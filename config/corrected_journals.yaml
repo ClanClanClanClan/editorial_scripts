@@ -1,0 +1,244 @@
+# Editorial Assistant - Corrected Journal Configuration
+# This file defines all 8 supported journals with their actual platforms
+
+journals:
+  MF:
+    name: "Mathematical Finance"
+    platform: "scholarone"
+    url: "https://mc.manuscriptcentral.com/mafi"
+    categories:
+      - "Awaiting Reviewer Scores"
+      - "Awaiting Reviewer Selection"
+      - "Awaiting Final Decision"
+    patterns:
+      manuscript_id: 'MAFI-\d{4}-\d{4}'
+      referee_row: 'tr[id^="reviewerInfo"]'
+    credentials:
+      username_env: "MF_USER"
+      password_env: "MF_PASS"
+      fallback_username_env: null
+      fallback_password_env: null
+    settings:
+      max_manuscripts_per_run: 50
+      download_timeout: 60
+      retry_attempts: 3
+
+  MOR:
+    name: "Mathematics of Operations Research"
+    platform: "scholarone"
+    url: "https://mc.manuscriptcentral.com/mathor"
+    categories:
+      - "Awaiting Reviewer Reports"
+      - "Awaiting Reviewer Selection"
+      - "Awaiting AE Recommendation"
+    patterns:
+      manuscript_id: 'MOR-\d{4}-\d{4}'
+      referee_row: 'tr[id^="reviewerInfo"]'
+    credentials:
+      username_env: "MOR_USER"
+      password_env: "MOR_PASS"
+      fallback_username_env: "MF_USER"
+      fallback_password_env: "MF_PASS"
+    settings:
+      max_manuscripts_per_run: 50
+      download_timeout: 60
+      retry_attempts: 3
+
+  FS:
+    name: "Finance and Stochastics"
+    platform: "email_based"
+    url: null  # Email-based extraction
+    categories:
+      - "Starred Emails"
+      - "Editor Communications"
+    patterns:
+      manuscript_id: 'FS-\d{4}-\d{4}'
+      email_subjects: ['Finance and Stochastics', 'FS manuscript']
+    credentials:
+      gmail_service: true
+      gmail_user_env: "GMAIL_USER"
+      fallback_username_env: null
+      fallback_password_env: null
+    settings:
+      max_manuscripts_per_run: 25
+      email_lookback_days: 30
+      retry_attempts: 3
+
+  SICON:
+    name: "SIAM Journal on Control and Optimization"
+    platform: "siam_orcid"
+    url: "http://sicon.siam.org"
+    categories:
+      - "Under Review"
+      - "Awaiting Decision"
+    patterns:
+      manuscript_id: 'SICON-\d{4}-\d{4}'
+      referee_row: 'tr[class*="reviewer"]'
+    credentials:
+      username_env: "ORCID_USER"
+      password_env: "ORCID_PASS"
+      fallback_username_env: null
+      fallback_password_env: null
+    settings:
+      max_manuscripts_per_run: 30
+      download_timeout: 90
+      retry_attempts: 5
+
+  SIFIN:
+    name: "SIAM Journal on Financial Mathematics"
+    platform: "siam_orcid"
+    url: "http://sifin.siam.org"
+    categories:
+      - "Under Review"
+      - "Awaiting Decision"
+    patterns:
+      manuscript_id: 'SIFIN-\d{4}-\d{4}'
+      referee_row: 'tr[class*="reviewer"]'
+    credentials:
+      username_env: "ORCID_USER"
+      password_env: "ORCID_PASS"
+      fallback_username_env: null
+      fallback_password_env: null
+    settings:
+      max_manuscripts_per_run: 25
+      download_timeout: 90
+      retry_attempts: 5
+
+  JOTA:
+    name: "Journal of Optimization Theory and Applications"
+    platform: "editorial_manager"
+    url: "https://www.editorialmanager.com/jota/"
+    categories:
+      - "With Referees"
+      - "Under Review"
+    patterns:
+      manuscript_id: 'JOTA-\d{4}-\d{4}'
+      referee_section: 'div.referee-section'
+    credentials:
+      username_env: "JOTA_USER"
+      password_env: "JOTA_PASS"
+      fallback_username_env: null
+      fallback_password_env: null
+    settings:
+      max_manuscripts_per_run: 40
+      download_timeout: 90
+      retry_attempts: 5
+
+  MAFE:
+    name: "Mathematics and Financial Economics"
+    platform: "editorial_manager_cloud"
+    url: "https://www2.cloud.editorialmanager.com/mafe/default2.aspx"
+    categories:
+      - "With Referees"
+      - "Under Review"
+    patterns:
+      manuscript_id: 'MAFE-\d{4}-\d{4}'
+      referee_section: 'table.referee-table'
+    credentials:
+      username_env: "MAFE_USER"
+      password_env: "MAFE_PASS"
+      fallback_username_env: null
+      fallback_password_env: null
+    settings:
+      max_manuscripts_per_run: 25
+      download_timeout: 90
+      retry_attempts: 5
+
+  NACO:
+    name: "Nonlinear Analysis"
+    platform: "msp_custom"
+    url: "https://ef.msp.org/login.php"
+    categories:
+      - "Mine"
+      - "Editorial Tasks"
+    patterns:
+      manuscript_id: 'NACO-\d{4}-\d{4}'
+      referee_section: 'div.editorial-section'
+    credentials:
+      username_env: "NACO_USER"
+      password_env: "NACO_PASS"
+      fallback_username_env: null
+      fallback_password_env: null
+    settings:
+      max_manuscripts_per_run: 20
+      download_timeout: 60
+      retry_attempts: 3
+
+# Platform-specific settings
+platforms:
+  scholarone:
+    login_selectors:
+      username: 'input[name="USERID"]'
+      password: 'input[name="PASSWORD"]'
+      submit: 'input[name="SUBMIT"]'
+    navigation:
+      ae_center: 'a[title="Associate Editor"]'
+      manuscript_row: 'tr[id^="row_"]'
+    pdf_patterns:
+      - 'a[href*="ViewPDF"]'
+      - 'a[href*="DOWNLOAD=TRUE"]'
+      - 'input[value="PDF"]'
+    
+  email_based:
+    gmail_api_required: true
+    search_patterns:
+      - 'is:starred'
+      - 'subject:"Finance and Stochastics"'
+    extraction_patterns:
+      - 'referee'
+      - 'review'
+      - 'manuscript'
+    
+  siam_orcid:
+    login_selectors:
+      orcid_login: 'a[href*="orcid"]'
+      username: 'input[name="userId"]'
+      password: 'input[name="password"]'
+      submit: 'button[type="submit"]'
+    cookie_modal_patterns:
+      - "autoriser tous les cookies"
+      - "tout refuser"
+      - "accepter"
+      - "accept all cookies"
+    navigation:
+      manuscript_list: 'a[href*="manuscripts"]'
+      review_tasks: 'a[href*="review"]'
+    
+  editorial_manager:
+    login_selectors:
+      username: 'input[id="username"]'
+      password: 'input[id="password"]'
+      submit: 'button[type="submit"]'
+    navigation:
+      editor_menu: 'a[href*="editor.main.menu"]'
+      manuscript_list: 'a[href*="PendingTasks"]'
+    pdf_patterns:
+      - 'a[class*="pdf-link"]'
+      - 'a[title*="Download PDF"]'
+      
+  editorial_manager_cloud:
+    # Similar to editorial_manager but with cloud-specific selectors
+    login_selectors:
+      username: 'input[id="MainContent_txtUserName"]'
+      password: 'input[id="MainContent_txtPassword"]'
+      submit: 'input[id="MainContent_btnLogin"]'
+    navigation:
+      editor_menu: 'a[href*="Editor"]'
+      manuscript_list: 'a[href*="Tasks"]'
+      
+  msp_custom:
+    login_selectors:
+      username: 'input[name="username"]'
+      password: 'input[name="password"]'
+      submit: 'input[type="submit"]'
+    navigation:
+      mine_link: 'a[href*="mine"]'
+      editorial_tasks: 'a[href*="editorial"]'
+
+# Global settings
+global:
+  headless_mode: true
+  screenshot_on_error: true
+  max_concurrent_downloads: 3
+  request_delay: 2  # seconds between requests
+  user_agent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"

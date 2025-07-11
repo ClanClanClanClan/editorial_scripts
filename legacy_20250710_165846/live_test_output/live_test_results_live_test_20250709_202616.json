@@ -1,0 +1,107 @@
+{
+  "session_id": "live_test_20250709_202616",
+  "start_time": "2025-07-09T20:26:16.266108",
+  "journals": {
+    "MF": {
+      "journal": "MF",
+      "test_start": "2025-07-09T20:26:16.266679",
+      "phases": {
+        "connection": {
+          "status": "success",
+          "url": "https://mc.manuscriptcentral.com/mafi",
+          "title": "ScholarOne Manuscripts",
+          "load_time": "< 30s"
+        },
+        "login": {
+          "status": "success",
+          "verification_required": true,
+          "method": "standard"
+        },
+        "navigation": {
+          "status": "partial",
+          "ae_center_found": false,
+          "page_title": "ScholarOne Manuscripts"
+        },
+        "scraping": {
+          "status": "success",
+          "manuscripts_found": 1,
+          "has_referee_data": true,
+          "has_download_data": true
+        }
+      },
+      "manuscripts": [
+        {
+          "id": "MAFI-2025-0166",
+          "title": "Optimal investment and consumption under forward utilities with relative performance concerns",
+          "author": "Anis Matoussi",
+          "submission_date": "19-Jun-2025",
+          "referee_count": 3,
+          "has_emails": true,
+          "has_downloads": true,
+          "referee_sample": {
+            "name": "Gechun Liang",
+            "status": "Accepted",
+            "has_email": true
+          }
+        }
+      ],
+      "error": null,
+      "success": true,
+      "test_end": "2025-07-09T20:27:40.687975"
+    },
+    "MOR": {
+      "journal": "MOR",
+      "test_start": "2025-07-09T20:27:40.688323",
+      "phases": {
+        "connection": {
+          "status": "success",
+          "url": "https://mc.manuscriptcentral.com/mathor",
+          "title": "ScholarOne Manuscripts",
+          "load_time": "< 30s"
+        },
+        "login": {
+          "status": "success",
+          "verification_required": true,
+          "method": "standard"
+        },
+        "navigation": {
+          "status": "partial",
+          "ae_center_found": false,
+          "page_title": "ScholarOne Manuscripts"
+        },
+        "scraping": {
+          "status": "success",
+          "manuscripts_found": 1,
+          "has_referee_data": true,
+          "has_download_data": true
+        }
+      },
+      "manuscripts": [
+        {
+          "id": "MOR-2024-0804",
+          "title": "Semi-static variance-optimal hedging with self-exciting jumps",
+          "author": "Giorgia Callegaro",
+          "submission_date": "07-Jun-2025",
+          "referee_count": 2,
+          "has_emails": true,
+          "has_downloads": true,
+          "referee_sample": {
+            "name": "Jan Kallsen",
+            "status": "Accepted",
+            "has_email": true
+          }
+        }
+      ],
+      "error": null,
+      "success": true,
+      "test_end": "2025-07-09T20:29:01.573072"
+    }
+  },
+  "summary": {
+    "total_tested": 2,
+    "successful": 2,
+    "success_rate": 1.0,
+    "total_manuscripts": 2
+  },
+  "end_time": "2025-07-09T20:29:01.573320"
+}

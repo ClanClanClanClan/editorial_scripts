@@ -1,0 +1,9 @@
+[WARNING] 1Password session not established. You may need to run 'op signin' manually.
+[INFO] 1Password CLI version: 2.31.1
+[INFO] Using 1Password for credentials
+[WARNING] 1Password session not established. You may need to run 'op signin' manually.
+[WARNING] 1Password session not available for MAFE/username
+[WARNING] No credential found for MAFE/username
+[WARNING] 1Password session not established. You may need to run 'op signin' manually.
+[WARNING] 1Password session not available for MAFE/password
+[WARNING] No credential found for MAFE/password

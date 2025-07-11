@@ -1,0 +1,29 @@
+{
+  "journal": "MOR",
+  "extraction_date": "2025-07-10T07:08:51.615561",
+  "target_category": "Awaiting Reviewer Reports",
+  "total_manuscripts": 3,
+  "manuscripts": [
+    {
+      "manuscript_id": "MOR-2025-1037",
+      "title": "",
+      "referees": [],
+      "category": "Awaiting Reviewer Reports",
+      "extraction_time": "2025-07-10T07:08:50.867424"
+    },
+    {
+      "manuscript_id": "MOR-2023-0376",
+      "title": "",
+      "referees": [],
+      "category": "Awaiting Reviewer Reports",
+      "extraction_time": "2025-07-10T07:08:51.121222"
+    },
+    {
+      "manuscript_id": "MOR-2024-0804",
+      "title": "",
+      "referees": [],
+      "category": "Awaiting Reviewer Reports",
+      "extraction_time": "2025-07-10T07:08:51.357139"
+    }
+  ]
+}

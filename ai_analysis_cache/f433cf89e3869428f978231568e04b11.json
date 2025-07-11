@@ -1,0 +1,65 @@
+{
+  "timestamp": "2025-07-09T20:04:40.877862",
+  "result": [
+    {
+      "name": "Expert in General Mathematics 1",
+      "expertise_match": 0.7,
+      "availability_score": 0.6,
+      "quality_score": 0.8,
+      "workload_score": 0.5,
+      "overall_score": 0.6,
+      "rationale": "Specializes in General Mathematics, relevant to manuscript topic",
+      "contact_info": {
+        "email": "expert1@university.edu"
+      }
+    },
+    {
+      "name": "Expert in General Mathematics 2",
+      "expertise_match": 0.6499999999999999,
+      "availability_score": 0.6,
+      "quality_score": 0.8,
+      "workload_score": 0.5,
+      "overall_score": 0.5499999999999999,
+      "rationale": "Specializes in General Mathematics, relevant to manuscript topic",
+      "contact_info": {
+        "email": "expert2@university.edu"
+      }
+    },
+    {
+      "name": "Expert in General Mathematics 3",
+      "expertise_match": 0.6,
+      "availability_score": 0.6,
+      "quality_score": 0.8,
+      "workload_score": 0.5,
+      "overall_score": 0.5,
+      "rationale": "Specializes in General Mathematics, relevant to manuscript topic",
+      "contact_info": {
+        "email": "expert3@university.edu"
+      }
+    },
+    {
+      "name": "Expert in General Mathematics 4",
+      "expertise_match": 0.5499999999999999,
+      "availability_score": 0.6,
+      "quality_score": 0.8,
+      "workload_score": 0.5,
+      "overall_score": 0.44999999999999996,
+      "rationale": "Specializes in General Mathematics, relevant to manuscript topic",
+      "contact_info": {
+        "email": "expert4@university.edu"
+      }
+    },
+    {
+      "name": "Expert in General Mathematics 5",
+      "expertise_match": 0.49999999999999994,
+      "availability_score": 0.6,
+      "quality_score": 0.8,
+      "workload_score": 0.5,
+      "overall_score": 0.39999999999999997,
+      "rationale": "Specializes in General Mathematics, relevant to manuscript topic",
+      "contact_info": {
+        "email": "expert5@university.edu"
+      }
+    }
+  ]
+}

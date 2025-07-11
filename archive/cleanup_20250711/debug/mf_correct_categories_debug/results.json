@@ -1,0 +1,46 @@
+{
+  "journal": "MF",
+  "timestamp": "2025-07-09T23:18:36.272771",
+  "total_manuscripts": 1,
+  "total_referees": 3,
+  "expected_manuscripts": 2,
+  "expected_referees": 4,
+  "success": false,
+  "manuscripts": [
+    {
+      "Manuscript #": "MAFI-2025-0166",
+      "Title": "Optimal investment and consumption under forward utilities with relative performance concerns",
+      "Contact Author": "Anis Matoussi",
+      "Submission Date": "19-Jun-2025",
+      "Referees": [
+        {
+          "Referee Name": "Gechun Liang",
+          "Status": "Accepted",
+          "Contacted Date": "22-Jun-2025",
+          "Accepted Date": "22-Jun-2025",
+          "Due Date": "20-Sep-2025",
+          "Email": "g.liang@warwick.ac.uk",
+          "Lateness": ""
+        },
+        {
+          "Referee Name": "Goncalo Dos Reis",
+          "Status": "Contacted",
+          "Contacted Date": "01-Jul-2025",
+          "Accepted Date": "",
+          "Due Date": "",
+          "Email": "",
+          "Lateness": ""
+        },
+        {
+          "Referee Name": "Moris Strub",
+          "Status": "Accepted",
+          "Contacted Date": "01-Jul-2025",
+          "Accepted Date": "01-Jul-2025",
+          "Due Date": "29-Sep-2025",
+          "Email": "moris.strub@wbs.ac.uk",
+          "Lateness": ""
+        }
+      ]
+    }
+  ]
+}

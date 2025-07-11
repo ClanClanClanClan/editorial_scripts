@@ -1,0 +1,188 @@
+{
+  "overall_status": "PASSED",
+  "failed_journals": [],
+  "results": {
+    "SIFIN": {
+      "tested": true,
+      "results": {
+        "email_extraction": {
+          "status": "PASSED",
+          "methods_present": true,
+          "xpath_patterns_correct": true,
+          "functionality_verified": true,
+          "claimed_success_rate": "100%",
+          "notes": "Using _extract_referee_emails_sifin with correct XPath patterns"
+        },
+        "cover_letter_extraction": {
+          "status": "PASSED",
+          "method_exists": true,
+          "patterns_correct": true,
+          "workflow_integrated": true,
+          "functionality_verified": true,
+          "claimed_success_rate": "75%",
+          "notes": "Extracts from Manuscript Items section"
+        },
+        "referee_report_extraction": {
+          "status": "PASSED",
+          "method_exists": true,
+          "patterns_correct": true,
+          "window_handling": true,
+          "functionality_verified": true,
+          "claimed_feature": "Associate Editor Recommendation workflow",
+          "notes": "Extracts from workflow popup windows"
+        },
+        "document_handling": {
+          "status": "PASSED",
+          "url_handling": true,
+          "download_paths": true,
+          "functionality_verified": true,
+          "notes": "Basic document handling structure verified"
+        },
+        "error_handling": {
+          "status": "PASSED",
+          "exception_handling": true,
+          "window_management": true,
+          "functionality_verified": true,
+          "notes": "Basic error handling patterns verified"
+        }
+      }
+    },
+    "SICON": {
+      "tested": true,
+      "results": {
+        "email_extraction": {
+          "status": "PASSED",
+          "methods_present": true,
+          "xpath_patterns_correct": true,
+          "functionality_verified": true,
+          "claimed_success_rate": "Enhanced",
+          "notes": "Using _extract_referee_emails_sicon with correct XPath patterns"
+        },
+        "cover_letter_extraction": {
+          "status": "PASSED",
+          "method_exists": true,
+          "patterns_correct": true,
+          "workflow_integrated": true,
+          "functionality_verified": true,
+          "claimed_success_rate": "Comprehensive",
+          "notes": "Extracts from Manuscript Items section"
+        },
+        "referee_report_extraction": {
+          "status": "PASSED",
+          "method_exists": true,
+          "patterns_correct": true,
+          "window_handling": true,
+          "functionality_verified": true,
+          "claimed_feature": "Associate Editor Recommendation workflow",
+          "notes": "Extracts from workflow popup windows"
+        },
+        "document_handling": {
+          "status": "PASSED",
+          "url_handling": true,
+          "download_paths": true,
+          "functionality_verified": true,
+          "notes": "Basic document handling structure verified"
+        },
+        "error_handling": {
+          "status": "PASSED",
+          "exception_handling": true,
+          "window_management": true,
+          "functionality_verified": true,
+          "notes": "Basic error handling patterns verified"
+        }
+      }
+    },
+    "MOR": {
+      "tested": true,
+      "results": {
+        "email_extraction": {
+          "status": "PASSED",
+          "methods_present": true,
+          "original_method_updated": true,
+          "selector_patterns_correct": true,
+          "functionality_verified": true,
+          "claimed_enhancement": "Direct extraction + enhanced matching",
+          "notes": "Enhanced MOR with direct profile extraction"
+        },
+        "cover_letter_extraction": {
+          "status": "PASSED",
+          "method_exists": true,
+          "patterns_correct": true,
+          "workflow_integrated": true,
+          "functionality_verified": true,
+          "claimed_enhancement": "Comprehensive selectors",
+          "notes": "Enhanced MOR with comprehensive cover letter detection"
+        },
+        "referee_report_extraction": {
+          "status": "PASSED",
+          "method_exists": true,
+          "patterns_correct": true,
+          "workflow_integrated": true,
+          "functionality_verified": true,
+          "claimed_enhancement": "Comprehensive selectors",
+          "notes": "Enhanced MOR with comprehensive report detection"
+        },
+        "document_handling": {
+          "status": "PASSED",
+          "url_handling": true,
+          "download_paths": true,
+          "functionality_verified": true,
+          "notes": "Basic document handling structure verified"
+        },
+        "error_handling": {
+          "status": "PASSED",
+          "exception_handling": true,
+          "window_management": true,
+          "functionality_verified": true,
+          "notes": "Basic error handling patterns verified"
+        }
+      }
+    },
+    "MF": {
+      "tested": true,
+      "results": {
+        "email_extraction": {
+          "status": "PASSED",
+          "methods_present": true,
+          "original_method_updated": true,
+          "selector_patterns_correct": true,
+          "functionality_verified": true,
+          "claimed_enhancement": "Direct extraction + enhanced matching",
+          "notes": "Enhanced MF with direct profile extraction"
+        },
+        "cover_letter_extraction": {
+          "status": "PASSED",
+          "method_exists": true,
+          "patterns_correct": true,
+          "workflow_integrated": true,
+          "functionality_verified": true,
+          "claimed_enhancement": "Comprehensive selectors",
+          "notes": "Enhanced MF with comprehensive cover letter detection"
+        },
+        "referee_report_extraction": {
+          "status": "PASSED",
+          "method_exists": true,
+          "patterns_correct": true,
+          "workflow_integrated": true,
+          "functionality_verified": true,
+          "claimed_enhancement": "Comprehensive selectors",
+          "notes": "Enhanced MF with comprehensive report detection"
+        },
+        "document_handling": {
+          "status": "PASSED",
+          "url_handling": true,
+          "download_paths": true,
+          "functionality_verified": true,
+          "notes": "Basic document handling structure verified"
+        },
+        "error_handling": {
+          "status": "PASSED",
+          "exception_handling": true,
+          "window_management": true,
+          "functionality_verified": true,
+          "notes": "Basic error handling patterns verified"
+        }
+      }
+    }
+  }
+}

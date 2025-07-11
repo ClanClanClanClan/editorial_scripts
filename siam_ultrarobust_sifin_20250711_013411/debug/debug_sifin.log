@@ -1,0 +1,17 @@
+[01:34:16] SUCCESS: Ultra-robust Chrome WebDriver initialized
+[01:34:16] INFO: Ultra-robust authentication with SIFIN
+[01:34:27] DEBUG: Screenshot saved: 01_journal_initial_013427.png Initial journal page
+[01:34:27] INFO: Clicked privacy notification Continue button
+[01:34:30] DEBUG: Screenshot saved: 01b_after_privacy_013430.png After privacy notification
+[01:34:30] INFO: Found ORCID link using strategy 1
+[01:34:30] INFO: Clicking ORCID link with enhanced strategies
+[01:34:30] INFO: Trying ORCID click strategy 1
+[01:34:38] INFO: On ORCID login page
+[01:34:38] DEBUG: Screenshot saved: 02_orcid_login_013438.png ORCID login page
+[01:35:38] DEBUG: Screenshot saved: 01_journal_initial_013538.png Initial journal page
+[01:35:53] INFO: No privacy notification found (already handled)
+[01:35:53] INFO: Found ORCID link using strategy 1
+[01:35:53] INFO: Clicking ORCID link with enhanced strategies
+[01:35:53] INFO: Trying ORCID click strategy 1
+[01:36:02] INFO: On ORCID login page
+[01:36:02] DEBUG: Screenshot saved: 02_orcid_login_013602.png ORCID login page

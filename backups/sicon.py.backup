@@ -1,0 +1,407 @@
+import os
+import re
+import time
+import logging
+from dotenv import load_dotenv
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import TimeoutException, NoSuchElementException
+from bs4 import BeautifulSoup
+from typing import List, Dict, Tuple
+
+load_dotenv()
+ORCID_USER = os.getenv("ORCID_USER")
+ORCID_PASS = os.getenv("ORCID_PASS")
+
+DECLINED_STATUSES = {"declined", "not interested", "no response", "declined - no time", "unavailable"}
+
+def dismiss_orcid_cookie_modal(driver, timeout=10, debug=True):
+    """
+    Dismisses the ORCID cookie modal if present.
+    Tries 'Autoriser tous les cookies', 'Tout refuser', 'Accepter', 'Accept all', etc.
+    """
+    btn_texts = [
+        "autoriser tous les cookies",
+        "tout refuser",
+        "accepter tous les cookies",
+        "accepter",
+        "accept all cookies",
+        "refuse all",
+        "authorize all cookies",
+        "allow all cookies",
+        "reject all",
+        "tout accepter",
+        "all cookies",
+        "paramètres des cookies",
+    ]
+    for _ in range(timeout):
+        for tag in ['button', 'input']:
+            try:
+                elems = driver.find_elements(By.TAG_NAME, tag)
+                for elem in elems:
+                    try:
+                        txt = elem.text.strip().lower()
+                        val = elem.get_attribute("value") or ""
+                        val = val.strip().lower()
+                        if not (elem.is_displayed() and elem.is_enabled()):
+                            continue
+                        if any(btxt in txt or btxt in val for btxt in btn_texts):
+                            elem.click()
+                            if debug:
+                                print("[SICON] ORCID cookie modal dismissed.")
+                            time.sleep(1)
+                            return
+                    except Exception:
+                        continue
+            except Exception:
+                continue
+        time.sleep(1)
+    if debug:
+        print("[SICON] ORCID cookie modal not found or already dismissed.")
+
+class SICONJournal:
+    SICON_URL = "https://sicon.siam.org/cgi-bin/main.plex"
+    SITE_PREFIX = "https://sicon.siam.org/"
+
+    def __init__(self, driver, debug=True):
+        self.driver = driver
+        self.debug = debug
+
+    def remove_overlay(self):
+        js_hide = """
+        for(let sel of [
+            '#cookie-policy-layer-bg',
+            '.cc_banner-wrapper',
+            '#cookie-policy-layer',
+            '#onetrust-banner-sdk',
+            '.onetrust-pc-dark-filter'
+        ]) {
+            let el = document.querySelector(sel);
+            if(el) el.style.display='none';
+        }
+        """
+        try:
+            self.driver.execute_script(js_hide)
+            if self.debug:
+                print("[SICON] Cookie overlay hidden.")
+        except Exception:
+            pass
+
+    def wait_for_elem(self, by, selector, timeout=12):
+        try:
+            return WebDriverWait(self.driver, timeout).until(
+                EC.presence_of_element_located((by, selector))
+            )
+        except TimeoutException:
+            return None
+
+    def take_screenshot(self, suffix="fail"):
+        fname = f"sicon_debug_{suffix}_{int(time.time())}.png"
+        try:
+            self.driver.save_screenshot(fname)
+            print(f"[SICON] Screenshot saved: {fname}")
+        except Exception:
+            print(f"[SICON] Failed to save screenshot.")
+
+    def login_orcid(self):
+        driver = self.driver
+        self.remove_overlay()
+        dismiss_orcid_cookie_modal(driver, timeout=5, debug=self.debug)
+        # Click ORCID login link
+        try:
+            orcid_link = self.wait_for_elem(By.XPATH, "//a[contains(@href, 'orcid')]", timeout=10)
+            if not orcid_link:
+                raise Exception("No ORCID login link found.")
+            orcid_link.click()
+            if self.debug:
+                print("[SICON] Clicked ORCID login link.")
+            time.sleep(1.2)
+        except Exception as e:
+            self.take_screenshot(suffix="no_orcid_link")
+            logging.error(f"SICON: Could not find/click ORCID login link: {e}")
+            raise
+
+        dismiss_orcid_cookie_modal(driver, timeout=6, debug=self.debug)
+        # Wait for ORCID username/password
+        try:
+            user_field = self.wait_for_elem(By.ID, "username-input", timeout=15)
+            dismiss_orcid_cookie_modal(driver, timeout=3, debug=self.debug)
+            pass_field = self.wait_for_elem(By.ID, "password", timeout=12)
+            if not (user_field and pass_field):
+                self.take_screenshot(suffix="login_fields")
+                raise Exception("Could not find ORCID login fields.")
+            user_field.clear()
+            user_field.send_keys(ORCID_USER)
+            pass_field.clear()
+            pass_field.send_keys(ORCID_PASS)
+            time.sleep(0.4)
+            dismiss_orcid_cookie_modal(driver, timeout=2, debug=self.debug)
+            # Try different selectors for the sign-in button
+            signin_btn = self.wait_for_elem(By.XPATH, "//button[contains(text(), 'Sign in to ORCID')]", timeout=10)
+            if not signin_btn:
+                signin_btn = self.wait_for_elem(By.XPATH, "//button[contains(text(), 'Sign in')]", timeout=5)
+            if not signin_btn:
+                signin_btn = self.wait_for_elem(By.ID, "signin-button", timeout=5)
+            if not signin_btn:
+                self.take_screenshot(suffix="signin_btn")
+                raise Exception("Could not find ORCID sign-in button.")
+            signin_btn.click()
+            if self.debug:
+                print("[SICON] ORCID credentials submitted.")
+            dismiss_orcid_cookie_modal(driver, timeout=2, debug=self.debug)
+        except Exception as e:
+            self.take_screenshot(suffix="orcid_login")
+            logging.error(f"SICON: ORCID login problem: {e}")
+            raise
+
+        # Wait for SICON redirect
+        try:
+            WebDriverWait(driver, 30).until(
+                lambda d: "cgi-bin/main.plex" in d.current_url
+            )
+        except Exception as e:
+            self.take_screenshot(suffix="orcid_redirect")
+            logging.error(f"SICON: No redirect after ORCID login: {e}")
+            raise
+        self.remove_overlay()
+        dismiss_orcid_cookie_modal(driver, timeout=3, debug=self.debug)
+        if self.debug:
+            print("[SICON] ORCID login succeeded, back on SICON.")
+
+        # SICON privacy notification popup: Click "Continue" if it appears
+        for _ in range(6):
+            self.remove_overlay()
+            dismiss_orcid_cookie_modal(driver, timeout=1, debug=self.debug)
+            try:
+                cont_btn = driver.find_element(By.XPATH, "//input[@type='button' and @value='Continue']")
+                cont_btn.click()
+                if self.debug:
+                    print("[SICON] Clicked privacy Continue button.")
+                break
+            except Exception:
+                time.sleep(1)
+
+    def click_pending_manuscripts(self):
+        driver = self.driver
+        self.remove_overlay()
+        dismiss_orcid_cookie_modal(driver, timeout=2, debug=self.debug)
+        if self.debug:
+            print("[SICON] Looking for All Pending Manuscripts AE link by row...")
+        try:
+            row = driver.find_element(By.XPATH, "//tr[contains(@class, 'ndt_folder') and @data-folder='all_pending_manuscripts']")
+            link = row.find_element(By.CSS_SELECTOR, "a.ndt_folder_link")
+            link.click()
+            time.sleep(2)
+            dismiss_orcid_cookie_modal(driver, timeout=2, debug=self.debug)
+            if self.debug:
+                print("[SICON] Clicked AE 'All Pending Manuscripts' link (row selector).")
+            return
+        except Exception as e:
+            if self.debug:
+                print(f"[SICON] Row/AE link click failed: {e}")
+        try:
+            links = driver.find_elements(By.CSS_SELECTOR, "a.ndt_folder_link")
+            if links:
+                links[0].click()
+                time.sleep(2)
+                dismiss_orcid_cookie_modal(driver, timeout=2, debug=self.debug)
+                if self.debug:
+                    print("[SICON] Fallback: Clicked first ndt_folder_link.")
+                return
+        except Exception as e:
+            self.take_screenshot("pending_link_fail")
+            logging.error(f"SICON: Could not click pending manuscripts link: {e}")
+            raise Exception("Cannot find the 'All Pending Manuscripts' AE link on SICON dashboard.")
+
+    def extract_full_name(self, html_text):
+        soup = BeautifulSoup(html_text, "html.parser")
+        font_tag = soup.find("font", size="+3")
+        if font_tag:
+            full = font_tag.text.strip()
+            parts = full.split()
+            if len(parts) > 1 and parts[0].endswith("."):
+                parts = parts[1:]
+            return " ".join(parts)
+        return None
+
+    def batch_fetch_emails_and_names(self, email_urls: List[str]):
+        driver = self.driver
+        cache = {}
+        for url in set(email_urls):
+            if not url:
+                continue
+            full_url = url if url.startswith("http") else self.SITE_PREFIX + url.lstrip("/")
+            try:
+                driver.execute_script("window.open('');")
+                driver.switch_to.window(driver.window_handles[-1])
+                driver.get(full_url)
+                dismiss_orcid_cookie_modal(driver, timeout=3, debug=self.debug)
+                WebDriverWait(driver, 8).until(
+                    lambda d: "@" in d.page_source or d.find_elements(By.TAG_NAME, "font")
+                )
+                soup = BeautifulSoup(driver.page_source, "html.parser")
+                email_tag = soup.find("a", href=re.compile(r"mailto:"))
+                email = email_tag.text.strip() if email_tag else ""
+                full_name = self.extract_full_name(driver.page_source)
+                if self.debug:
+                    print(f"[SICON] Referee page {full_url}: email={email}, name={full_name}")
+                cache[url] = {"email": email, "full_name": full_name}
+                driver.close()
+                driver.switch_to.window(driver.window_handles[0])
+            except Exception as e:
+                self.take_screenshot(suffix="refinfo_fail")
+                cache[url] = {"email": "", "full_name": None}
+                try:
+                    driver.close()
+                    driver.switch_to.window(driver.window_handles[0])
+                except Exception:
+                    pass
+                logging.error(f"Failed to get referee info from {full_url}: {e}")
+        return cache
+
+    def get_declined_status(self, status):
+        return status.strip().lower() in DECLINED_STATUSES
+
+    def normalize_name(self, name):
+        return " ".join(part.capitalize() for part in name.split())
+
+    def extract_sicon_table(self) -> Tuple[List[Dict], List[str]]:
+        driver = self.driver
+        ms_list = []
+        email_urls = []
+        soup = BeautifulSoup(driver.page_source, "html.parser")
+        table = soup.find("table", id="ejp_apm_folder_data_table")
+        if not table:
+            tables = soup.find_all("table")
+            for t in tables:
+                if len(t.find_all("tr")) > 1 and len(t.find_all("td")) > 8:
+                    table = t
+                    break
+        if not table:
+            self.take_screenshot("table_missing")
+            logging.error("No manuscript table found.")
+            return ms_list, email_urls
+        rows = table.find_all("tr")
+        for row in rows:
+            cols = row.find_all("td")
+            if len(cols) < 8:
+                continue
+            try:
+                ms_id = cols[0].find("a").get_text(strip=True) if cols[0].find("a") else cols[0].get_text(strip=True)
+                title = cols[1].get_text(strip=True)
+                submitted = cols[4].get_text(strip=True) if len(cols) > 4 else ""
+                current_stage = cols[-1].get_text(strip=True)
+                invitees_html = str(cols[6]) if len(cols) > 6 else ""
+                invitee_status_html = str(cols[7]) if len(cols) > 7 else ""
+                due_html = str(cols[9]) if len(cols) > 9 else ""
+                review_received_html = str(cols[10]) if len(cols) > 10 else ""
+            except Exception as e:
+                logging.error(f"Row parse error: {e}")
+                continue
+            invitees_soup = BeautifulSoup(invitees_html, "html.parser")
+            invitees_links = invitees_soup.find_all("a")
+            invitees_names = [a.get_text(strip=True) for a in invitees_links]
+            invitees_urls = [a.get("href") for a in invitees_links]
+            def split_html(html_str):
+                if not html_str:
+                    return []
+                return [BeautifulSoup(x, "html.parser").get_text(strip=True)
+                        for x in re.split(r"<br\s*/?>", html_str) if x.strip() and x.strip() != '&nbsp;']
+            status_list = split_html(invitee_status_html)
+            due_list = split_html(due_html)
+            review_received_list = split_html(review_received_html)
+            for idx, name in enumerate(invitees_names):
+                status = "Contacted"
+                due_date = ""
+                review_received = ""
+                if idx < len(status_list):
+                    st = status_list[idx].strip().lower()
+                    if st == "accepted":
+                        status = "Accepted"
+                    if self.get_declined_status(st):
+                        continue  # Don't process declined
+                if idx < len(due_list):
+                    due_date = due_list[idx].strip()
+                if idx < len(review_received_list):
+                    review_received = review_received_list[idx].strip()
+                if status == "Accepted" and review_received:
+                    continue  # Already delivered report
+                url = invitees_urls[idx] if idx < len(invitees_urls) else ""
+                email_urls.append(url)
+                ms_list.append({
+                    "Manuscript #": ms_id,
+                    "Title": title,
+                    "Submitted": submitted,
+                    "Current Stage": current_stage,
+                    "Referees": [{
+                        "Referee Name": name,
+                        "Referee URL": url,
+                        "Status": status,
+                        "Due Date": due_date
+                    }]
+                })
+        return ms_list, email_urls
+
+    def scrape_manuscripts_and_emails(self) -> List[Dict]:
+        driver = self.driver
+        try:
+            logging.info("Navigating to SICON dashboard...")
+            try:
+                driver.get(self.SICON_URL)
+            except Exception as e:
+                self.take_screenshot(suffix="get_url")
+                logging.error(f"SICON: Could not load SICON URL: {e}")
+                raise
+
+            self.remove_overlay()
+            dismiss_orcid_cookie_modal(driver, timeout=4, debug=self.debug)
+
+            try:
+                self.login_orcid()
+            except Exception as e:
+                self.take_screenshot(suffix="fatal_login")
+                logging.error(f"SICON: ORCID login failed: {e}")
+                raise
+
+            self.remove_overlay()
+            dismiss_orcid_cookie_modal(driver, timeout=3, debug=self.debug)
+
+            try:
+                self.click_pending_manuscripts()
+            except Exception as e:
+                self.take_screenshot(suffix="pending_manuscripts")
+                logging.error(f"SICON: Clicking pending manuscripts failed: {e}")
+                raise
+
+            self.remove_overlay()
+            dismiss_orcid_cookie_modal(driver, timeout=2, debug=self.debug)
+            try:
+                ms_list, email_urls = self.extract_sicon_table()
+            except Exception as e:
+                self.take_screenshot(suffix="extract_table")
+                logging.error(f"SICON: Could not extract manuscript table: {e}")
+                raise
+
+            logging.info(f"Found {len(ms_list)} manuscripts; fetching {len(email_urls)} referee emails/names.")
+            if self.debug:
+                print(f"[SICON] Extracted {len(ms_list)} manuscripts, {len(email_urls)} emails")
+            try:
+                email_cache = self.batch_fetch_emails_and_names(email_urls)
+            except Exception as e:
+                self.take_screenshot(suffix="batch_emails")
+                logging.error(f"SICON: Batch email/name fetching failed: {e}")
+                raise
+
+            for ms in ms_list:
+                for ref in ms["Referees"]:
+                    info = email_cache.get(ref["Referee URL"], {})
+                    full_name = info.get("full_name")
+                    if full_name:
+                        ref["Referee Name"] = self.normalize_name(full_name)
+                    ref['Referee Email'] = info.get("email", "")
+            return ms_list
+        except Exception as e:
+            self.take_screenshot(suffix="fatal_error")
+            logging.error(f"SICON scraping failed: {e}")
+            raise

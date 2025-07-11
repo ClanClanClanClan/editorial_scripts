@@ -1,0 +1,154 @@
+[01:44:01] SUCCESS: Ultra-robust Chrome WebDriver initialized
+[01:44:01] INFO: Ultra-robust authentication with SICON
+[01:44:11] DEBUG: Screenshot saved: 01_journal_initial_014411.png Initial journal page
+[01:44:11] INFO: Clicked privacy notification Continue button
+[01:44:15] DEBUG: Screenshot saved: 01b_after_privacy_014414.png After privacy notification
+[01:44:15] INFO: Found ORCID link using strategy 1
+[01:44:15] INFO: Clicking ORCID link with enhanced strategies
+[01:44:15] INFO: Trying ORCID click strategy 1
+[01:44:23] INFO: On ORCID login page
+[01:44:23] DEBUG: Screenshot saved: 02_orcid_login_014423.png ORCID login page
+[01:44:23] INFO: Trying ORCID cookie consent strategy 1
+[01:44:23] INFO: Successfully accepted ORCID cookies
+[01:44:26] DEBUG: Screenshot saved: 02b_after_orcid_cookies_014426.png After ORCID cookie consent
+[01:44:26] INFO: Waiting for ORCID login form
+[01:44:26] INFO: Trying username field strategy 1
+[01:44:41] WARNING: Username field strategy 1 failed: Message: no such element: Unable to locate element: {"method":"css selector","selector":"[id="username"]"}
+  (Session info: chrome=138.0.7204.100); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#no-such-element-exception
+Stacktrace:
+0   chromedriver                        0x0000000102dc0ea4 cxxbridge1$str$ptr + 2722840
+1   chromedriver                        0x0000000102db8dac cxxbridge1$str$ptr + 2689824
+2   chromedriver                        0x000000010290a3ec cxxbridge1$string$len + 90648
+3   chromedriver                        0x0000000102951544 cxxbridge1$string$len + 381808
+4   chromedriver                        0x0000000102992934 cxxbridge1$string$len + 649056
+5   chromedriver                        0x0000000102945834 cxxbridge1$string$len + 333408
+6   chromedriver                        0x0000000102d83fc0 cxxbridge1$str$ptr + 2473268
+7   chromedriver                        0x0000000102d8722c cxxbridge1$str$ptr + 2486176
+8   chromedriver                        0x0000000102d65a08 cxxbridge1$str$ptr + 2348924
+9   chromedriver                        0x0000000102d87ae8 cxxbridge1$str$ptr + 2488412
+10  chromedriver                        0x0000000102d56a98 cxxbridge1$str$ptr + 2287628
+11  chromedriver                        0x0000000102da79d8 cxxbridge1$str$ptr + 2619212
+12  chromedriver                        0x0000000102da7b64 cxxbridge1$str$ptr + 2619608
+13  chromedriver                        0x0000000102db89e8 cxxbridge1$str$ptr + 2688860
+14  libsystem_pthread.dylib             0x000000019690ec0c _pthread_start + 136
+15  libsystem_pthread.dylib             0x0000000196909b80 thread_start + 8
+
+[01:44:41] INFO: Trying username field strategy 2
+[01:44:56] WARNING: Username field strategy 2 failed: Message: no such element: Unable to locate element: {"method":"css selector","selector":"[id="userId"]"}
+  (Session info: chrome=138.0.7204.100); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#no-such-element-exception
+Stacktrace:
+0   chromedriver                        0x0000000102dc0ea4 cxxbridge1$str$ptr + 2722840
+1   chromedriver                        0x0000000102db8dac cxxbridge1$str$ptr + 2689824
+2   chromedriver                        0x000000010290a3ec cxxbridge1$string$len + 90648
+3   chromedriver                        0x0000000102951544 cxxbridge1$string$len + 381808
+4   chromedriver                        0x0000000102992934 cxxbridge1$string$len + 649056
+5   chromedriver                        0x0000000102945834 cxxbridge1$string$len + 333408
+6   chromedriver                        0x0000000102d83fc0 cxxbridge1$str$ptr + 2473268
+7   chromedriver                        0x0000000102d8722c cxxbridge1$str$ptr + 2486176
+8   chromedriver                        0x0000000102d65a08 cxxbridge1$str$ptr + 2348924
+9   chromedriver                        0x0000000102d87ae8 cxxbridge1$str$ptr + 2488412
+10  chromedriver                        0x0000000102d56a98 cxxbridge1$str$ptr + 2287628
+11  chromedriver                        0x0000000102da79d8 cxxbridge1$str$ptr + 2619212
+12  chromedriver                        0x0000000102da7b64 cxxbridge1$str$ptr + 2619608
+13  chromedriver                        0x0000000102db89e8 cxxbridge1$str$ptr + 2688860
+14  libsystem_pthread.dylib             0x000000019690ec0c _pthread_start + 136
+15  libsystem_pthread.dylib             0x0000000196909b80 thread_start + 8
+
+[01:44:56] INFO: Trying username field strategy 3
+[01:45:11] WARNING: Username field strategy 3 failed: Message: no such element: Unable to locate element: {"method":"css selector","selector":"[name="username"]"}
+  (Session info: chrome=138.0.7204.100); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#no-such-element-exception
+Stacktrace:
+0   chromedriver                        0x0000000102dc0ea4 cxxbridge1$str$ptr + 2722840
+1   chromedriver                        0x0000000102db8dac cxxbridge1$str$ptr + 2689824
+2   chromedriver                        0x000000010290a3ec cxxbridge1$string$len + 90648
+3   chromedriver                        0x0000000102951544 cxxbridge1$string$len + 381808
+4   chromedriver                        0x0000000102992934 cxxbridge1$string$len + 649056
+5   chromedriver                        0x0000000102945834 cxxbridge1$string$len + 333408
+6   chromedriver                        0x0000000102d83fc0 cxxbridge1$str$ptr + 2473268
+7   chromedriver                        0x0000000102d8722c cxxbridge1$str$ptr + 2486176
+8   chromedriver                        0x0000000102d65a08 cxxbridge1$str$ptr + 2348924
+9   chromedriver                        0x0000000102d87ae8 cxxbridge1$str$ptr + 2488412
+10  chromedriver                        0x0000000102d56a98 cxxbridge1$str$ptr + 2287628
+11  chromedriver                        0x0000000102da79d8 cxxbridge1$str$ptr + 2619212
+12  chromedriver                        0x0000000102da7b64 cxxbridge1$str$ptr + 2619608
+13  chromedriver                        0x0000000102db89e8 cxxbridge1$str$ptr + 2688860
+14  libsystem_pthread.dylib             0x000000019690ec0c _pthread_start + 136
+15  libsystem_pthread.dylib             0x0000000196909b80 thread_start + 8
+
+[01:45:11] INFO: Trying username field strategy 4
+[01:45:26] WARNING: Username field strategy 4 failed: Message: no such element: Unable to locate element: {"method":"css selector","selector":"[name="userId"]"}
+  (Session info: chrome=138.0.7204.100); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#no-such-element-exception
+Stacktrace:
+0   chromedriver                        0x0000000102dc0ea4 cxxbridge1$str$ptr + 2722840
+1   chromedriver                        0x0000000102db8dac cxxbridge1$str$ptr + 2689824
+2   chromedriver                        0x000000010290a3ec cxxbridge1$string$len + 90648
+3   chromedriver                        0x0000000102951544 cxxbridge1$string$len + 381808
+4   chromedriver                        0x0000000102992934 cxxbridge1$string$len + 649056
+5   chromedriver                        0x0000000102945834 cxxbridge1$string$len + 333408
+6   chromedriver                        0x0000000102d83fc0 cxxbridge1$str$ptr + 2473268
+7   chromedriver                        0x0000000102d8722c cxxbridge1$str$ptr + 2486176
+8   chromedriver                        0x0000000102d65a08 cxxbridge1$str$ptr + 2348924
+9   chromedriver                        0x0000000102d87ae8 cxxbridge1$str$ptr + 2488412
+10  chromedriver                        0x0000000102d56a98 cxxbridge1$str$ptr + 2287628
+11  chromedriver                        0x0000000102da79d8 cxxbridge1$str$ptr + 2619212
+12  chromedriver                        0x0000000102da7b64 cxxbridge1$str$ptr + 2619608
+13  chromedriver                        0x0000000102db89e8 cxxbridge1$str$ptr + 2688860
+14  libsystem_pthread.dylib             0x000000019690ec0c _pthread_start + 136
+15  libsystem_pthread.dylib             0x0000000196909b80 thread_start + 8
+
+[01:45:26] INFO: Trying username field strategy 5
+[01:45:27] INFO: Found username field
+[01:45:27] INFO: Trying password field strategy 1
+[01:45:27] INFO: Found password field
+[01:45:58] DEBUG: Screenshot saved: 01_journal_initial_014555.png Initial journal page
+[01:46:13] INFO: No privacy notification found (already handled)
+[01:46:13] INFO: Found ORCID link using strategy 1
+[01:46:13] INFO: Clicking ORCID link with enhanced strategies
+[01:46:13] INFO: Trying ORCID click strategy 1
+[01:46:23] INFO: On ORCID login page
+[01:46:24] DEBUG: Screenshot saved: 02_orcid_login_014623.png ORCID login page
+[01:46:24] INFO: Trying ORCID cookie consent strategy 1
+[01:46:39] WARNING: ORCID cookie consent strategy 1 failed: Message: element not interactable
+  (Session info: chrome=138.0.7204.100)
+Stacktrace:
+0   chromedriver                        0x0000000102dc0ea4 cxxbridge1$str$ptr + 2722840
+1   chromedriver                        0x0000000102db8dac cxxbridge1$str$ptr + 2689824
+2   chromedriver                        0x000000010290a260 cxxbridge1$string$len + 90252
+3   chromedriver                        0x0000000102952568 cxxbridge1$string$len + 385940
+4   chromedriver                        0x0000000102947358 cxxbridge1$string$len + 340356
+5   chromedriver                        0x0000000102946de4 cxxbridge1$string$len + 338960
+6   chromedriver                        0x0000000102992934 cxxbridge1$string$len + 649056
+7   chromedriver                        0x0000000102945834 cxxbridge1$string$len + 333408
+8   chromedriver                        0x0000000102d83fc0 cxxbridge1$str$ptr + 2473268
+9   chromedriver                        0x0000000102d8722c cxxbridge1$str$ptr + 2486176
+10  chromedriver                        0x0000000102d65a08 cxxbridge1$str$ptr + 2348924
+11  chromedriver                        0x0000000102d87ae8 cxxbridge1$str$ptr + 2488412
+12  chromedriver                        0x0000000102d56a98 cxxbridge1$str$ptr + 2287628
+13  chromedriver                        0x0000000102da79d8 cxxbridge1$str$ptr + 2619212
+14  chromedriver                        0x0000000102da7b64 cxxbridge1$str$ptr + 2619608
+15  chromedriver                        0x0000000102db89e8 cxxbridge1$str$ptr + 2688860
+16  libsystem_pthread.dylib             0x000000019690ec0c _pthread_start + 136
+17  libsystem_pthread.dylib             0x0000000196909b80 thread_start + 8
+
+[01:46:39] INFO: Trying ORCID cookie consent strategy 2
+[01:46:54] WARNING: ORCID cookie consent strategy 2 failed: Message: no such element: Unable to locate element: {"method":"xpath","selector":"//button[contains(text(), 'Accept all cookies')]"}
+  (Session info: chrome=138.0.7204.100); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#no-such-element-exception
+Stacktrace:
+0   chromedriver                        0x0000000102dc0ea4 cxxbridge1$str$ptr + 2722840
+1   chromedriver                        0x0000000102db8dac cxxbridge1$str$ptr + 2689824
+2   chromedriver                        0x000000010290a3ec cxxbridge1$string$len + 90648
+3   chromedriver                        0x0000000102951544 cxxbridge1$string$len + 381808
+4   chromedriver                        0x0000000102992934 cxxbridge1$string$len + 649056
+5   chromedriver                        0x0000000102945834 cxxbridge1$string$len + 333408
+6   chromedriver                        0x0000000102d83fc0 cxxbridge1$str$ptr + 2473268
+7   chromedriver                        0x0000000102d8722c cxxbridge1$str$ptr + 2486176
+8   chromedriver                        0x0000000102d65a08 cxxbridge1$str$ptr + 2348924
+9   chromedriver                        0x0000000102d87ae8 cxxbridge1$str$ptr + 2488412
+10  chromedriver                        0x0000000102d56a98 cxxbridge1$str$ptr + 2287628
+11  chromedriver                        0x0000000102da79d8 cxxbridge1$str$ptr + 2619212
+12  chromedriver                        0x0000000102da7b64 cxxbridge1$str$ptr + 2619608
+13  chromedriver                        0x0000000102db89e8 cxxbridge1$str$ptr + 2688860
+14  libsystem_pthread.dylib             0x000000019690ec0c _pthread_start + 136
+15  libsystem_pthread.dylib             0x0000000196909b80 thread_start + 8
+
+[01:46:54] INFO: Trying ORCID cookie consent strategy 3

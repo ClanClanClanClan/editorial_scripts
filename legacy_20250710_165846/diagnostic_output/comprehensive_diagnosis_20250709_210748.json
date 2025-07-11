@@ -1,0 +1,1653 @@
+{
+  "MF": {
+    "journal": "MF",
+    "start_time": "2025-07-09T21:06:14.128356",
+    "stages": {
+      "initial_connection": {
+        "journal": "MF",
+        "analysis_time": "2025-07-09T21:06:20.384968",
+        "page_type": "home",
+        "links_found": [
+          {
+            "text": "Mathematical Finance",
+            "href": "",
+            "relevant": false
+          },
+          {
+            "text": "ScholarOne Manuscripts\u2122",
+            "href": "https://clarivate.com/webofsciencegroup/solutions/scholarone/",
+            "relevant": true
+          },
+          {
+            "text": "Instructions & Forms",
+            "href": "javascript:popWindowSimple('mafi?NEXT_PAGE=FORMS_AND_INSTRUCTIONS&XIK_CUR_ROLE_ID=xik_FdWr6VXqZmKfobYzKCFEhN&XIK_CUR_USER_ID=xik_SHUBe9Acp5o3SnDt4Kkbqp&XIK_CNFID=xik_GEDpotMjzyEEtFgsUYGGicHGvsfCb6o2KKPZpvRCwujM&CURRENT_QUEUE_VALUE=null&PAGE_NAME=LOGIN','forms_instructions_popup', 700, 400);",
+            "relevant": false
+          },
+          {
+            "text": "Help",
+            "href": "https://support.silverchair.com/scholarone-manuscripts/",
+            "relevant": false
+          },
+          {
+            "text": "Log In",
+            "href": "#",
+            "relevant": false
+          },
+          {
+            "text": "Reset Password",
+            "href": "javascript:setNextPage('RESET_PASSWORD')",
+            "relevant": false
+          },
+          {
+            "text": "Create An Account",
+            "href": "javascript:setDataAndNextPage('XIK_PREACT','xik_kR5e7yxHFPJegqoEUX2Dgrrwru6PcQrzeZEAKnUdSNL1KBVndqLhYhwiwkyhycXms','CREATE_ACCOUNT_1')",
+            "relevant": false
+          },
+          {
+            "text": "More information on disabling pop-up blockers",
+            "href": "http://ssl.salesforce.com/_ui/selfservice/pkb/PublicKnowledgeSolution/d?orgId=00D000000008YVy&lang=1&id=501000000006wHu&retURL=%2Fsol%2Fpublic%2Fsolutionbrowser.jsp%3Fsearch%3DSol-01295%26cid%3D02n000000000KgR%26orgId%3D00D000000008YVy%26lang%3D1%26t%3D4&ps=1",
+            "relevant": false
+          },
+          {
+            "text": "Go Back",
+            "href": "",
+            "relevant": false
+          },
+          {
+            "text": "Cancel ORCID iD linking process",
+            "href": "",
+            "relevant": false
+          },
+          {
+            "text": "Go Back",
+            "href": "",
+            "relevant": false
+          },
+          {
+            "text": "Cancel ORCID iD Linking to Reset Password",
+            "href": "",
+            "relevant": false
+          },
+          {
+            "text": "Create an Account",
+            "href": "javascript:setDataAndNextPage('XIK_PREACT','xik_kR5e7yxHFPJegqoEUX2Dgrrwru6PcQrzeZEAKnUdSNL1KBVndqLhYhwiwkyhycXms','CREATE_ACCOUNT_1')",
+            "relevant": false
+          },
+          {
+            "text": "Reset Password",
+            "href": "javascript:setNextPage('RESET_PASSWORD');",
+            "relevant": false
+          },
+          {
+            "text": "Log In",
+            "href": "",
+            "relevant": false
+          },
+          {
+            "text": "Log in using Web of ScienceTM",
+            "href": "https://apps.clarivate.com/login?app=s1m&referrer=s1m_stack1%3Fjournal%3D",
+            "relevant": false
+          },
+          {
+            "text": "FAQs & User Guides",
+            "href": "https://support.silverchair.com/scholarone-manuscripts/faqs/",
+            "relevant": false
+          },
+          {
+            "text": "Instructions & Forms",
+            "href": "javascript:popWindowSimple('mafi?NEXT_PAGE=FORMS_AND_INSTRUCTIONS&XIK_CUR_ROLE_ID=xik_FdWr6VXqZmKfobYzKCFEhN&XIK_CUR_USER_ID=xik_SHUBe9Acp5o3SnDt4Kkbqp&XIK_CNFID=xik_GEDpotMjzyEEtFgsUYGGicHGvsfCb6o2KKPZpvRCwujM&CURRENT_QUEUE_VALUE=null&PAGE_NAME=LOGIN','forms_instructions_popup', 700, 400);",
+            "relevant": false
+          },
+          {
+            "text": "Journal Home",
+            "href": "http://www.blackwellpublishing.com/journal.asp?ref=0960-1627&site=1",
+            "relevant": false
+          },
+          {
+            "text": "Site Support",
+            "href": "https://support.silverchair.com/scholarone-manuscripts/",
+            "relevant": false
+          },
+          {
+            "text": "Reset Password",
+            "href": "javascript:setNextPage('RESET_PASSWORD')",
+            "relevant": false
+          },
+          {
+            "text": "\u00a9\u00a0Clarivate",
+            "href": "https://clarivate.com/legal/copyright/",
+            "relevant": false
+          },
+          {
+            "text": "#7,257,767",
+            "href": "http://patft.uspto.gov/netacgi/nph-Parser?Sect2=PTO1&Sect2=HITOFF&p=1&u=/netahtml/PTO/search-bool.html&r=1&f=G&l=50&d=PALL&RefSrch=yes&Query=PN/7257767",
+            "relevant": false
+          },
+          {
+            "text": "#7,263,655",
+            "href": "http://patft.uspto.gov/netacgi/nph-Parser?Sect2=PTO1&Sect2=HITOFF&p=1&u=/netahtml/PTO/search-bool.html&r=1&f=G&l=50&d=PALL&RefSrch=yes&Query=PN/7263655",
+            "relevant": false
+          },
+          {
+            "text": "@Clarivate for Academia & Government",
+            "href": "https://twitter.com/ClarivateAG",
+            "relevant": false
+          },
+          {
+            "text": "System Requirements",
+            "href": "mafi?NEXT_PAGE=SYSTEM_REQUIREMENTS&XIK_CUR_ROLE_ID=xik_FdWr6VXqZmKfobYzKCFEhN&XIK_CUR_USER_ID=xik_SHUBe9Acp5o3SnDt4Kkbqp&XIK_CNFID=xik_GEDpotMjzyEEtFgsUYGGicHGvsfCb6o2KKPZpvRCwujM&CURRENT_QUEUE_VALUE=null&PAGE_NAME=LOGIN",
+            "relevant": false
+          },
+          {
+            "text": "Privacy Statement",
+            "href": "https://clarivate.com/legal/scholarone-privacy-notice/scholarone-privacy-notice-en/",
+            "relevant": false
+          },
+          {
+            "text": "Terms of Use",
+            "href": "https://clarivate.com/legal/terms-of-use/",
+            "relevant": false
+          },
+          {
+            "text": "Cookies Settings",
+            "href": "#",
+            "relevant": false
+          },
+          {
+            "text": "Accessibility",
+            "href": "https://clarivate.com/webofsciencegroup/support/scholarone-manuscripts/accessibility/",
+            "relevant": false
+          }
+        ],
+        "status_indicators": [],
+        "manuscript_ids": [],
+        "tables_with_manuscripts": 0,
+        "navigation_options": [
+          "Mathematical FinanceScholarOne Manuscripts\u2122Instructions & FormsHelpLog InReset PasswordCreate An AccountPlease add this site to your pop-up blocker exception listBlocking pop-ups on this site may prevent peer-review related e-mails from being sent.More information on disabling pop-up blockersCancel ORCID iD linking process?You are about to cancel the ORCID iD linking process. You may use the \"Log In with ORCID iD\" button on the Log In page to start the process again at a later time.Go BackCancel ORCID iD linking processCancel the ORCID iD Linking Process to Reset your Password?Resetting your password will cancel the ORCID iD linking processWhen you have successfully reset your password, use the \"Log In with ORCID iD\" button on the Log In page to start the process again.Go BackCancel ORCID iD Linking to Reset PasswordLog InUser IDCreate an AccountPasswordReset PasswordLog InLog in using Web of ScienceTMResourcesFAQs & User GuidesInstructions & FormsJournal HomeSite SupportWelcome to the submission site forMathematical FinanceTo begin, log in with your user ID and password.If you are unsure about whether or not you have an account, or have forgotten your password, go to theReset Passwordscreen.",
+          "Mathematical FinanceScholarOne Manuscripts\u2122Instructions & FormsHelpLog InReset PasswordCreate An Account",
+          "Mathematical FinanceScholarOne Manuscripts\u2122Instructions & FormsHelpLog InReset PasswordCreate An Account",
+          "Mathematical FinanceScholarOne Manuscripts\u2122Instructions & FormsHelp",
+          "Mathematical FinanceScholarOne Manuscripts\u2122Instructions & FormsHelp",
+          "ScholarOne Manuscripts\u2122Instructions & FormsHelp",
+          "ScholarOne Manuscripts\u2122",
+          "\u00a9\u00a0Clarivate|\u00a9\u00a0ScholarOne, Inc., 2025.All Rights Reserved.ScholarOne Manuscripts and ScholarOne are registered trademarks of ScholarOne, Inc.ScholarOne Manuscripts Patents#7,257,767and#7,263,655.@Clarivate for Academia & Government|System Requirements|Privacy Statement|Terms of Use|Cookies Settings|Accessibility",
+          "\u00a9\u00a0Clarivate|\u00a9\u00a0ScholarOne, Inc., 2025.All Rights Reserved.ScholarOne Manuscripts and ScholarOne are registered trademarks of ScholarOne, Inc.ScholarOne Manuscripts Patents#7,257,767and#7,263,655.@Clarivate for Academia & Government|System Requirements|Privacy Statement|Terms of Use|Cookies Settings|Accessibility",
+          "\u00a9\u00a0Clarivate|\u00a9\u00a0ScholarOne, Inc., 2025.All Rights Reserved.ScholarOne Manuscripts and ScholarOne are registered trademarks of ScholarOne, Inc.ScholarOne Manuscripts Patents#7,257,767and#7,263,655.@Clarivate for Academia & Government|System Requirements|Privacy Statement|Terms of Use|Cookies Settings|Accessibility",
+          "\u00a9\u00a0Clarivate|\u00a9\u00a0ScholarOne, Inc., 2025.All Rights Reserved.ScholarOne Manuscripts and ScholarOne are registered trademarks of ScholarOne, Inc.ScholarOne Manuscripts Patents#7,257,767and#7,263,655.@Clarivate for Academia & Government|System Requirements|Privacy Statement|Terms of Use|Cookies Settings|Accessibility"
+        ]
+      },
+      "after_login": {
+        "journal": "MF",
+        "analysis_time": "2025-07-09T21:06:48.057392",
+        "page_type": "associate_editor",
+        "links_found": [
+          {
+            "text": "Mathematical Finance",
+            "href": "",
+            "relevant": false
+          },
+          {
+            "text": "ScholarOne Manuscripts\u2122",
+            "href": "https://clarivate.com/webofsciencegroup/solutions/scholarone/",
+            "relevant": true
+          },
+          {
+            "text": "Dylan Possamai",
+            "href": "#",
+            "relevant": false
+          },
+          {
+            "text": "E-Mail / Name",
+            "href": "javascript:setDataAndNextPage('XIK_PREACT','xik_6NzuLvth2UWfY6WyNmdSsUrqVfWY1tokZJTgmdSqifn4JNrU8ejkpyKXTG7rZiT3Cr','EDIT_ACCOUNT_1')",
+            "relevant": false
+          },
+          {
+            "text": "Address",
+            "href": "javascript:setDataAndNextPage('XIK_PREACT','xik_6NzuLvth2UWfY6WyNmdSsUrqVfWY1tokZJTgmdSqifn4JNrU8ejkpyKXTG7rZiT3Cr','EDIT_ACCOUNT_2')",
+            "relevant": false
+          },
+          {
+            "text": "User ID & Password",
+            "href": "javascript:setDataAndNextPage('XIK_PREACT','xik_6NzuLvth2UWfY6WyNmdSsUrqVfWY1tokZJTgmdSqifn4JNrU8ejkpyKXTG7rZiT3Cr','EDIT_ACCOUNT_3')",
+            "relevant": false
+          },
+          {
+            "text": "Instructions & Forms",
+            "href": "javascript:popWindowSimple('mafi?PARAMS=xik_2wkR1zt7a3FDKLPCioi1kNkxvCjMuonY7ofVgDZGNmaWxJxuyXQkcxcgrMu3fG6cNhWXyGrW5W5ToJcv9VH7ZEXRVhipuS5Za1LamySUCk8HEAEhdJqcG9bZxYYmw1oM68BTSPhSkuqJVo9N4qTGX6ZyEUF3T9KiecawjBXqjVgj9rcx2ge6SWYotwxgGxk1FMJc9','forms_instructions_popup', 700, 400);",
+            "relevant": false
+          },
+          {
+            "text": "Help",
+            "href": "https://support.silverchair.com/scholarone-manuscripts/",
+            "relevant": false
+          },
+          {
+            "text": "Log Out",
+            "href": "javascript:setField('XIK_PREACT', 'xik_6vZg4XWHha6MeZc1x4FuVXPmUKBNufCz9dJSKqqRM6Df');\n          setNextPage('LOGIN');",
+            "relevant": false
+          },
+          {
+            "text": "Home",
+            "href": "#",
+            "relevant": false
+          },
+          {
+            "text": "Author",
+            "href": "javascript:setDataAndNextPage('XIK_CUR_ROLE_ID','xik_AE2b52DnQzfsQkCZ5VMjtVw61Rfxos1MKDNXLHNscg8d','AUTHOR_VIEW_MANUSCRIPTS')",
+            "relevant": false
+          },
+          {
+            "text": "Review",
+            "href": "javascript:setDataAndNextPage('XIK_CUR_ROLE_ID', 'xik_GhT9E3B9G8wPygUCLbSqgzdX8iaabNW2ZCoKtWF3N7UL', 'REVIEWER_VIEW_MANUSCRIPTS');",
+            "relevant": false
+          },
+          {
+            "text": "Associate Editor Center",
+            "href": "javascript:setField('XIK_POSTACT', 'xik_HwMW6Mz58cgSBvrPuBfZemmkLYUhbiiY3pn7yvcWEcxf'); setDataAndNextPageOneDataValue('XIK_CUR_ROLE_ID', 'xik_4Zy5nTsZTnmSgjqqKdjpdzFP9xMZFZLNACf5QkYaLx7B','ASSOCIATE_EDITOR_DASHBOARD');",
+            "relevant": true
+          },
+          {
+            "text": "FAQs & User Guides",
+            "href": "https://support.silverchair.com/scholarone-manuscripts/faqs/",
+            "relevant": false
+          },
+          {
+            "text": "Journal Home",
+            "href": "http://www.blackwellpublishing.com/journal.asp?ref=0960-1627&site=1",
+            "relevant": false
+          },
+          {
+            "text": "Site Support",
+            "href": "https://support.silverchair.com/scholarone-manuscripts/",
+            "relevant": false
+          },
+          {
+            "text": "wiley.atyponrex.com/journal/MAFI",
+            "href": "https://wiley.atyponrex.com/journal/MAFI",
+            "relevant": false
+          },
+          {
+            "text": "how",
+            "href": "http://www.wileyauthors.com/orcid",
+            "relevant": false
+          },
+          {
+            "text": "\u00a9\u00a0Clarivate",
+            "href": "https://clarivate.com/legal/copyright/",
+            "relevant": false
+          },
+          {
+            "text": "#7,257,767",
+            "href": "http://patft.uspto.gov/netacgi/nph-Parser?Sect2=PTO1&Sect2=HITOFF&p=1&u=/netahtml/PTO/search-bool.html&r=1&f=G&l=50&d=PALL&RefSrch=yes&Query=PN/7257767",
+            "relevant": false
+          },
+          {
+            "text": "#7,263,655",
+            "href": "http://patft.uspto.gov/netacgi/nph-Parser?Sect2=PTO1&Sect2=HITOFF&p=1&u=/netahtml/PTO/search-bool.html&r=1&f=G&l=50&d=PALL&RefSrch=yes&Query=PN/7263655",
+            "relevant": false
+          },
+          {
+            "text": "@Clarivate for Academia & Government",
+            "href": "https://twitter.com/ClarivateAG",
+            "relevant": false
+          },
+          {
+            "text": "System Requirements",
+            "href": "mafi?PARAMS=xik_BtWuxAygub5nf1K4hX25LmhVsUJ5JPsG7q3iPMFYQw8haVWQjXaGNQCw1eYcZS2NT2BxuZvrcZVMk8w7FjPkhuv1cemtpX1gHNkxqyHsi3Nf2WTrZ4VvxD3WrzoTaqMuaJCkZubVkvEU3tGZ5gkDf9F8DxtMxPSroDAUP1YjpoMwHCi",
+            "relevant": false
+          },
+          {
+            "text": "Privacy Statement",
+            "href": "https://clarivate.com/legal/scholarone-privacy-notice/scholarone-privacy-notice-en/",
+            "relevant": false
+          },
+          {
+            "text": "Terms of Use",
+            "href": "https://clarivate.com/legal/terms-of-use/",
+            "relevant": false
+          },
+          {
+            "text": "Cookies Settings",
+            "href": "#",
+            "relevant": false
+          },
+          {
+            "text": "Accessibility",
+            "href": "https://clarivate.com/webofsciencegroup/support/scholarone-manuscripts/accessibility/",
+            "relevant": false
+          }
+        ],
+        "status_indicators": [],
+        "manuscript_ids": [],
+        "tables_with_manuscripts": 0,
+        "navigation_options": [
+          "Mathematical FinanceScholarOne Manuscripts\u2122Dylan PossamaiE-Mail / NameAddressUser ID & PasswordInstructions & FormsHelpLog OutHomeAuthorReviewAssociate Editor CenterFor security reasons, your session will time out in 10 minutes (at10:16 PM, 7:16 PM GMT).  Please save your work to avoid potential loss.  To refresh your session, close this message and save your work or return to your main menu.  You may then continue working as normal.HelpFAQs & User GuidesJournal HomeSite SupportMathematical FinanceWelcome! The tabs in the header area above indicate which \"roles\" you can currently perform according to your permissions.AUTHORS: ATTENTION REQUIREDWe are currently transitioning to Wiley\u2019s Research Exchange submission portal. Please review the following instructions carefully to ensure that you are using the correct site to submit your work for consideration.All new submissions need to be sent via Wiley\u2019s Research Exchange submission portal:wiley.atyponrex.com/journal/MAFIFor revisions, check your decision letter for specific instructions, including which submission portal you should use.Associate your ScholarOne account with your ORCID iD todayORCID iD is a unique and persistent identifier that distinguishes you from every other researcher \u2013 by connecting you with your research activities. We encourage you to register today for your ORCID iD and then associate it with your ScholarOne account. Find outhow.",
+          "Mathematical FinanceScholarOne Manuscripts\u2122Dylan PossamaiE-Mail / NameAddressUser ID & PasswordInstructions & FormsHelpLog OutHomeAuthorReviewAssociate Editor Center",
+          "Mathematical FinanceScholarOne Manuscripts\u2122Dylan PossamaiE-Mail / NameAddressUser ID & PasswordInstructions & FormsHelpLog OutHomeAuthorReviewAssociate Editor Center",
+          "Mathematical FinanceScholarOne Manuscripts\u2122Dylan PossamaiE-Mail / NameAddressUser ID & PasswordInstructions & FormsHelpLog Out",
+          "Mathematical FinanceScholarOne Manuscripts\u2122Dylan PossamaiE-Mail / NameAddressUser ID & PasswordInstructions & FormsHelpLog Out",
+          "ScholarOne Manuscripts\u2122Dylan PossamaiE-Mail / NameAddressUser ID & PasswordInstructions & FormsHelpLog Out",
+          "ScholarOne Manuscripts\u2122",
+          "HelpFAQs & User GuidesJournal HomeSite SupportMathematical FinanceWelcome! The tabs in the header area above indicate which \"roles\" you can currently perform according to your permissions.AUTHORS: ATTENTION REQUIREDWe are currently transitioning to Wiley\u2019s Research Exchange submission portal. Please review the following instructions carefully to ensure that you are using the correct site to submit your work for consideration.All new submissions need to be sent via Wiley\u2019s Research Exchange submission portal:wiley.atyponrex.com/journal/MAFIFor revisions, check your decision letter for specific instructions, including which submission portal you should use.Associate your ScholarOne account with your ORCID iD todayORCID iD is a unique and persistent identifier that distinguishes you from every other researcher \u2013 by connecting you with your research activities. We encourage you to register today for your ORCID iD and then associate it with your ScholarOne account. Find outhow.",
+          "HelpFAQs & User GuidesJournal HomeSite SupportMathematical FinanceWelcome! The tabs in the header area above indicate which \"roles\" you can currently perform according to your permissions.AUTHORS: ATTENTION REQUIREDWe are currently transitioning to Wiley\u2019s Research Exchange submission portal. Please review the following instructions carefully to ensure that you are using the correct site to submit your work for consideration.All new submissions need to be sent via Wiley\u2019s Research Exchange submission portal:wiley.atyponrex.com/journal/MAFIFor revisions, check your decision letter for specific instructions, including which submission portal you should use.Associate your ScholarOne account with your ORCID iD todayORCID iD is a unique and persistent identifier that distinguishes you from every other researcher \u2013 by connecting you with your research activities. We encourage you to register today for your ORCID iD and then associate it with your ScholarOne account. Find outhow.",
+          "Mathematical FinanceWelcome! The tabs in the header area above indicate which \"roles\" you can currently perform according to your permissions.AUTHORS: ATTENTION REQUIREDWe are currently transitioning to Wiley\u2019s Research Exchange submission portal. Please review the following instructions carefully to ensure that you are using the correct site to submit your work for consideration.All new submissions need to be sent via Wiley\u2019s Research Exchange submission portal:wiley.atyponrex.com/journal/MAFIFor revisions, check your decision letter for specific instructions, including which submission portal you should use.Associate your ScholarOne account with your ORCID iD todayORCID iD is a unique and persistent identifier that distinguishes you from every other researcher \u2013 by connecting you with your research activities. We encourage you to register today for your ORCID iD and then associate it with your ScholarOne account. Find outhow.",
+          "\u00a9\u00a0Clarivate|\u00a9\u00a0ScholarOne, Inc., 2025.All Rights Reserved.ScholarOne Manuscripts and ScholarOne are registered trademarks of ScholarOne, Inc.ScholarOne Manuscripts Patents#7,257,767and#7,263,655.@Clarivate for Academia & Government|System Requirements|Privacy Statement|Terms of Use|Cookies Settings|Accessibility",
+          "\u00a9\u00a0Clarivate|\u00a9\u00a0ScholarOne, Inc., 2025.All Rights Reserved.ScholarOne Manuscripts and ScholarOne are registered trademarks of ScholarOne, Inc.ScholarOne Manuscripts Patents#7,257,767and#7,263,655.@Clarivate for Academia & Government|System Requirements|Privacy Statement|Terms of Use|Cookies Settings|Accessibility",
+          "\u00a9\u00a0Clarivate|\u00a9\u00a0ScholarOne, Inc., 2025.All Rights Reserved.ScholarOne Manuscripts and ScholarOne are registered trademarks of ScholarOne, Inc.ScholarOne Manuscripts Patents#7,257,767and#7,263,655.@Clarivate for Academia & Government|System Requirements|Privacy Statement|Terms of Use|Cookies Settings|Accessibility",
+          "\u00a9\u00a0Clarivate|\u00a9\u00a0ScholarOne, Inc., 2025.All Rights Reserved.ScholarOne Manuscripts and ScholarOne are registered trademarks of ScholarOne, Inc.ScholarOne Manuscripts Patents#7,257,767and#7,263,655.@Clarivate for Academia & Government|System Requirements|Privacy Statement|Terms of Use|Cookies Settings|Accessibility"
+        ]
+      },
+      "ae_center": {
+        "journal": "MF",
+        "analysis_time": "2025-07-09T21:06:51.927447",
+        "page_type": "associate_editor",
+        "links_found": [
+          {
+            "text": "Mathematical Finance",
+            "href": "",
+            "relevant": false
+          },
+          {
+            "text": "ScholarOne Manuscripts\u2122",
+            "href": "https://clarivate.com/webofsciencegroup/solutions/scholarone/",
+            "relevant": true
+          },
+          {
+            "text": "Dylan Possamai",
+            "href": "#",
+            "relevant": false
+          },
+          {
+            "text": "E-Mail / Name",
+            "href": "javascript:setDataAndNextPage('XIK_PREACT','xik_6NzuLvth2UWfY6WyNmdSsUrqVfWY1tokZJTgmdSqifn4JNrU8ejkpyKXTG7rZiT3Cr','EDIT_ACCOUNT_1')",
+            "relevant": false
+          },
+          {
+            "text": "Address",
+            "href": "javascript:setDataAndNextPage('XIK_PREACT','xik_6NzuLvth2UWfY6WyNmdSsUrqVfWY1tokZJTgmdSqifn4JNrU8ejkpyKXTG7rZiT3Cr','EDIT_ACCOUNT_2')",
+            "relevant": false
+          },
+          {
+            "text": "User ID & Password",
+            "href": "javascript:setDataAndNextPage('XIK_PREACT','xik_6NzuLvth2UWfY6WyNmdSsUrqVfWY1tokZJTgmdSqifn4JNrU8ejkpyKXTG7rZiT3Cr','EDIT_ACCOUNT_3')",
+            "relevant": false
+          },
+          {
+            "text": "Instructions & Forms",
+            "href": "javascript:popWindowSimple('mafi?PARAMS=xik_2tMwNpeToBa8xBpQBDNgw2b9VRx15WJqm4DQBMvnGoPLykXN3Kg755Z3sCkcC4gkUytoLMiZVenQFiib13UH7TmWamxTMnvBKvfwKz1EgnCXwKABt3Xkf26F8bE8VsVMr6LLR3bYzuHTGK7ihryEVCh6MdHm2R7n9h9if9noxnVyftKkL8B2ubTvSgLBrp7KSJd6g3FT5Qj3EwUL1ciCHYfsUGLMSTaHgiAeaJhm89CDUKsbz','forms_instructions_popup', 700, 400);",
+            "relevant": false
+          },
+          {
+            "text": "Help",
+            "href": "https://support.silverchair.com/scholarone-manuscripts/",
+            "relevant": false
+          },
+          {
+            "text": "Log Out",
+            "href": "javascript:setField('XIK_PREACT', 'xik_6vZg4XWHha6MeZc1x4FuVXPmUKBNufCz9dJSKqqRM6Df');\n          setNextPage('LOGIN');",
+            "relevant": false
+          },
+          {
+            "text": "Home",
+            "href": "javascript:if(isPageCompletelyLoaded()){setDataAndNextPage('XIK_CUR_ROLE_ID', 'xik_EGx1tX8ZMgDpCqxrwmqAfx', 'HOME');}",
+            "relevant": false
+          },
+          {
+            "text": "Author",
+            "href": "javascript:setDataAndNextPage('XIK_CUR_ROLE_ID','xik_AE2b52DnQzfsQkCZ5VMjtVw61Rfxos1MKDNXLHNscg8d','AUTHOR_VIEW_MANUSCRIPTS')",
+            "relevant": false
+          },
+          {
+            "text": "Review",
+            "href": "javascript:setDataAndNextPage('XIK_CUR_ROLE_ID', 'xik_GhT9E3B9G8wPygUCLbSqgzdX8iaabNW2ZCoKtWF3N7UL', 'REVIEWER_VIEW_MANUSCRIPTS');",
+            "relevant": false
+          },
+          {
+            "text": "Associate Editor Center",
+            "href": "javascript:setField('XIK_POSTACT', 'xik_HwMW6Mz58cgSBvrPuBfZemmkLYUhbiiY3pn7yvcWEcxf'); setDataAndNextPageOneDataValue('XIK_CUR_ROLE_ID', 'xik_4Zy5nTsZTnmSgjqqKdjpdzFP9xMZFZLNACf5QkYaLx7B','ASSOCIATE_EDITOR_DASHBOARD');",
+            "relevant": true
+          },
+          {
+            "text": "Search",
+            "href": "#",
+            "relevant": false
+          },
+          {
+            "text": "Manuscript ID",
+            "href": "#",
+            "relevant": true
+          },
+          {
+            "text": "External Manuscript ID",
+            "href": "#",
+            "relevant": true
+          },
+          {
+            "text": "Manuscript Title",
+            "href": "#",
+            "relevant": true
+          },
+          {
+            "text": "Adv. Manuscript Search",
+            "href": "#",
+            "relevant": true
+          },
+          {
+            "text": "Read More ...",
+            "href": "",
+            "relevant": false
+          },
+          {
+            "text": "Show Advanced Search",
+            "href": "javascript: setField('XIK_PREACT','xik_HwMW6Mz58cgSBvrPuBfZemmkLYUhbiiY3pn7yvcWEcxf'); setField('SEARCH_MODE','Y');setField('ADV_DASHBOARD_SRCH','Y'); setNextPage('ASSOCIATE_EDITOR_DASHBOARD');",
+            "relevant": false
+          },
+          {
+            "text": "2",
+            "href": "mafi?PARAMS=xik_cZe8ptZtiHScM5APps1K9yZjjYCPGpQkPATLAfWbVo11KNHzvSLRAXLx21k4HP36FnZrWNrcaPw4VPkjCFwK1u3Ajz3XbFDCxpKmGg8akANKgqaT4vvozqB6PL9KcgUGYK14RKSuRg1aWnPVynwy5HFLRXdvmzcopZSXPfzhMcQvXMnftWE9rX1JLPo8a6kfhdfCuNNQ5oFf1vdmNoyEodJXKoHnuBnqUBZECCnYfvhXcxeeYr4Vz1EqmxdLeMUQcSW4Vo1oJbumRx7CMkfiSiMhYTmyusJVFz8URTexqczQ74VfgD",
+            "relevant": false
+          },
+          {
+            "text": "Awaiting Reviewer Scores",
+            "href": "mafi?PARAMS=xik_F1WShFu65PbPMnTjbtf3XSsuxM53cbTmzRoke68Fa2WvBv7ox34SN3W8KwdTpxpJghSEghpUWC2DySWMQJEC2TUofm5RbGf9JFNcjWqMdTdSNDdGwiLnVX4h91R5xnn2nGqzzwyxkVJ6soK1BMvTWtrRpVe7fwsJkibm7tvHA5MDKQLmcE9nyJ4qpJ1zwXL9HMLdVxRMSGiDvueEWCEaSqjaSPqCLt8HbNjQRuCgirGP6YBiffRjnGRRcr4PJmXTxjE5pB4YFV9aEx7FZHnEo2CiTUp9tbV6qLpzMFTyKiE8k7osYS",
+            "relevant": true
+          },
+          {
+            "text": "1",
+            "href": "mafi?PARAMS=xik_DwXNDkNxrCU1yMyFBTodgbfk7GGEVKe9HikuRyiyGeZgum5NRtB84i86HEGuErf9PhnQwpvjzxFGaXgqRR9UkDYhHLAK5uMKihZFDBrKXzmBV6yvcmwNaD1bQprDffKRSknVfFHwm1tCoLBGRdfwzeqpPgXxxRjQ646V3K7vdL1hEH2hG27bTPbUQnvDYrraUFsAA6xQRW1VkzKsndnw8XkmnoWW45heSU5kh1KRJbEuTzM25sS27CHUBaHsA5V1MdaKbViPhF38HsWv9CHHsu57Bxdm4fbqCZNntFJktpQe8ay79yANWHwr8HZWaRo85jmMLAEy",
+            "relevant": false
+          },
+          {
+            "text": "Overdue Manuscripts Awaiting Revision",
+            "href": "mafi?PARAMS=xik_GCUVf2Viu14o4RL3Brn8KrUaUvvCCM67b14v4RvYFTgeXEpUfov2cy7jRHxAiKjNGx2gqvsJhdaTahsUKATjbmEsiPGFc1XRE2m45PofyAMo3oUvm9KFRmnR7JL7e4wxwcetbh4XBAYWSuMyNiJzXYEAVkDsXjzpqZBxNb756k9PDgomVa6BiF4jqXFKLmmzhhP4dPk7oFEbwUsmokbugrJYZfNVimNuu4PgpdqiSG4Sp6p7bUaZ1Q4LXAvqWvNQNNywYbCReHRrAmGuPPnEkuKcf48jgNzM81kj1i1499R2TczBcd6bALMeZuaxZdi2wH2gE3sq",
+            "relevant": true
+          },
+          {
+            "text": "Manuscript Status and Summary Reports",
+            "href": "",
+            "relevant": true
+          },
+          {
+            "text": "Final Decisions",
+            "href": "javascript: popWindow('mafi?PARAMS=xik_2ABJabtAZiPRuKdJTRLyqDnMEsNipHw5haYgGMB8UtMKth6vwee8yBxodyUAra2wjzdbYjMHg4HGYxNPV6DrmGwmbm2GesmFKSXEaaPaHf2EeroSAffkHPDPNBZHreH38H13KP7dody7GgVck5Mpk5mTN7tMQwWzMWUHod9JLNVJ9j8fPBPpPnkBfzAEE3xnw2ERiz9qfuk1trZuohD3QN3FbwBEcVWxVx8c2RumxYxECBQPSEjXoDT2LeeqTNqjAsVrFXV','cognos_popup', 1000, 750);",
+            "relevant": true
+          },
+          {
+            "text": "Manuscripts Decided",
+            "href": "javascript: popWindow('mafi?PARAMS=xik_2KEEaM6qxz8jwMarfEnAPudP6t9cDVBtmwW23LgpCzyXSiuWwqNuRxnmPoboeZHPEAN2XSwT696YpPVGwpMoPdSveoj7kfBLQJg7wEe6qYcU5JrBu7WCjKjVbEcPKnee71LWQMKUuphbPqUCVE1SMAk95tir2CnXUVVnucB77Euxr97P7Xt3ajFYrHtarkUw2wsJsjqyBZNLgWb6r2GDxLoJyDbXczi5NhQMfiWuxFFGGJdZeMS1yUFmM3AWUv8FqC639Uf','cognos_popup', 1000, 750);",
+            "relevant": true
+          },
+          {
+            "text": "Peer Review Details Reports",
+            "href": "",
+            "relevant": false
+          },
+          {
+            "text": "Manuscripts with Reviewers",
+            "href": "javascript: popWindow('mafi?PARAMS=xik_n9hU78KVnJYgMnj3ht8BEaSYZT7Je2K2fsWwQ8oroJFfPN6HnQVthVjffNHxCTTL8uNRf3MGmB9DeMb1MLENCDAmQYSGUkFuvPZ7GHv8XPtdjH8dEpoYpaN5wL9vFuvP7VKfZbrK2v44cnSmozjQCywAaAywH13EziwSSSsYHypst7N1is3YWbujSyyXyf4No4TAJyTjFzRT52AA5pS1s7yUQem18eT4GdkaDhCCbuGbANWB6TyY8nwwMsJmUXLNQpootMH1raWyuJAVgmPKfbdDTxP6','cognos_popup', 1000, 750);",
+            "relevant": true
+          },
+          {
+            "text": "Manuscripts by Decision Status",
+            "href": "javascript: popWindow('mafi?PARAMS=xik_26n6iqiAVRV2NBHnzQb3SDLCqro4uzEL9xebS1a91yt3VpsxVVNfCTnUUCjuV7JePMR2STr58VYVMgVj5xJNKeerdwjH7zHYpsu1xrzqAfTe12LPpnxcgMNbYMwUTAZDMiFLdfmHafLkHFZXVHUBT2abAnnro9qvun8K687Ug38G3pksH2NdLjCMjwtQwXUumv27rnkseUs3XGMGzrerptTHBgocktMeDJRcVkUwafKE8V66cAhn1Nk7P6oMuDGpcePjfaygPaTKCAjyBV4dXGjxt9spJ','cognos_popup', 1000, 750);",
+            "relevant": true
+          },
+          {
+            "text": "User Account Reports",
+            "href": "",
+            "relevant": false
+          },
+          {
+            "text": "Blocked Email Addresses",
+            "href": "javascript: popWindow('mafi?PARAMS=xik_ZCJ4GYcPTh2tUR4xoqd4fum7BbZk7pusum18NLYFXWpUhDgh5HG1ZPh1ExLEMWYpu8dL2aLBi9NSi7kubQQZ22YEWDwdcanxzee87juFCFBwastG6jcWwxhtoQNDejjWFmddJWQexnJ8YFiHSAa6mKQuvEedYDvxkbnR3xsj344SWZ6FhCZS42jGovEMPuq4V5AHVbtj8rcxbMHQ6ETzR83K2bRPMrEeXmgJrcnVHUhknnpFa2FPeSaJWLxy4qyKoZ1oBmZNvr9Fn3MZ59RXF5YLxG5X','cognos_popup', 1000, 750);",
+            "relevant": false
+          },
+          {
+            "text": "User Performance Reports",
+            "href": "",
+            "relevant": false
+          },
+          {
+            "text": "Reviewer Contact Info and Lifetime Statistics",
+            "href": "javascript: popWindow('mafi?PARAMS=xik_WjcyFqmy8dcjr3k1M6JBi1cbWRKnQkDpb1QwT51DNdnxKjPVePkZcKhtA2c3b7F7vhUwro1p9Cf6a5etK572CuNc1fcpyAzGAC3Kn3ERg4JEG1XKc6p7WJFmo5KyyEnrXdWj3MfSAsRjhJEBBaDYpm6LYd8fd76sBCTpbHfF12SiVW9qhV2yDTFEexizPqAPghSbEUNSMFNvBsAFxCXRPPA7AFwriwYU1wMbJSX8XhtSEoRsZpnyDs1cWnbb9XzuMTSZwLyih1BokLDPPofH47gdZ2bvhGEMaHqfffC9VuhNdjTZ58','cognos_popup', 1000, 750);",
+            "relevant": true
+          },
+          {
+            "text": "Reviewer Contact Info and Lifetime Statistics for Export",
+            "href": "javascript: popWindow('mafi?PARAMS=xik_A7UKpTBNU7sDYiyPEwCS27Ef3MzM9KPNiamPbXHKRTakbK4M8RYHMzPPqZVwaMusmZZ3gyaPPGbxDiUkTm1Xe6xNwfkGipZgE3VSDrCntSB6qaoZvadC4NSZivpccPAvHQ7G2Q79bKt3S1kNhoZgVXhvbsP6cVNTe9G1Lo5uqhgrfBvYFrR4yzgSyw6uKJKsgFmQp225rUec6RMFidicPNRdxQdNioTaF3darVhc8Lb6M1EdUBTBr6LrTTgf849qbyvGSNSMDUW8joWHzMEMnVZFinFFiKEW4sPyrysq92Cf5gUJQsyBcz5LYcNSrZup5tJKbbAs','cognos_popup', 1000, 750);",
+            "relevant": true
+          },
+          {
+            "text": "Reviewer Summary",
+            "href": "javascript: popWindow('mafi?PARAMS=xik_2e5m5vxgCabpSMhndD47dpjmUL74ooYvDM9H4MJvgS46kE6g8vEnzDPxAimpcwhhoPBRHPgzbADFUUVNj2vLiReEZhdUgYvPzUsYHH6MAFKYvt2VHPYQ12yYxscLLBf1reJoY6fN2FsgGhJVECSDnkskYtoYDq5853r4zBifZnLsGj3CfKUtq28M2ujXg5kMKHGg2v4FieaSXAh6GWTMuCnDw2iAkaKwdXLvChnYBtpZqzm5QtdgStHzq8wsQPzpiEpHRJM','cognos_popup', 1000, 750);",
+            "relevant": true
+          },
+          {
+            "text": "Publication Folders, My Folders, Custom Reports, and Role Reports",
+            "href": "javascript: popWindow('mafi?PARAMS=xik_3FPC6VXayocenYAVDLcpWHQEthd6cKPisHT3JA9KxHpDuv6DHyqv7b64YrCvtt8ttPYHndbUuNuPu4nDucKgLyz7oyoFBNN6gLZaj67tPoxFBeAWYuXMVEfAwEMhLbKgPR7LBWZsDH8HMJPe2CwCo1McjCHziQCkmxgMeSxfXkciXc8LGKTeYmiwx63kPFCiBMaXjaz6yosoZDaDyq2qnnnCnZ6KnXpAg9ERpzhBEJy6aNXZC','cognos_popup', 1000, 750);",
+            "relevant": false
+          },
+          {
+            "text": "\u00a9\u00a0Clarivate",
+            "href": "https://clarivate.com/legal/copyright/",
+            "relevant": false
+          },
+          {
+            "text": "#7,257,767",
+            "href": "http://patft.uspto.gov/netacgi/nph-Parser?Sect2=PTO1&Sect2=HITOFF&p=1&u=/netahtml/PTO/search-bool.html&r=1&f=G&l=50&d=PALL&RefSrch=yes&Query=PN/7257767",
+            "relevant": false
+          },
+          {
+            "text": "#7,263,655",
+            "href": "http://patft.uspto.gov/netacgi/nph-Parser?Sect2=PTO1&Sect2=HITOFF&p=1&u=/netahtml/PTO/search-bool.html&r=1&f=G&l=50&d=PALL&RefSrch=yes&Query=PN/7263655",
+            "relevant": false
+          },
+          {
+            "text": "@Clarivate for Academia & Government",
+            "href": "https://twitter.com/ClarivateAG",
+            "relevant": false
+          },
+          {
+            "text": "System Requirements",
+            "href": "mafi?PARAMS=xik_7Gr2WfepmrzepeyswMt9dejRBwfxsEyHHsnPcZQPNK25EfxFP2rigAJurPiBddJb5rgvS7xyNQjR3cMGLBf9Rap58V3wyooSvRHYQL9Ao8vHVYyHBUrmzvAmdeZzpDr4UVXvsgJjCeQ6LtyypRUkffZ8uAhJ6jCR91Z5z82JkngmpF6ExZF8LAGEhLLPNAh4PxKj9cvzS29DbBSDUk4dpvRwwyV",
+            "relevant": false
+          },
+          {
+            "text": "Privacy Statement",
+            "href": "https://clarivate.com/legal/scholarone-privacy-notice/scholarone-privacy-notice-en/",
+            "relevant": false
+          },
+          {
+            "text": "Terms of Use",
+            "href": "https://clarivate.com/legal/terms-of-use/",
+            "relevant": false
+          },
+          {
+            "text": "Cookies Settings",
+            "href": "#",
+            "relevant": false
+          },
+          {
+            "text": "Accessibility",
+            "href": "https://clarivate.com/webofsciencegroup/support/scholarone-manuscripts/accessibility/",
+            "relevant": false
+          }
+        ],
+        "status_indicators": [
+          "Mathematical FinanceScholarOne Manuscripts\u2122Dylan PossamaiE-Mail / NameAddressUser ID & PasswordInstructions & FormsHelpLog OutHomeAuthorReviewAssociate Editor CenterAssociate Editor DashboardSearchManuscript IDManuscript IDExternal Manuscript IDManuscript TitleAdv. Manuscript SearchSearchFor security reasons, your session will time out in 10 minutes (at10:16 PM, 7:16 PM GMT).  Please save your work to avoid potential loss.  To refresh your session, close this message and save your work or return to your main menu.  You may then continue working as normal.You can access manuscripts in each peer review status by clicking on the status queue title. The number next to each status queue title indicates the number of manuscripts in that status. You may search for specific manuscripts with the Quick Manuscript Search form or conduct an \"Advanced Search\" by clicking the link below (the advanced search form will display at the bottom of the screen). For tips on conducting searches, click the following link:Read More ...Associate Editor ListsQuick Search -Show Advanced SearchYou may click on the manuscript list title to view a full listing of manuscripts in each status, or click on the number next to the list to jump directly to the first manuscript in the list.0Awaiting Reviewer Selection0Awaiting Reviewer Invitation0Awaiting Reviewer Assignment2Awaiting Reviewer Scores0Overdue Reviewer Scores0Awaiting AE RecommendationManuscripts Awaiting Revision0Manuscripts Awaiting Revision1Overdue Manuscripts Awaiting RevisionYou may conduct a wildcard search by adding an asterisk (*) to the end of the search string. For example, to view a list of all of the manuscripts whose titles begin with the words \"neuroscience\" or \"neurology\" simply type \"neuro*\" in the Title field and click \"Search.\"Saved Search:Select...Manuscript ID:External Manuscript ID:Title:Author's First (Given)or Last (Family) name:*Keywords:ReportsManuscript Status and Summary ReportsStandard ReportsFinal DecisionsManuscripts DecidedPeer Review Details ReportsStandard ReportsManuscripts with ReviewersManuscripts by Decision StatusUser Account ReportsStandard ReportsBlocked Email AddressesUser Performance ReportsStandard ReportsReviewer Contact Info and Lifetime StatisticsReviewer Contact Info and Lifetime Statistics for ExportReviewer SummaryPublication Folders, My Folders, Custom Reports, and Role Reports",
+          "You can access manuscripts in each peer review status by clicking on the status queue title. The number next to each status queue title indicates the number of manuscripts in that status. You may search for specific manuscripts with the Quick Manuscript Search form or conduct an \"Advanced Search\" by clicking the link below (the advanced search form will display at the bottom of the screen). For tips on conducting searches, click the following link:Read More ...Associate Editor ListsQuick Search -Show Advanced SearchYou may click on the manuscript list title to view a full listing of manuscripts in each status, or click on the number next to the list to jump directly to the first manuscript in the list.0Awaiting Reviewer Selection0Awaiting Reviewer Invitation0Awaiting Reviewer Assignment2Awaiting Reviewer Scores0Overdue Reviewer Scores0Awaiting AE RecommendationManuscripts Awaiting Revision0Manuscripts Awaiting Revision1Overdue Manuscripts Awaiting RevisionYou may conduct a wildcard search by adding an asterisk (*) to the end of the search string. For example, to view a list of all of the manuscripts whose titles begin with the words \"neuroscience\" or \"neurology\" simply type \"neuro*\" in the Title field and click \"Search.\"Saved Search:Select...Manuscript ID:External Manuscript ID:Title:Author's First (Given)or Last (Family) name:*Keywords:ReportsManuscript Status and Summary ReportsStandard ReportsFinal DecisionsManuscripts DecidedPeer Review Details ReportsStandard ReportsManuscripts with ReviewersManuscripts by Decision StatusUser Account ReportsStandard ReportsBlocked Email AddressesUser Performance ReportsStandard ReportsReviewer Contact Info and Lifetime StatisticsReviewer Contact Info and Lifetime Statistics for ExportReviewer SummaryPublication Folders, My Folders, Custom Reports, and Role Reports",
+          "You can access manuscripts in each peer review status by clicking on the status queue title. The number next to each status queue title indicates the number of manuscripts in that status. You may search for specific manuscripts with the Quick Manuscript Search form or conduct an \"Advanced Search\" by clicking the link below (the advanced search form will display at the bottom of the screen). For tips on conducting searches, click the following link:Read More ...Associate Editor ListsQuick Search -Show Advanced SearchYou may click on the manuscript list title to view a full listing of manuscripts in each status, or click on the number next to the list to jump directly to the first manuscript in the list.0Awaiting Reviewer Selection0Awaiting Reviewer Invitation0Awaiting Reviewer Assignment2Awaiting Reviewer Scores0Overdue Reviewer Scores0Awaiting AE RecommendationManuscripts Awaiting Revision0Manuscripts Awaiting Revision1Overdue Manuscripts Awaiting RevisionYou may conduct a wildcard search by adding an asterisk (*) to the end of the search string. For example, to view a list of all of the manuscripts whose titles begin with the words \"neuroscience\" or \"neurology\" simply type \"neuro*\" in the Title field and click \"Search.\"Saved Search:Select...Manuscript ID:External Manuscript ID:Title:Author's First (Given)or Last (Family) name:*Keywords:ReportsManuscript Status and Summary ReportsStandard ReportsFinal DecisionsManuscripts DecidedPeer Review Details ReportsStandard ReportsManuscripts with ReviewersManuscripts by Decision StatusUser Account ReportsStandard ReportsBlocked Email AddressesUser Performance ReportsStandard ReportsReviewer Contact Info and Lifetime StatisticsReviewer Contact Info and Lifetime Statistics for ExportReviewer SummaryPublication Folders, My Folders, Custom Reports, and Role Reports",
+          "You may click on the manuscript list title to view a full listing of manuscripts in each status, or click on the number next to the list to jump directly to the first manuscript in the list.0Awaiting Reviewer Selection0Awaiting Reviewer Invitation0Awaiting Reviewer Assignment2Awaiting Reviewer Scores0Overdue Reviewer Scores0Awaiting AE RecommendationManuscripts Awaiting Revision0Manuscripts Awaiting Revision1Overdue Manuscripts Awaiting RevisionYou may conduct a wildcard search by adding an asterisk (*) to the end of the search string. For example, to view a list of all of the manuscripts whose titles begin with the words \"neuroscience\" or \"neurology\" simply type \"neuro*\" in the Title field and click \"Search.\"Saved Search:Select...Manuscript ID:External Manuscript ID:Title:Author's First (Given)or Last (Family) name:*Keywords:ReportsManuscript Status and Summary ReportsStandard ReportsFinal DecisionsManuscripts DecidedPeer Review Details ReportsStandard ReportsManuscripts with ReviewersManuscripts by Decision StatusUser Account ReportsStandard ReportsBlocked Email AddressesUser Performance ReportsStandard ReportsReviewer Contact Info and Lifetime StatisticsReviewer Contact Info and Lifetime Statistics for ExportReviewer SummaryPublication Folders, My Folders, Custom Reports, and Role Reports",
+          "You may click on the manuscript list title to view a full listing of manuscripts in each status, or click on the number next to the list to jump directly to the first manuscript in the list.0Awaiting Reviewer Selection0Awaiting Reviewer Invitation0Awaiting Reviewer Assignment2Awaiting Reviewer Scores0Overdue Reviewer Scores0Awaiting AE RecommendationManuscripts Awaiting Revision0Manuscripts Awaiting Revision1Overdue Manuscripts Awaiting Revision",
+          "Awaiting Reviewer Selection",
+          "Awaiting Reviewer Selection",
+          "Awaiting Reviewer Invitation",
+          "Awaiting Reviewer Invitation",
+          "Awaiting Reviewer Assignment",
+          "Awaiting Reviewer Assignment",
+          "Awaiting Reviewer Scores",
+          "Awaiting Reviewer Scores",
+          "Overdue Reviewer Scores",
+          "Overdue Reviewer Scores",
+          "Awaiting AE Recommendation",
+          "Awaiting AE Recommendation",
+          "Manuscripts Awaiting Revision",
+          "Manuscripts Awaiting Revision",
+          "Manuscripts Awaiting Revision",
+          "Manuscripts Awaiting Revision",
+          "Overdue Manuscripts Awaiting Revision",
+          "Overdue Manuscripts Awaiting Revision"
+        ],
+        "manuscript_ids": [],
+        "tables_with_manuscripts": 0,
+        "navigation_options": [
+          "Mathematical FinanceScholarOne Manuscripts\u2122Dylan PossamaiE-Mail / NameAddressUser ID & PasswordInstructions & FormsHelpLog OutHomeAuthorReviewAssociate Editor CenterAssociate Editor DashboardSearchManuscript IDManuscript IDExternal Manuscript IDManuscript TitleAdv. Manuscript SearchSearchFor security reasons, your session will time out in 10 minutes (at10:16 PM, 7:16 PM GMT).  Please save your work to avoid potential loss.  To refresh your session, close this message and save your work or return to your main menu.  You may then continue working as normal.You can access manuscripts in each peer review status by clicking on the status queue title. The number next to each status queue title indicates the number of manuscripts in that status. You may search for specific manuscripts with the Quick Manuscript Search form or conduct an \"Advanced Search\" by clicking the link below (the advanced search form will display at the bottom of the screen). For tips on conducting searches, click the following link:Read More ...Associate Editor ListsQuick Search -Show Advanced SearchYou may click on the manuscript list title to view a full listing of manuscripts in each status, or click on the number next to the list to jump directly to the first manuscript in the list.0Awaiting Reviewer Selection0Awaiting Reviewer Invitation0Awaiting Reviewer Assignment2Awaiting Reviewer Scores0Overdue Reviewer Scores0Awaiting AE RecommendationManuscripts Awaiting Revision0Manuscripts Awaiting Revision1Overdue Manuscripts Awaiting RevisionYou may conduct a wildcard search by adding an asterisk (*) to the end of the search string. For example, to view a list of all of the manuscripts whose titles begin with the words \"neuroscience\" or \"neurology\" simply type \"neuro*\" in the Title field and click \"Search.\"Saved Search:Select...Manuscript ID:External Manuscript ID:Title:Author's First (Given)or Last (Family) name:*Keywords:ReportsManuscript Status and Summary ReportsStandard ReportsFinal DecisionsManuscripts DecidedPeer Review Details ReportsStandard ReportsManuscripts with ReviewersManuscripts by Decision StatusUser Account ReportsStandard ReportsBlocked Email AddressesUser Performance ReportsStandard ReportsReviewer Contact Info and Lifetime StatisticsReviewer Contact Info and Lifetime Statistics for ExportReviewer SummaryPublication Folders, My Folders, Custom Reports, and Role Reports",
+          "Mathematical FinanceScholarOne Manuscripts\u2122Dylan PossamaiE-Mail / NameAddressUser ID & PasswordInstructions & FormsHelpLog OutHomeAuthorReviewAssociate Editor CenterAssociate Editor DashboardSearchManuscript IDManuscript IDExternal Manuscript IDManuscript TitleAdv. Manuscript SearchSearch",
+          "Mathematical FinanceScholarOne Manuscripts\u2122Dylan PossamaiE-Mail / NameAddressUser ID & PasswordInstructions & FormsHelpLog OutHomeAuthorReviewAssociate Editor CenterAssociate Editor DashboardSearchManuscript IDManuscript IDExternal Manuscript IDManuscript TitleAdv. Manuscript SearchSearch",
+          "Mathematical FinanceScholarOne Manuscripts\u2122Dylan PossamaiE-Mail / NameAddressUser ID & PasswordInstructions & FormsHelpLog Out",
+          "Mathematical FinanceScholarOne Manuscripts\u2122Dylan PossamaiE-Mail / NameAddressUser ID & PasswordInstructions & FormsHelpLog Out",
+          "ScholarOne Manuscripts\u2122Dylan PossamaiE-Mail / NameAddressUser ID & PasswordInstructions & FormsHelpLog Out",
+          "ScholarOne Manuscripts\u2122",
+          "Manuscript IDManuscript IDExternal Manuscript IDManuscript TitleAdv. Manuscript SearchSearch",
+          "Manuscript IDManuscript IDExternal Manuscript IDManuscript TitleAdv. Manuscript SearchSearch",
+          "Manuscript IDManuscript IDExternal Manuscript IDManuscript TitleAdv. Manuscript SearchSearch",
+          "Manuscript IDManuscript IDExternal Manuscript IDManuscript TitleAdv. Manuscript SearchSearch",
+          "Manuscript IDManuscript IDExternal Manuscript IDManuscript TitleAdv. Manuscript SearchSearch",
+          "Manuscript IDManuscript IDExternal Manuscript IDManuscript TitleAdv. Manuscript Search",
+          "Manuscript ID",
+          "External Manuscript ID",
+          "Manuscript Title",
+          "Adv. Manuscript Search",
+          "Standard ReportsFinal DecisionsManuscripts Decided",
+          "Final DecisionsManuscripts Decided",
+          "Standard ReportsManuscripts with ReviewersManuscripts by Decision Status",
+          "Manuscripts with ReviewersManuscripts by Decision Status",
+          "\u00a9\u00a0Clarivate|\u00a9\u00a0ScholarOne, Inc., 2025.All Rights Reserved.ScholarOne Manuscripts and ScholarOne are registered trademarks of ScholarOne, Inc.ScholarOne Manuscripts Patents#7,257,767and#7,263,655.@Clarivate for Academia & Government|System Requirements|Privacy Statement|Terms of Use|Cookies Settings|Accessibility",
+          "\u00a9\u00a0Clarivate|\u00a9\u00a0ScholarOne, Inc., 2025.All Rights Reserved.ScholarOne Manuscripts and ScholarOne are registered trademarks of ScholarOne, Inc.ScholarOne Manuscripts Patents#7,257,767and#7,263,655.@Clarivate for Academia & Government|System Requirements|Privacy Statement|Terms of Use|Cookies Settings|Accessibility",
+          "\u00a9\u00a0Clarivate|\u00a9\u00a0ScholarOne, Inc., 2025.All Rights Reserved.ScholarOne Manuscripts and ScholarOne are registered trademarks of ScholarOne, Inc.ScholarOne Manuscripts Patents#7,257,767and#7,263,655.@Clarivate for Academia & Government|System Requirements|Privacy Statement|Terms of Use|Cookies Settings|Accessibility",
+          "\u00a9\u00a0Clarivate|\u00a9\u00a0ScholarOne, Inc., 2025.All Rights Reserved.ScholarOne Manuscripts and ScholarOne are registered trademarks of ScholarOne, Inc.ScholarOne Manuscripts Patents#7,257,767and#7,263,655.@Clarivate for Academia & Government|System Requirements|Privacy Statement|Terms of Use|Cookies Settings|Accessibility"
+        ]
+      },
+      "deep_analysis": {
+        "journal": "MF",
+        "analysis_time": "2025-07-09T21:06:52.475881",
+        "page_type": "associate_editor",
+        "links_found": [
+          {
+            "text": "Mathematical Finance",
+            "href": "",
+            "relevant": false
+          },
+          {
+            "text": "ScholarOne Manuscripts\u2122",
+            "href": "https://clarivate.com/webofsciencegroup/solutions/scholarone/",
+            "relevant": true
+          },
+          {
+            "text": "Dylan Possamai",
+            "href": "#",
+            "relevant": false
+          },
+          {
+            "text": "E-Mail / Name",
+            "href": "javascript:setDataAndNextPage('XIK_PREACT','xik_6NzuLvth2UWfY6WyNmdSsUrqVfWY1tokZJTgmdSqifn4JNrU8ejkpyKXTG7rZiT3Cr','EDIT_ACCOUNT_1')",
+            "relevant": false
+          },
+          {
+            "text": "Address",
+            "href": "javascript:setDataAndNextPage('XIK_PREACT','xik_6NzuLvth2UWfY6WyNmdSsUrqVfWY1tokZJTgmdSqifn4JNrU8ejkpyKXTG7rZiT3Cr','EDIT_ACCOUNT_2')",
+            "relevant": false
+          },
+          {
+            "text": "User ID & Password",
+            "href": "javascript:setDataAndNextPage('XIK_PREACT','xik_6NzuLvth2UWfY6WyNmdSsUrqVfWY1tokZJTgmdSqifn4JNrU8ejkpyKXTG7rZiT3Cr','EDIT_ACCOUNT_3')",
+            "relevant": false
+          },
+          {
+            "text": "Instructions & Forms",
+            "href": "javascript:popWindowSimple('mafi?PARAMS=xik_2tMwNpeToBa8xBpQBDNgw2b9VRx15WJqm4DQBMvnGoPLykXN3Kg755Z3sCkcC4gkUytoLMiZVenQFiib13UH7TmWamxTMnvBKvfwKz1EgnCXwKABt3Xkf26F8bE8VsVMr6LLR3bYzuHTGK7ihryEVCh6MdHm2R7n9h9if9noxnVyftKkL8B2ubTvSgLBrp7KSJd6g3FT5Qj3EwUL1ciCHYfsUGLMSTaHgiAeaJhm89CDUKsbz','forms_instructions_popup', 700, 400);",
+            "relevant": false
+          },
+          {
+            "text": "Help",
+            "href": "https://support.silverchair.com/scholarone-manuscripts/",
+            "relevant": false
+          },
+          {
+            "text": "Log Out",
+            "href": "javascript:setField('XIK_PREACT', 'xik_6vZg4XWHha6MeZc1x4FuVXPmUKBNufCz9dJSKqqRM6Df');\n          setNextPage('LOGIN');",
+            "relevant": false
+          },
+          {
+            "text": "Home",
+            "href": "javascript:if(isPageCompletelyLoaded()){setDataAndNextPage('XIK_CUR_ROLE_ID', 'xik_EGx1tX8ZMgDpCqxrwmqAfx', 'HOME');}",
+            "relevant": false
+          },
+          {
+            "text": "Author",
+            "href": "javascript:setDataAndNextPage('XIK_CUR_ROLE_ID','xik_AE2b52DnQzfsQkCZ5VMjtVw61Rfxos1MKDNXLHNscg8d','AUTHOR_VIEW_MANUSCRIPTS')",
+            "relevant": false
+          },
+          {
+            "text": "Review",
+            "href": "javascript:setDataAndNextPage('XIK_CUR_ROLE_ID', 'xik_GhT9E3B9G8wPygUCLbSqgzdX8iaabNW2ZCoKtWF3N7UL', 'REVIEWER_VIEW_MANUSCRIPTS');",
+            "relevant": false
+          },
+          {
+            "text": "Associate Editor Center",
+            "href": "javascript:setField('XIK_POSTACT', 'xik_HwMW6Mz58cgSBvrPuBfZemmkLYUhbiiY3pn7yvcWEcxf'); setDataAndNextPageOneDataValue('XIK_CUR_ROLE_ID', 'xik_4Zy5nTsZTnmSgjqqKdjpdzFP9xMZFZLNACf5QkYaLx7B','ASSOCIATE_EDITOR_DASHBOARD');",
+            "relevant": true
+          },
+          {
+            "text": "Search",
+            "href": "#",
+            "relevant": false
+          },
+          {
+            "text": "Manuscript ID",
+            "href": "#",
+            "relevant": true
+          },
+          {
+            "text": "External Manuscript ID",
+            "href": "#",
+            "relevant": true
+          },
+          {
+            "text": "Manuscript Title",
+            "href": "#",
+            "relevant": true
+          },
+          {
+            "text": "Adv. Manuscript Search",
+            "href": "#",
+            "relevant": true
+          },
+          {
+            "text": "Read More ...",
+            "href": "",
+            "relevant": false
+          },
+          {
+            "text": "Show Advanced Search",
+            "href": "javascript: setField('XIK_PREACT','xik_HwMW6Mz58cgSBvrPuBfZemmkLYUhbiiY3pn7yvcWEcxf'); setField('SEARCH_MODE','Y');setField('ADV_DASHBOARD_SRCH','Y'); setNextPage('ASSOCIATE_EDITOR_DASHBOARD');",
+            "relevant": false
+          },
+          {
+            "text": "2",
+            "href": "mafi?PARAMS=xik_cZe8ptZtiHScM5APps1K9yZjjYCPGpQkPATLAfWbVo11KNHzvSLRAXLx21k4HP36FnZrWNrcaPw4VPkjCFwK1u3Ajz3XbFDCxpKmGg8akANKgqaT4vvozqB6PL9KcgUGYK14RKSuRg1aWnPVynwy5HFLRXdvmzcopZSXPfzhMcQvXMnftWE9rX1JLPo8a6kfhdfCuNNQ5oFf1vdmNoyEodJXKoHnuBnqUBZECCnYfvhXcxeeYr4Vz1EqmxdLeMUQcSW4Vo1oJbumRx7CMkfiSiMhYTmyusJVFz8URTexqczQ74VfgD",
+            "relevant": false
+          },
+          {
+            "text": "Awaiting Reviewer Scores",
+            "href": "mafi?PARAMS=xik_F1WShFu65PbPMnTjbtf3XSsuxM53cbTmzRoke68Fa2WvBv7ox34SN3W8KwdTpxpJghSEghpUWC2DySWMQJEC2TUofm5RbGf9JFNcjWqMdTdSNDdGwiLnVX4h91R5xnn2nGqzzwyxkVJ6soK1BMvTWtrRpVe7fwsJkibm7tvHA5MDKQLmcE9nyJ4qpJ1zwXL9HMLdVxRMSGiDvueEWCEaSqjaSPqCLt8HbNjQRuCgirGP6YBiffRjnGRRcr4PJmXTxjE5pB4YFV9aEx7FZHnEo2CiTUp9tbV6qLpzMFTyKiE8k7osYS",
+            "relevant": true
+          },
+          {
+            "text": "1",
+            "href": "mafi?PARAMS=xik_DwXNDkNxrCU1yMyFBTodgbfk7GGEVKe9HikuRyiyGeZgum5NRtB84i86HEGuErf9PhnQwpvjzxFGaXgqRR9UkDYhHLAK5uMKihZFDBrKXzmBV6yvcmwNaD1bQprDffKRSknVfFHwm1tCoLBGRdfwzeqpPgXxxRjQ646V3K7vdL1hEH2hG27bTPbUQnvDYrraUFsAA6xQRW1VkzKsndnw8XkmnoWW45heSU5kh1KRJbEuTzM25sS27CHUBaHsA5V1MdaKbViPhF38HsWv9CHHsu57Bxdm4fbqCZNntFJktpQe8ay79yANWHwr8HZWaRo85jmMLAEy",
+            "relevant": false
+          },
+          {
+            "text": "Overdue Manuscripts Awaiting Revision",
+            "href": "mafi?PARAMS=xik_GCUVf2Viu14o4RL3Brn8KrUaUvvCCM67b14v4RvYFTgeXEpUfov2cy7jRHxAiKjNGx2gqvsJhdaTahsUKATjbmEsiPGFc1XRE2m45PofyAMo3oUvm9KFRmnR7JL7e4wxwcetbh4XBAYWSuMyNiJzXYEAVkDsXjzpqZBxNb756k9PDgomVa6BiF4jqXFKLmmzhhP4dPk7oFEbwUsmokbugrJYZfNVimNuu4PgpdqiSG4Sp6p7bUaZ1Q4LXAvqWvNQNNywYbCReHRrAmGuPPnEkuKcf48jgNzM81kj1i1499R2TczBcd6bALMeZuaxZdi2wH2gE3sq",
+            "relevant": true
+          },
+          {
+            "text": "Manuscript Status and Summary Reports",
+            "href": "",
+            "relevant": true
+          },
+          {
+            "text": "Final Decisions",
+            "href": "javascript: popWindow('mafi?PARAMS=xik_2ABJabtAZiPRuKdJTRLyqDnMEsNipHw5haYgGMB8UtMKth6vwee8yBxodyUAra2wjzdbYjMHg4HGYxNPV6DrmGwmbm2GesmFKSXEaaPaHf2EeroSAffkHPDPNBZHreH38H13KP7dody7GgVck5Mpk5mTN7tMQwWzMWUHod9JLNVJ9j8fPBPpPnkBfzAEE3xnw2ERiz9qfuk1trZuohD3QN3FbwBEcVWxVx8c2RumxYxECBQPSEjXoDT2LeeqTNqjAsVrFXV','cognos_popup', 1000, 750);",
+            "relevant": true
+          },
+          {
+            "text": "Manuscripts Decided",
+            "href": "javascript: popWindow('mafi?PARAMS=xik_2KEEaM6qxz8jwMarfEnAPudP6t9cDVBtmwW23LgpCzyXSiuWwqNuRxnmPoboeZHPEAN2XSwT696YpPVGwpMoPdSveoj7kfBLQJg7wEe6qYcU5JrBu7WCjKjVbEcPKnee71LWQMKUuphbPqUCVE1SMAk95tir2CnXUVVnucB77Euxr97P7Xt3ajFYrHtarkUw2wsJsjqyBZNLgWb6r2GDxLoJyDbXczi5NhQMfiWuxFFGGJdZeMS1yUFmM3AWUv8FqC639Uf','cognos_popup', 1000, 750);",
+            "relevant": true
+          },
+          {
+            "text": "Peer Review Details Reports",
+            "href": "",
+            "relevant": false
+          },
+          {
+            "text": "Manuscripts with Reviewers",
+            "href": "javascript: popWindow('mafi?PARAMS=xik_n9hU78KVnJYgMnj3ht8BEaSYZT7Je2K2fsWwQ8oroJFfPN6HnQVthVjffNHxCTTL8uNRf3MGmB9DeMb1MLENCDAmQYSGUkFuvPZ7GHv8XPtdjH8dEpoYpaN5wL9vFuvP7VKfZbrK2v44cnSmozjQCywAaAywH13EziwSSSsYHypst7N1is3YWbujSyyXyf4No4TAJyTjFzRT52AA5pS1s7yUQem18eT4GdkaDhCCbuGbANWB6TyY8nwwMsJmUXLNQpootMH1raWyuJAVgmPKfbdDTxP6','cognos_popup', 1000, 750);",
+            "relevant": true
+          },
+          {
+            "text": "Manuscripts by Decision Status",
+            "href": "javascript: popWindow('mafi?PARAMS=xik_26n6iqiAVRV2NBHnzQb3SDLCqro4uzEL9xebS1a91yt3VpsxVVNfCTnUUCjuV7JePMR2STr58VYVMgVj5xJNKeerdwjH7zHYpsu1xrzqAfTe12LPpnxcgMNbYMwUTAZDMiFLdfmHafLkHFZXVHUBT2abAnnro9qvun8K687Ug38G3pksH2NdLjCMjwtQwXUumv27rnkseUs3XGMGzrerptTHBgocktMeDJRcVkUwafKE8V66cAhn1Nk7P6oMuDGpcePjfaygPaTKCAjyBV4dXGjxt9spJ','cognos_popup', 1000, 750);",
+            "relevant": true
+          },
+          {
+            "text": "User Account Reports",
+            "href": "",
+            "relevant": false
+          },
+          {
+            "text": "Blocked Email Addresses",
+            "href": "javascript: popWindow('mafi?PARAMS=xik_ZCJ4GYcPTh2tUR4xoqd4fum7BbZk7pusum18NLYFXWpUhDgh5HG1ZPh1ExLEMWYpu8dL2aLBi9NSi7kubQQZ22YEWDwdcanxzee87juFCFBwastG6jcWwxhtoQNDejjWFmddJWQexnJ8YFiHSAa6mKQuvEedYDvxkbnR3xsj344SWZ6FhCZS42jGovEMPuq4V5AHVbtj8rcxbMHQ6ETzR83K2bRPMrEeXmgJrcnVHUhknnpFa2FPeSaJWLxy4qyKoZ1oBmZNvr9Fn3MZ59RXF5YLxG5X','cognos_popup', 1000, 750);",
+            "relevant": false
+          },
+          {
+            "text": "User Performance Reports",
+            "href": "",
+            "relevant": false
+          },
+          {
+            "text": "Reviewer Contact Info and Lifetime Statistics",
+            "href": "javascript: popWindow('mafi?PARAMS=xik_WjcyFqmy8dcjr3k1M6JBi1cbWRKnQkDpb1QwT51DNdnxKjPVePkZcKhtA2c3b7F7vhUwro1p9Cf6a5etK572CuNc1fcpyAzGAC3Kn3ERg4JEG1XKc6p7WJFmo5KyyEnrXdWj3MfSAsRjhJEBBaDYpm6LYd8fd76sBCTpbHfF12SiVW9qhV2yDTFEexizPqAPghSbEUNSMFNvBsAFxCXRPPA7AFwriwYU1wMbJSX8XhtSEoRsZpnyDs1cWnbb9XzuMTSZwLyih1BokLDPPofH47gdZ2bvhGEMaHqfffC9VuhNdjTZ58','cognos_popup', 1000, 750);",
+            "relevant": true
+          },
+          {
+            "text": "Reviewer Contact Info and Lifetime Statistics for Export",
+            "href": "javascript: popWindow('mafi?PARAMS=xik_A7UKpTBNU7sDYiyPEwCS27Ef3MzM9KPNiamPbXHKRTakbK4M8RYHMzPPqZVwaMusmZZ3gyaPPGbxDiUkTm1Xe6xNwfkGipZgE3VSDrCntSB6qaoZvadC4NSZivpccPAvHQ7G2Q79bKt3S1kNhoZgVXhvbsP6cVNTe9G1Lo5uqhgrfBvYFrR4yzgSyw6uKJKsgFmQp225rUec6RMFidicPNRdxQdNioTaF3darVhc8Lb6M1EdUBTBr6LrTTgf849qbyvGSNSMDUW8joWHzMEMnVZFinFFiKEW4sPyrysq92Cf5gUJQsyBcz5LYcNSrZup5tJKbbAs','cognos_popup', 1000, 750);",
+            "relevant": true
+          },
+          {
+            "text": "Reviewer Summary",
+            "href": "javascript: popWindow('mafi?PARAMS=xik_2e5m5vxgCabpSMhndD47dpjmUL74ooYvDM9H4MJvgS46kE6g8vEnzDPxAimpcwhhoPBRHPgzbADFUUVNj2vLiReEZhdUgYvPzUsYHH6MAFKYvt2VHPYQ12yYxscLLBf1reJoY6fN2FsgGhJVECSDnkskYtoYDq5853r4zBifZnLsGj3CfKUtq28M2ujXg5kMKHGg2v4FieaSXAh6GWTMuCnDw2iAkaKwdXLvChnYBtpZqzm5QtdgStHzq8wsQPzpiEpHRJM','cognos_popup', 1000, 750);",
+            "relevant": true
+          },
+          {
+            "text": "Publication Folders, My Folders, Custom Reports, and Role Reports",
+            "href": "javascript: popWindow('mafi?PARAMS=xik_3FPC6VXayocenYAVDLcpWHQEthd6cKPisHT3JA9KxHpDuv6DHyqv7b64YrCvtt8ttPYHndbUuNuPu4nDucKgLyz7oyoFBNN6gLZaj67tPoxFBeAWYuXMVEfAwEMhLbKgPR7LBWZsDH8HMJPe2CwCo1McjCHziQCkmxgMeSxfXkciXc8LGKTeYmiwx63kPFCiBMaXjaz6yosoZDaDyq2qnnnCnZ6KnXpAg9ERpzhBEJy6aNXZC','cognos_popup', 1000, 750);",
+            "relevant": false
+          },
+          {
+            "text": "\u00a9\u00a0Clarivate",
+            "href": "https://clarivate.com/legal/copyright/",
+            "relevant": false
+          },
+          {
+            "text": "#7,257,767",
+            "href": "http://patft.uspto.gov/netacgi/nph-Parser?Sect2=PTO1&Sect2=HITOFF&p=1&u=/netahtml/PTO/search-bool.html&r=1&f=G&l=50&d=PALL&RefSrch=yes&Query=PN/7257767",
+            "relevant": false
+          },
+          {
+            "text": "#7,263,655",
+            "href": "http://patft.uspto.gov/netacgi/nph-Parser?Sect2=PTO1&Sect2=HITOFF&p=1&u=/netahtml/PTO/search-bool.html&r=1&f=G&l=50&d=PALL&RefSrch=yes&Query=PN/7263655",
+            "relevant": false
+          },
+          {
+            "text": "@Clarivate for Academia & Government",
+            "href": "https://twitter.com/ClarivateAG",
+            "relevant": false
+          },
+          {
+            "text": "System Requirements",
+            "href": "mafi?PARAMS=xik_7Gr2WfepmrzepeyswMt9dejRBwfxsEyHHsnPcZQPNK25EfxFP2rigAJurPiBddJb5rgvS7xyNQjR3cMGLBf9Rap58V3wyooSvRHYQL9Ao8vHVYyHBUrmzvAmdeZzpDr4UVXvsgJjCeQ6LtyypRUkffZ8uAhJ6jCR91Z5z82JkngmpF6ExZF8LAGEhLLPNAh4PxKj9cvzS29DbBSDUk4dpvRwwyV",
+            "relevant": false
+          },
+          {
+            "text": "Privacy Statement",
+            "href": "https://clarivate.com/legal/scholarone-privacy-notice/scholarone-privacy-notice-en/",
+            "relevant": false
+          },
+          {
+            "text": "Terms of Use",
+            "href": "https://clarivate.com/legal/terms-of-use/",
+            "relevant": false
+          },
+          {
+            "text": "Cookies Settings",
+            "href": "#",
+            "relevant": false
+          },
+          {
+            "text": "Accessibility",
+            "href": "https://clarivate.com/webofsciencegroup/support/scholarone-manuscripts/accessibility/",
+            "relevant": false
+          }
+        ],
+        "status_indicators": [
+          "Mathematical FinanceScholarOne Manuscripts\u2122Dylan PossamaiE-Mail / NameAddressUser ID & PasswordInstructions & FormsHelpLog OutHomeAuthorReviewAssociate Editor CenterAssociate Editor DashboardSearchManuscript IDManuscript IDExternal Manuscript IDManuscript TitleAdv. Manuscript SearchSearchFor security reasons, your session will time out in 10 minutes (at10:16 PM, 7:16 PM GMT).  Please save your work to avoid potential loss.  To refresh your session, close this message and save your work or return to your main menu.  You may then continue working as normal.You can access manuscripts in each peer review status by clicking on the status queue title. The number next to each status queue title indicates the number of manuscripts in that status. You may search for specific manuscripts with the Quick Manuscript Search form or conduct an \"Advanced Search\" by clicking the link below (the advanced search form will display at the bottom of the screen). For tips on conducting searches, click the following link:Read More ...Associate Editor ListsQuick Search -Show Advanced SearchYou may click on the manuscript list title to view a full listing of manuscripts in each status, or click on the number next to the list to jump directly to the first manuscript in the list.0Awaiting Reviewer Selection0Awaiting Reviewer Invitation0Awaiting Reviewer Assignment2Awaiting Reviewer Scores0Overdue Reviewer Scores0Awaiting AE RecommendationManuscripts Awaiting Revision0Manuscripts Awaiting Revision1Overdue Manuscripts Awaiting RevisionYou may conduct a wildcard search by adding an asterisk (*) to the end of the search string. For example, to view a list of all of the manuscripts whose titles begin with the words \"neuroscience\" or \"neurology\" simply type \"neuro*\" in the Title field and click \"Search.\"Saved Search:Select...Manuscript ID:External Manuscript ID:Title:Author's First (Given)or Last (Family) name:*Keywords:ReportsManuscript Status and Summary ReportsStandard ReportsFinal DecisionsManuscripts DecidedPeer Review Details ReportsStandard ReportsManuscripts with ReviewersManuscripts by Decision StatusUser Account ReportsStandard ReportsBlocked Email AddressesUser Performance ReportsStandard ReportsReviewer Contact Info and Lifetime StatisticsReviewer Contact Info and Lifetime Statistics for ExportReviewer SummaryPublication Folders, My Folders, Custom Reports, and Role Reports",
+          "You can access manuscripts in each peer review status by clicking on the status queue title. The number next to each status queue title indicates the number of manuscripts in that status. You may search for specific manuscripts with the Quick Manuscript Search form or conduct an \"Advanced Search\" by clicking the link below (the advanced search form will display at the bottom of the screen). For tips on conducting searches, click the following link:Read More ...Associate Editor ListsQuick Search -Show Advanced SearchYou may click on the manuscript list title to view a full listing of manuscripts in each status, or click on the number next to the list to jump directly to the first manuscript in the list.0Awaiting Reviewer Selection0Awaiting Reviewer Invitation0Awaiting Reviewer Assignment2Awaiting Reviewer Scores0Overdue Reviewer Scores0Awaiting AE RecommendationManuscripts Awaiting Revision0Manuscripts Awaiting Revision1Overdue Manuscripts Awaiting RevisionYou may conduct a wildcard search by adding an asterisk (*) to the end of the search string. For example, to view a list of all of the manuscripts whose titles begin with the words \"neuroscience\" or \"neurology\" simply type \"neuro*\" in the Title field and click \"Search.\"Saved Search:Select...Manuscript ID:External Manuscript ID:Title:Author's First (Given)or Last (Family) name:*Keywords:ReportsManuscript Status and Summary ReportsStandard ReportsFinal DecisionsManuscripts DecidedPeer Review Details ReportsStandard ReportsManuscripts with ReviewersManuscripts by Decision StatusUser Account ReportsStandard ReportsBlocked Email AddressesUser Performance ReportsStandard ReportsReviewer Contact Info and Lifetime StatisticsReviewer Contact Info and Lifetime Statistics for ExportReviewer SummaryPublication Folders, My Folders, Custom Reports, and Role Reports",
+          "You can access manuscripts in each peer review status by clicking on the status queue title. The number next to each status queue title indicates the number of manuscripts in that status. You may search for specific manuscripts with the Quick Manuscript Search form or conduct an \"Advanced Search\" by clicking the link below (the advanced search form will display at the bottom of the screen). For tips on conducting searches, click the following link:Read More ...Associate Editor ListsQuick Search -Show Advanced SearchYou may click on the manuscript list title to view a full listing of manuscripts in each status, or click on the number next to the list to jump directly to the first manuscript in the list.0Awaiting Reviewer Selection0Awaiting Reviewer Invitation0Awaiting Reviewer Assignment2Awaiting Reviewer Scores0Overdue Reviewer Scores0Awaiting AE RecommendationManuscripts Awaiting Revision0Manuscripts Awaiting Revision1Overdue Manuscripts Awaiting RevisionYou may conduct a wildcard search by adding an asterisk (*) to the end of the search string. For example, to view a list of all of the manuscripts whose titles begin with the words \"neuroscience\" or \"neurology\" simply type \"neuro*\" in the Title field and click \"Search.\"Saved Search:Select...Manuscript ID:External Manuscript ID:Title:Author's First (Given)or Last (Family) name:*Keywords:ReportsManuscript Status and Summary ReportsStandard ReportsFinal DecisionsManuscripts DecidedPeer Review Details ReportsStandard ReportsManuscripts with ReviewersManuscripts by Decision StatusUser Account ReportsStandard ReportsBlocked Email AddressesUser Performance ReportsStandard ReportsReviewer Contact Info and Lifetime StatisticsReviewer Contact Info and Lifetime Statistics for ExportReviewer SummaryPublication Folders, My Folders, Custom Reports, and Role Reports",
+          "You may click on the manuscript list title to view a full listing of manuscripts in each status, or click on the number next to the list to jump directly to the first manuscript in the list.0Awaiting Reviewer Selection0Awaiting Reviewer Invitation0Awaiting Reviewer Assignment2Awaiting Reviewer Scores0Overdue Reviewer Scores0Awaiting AE RecommendationManuscripts Awaiting Revision0Manuscripts Awaiting Revision1Overdue Manuscripts Awaiting RevisionYou may conduct a wildcard search by adding an asterisk (*) to the end of the search string. For example, to view a list of all of the manuscripts whose titles begin with the words \"neuroscience\" or \"neurology\" simply type \"neuro*\" in the Title field and click \"Search.\"Saved Search:Select...Manuscript ID:External Manuscript ID:Title:Author's First (Given)or Last (Family) name:*Keywords:ReportsManuscript Status and Summary ReportsStandard ReportsFinal DecisionsManuscripts DecidedPeer Review Details ReportsStandard ReportsManuscripts with ReviewersManuscripts by Decision StatusUser Account ReportsStandard ReportsBlocked Email AddressesUser Performance ReportsStandard ReportsReviewer Contact Info and Lifetime StatisticsReviewer Contact Info and Lifetime Statistics for ExportReviewer SummaryPublication Folders, My Folders, Custom Reports, and Role Reports",
+          "You may click on the manuscript list title to view a full listing of manuscripts in each status, or click on the number next to the list to jump directly to the first manuscript in the list.0Awaiting Reviewer Selection0Awaiting Reviewer Invitation0Awaiting Reviewer Assignment2Awaiting Reviewer Scores0Overdue Reviewer Scores0Awaiting AE RecommendationManuscripts Awaiting Revision0Manuscripts Awaiting Revision1Overdue Manuscripts Awaiting Revision",
+          "Awaiting Reviewer Selection",
+          "Awaiting Reviewer Selection",
+          "Awaiting Reviewer Invitation",
+          "Awaiting Reviewer Invitation",
+          "Awaiting Reviewer Assignment",
+          "Awaiting Reviewer Assignment",
+          "Awaiting Reviewer Scores",
+          "Awaiting Reviewer Scores",
+          "Overdue Reviewer Scores",
+          "Overdue Reviewer Scores",
+          "Awaiting AE Recommendation",
+          "Awaiting AE Recommendation",
+          "Manuscripts Awaiting Revision",
+          "Manuscripts Awaiting Revision",
+          "Manuscripts Awaiting Revision",
+          "Manuscripts Awaiting Revision",
+          "Overdue Manuscripts Awaiting Revision",
+          "Overdue Manuscripts Awaiting Revision"
+        ],
+        "manuscript_ids": [],
+        "tables_with_manuscripts": 0,
+        "navigation_options": [
+          "Mathematical FinanceScholarOne Manuscripts\u2122Dylan PossamaiE-Mail / NameAddressUser ID & PasswordInstructions & FormsHelpLog OutHomeAuthorReviewAssociate Editor CenterAssociate Editor DashboardSearchManuscript IDManuscript IDExternal Manuscript IDManuscript TitleAdv. Manuscript SearchSearchFor security reasons, your session will time out in 10 minutes (at10:16 PM, 7:16 PM GMT).  Please save your work to avoid potential loss.  To refresh your session, close this message and save your work or return to your main menu.  You may then continue working as normal.You can access manuscripts in each peer review status by clicking on the status queue title. The number next to each status queue title indicates the number of manuscripts in that status. You may search for specific manuscripts with the Quick Manuscript Search form or conduct an \"Advanced Search\" by clicking the link below (the advanced search form will display at the bottom of the screen). For tips on conducting searches, click the following link:Read More ...Associate Editor ListsQuick Search -Show Advanced SearchYou may click on the manuscript list title to view a full listing of manuscripts in each status, or click on the number next to the list to jump directly to the first manuscript in the list.0Awaiting Reviewer Selection0Awaiting Reviewer Invitation0Awaiting Reviewer Assignment2Awaiting Reviewer Scores0Overdue Reviewer Scores0Awaiting AE RecommendationManuscripts Awaiting Revision0Manuscripts Awaiting Revision1Overdue Manuscripts Awaiting RevisionYou may conduct a wildcard search by adding an asterisk (*) to the end of the search string. For example, to view a list of all of the manuscripts whose titles begin with the words \"neuroscience\" or \"neurology\" simply type \"neuro*\" in the Title field and click \"Search.\"Saved Search:Select...Manuscript ID:External Manuscript ID:Title:Author's First (Given)or Last (Family) name:*Keywords:ReportsManuscript Status and Summary ReportsStandard ReportsFinal DecisionsManuscripts DecidedPeer Review Details ReportsStandard ReportsManuscripts with ReviewersManuscripts by Decision StatusUser Account ReportsStandard ReportsBlocked Email AddressesUser Performance ReportsStandard ReportsReviewer Contact Info and Lifetime StatisticsReviewer Contact Info and Lifetime Statistics for ExportReviewer SummaryPublication Folders, My Folders, Custom Reports, and Role Reports",
+          "Mathematical FinanceScholarOne Manuscripts\u2122Dylan PossamaiE-Mail / NameAddressUser ID & PasswordInstructions & FormsHelpLog OutHomeAuthorReviewAssociate Editor CenterAssociate Editor DashboardSearchManuscript IDManuscript IDExternal Manuscript IDManuscript TitleAdv. Manuscript SearchSearch",
+          "Mathematical FinanceScholarOne Manuscripts\u2122Dylan PossamaiE-Mail / NameAddressUser ID & PasswordInstructions & FormsHelpLog OutHomeAuthorReviewAssociate Editor CenterAssociate Editor DashboardSearchManuscript IDManuscript IDExternal Manuscript IDManuscript TitleAdv. Manuscript SearchSearch",
+          "Mathematical FinanceScholarOne Manuscripts\u2122Dylan PossamaiE-Mail / NameAddressUser ID & PasswordInstructions & FormsHelpLog Out",
+          "Mathematical FinanceScholarOne Manuscripts\u2122Dylan PossamaiE-Mail / NameAddressUser ID & PasswordInstructions & FormsHelpLog Out",
+          "ScholarOne Manuscripts\u2122Dylan PossamaiE-Mail / NameAddressUser ID & PasswordInstructions & FormsHelpLog Out",
+          "ScholarOne Manuscripts\u2122",
+          "Manuscript IDManuscript IDExternal Manuscript IDManuscript TitleAdv. Manuscript SearchSearch",
+          "Manuscript IDManuscript IDExternal Manuscript IDManuscript TitleAdv. Manuscript SearchSearch",
+          "Manuscript IDManuscript IDExternal Manuscript IDManuscript TitleAdv. Manuscript SearchSearch",
+          "Manuscript IDManuscript IDExternal Manuscript IDManuscript TitleAdv. Manuscript SearchSearch",
+          "Manuscript IDManuscript IDExternal Manuscript IDManuscript TitleAdv. Manuscript SearchSearch",
+          "Manuscript IDManuscript IDExternal Manuscript IDManuscript TitleAdv. Manuscript Search",
+          "Manuscript ID",
+          "External Manuscript ID",
+          "Manuscript Title",
+          "Adv. Manuscript Search",
+          "Standard ReportsFinal DecisionsManuscripts Decided",
+          "Final DecisionsManuscripts Decided",
+          "Standard ReportsManuscripts with ReviewersManuscripts by Decision Status",
+          "Manuscripts with ReviewersManuscripts by Decision Status",
+          "\u00a9\u00a0Clarivate|\u00a9\u00a0ScholarOne, Inc., 2025.All Rights Reserved.ScholarOne Manuscripts and ScholarOne are registered trademarks of ScholarOne, Inc.ScholarOne Manuscripts Patents#7,257,767and#7,263,655.@Clarivate for Academia & Government|System Requirements|Privacy Statement|Terms of Use|Cookies Settings|Accessibility",
+          "\u00a9\u00a0Clarivate|\u00a9\u00a0ScholarOne, Inc., 2025.All Rights Reserved.ScholarOne Manuscripts and ScholarOne are registered trademarks of ScholarOne, Inc.ScholarOne Manuscripts Patents#7,257,767and#7,263,655.@Clarivate for Academia & Government|System Requirements|Privacy Statement|Terms of Use|Cookies Settings|Accessibility",
+          "\u00a9\u00a0Clarivate|\u00a9\u00a0ScholarOne, Inc., 2025.All Rights Reserved.ScholarOne Manuscripts and ScholarOne are registered trademarks of ScholarOne, Inc.ScholarOne Manuscripts Patents#7,257,767and#7,263,655.@Clarivate for Academia & Government|System Requirements|Privacy Statement|Terms of Use|Cookies Settings|Accessibility",
+          "\u00a9\u00a0Clarivate|\u00a9\u00a0ScholarOne, Inc., 2025.All Rights Reserved.ScholarOne Manuscripts and ScholarOne are registered trademarks of ScholarOne, Inc.ScholarOne Manuscripts Patents#7,257,767and#7,263,655.@Clarivate for Academia & Government|System Requirements|Privacy Statement|Terms of Use|Cookies Settings|Accessibility"
+        ],
+        "detailed_links": [
+          {
+            "text": "Awaiting Reviewer Scores",
+            "href": "https://mc.manuscriptcentral.com/mafi?PARAMS=xik_F1WShFu65PbPMnTjbtf3XSsuxM53cbTmzRoke68Fa2WvBv7ox34SN3W8KwdTpxpJghSEghpUWC2DySWMQJEC2TUofm5RbGf9JFNcjWqMdTdSNDdGwiLnVX4h91R5xnn2nGqzzwyxkVJ6soK1BMvTWtrRpVe7fwsJkibm7tvHA5MDKQLmcE9nyJ4qpJ1zwXL9HMLdVxRMSGiDvueEWCEaSqjaSPqCLt8HbNjQRuCgirGP6YBiffRjnGRRcr4PJmXTxjE5pB4YFV9aEx7FZHnEo2CiTUp9tbV6qLpzMFTyKiE8k7osYS",
+            "onclick": "",
+            "relevant_score": 2
+          },
+          {
+            "text": "Overdue Manuscripts Awaiting Revision",
+            "href": "https://mc.manuscriptcentral.com/mafi?PARAMS=xik_GCUVf2Viu14o4RL3Brn8KrUaUvvCCM67b14v4RvYFTgeXEpUfov2cy7jRHxAiKjNGx2gqvsJhdaTahsUKATjbmEsiPGFc1XRE2m45PofyAMo3oUvm9KFRmnR7JL7e4wxwcetbh4XBAYWSuMyNiJzXYEAVkDsXjzpqZBxNb756k9PDgomVa6BiF4jqXFKLmmzhhP4dPk7oFEbwUsmokbugrJYZfNVimNuu4PgpdqiSG4Sp6p7bUaZ1Q4LXAvqWvNQNNywYbCReHRrAmGuPPnEkuKcf48jgNzM81kj1i1499R2TczBcd6bALMeZuaxZdi2wH2gE3sq",
+            "onclick": "",
+            "relevant_score": 2
+          },
+          {
+            "text": "ScholarOne Manuscripts\u2122",
+            "href": "https://clarivate.com/webofsciencegroup/solutions/scholarone/",
+            "onclick": "",
+            "relevant_score": 1
+          },
+          {
+            "text": "Manuscript Status and Summary Reports",
+            "href": "",
+            "onclick": "toggleBranch(1)",
+            "relevant_score": 1
+          },
+          {
+            "text": "Dylan Possamai",
+            "href": "https://mc.manuscriptcentral.com/mafi#",
+            "onclick": "handleContainerLight();",
+            "relevant_score": 0
+          },
+          {
+            "text": "Instructions & Forms",
+            "href": "javascript:popWindowSimple('mafi?PARAMS=xik_2tMwNpeToBa8xBpQBDNgw2b9VRx15WJqm4DQBMvnGoPLykXN3Kg755Z3sCkcC4gkUytoLMiZVenQFiib13UH7TmWamxTMnvBKvfwKz1EgnCXwKABt3Xkf26F8bE8VsVMr6LLR3bYzuHTGK7ihryEVCh6MdHm2R7n9h9if9noxnVyftKkL8B2ubTvSgLBrp7KSJd6g3FT5Qj3EwUL1ciCHYfsUGLMSTaHgiAeaJhm89CDUKsbz%27,%27forms_instructions_popup%27,%20700,%20400);",
+            "onclick": "",
+            "relevant_score": 0
+          },
+          {
+            "text": "Help",
+            "href": "https://support.silverchair.com/scholarone-manuscripts/",
+            "onclick": "",
+            "relevant_score": 0
+          },
+          {
+            "text": "Log Out",
+            "href": "javascript:setField('XIK_PREACT', 'xik_6vZg4XWHha6MeZc1x4FuVXPmUKBNufCz9dJSKqqRM6Df');          setNextPage('LOGIN');",
+            "onclick": "",
+            "relevant_score": 0
+          },
+          {
+            "text": "Home",
+            "href": "javascript:if(isPageCompletelyLoaded()){setDataAndNextPage('XIK_CUR_ROLE_ID', 'xik_EGx1tX8ZMgDpCqxrwmqAfx', 'HOME');}",
+            "onclick": "",
+            "relevant_score": 0
+          },
+          {
+            "text": "Author",
+            "href": "javascript:setDataAndNextPage('XIK_CUR_ROLE_ID','xik_AE2b52DnQzfsQkCZ5VMjtVw61Rfxos1MKDNXLHNscg8d','AUTHOR_VIEW_MANUSCRIPTS')",
+            "onclick": "",
+            "relevant_score": 0
+          },
+          {
+            "text": "Review",
+            "href": "javascript:setDataAndNextPage('XIK_CUR_ROLE_ID', 'xik_GhT9E3B9G8wPygUCLbSqgzdX8iaabNW2ZCoKtWF3N7UL', 'REVIEWER_VIEW_MANUSCRIPTS');",
+            "onclick": "",
+            "relevant_score": 0
+          },
+          {
+            "text": "Associate Editor Center",
+            "href": "javascript:setField('XIK_POSTACT', 'xik_HwMW6Mz58cgSBvrPuBfZemmkLYUhbiiY3pn7yvcWEcxf'); setDataAndNextPageOneDataValue('XIK_CUR_ROLE_ID', 'xik_4Zy5nTsZTnmSgjqqKdjpdzFP9xMZFZLNACf5QkYaLx7B','ASSOCIATE_EDITOR_DASHBOARD');",
+            "onclick": "",
+            "relevant_score": 0
+          },
+          {
+            "text": "Search",
+            "href": "https://mc.manuscriptcentral.com/mafi#",
+            "onclick": "",
+            "relevant_score": 0
+          },
+          {
+            "text": "Read More ...",
+            "href": "",
+            "onclick": "javascript:window.open('mafi?PARAMS=xik_Vk9zPFYaDDXEr4WH4MrvqBszAHoEYAF6Zb6uMPxnk5QemCTg8BkTKFcNDo88SVdB3wc1hg47qcdRrjbPV9K3x4MESKwDW5AAbL1inYBEWFtPau7VnPCcedT1oDexwJfvjCpVSArE1hbAycBcNXDZhE5yJt4iRNtuugr7k1rNNBCUAXmBqCYabXbuDkH2um2BZT5SkCKZi2N7w3s9wHp1RudTnP5fJHoVKw2VSmGhS2xczwp7onpDLq3i4UjkWbFioSKQ4FSN5RCqhNnrEbGxFG46Z2Tk5ahd7CyefgREKtLdVG5D82','custom_html_edit', 'resizable=1,width=800,height=600,return=true,scrollbars=1'); return false;",
+            "relevant_score": 0
+          },
+          {
+            "text": "Show Advanced Search",
+            "href": "javascript: setField('XIK_PREACT','xik_HwMW6Mz58cgSBvrPuBfZemmkLYUhbiiY3pn7yvcWEcxf'); setField('SEARCH_MODE','Y');setField('ADV_DASHBOARD_SRCH','Y'); setNextPage('ASSOCIATE_EDITOR_DASHBOARD');",
+            "onclick": "",
+            "relevant_score": 0
+          },
+          {
+            "text": "2",
+            "href": "https://mc.manuscriptcentral.com/mafi?PARAMS=xik_cZe8ptZtiHScM5APps1K9yZjjYCPGpQkPATLAfWbVo11KNHzvSLRAXLx21k4HP36FnZrWNrcaPw4VPkjCFwK1u3Ajz3XbFDCxpKmGg8akANKgqaT4vvozqB6PL9KcgUGYK14RKSuRg1aWnPVynwy5HFLRXdvmzcopZSXPfzhMcQvXMnftWE9rX1JLPo8a6kfhdfCuNNQ5oFf1vdmNoyEodJXKoHnuBnqUBZECCnYfvhXcxeeYr4Vz1EqmxdLeMUQcSW4Vo1oJbumRx7CMkfiSiMhYTmyusJVFz8URTexqczQ74VfgD",
+            "onclick": "",
+            "relevant_score": 0
+          },
+          {
+            "text": "1",
+            "href": "https://mc.manuscriptcentral.com/mafi?PARAMS=xik_DwXNDkNxrCU1yMyFBTodgbfk7GGEVKe9HikuRyiyGeZgum5NRtB84i86HEGuErf9PhnQwpvjzxFGaXgqRR9UkDYhHLAK5uMKihZFDBrKXzmBV6yvcmwNaD1bQprDffKRSknVfFHwm1tCoLBGRdfwzeqpPgXxxRjQ646V3K7vdL1hEH2hG27bTPbUQnvDYrraUFsAA6xQRW1VkzKsndnw8XkmnoWW45heSU5kh1KRJbEuTzM25sS27CHUBaHsA5V1MdaKbViPhF38HsWv9CHHsu57Bxdm4fbqCZNntFJktpQe8ay79yANWHwr8HZWaRo85jmMLAEy",
+            "onclick": "",
+            "relevant_score": 0
+          },
+          {
+            "text": "Peer Review Details Reports",
+            "href": "",
+            "onclick": "toggleBranch(2)",
+            "relevant_score": 0
+          },
+          {
+            "text": "User Account Reports",
+            "href": "",
+            "onclick": "toggleBranch(3)",
+            "relevant_score": 0
+          },
+          {
+            "text": "User Performance Reports",
+            "href": "",
+            "onclick": "toggleBranch(4)",
+            "relevant_score": 0
+          }
+        ]
+      }
+    },
+    "summary": {
+      "manuscripts_found": 0,
+      "status_indicators_found": 23,
+      "relevant_links_found": 4,
+      "ae_center_accessible": true,
+      "current_page_type": "associate_editor"
+    },
+    "recommendations": [
+      "\u274c No manuscripts found - may indicate no current assignments or navigation issues",
+      "\ud83d\udd17 Found 4 potentially relevant navigation links"
+    ],
+    "end_time": "2025-07-09T21:06:52.692612"
+  },
+  "MOR": {
+    "journal": "MOR",
+    "start_time": "2025-07-09T21:06:55.736365",
+    "stages": {
+      "initial_connection": {
+        "journal": "MOR",
+        "analysis_time": "2025-07-09T21:07:00.376425",
+        "page_type": "login",
+        "links_found": [
+          {
+            "text": "Mathematics of Operations Research",
+            "href": "",
+            "relevant": false
+          },
+          {
+            "text": "ScholarOne Manuscripts\u2122",
+            "href": "https://clarivate.com/webofsciencegroup/solutions/scholarone/",
+            "relevant": true
+          },
+          {
+            "text": "Instructions & Forms",
+            "href": "javascript:popWindowSimple('mathor?NEXT_PAGE=FORMS_AND_INSTRUCTIONS&XIK_CUR_ROLE_ID=xik_FwKa8wsi6AyDWn2KGFDaQk&XIK_CUR_USER_ID=xik_adc8Fr42R38B7Viyj37X6&XIK_CNFID=xik_2oxYx5vdr2cz5MpiPteztk9YAgzAKMULBT7EJxHY1Bt8&CURRENT_QUEUE_VALUE=null&PAGE_NAME=LOGIN','forms_instructions_popup', 700, 400);",
+            "relevant": false
+          },
+          {
+            "text": "Help",
+            "href": "https://support.silverchair.com/scholarone-manuscripts/ ",
+            "relevant": false
+          },
+          {
+            "text": "Log In",
+            "href": "#",
+            "relevant": false
+          },
+          {
+            "text": "Reset Password",
+            "href": "javascript:setNextPage('RESET_PASSWORD')",
+            "relevant": false
+          },
+          {
+            "text": "Create An Account",
+            "href": "javascript:setDataAndNextPage('XIK_PREACT','xik_3HBJhmNkRnfhTk9MRE7jHfvEBzAwpEcLWNqHkQaaAq7Q6UBnv2SaE8SsnqSRRMd71Q','CREATE_ACCOUNT_1')",
+            "relevant": false
+          },
+          {
+            "text": "More information on disabling pop-up blockers",
+            "href": "http://ssl.salesforce.com/_ui/selfservice/pkb/PublicKnowledgeSolution/d?orgId=00D000000008YVy&lang=1&id=501000000006wHu&retURL=%2Fsol%2Fpublic%2Fsolutionbrowser.jsp%3Fsearch%3DSol-01295%26cid%3D02n000000000KgR%26orgId%3D00D000000008YVy%26lang%3D1%26t%3D4&ps=1",
+            "relevant": false
+          },
+          {
+            "text": "Go Back",
+            "href": "",
+            "relevant": false
+          },
+          {
+            "text": "Cancel ORCID iD linking process",
+            "href": "",
+            "relevant": false
+          },
+          {
+            "text": "Go Back",
+            "href": "",
+            "relevant": false
+          },
+          {
+            "text": "Cancel ORCID iD Linking to Reset Password",
+            "href": "",
+            "relevant": false
+          },
+          {
+            "text": "Create an Account",
+            "href": "javascript:setDataAndNextPage('XIK_PREACT','xik_3HBJhmNkRnfhTk9MRE7jHfvEBzAwpEcLWNqHkQaaAq7Q6UBnv2SaE8SsnqSRRMd71Q','CREATE_ACCOUNT_1')",
+            "relevant": false
+          },
+          {
+            "text": "Reset Password",
+            "href": "javascript:setNextPage('RESET_PASSWORD');",
+            "relevant": false
+          },
+          {
+            "text": "Log In",
+            "href": "",
+            "relevant": false
+          },
+          {
+            "text": "Log in using Web of ScienceTM",
+            "href": "https://apps.clarivate.com/login?app=s1m&referrer=s1m_stack1%3Fjournal%3D",
+            "relevant": false
+          },
+          {
+            "text": "FAQs & User Guides",
+            "href": "https://support.silverchair.com/scholarone-manuscripts/faqs/ ",
+            "relevant": false
+          },
+          {
+            "text": "Instructions & Forms",
+            "href": "javascript:popWindowSimple('mathor?NEXT_PAGE=FORMS_AND_INSTRUCTIONS&XIK_CUR_ROLE_ID=xik_FwKa8wsi6AyDWn2KGFDaQk&XIK_CUR_USER_ID=xik_adc8Fr42R38B7Viyj37X6&XIK_CNFID=xik_2oxYx5vdr2cz5MpiPteztk9YAgzAKMULBT7EJxHY1Bt8&CURRENT_QUEUE_VALUE=null&PAGE_NAME=LOGIN','forms_instructions_popup', 700, 400);",
+            "relevant": false
+          },
+          {
+            "text": "Journal Home",
+            "href": "http://pubsonline.informs.org/journal/moor",
+            "relevant": false
+          },
+          {
+            "text": "Site Support",
+            "href": "https://support.silverchair.com/scholarone-manuscripts/ ",
+            "relevant": false
+          },
+          {
+            "text": "create an account",
+            "href": "javascript:setDataAndNextPage('XIK_PREACT' ,'xik_3HBJhmNkRnfhTk9MRE7jHfvEBzAwpEcLWNqHkQaaAq7Q6UBnv2SaE8SsnqSRRMd71Q','CREATE_ACCOUNT_1')",
+            "relevant": false
+          },
+          {
+            "text": "Reset Password",
+            "href": "javascript:setNextPage('RESET_PASSWORD')",
+            "relevant": false
+          },
+          {
+            "text": "https://clarivate.com/webofsciencegroup/support/scholarone-manuscripts/release-notes/unified-scholarone-login-via-web-of-science/",
+            "href": "https://clarivate.com/webofsciencegroup/support/scholarone-manuscripts/release-notes/unified-scholarone-login-via-web-of-science/",
+            "relevant": true
+          },
+          {
+            "text": "https://www.informs.org/About-INFORMS/Privacy-Policy",
+            "href": "https://www.informs.org/About-INFORMS/Privacy-Policy",
+            "relevant": false
+          },
+          {
+            "text": "https://www.informs.org/About-INFORMS/Governance/INFORMS-Code-of-Conduct",
+            "href": "https://www.informs.org/About-INFORMS/Governance/INFORMS-Code-of-Conduct",
+            "relevant": false
+          },
+          {
+            "text": "\u00a9\u00a0Clarivate",
+            "href": "https://clarivate.com/legal/copyright/",
+            "relevant": false
+          },
+          {
+            "text": "#7,257,767",
+            "href": "http://patft.uspto.gov/netacgi/nph-Parser?Sect2=PTO1&Sect2=HITOFF&p=1&u=/netahtml/PTO/search-bool.html&r=1&f=G&l=50&d=PALL&RefSrch=yes&Query=PN/7257767",
+            "relevant": false
+          },
+          {
+            "text": "#7,263,655",
+            "href": "http://patft.uspto.gov/netacgi/nph-Parser?Sect2=PTO1&Sect2=HITOFF&p=1&u=/netahtml/PTO/search-bool.html&r=1&f=G&l=50&d=PALL&RefSrch=yes&Query=PN/7263655",
+            "relevant": false
+          },
+          {
+            "text": "@Clarivate for Academia & Government",
+            "href": "https://twitter.com/ClarivateAG",
+            "relevant": false
+          },
+          {
+            "text": "System Requirements",
+            "href": "mathor?NEXT_PAGE=SYSTEM_REQUIREMENTS&XIK_CUR_ROLE_ID=xik_FwKa8wsi6AyDWn2KGFDaQk&XIK_CUR_USER_ID=xik_adc8Fr42R38B7Viyj37X6&XIK_CNFID=xik_2oxYx5vdr2cz5MpiPteztk9YAgzAKMULBT7EJxHY1Bt8&CURRENT_QUEUE_VALUE=null&PAGE_NAME=LOGIN",
+            "relevant": false
+          },
+          {
+            "text": "Privacy Statement",
+            "href": "https://clarivate.com/legal/scholarone-privacy-notice/scholarone-privacy-notice-en/",
+            "relevant": false
+          },
+          {
+            "text": "Terms of Use",
+            "href": "https://clarivate.com/legal/terms-of-use/",
+            "relevant": false
+          },
+          {
+            "text": "Cookies Settings",
+            "href": "#",
+            "relevant": false
+          },
+          {
+            "text": "Accessibility",
+            "href": "https://clarivate.com/webofsciencegroup/support/scholarone-manuscripts/accessibility/",
+            "relevant": false
+          }
+        ],
+        "status_indicators": [],
+        "manuscript_ids": [],
+        "tables_with_manuscripts": 0,
+        "navigation_options": [
+          "Mathematics of Operations ResearchScholarOne Manuscripts\u2122Instructions & FormsHelpLog InReset PasswordCreate An AccountPlease add this site to your pop-up blocker exception listBlocking pop-ups on this site may prevent peer-review related e-mails from being sent.More information on disabling pop-up blockersCancel ORCID iD linking process?You are about to cancel the ORCID iD linking process. You may use the \"Log In with ORCID iD\" button on the Log In page to start the process again at a later time.Go BackCancel ORCID iD linking processCancel the ORCID iD Linking Process to Reset your Password?Resetting your password will cancel the ORCID iD linking processWhen you have successfully reset your password, use the \"Log In with ORCID iD\" button on the Log In page to start the process again.Go BackCancel ORCID iD Linking to Reset PasswordLog InUser IDCreate an AccountPasswordReset PasswordLog InLog in using Web of ScienceTMResourcesFAQs & User GuidesInstructions & FormsJournal HomeSite SupportWelcome to the submission site forMathematics of Operations ResearchTo begin,create an account. It only takes a few minutes.If you are unsure about whether or not you have an account, or have forgotten your password, go to theReset Passwordscreen.IMPORTANT NOTICE:With the launch of Web of Science login, ScholarOne has sunset theLog in with ORCIDoption from ScholarOne sites. However, using your ORCID account as an authentication method for your Web of Science account is an available alternative; simply click the \u201cConnect your ORCID\u201d button when registering or signing in to your Web of Science account. You can learn more athttps://clarivate.com/webofsciencegroup/support/scholarone-manuscripts/release-notes/unified-scholarone-login-via-web-of-science/.PRIVACY NOTICE:By submitting a manuscript to or reviewing for this publication, your name, email address, and affiliation, and other contact details the publication might require, will be used for the regular operations of the publication, including, when necessary, sharing with the publisher (INFORMS) and partners for production and publication. The publication and the publisher recognize the importance of protecting the personal information collected from users in the operation of these services, and have practices in place to ensure that steps are taken to maintain the security, integrity, and privacy of the personal data collected and processed. You can learn more athttps://www.informs.org/About-INFORMS/Privacy-Policy.CODE OF CONDUCT:Please read the following Code of Conduct Policy carefully before using this site:https://www.informs.org/About-INFORMS/Governance/INFORMS-Code-of-Conduct.  This Code of Conduct Policy requires that all participants conduct themselves during INFORMS activities in a professional manner that is welcoming to all participants and free from any form of discrimination, harassment, intimidation or retaliation. Participants agree to treat each other with respect and consideration to create and ensure a collegial, inclusive and professional environment.  By accessing or using this site, you are indicating that you have read and agree to comply with INFORMS\u2019 Code of Conduct.  If you do not agree with any portion of the Code of Conduct, you should not access or otherwise use this site.",
+          "Mathematics of Operations ResearchScholarOne Manuscripts\u2122Instructions & FormsHelpLog InReset PasswordCreate An Account",
+          "Mathematics of Operations ResearchScholarOne Manuscripts\u2122Instructions & FormsHelpLog InReset PasswordCreate An Account",
+          "Mathematics of Operations ResearchScholarOne Manuscripts\u2122Instructions & FormsHelp",
+          "Mathematics of Operations ResearchScholarOne Manuscripts\u2122Instructions & FormsHelp",
+          "ScholarOne Manuscripts\u2122Instructions & FormsHelp",
+          "ScholarOne Manuscripts\u2122",
+          "Log InUser IDCreate an AccountPasswordReset PasswordLog InLog in using Web of ScienceTMResourcesFAQs & User GuidesInstructions & FormsJournal HomeSite SupportWelcome to the submission site forMathematics of Operations ResearchTo begin,create an account. It only takes a few minutes.If you are unsure about whether or not you have an account, or have forgotten your password, go to theReset Passwordscreen.IMPORTANT NOTICE:With the launch of Web of Science login, ScholarOne has sunset theLog in with ORCIDoption from ScholarOne sites. However, using your ORCID account as an authentication method for your Web of Science account is an available alternative; simply click the \u201cConnect your ORCID\u201d button when registering or signing in to your Web of Science account. You can learn more athttps://clarivate.com/webofsciencegroup/support/scholarone-manuscripts/release-notes/unified-scholarone-login-via-web-of-science/.PRIVACY NOTICE:By submitting a manuscript to or reviewing for this publication, your name, email address, and affiliation, and other contact details the publication might require, will be used for the regular operations of the publication, including, when necessary, sharing with the publisher (INFORMS) and partners for production and publication. The publication and the publisher recognize the importance of protecting the personal information collected from users in the operation of these services, and have practices in place to ensure that steps are taken to maintain the security, integrity, and privacy of the personal data collected and processed. You can learn more athttps://www.informs.org/About-INFORMS/Privacy-Policy.CODE OF CONDUCT:Please read the following Code of Conduct Policy carefully before using this site:https://www.informs.org/About-INFORMS/Governance/INFORMS-Code-of-Conduct.  This Code of Conduct Policy requires that all participants conduct themselves during INFORMS activities in a professional manner that is welcoming to all participants and free from any form of discrimination, harassment, intimidation or retaliation. Participants agree to treat each other with respect and consideration to create and ensure a collegial, inclusive and professional environment.  By accessing or using this site, you are indicating that you have read and agree to comply with INFORMS\u2019 Code of Conduct.  If you do not agree with any portion of the Code of Conduct, you should not access or otherwise use this site.",
+          "Log InUser IDCreate an AccountPasswordReset PasswordLog InLog in using Web of ScienceTMResourcesFAQs & User GuidesInstructions & FormsJournal HomeSite SupportWelcome to the submission site forMathematics of Operations ResearchTo begin,create an account. It only takes a few minutes.If you are unsure about whether or not you have an account, or have forgotten your password, go to theReset Passwordscreen.IMPORTANT NOTICE:With the launch of Web of Science login, ScholarOne has sunset theLog in with ORCIDoption from ScholarOne sites. However, using your ORCID account as an authentication method for your Web of Science account is an available alternative; simply click the \u201cConnect your ORCID\u201d button when registering or signing in to your Web of Science account. You can learn more athttps://clarivate.com/webofsciencegroup/support/scholarone-manuscripts/release-notes/unified-scholarone-login-via-web-of-science/.PRIVACY NOTICE:By submitting a manuscript to or reviewing for this publication, your name, email address, and affiliation, and other contact details the publication might require, will be used for the regular operations of the publication, including, when necessary, sharing with the publisher (INFORMS) and partners for production and publication. The publication and the publisher recognize the importance of protecting the personal information collected from users in the operation of these services, and have practices in place to ensure that steps are taken to maintain the security, integrity, and privacy of the personal data collected and processed. You can learn more athttps://www.informs.org/About-INFORMS/Privacy-Policy.CODE OF CONDUCT:Please read the following Code of Conduct Policy carefully before using this site:https://www.informs.org/About-INFORMS/Governance/INFORMS-Code-of-Conduct.  This Code of Conduct Policy requires that all participants conduct themselves during INFORMS activities in a professional manner that is welcoming to all participants and free from any form of discrimination, harassment, intimidation or retaliation. Participants agree to treat each other with respect and consideration to create and ensure a collegial, inclusive and professional environment.  By accessing or using this site, you are indicating that you have read and agree to comply with INFORMS\u2019 Code of Conduct.  If you do not agree with any portion of the Code of Conduct, you should not access or otherwise use this site.",
+          "Log InUser IDCreate an AccountPasswordReset PasswordLog InLog in using Web of ScienceTMResourcesFAQs & User GuidesInstructions & FormsJournal HomeSite SupportWelcome to the submission site forMathematics of Operations ResearchTo begin,create an account. It only takes a few minutes.If you are unsure about whether or not you have an account, or have forgotten your password, go to theReset Passwordscreen.IMPORTANT NOTICE:With the launch of Web of Science login, ScholarOne has sunset theLog in with ORCIDoption from ScholarOne sites. However, using your ORCID account as an authentication method for your Web of Science account is an available alternative; simply click the \u201cConnect your ORCID\u201d button when registering or signing in to your Web of Science account. You can learn more athttps://clarivate.com/webofsciencegroup/support/scholarone-manuscripts/release-notes/unified-scholarone-login-via-web-of-science/.PRIVACY NOTICE:By submitting a manuscript to or reviewing for this publication, your name, email address, and affiliation, and other contact details the publication might require, will be used for the regular operations of the publication, including, when necessary, sharing with the publisher (INFORMS) and partners for production and publication. The publication and the publisher recognize the importance of protecting the personal information collected from users in the operation of these services, and have practices in place to ensure that steps are taken to maintain the security, integrity, and privacy of the personal data collected and processed. You can learn more athttps://www.informs.org/About-INFORMS/Privacy-Policy.CODE OF CONDUCT:Please read the following Code of Conduct Policy carefully before using this site:https://www.informs.org/About-INFORMS/Governance/INFORMS-Code-of-Conduct.  This Code of Conduct Policy requires that all participants conduct themselves during INFORMS activities in a professional manner that is welcoming to all participants and free from any form of discrimination, harassment, intimidation or retaliation. Participants agree to treat each other with respect and consideration to create and ensure a collegial, inclusive and professional environment.  By accessing or using this site, you are indicating that you have read and agree to comply with INFORMS\u2019 Code of Conduct.  If you do not agree with any portion of the Code of Conduct, you should not access or otherwise use this site.",
+          "Welcome to the submission site forMathematics of Operations ResearchTo begin,create an account. It only takes a few minutes.If you are unsure about whether or not you have an account, or have forgotten your password, go to theReset Passwordscreen.IMPORTANT NOTICE:With the launch of Web of Science login, ScholarOne has sunset theLog in with ORCIDoption from ScholarOne sites. However, using your ORCID account as an authentication method for your Web of Science account is an available alternative; simply click the \u201cConnect your ORCID\u201d button when registering or signing in to your Web of Science account. You can learn more athttps://clarivate.com/webofsciencegroup/support/scholarone-manuscripts/release-notes/unified-scholarone-login-via-web-of-science/.PRIVACY NOTICE:By submitting a manuscript to or reviewing for this publication, your name, email address, and affiliation, and other contact details the publication might require, will be used for the regular operations of the publication, including, when necessary, sharing with the publisher (INFORMS) and partners for production and publication. The publication and the publisher recognize the importance of protecting the personal information collected from users in the operation of these services, and have practices in place to ensure that steps are taken to maintain the security, integrity, and privacy of the personal data collected and processed. You can learn more athttps://www.informs.org/About-INFORMS/Privacy-Policy.CODE OF CONDUCT:Please read the following Code of Conduct Policy carefully before using this site:https://www.informs.org/About-INFORMS/Governance/INFORMS-Code-of-Conduct.  This Code of Conduct Policy requires that all participants conduct themselves during INFORMS activities in a professional manner that is welcoming to all participants and free from any form of discrimination, harassment, intimidation or retaliation. Participants agree to treat each other with respect and consideration to create and ensure a collegial, inclusive and professional environment.  By accessing or using this site, you are indicating that you have read and agree to comply with INFORMS\u2019 Code of Conduct.  If you do not agree with any portion of the Code of Conduct, you should not access or otherwise use this site.",
+          "\u00a9\u00a0Clarivate|\u00a9\u00a0ScholarOne, Inc., 2025.All Rights Reserved.ScholarOne Manuscripts and ScholarOne are registered trademarks of ScholarOne, Inc.ScholarOne Manuscripts Patents#7,257,767and#7,263,655.@Clarivate for Academia & Government|System Requirements|Privacy Statement|Terms of Use|Cookies Settings|Accessibility",
+          "\u00a9\u00a0Clarivate|\u00a9\u00a0ScholarOne, Inc., 2025.All Rights Reserved.ScholarOne Manuscripts and ScholarOne are registered trademarks of ScholarOne, Inc.ScholarOne Manuscripts Patents#7,257,767and#7,263,655.@Clarivate for Academia & Government|System Requirements|Privacy Statement|Terms of Use|Cookies Settings|Accessibility",
+          "\u00a9\u00a0Clarivate|\u00a9\u00a0ScholarOne, Inc., 2025.All Rights Reserved.ScholarOne Manuscripts and ScholarOne are registered trademarks of ScholarOne, Inc.ScholarOne Manuscripts Patents#7,257,767and#7,263,655.@Clarivate for Academia & Government|System Requirements|Privacy Statement|Terms of Use|Cookies Settings|Accessibility",
+          "\u00a9\u00a0Clarivate|\u00a9\u00a0ScholarOne, Inc., 2025.All Rights Reserved.ScholarOne Manuscripts and ScholarOne are registered trademarks of ScholarOne, Inc.ScholarOne Manuscripts Patents#7,257,767and#7,263,655.@Clarivate for Academia & Government|System Requirements|Privacy Statement|Terms of Use|Cookies Settings|Accessibility"
+        ]
+      },
+      "after_login": {
+        "journal": "MOR",
+        "analysis_time": "2025-07-09T21:07:47.489220",
+        "page_type": "unknown",
+        "links_found": [
+          {
+            "text": "Mathematics of Operations Research",
+            "href": "",
+            "relevant": false
+          },
+          {
+            "text": "ScholarOne Manuscripts\u2122",
+            "href": "https://clarivate.com/webofsciencegroup/solutions/scholarone/",
+            "relevant": true
+          },
+          {
+            "text": "Instructions & Forms",
+            "href": "javascript:popWindowSimple('mathor?PARAMS=xik_Q8UCYbz8p5DjvdvY8jchXBazUA6xyn28AmLAG6HSGECkgcEMx3s3HmogCCkZLh8LArtr1aCDiFiwKZdmN5UxRTUrtDNPGWBSvkKoSy4gdQG2Svyk97d92HGkZNahTHHLXmdM23btMafBqV1Q1wC2pRNDfaU48DtzeoNCzLdSh717qLz','forms_instructions_popup', 700, 400);",
+            "relevant": false
+          },
+          {
+            "text": "Help",
+            "href": "https://support.silverchair.com/scholarone-manuscripts/ ",
+            "relevant": false
+          },
+          {
+            "text": "Log In",
+            "href": "javascript:setNextPage('LOGIN')",
+            "relevant": false
+          },
+          {
+            "text": "Log In",
+            "href": "javascript:setNextPage('LOGIN')",
+            "relevant": false
+          },
+          {
+            "text": "Create An Account",
+            "href": "javascript:setDataAndNextPage('XIK_PREACT','xik_3HBJhmNkRnfhTk9MRE7jHfvEBzAwpEcLWNqHkQaaAq7Q6UBnv2SaE8SsnqSRRMd71Q','CREATE_ACCOUNT_1')",
+            "relevant": false
+          },
+          {
+            "text": "Resend",
+            "href": "#",
+            "relevant": false
+          },
+          {
+            "text": "Close",
+            "href": "",
+            "relevant": false
+          },
+          {
+            "text": "Verify",
+            "href": "",
+            "relevant": false
+          },
+          {
+            "text": "support",
+            "href": "https://support.silverchair.com/scholarone-manuscripts/",
+            "relevant": false
+          },
+          {
+            "text": "Close",
+            "href": "",
+            "relevant": false
+          },
+          {
+            "text": "Contact Support",
+            "href": "https://support.silverchair.com/scholarone-manuscripts/ ",
+            "relevant": false
+          },
+          {
+            "text": "\u00a9\u00a0Clarivate",
+            "href": "https://clarivate.com/legal/copyright/",
+            "relevant": false
+          },
+          {
+            "text": "#7,257,767",
+            "href": "http://patft.uspto.gov/netacgi/nph-Parser?Sect2=PTO1&Sect2=HITOFF&p=1&u=/netahtml/PTO/search-bool.html&r=1&f=G&l=50&d=PALL&RefSrch=yes&Query=PN/7257767",
+            "relevant": false
+          },
+          {
+            "text": "#7,263,655",
+            "href": "http://patft.uspto.gov/netacgi/nph-Parser?Sect2=PTO1&Sect2=HITOFF&p=1&u=/netahtml/PTO/search-bool.html&r=1&f=G&l=50&d=PALL&RefSrch=yes&Query=PN/7263655",
+            "relevant": false
+          },
+          {
+            "text": "@Clarivate for Academia & Government",
+            "href": "https://twitter.com/ClarivateAG",
+            "relevant": false
+          },
+          {
+            "text": "System Requirements",
+            "href": "mathor?PARAMS=xik_7cZsm19mKdmrvov61hY5e8X67CpEch1FH9WDAKLBDjbakBvvt8Uz4qZENQ1eGjX6Wa1KTmArbkL1mrTV9YJxu1C8FrZn3DRz232Py9dyKzmcHhfD2BSf8ynVjy7Nno7pJN1mswVNYh1wz6hA1HQgY73eE3XMtzEDn72c2cVtK3WpTwq",
+            "relevant": false
+          },
+          {
+            "text": "Privacy Statement",
+            "href": "https://clarivate.com/legal/scholarone-privacy-notice/scholarone-privacy-notice-en/",
+            "relevant": false
+          },
+          {
+            "text": "Terms of Use",
+            "href": "https://clarivate.com/legal/terms-of-use/",
+            "relevant": false
+          },
+          {
+            "text": "Cookies Settings",
+            "href": "#",
+            "relevant": false
+          },
+          {
+            "text": "Accessibility",
+            "href": "https://clarivate.com/webofsciencegroup/support/scholarone-manuscripts/accessibility/",
+            "relevant": false
+          }
+        ],
+        "status_indicators": [],
+        "manuscript_ids": [],
+        "tables_with_manuscripts": 0,
+        "navigation_options": [
+          "Mathematics of Operations ResearchScholarOne Manuscripts\u2122Instructions & FormsHelpLog InLog InCreate An Account\u00d7Unrecognized DeviceFor your security, please enter the verification code sent tody************@ma*******.chto authenticate this device. Look for an email with \"Mathematics of Operations Research Verification Code\" in the subject line.Enter Verification CodeEmail not arrive?ResendRemember this deviceCloseVerify\u00d7Account LockedYou have entered the wrong validation code too many times. For your security we have locked your account for 30 minutes. Please contactsupportfor assistance.CloseContact Support",
+          "Mathematics of Operations ResearchScholarOne Manuscripts\u2122Instructions & FormsHelpLog InLog InCreate An Account",
+          "Mathematics of Operations ResearchScholarOne Manuscripts\u2122Instructions & FormsHelpLog InLog InCreate An Account",
+          "Mathematics of Operations ResearchScholarOne Manuscripts\u2122Instructions & FormsHelpLog In",
+          "Mathematics of Operations ResearchScholarOne Manuscripts\u2122Instructions & FormsHelpLog In",
+          "ScholarOne Manuscripts\u2122Instructions & FormsHelpLog In",
+          "ScholarOne Manuscripts\u2122",
+          "\u00a9\u00a0Clarivate|\u00a9\u00a0ScholarOne, Inc., 2025.All Rights Reserved.ScholarOne Manuscripts and ScholarOne are registered trademarks of ScholarOne, Inc.ScholarOne Manuscripts Patents#7,257,767and#7,263,655.@Clarivate for Academia & Government|System Requirements|Privacy Statement|Terms of Use|Cookies Settings|Accessibility",
+          "\u00a9\u00a0Clarivate|\u00a9\u00a0ScholarOne, Inc., 2025.All Rights Reserved.ScholarOne Manuscripts and ScholarOne are registered trademarks of ScholarOne, Inc.ScholarOne Manuscripts Patents#7,257,767and#7,263,655.@Clarivate for Academia & Government|System Requirements|Privacy Statement|Terms of Use|Cookies Settings|Accessibility",
+          "\u00a9\u00a0Clarivate|\u00a9\u00a0ScholarOne, Inc., 2025.All Rights Reserved.ScholarOne Manuscripts and ScholarOne are registered trademarks of ScholarOne, Inc.ScholarOne Manuscripts Patents#7,257,767and#7,263,655.@Clarivate for Academia & Government|System Requirements|Privacy Statement|Terms of Use|Cookies Settings|Accessibility",
+          "\u00a9\u00a0Clarivate|\u00a9\u00a0ScholarOne, Inc., 2025.All Rights Reserved.ScholarOne Manuscripts and ScholarOne are registered trademarks of ScholarOne, Inc.ScholarOne Manuscripts Patents#7,257,767and#7,263,655.@Clarivate for Academia & Government|System Requirements|Privacy Statement|Terms of Use|Cookies Settings|Accessibility"
+        ]
+      },
+      "ae_center": {
+        "error": "AE center not found"
+      },
+      "deep_analysis": {
+        "journal": "MOR",
+        "analysis_time": "2025-07-09T21:07:48.333168",
+        "page_type": "unknown",
+        "links_found": [
+          {
+            "text": "Mathematics of Operations Research",
+            "href": "",
+            "relevant": false
+          },
+          {
+            "text": "ScholarOne Manuscripts\u2122",
+            "href": "https://clarivate.com/webofsciencegroup/solutions/scholarone/",
+            "relevant": true
+          },
+          {
+            "text": "Instructions & Forms",
+            "href": "javascript:popWindowSimple('mathor?PARAMS=xik_Q8UCYbz8p5DjvdvY8jchXBazUA6xyn28AmLAG6HSGECkgcEMx3s3HmogCCkZLh8LArtr1aCDiFiwKZdmN5UxRTUrtDNPGWBSvkKoSy4gdQG2Svyk97d92HGkZNahTHHLXmdM23btMafBqV1Q1wC2pRNDfaU48DtzeoNCzLdSh717qLz','forms_instructions_popup', 700, 400);",
+            "relevant": false
+          },
+          {
+            "text": "Help",
+            "href": "https://support.silverchair.com/scholarone-manuscripts/ ",
+            "relevant": false
+          },
+          {
+            "text": "Log In",
+            "href": "javascript:setNextPage('LOGIN')",
+            "relevant": false
+          },
+          {
+            "text": "Log In",
+            "href": "javascript:setNextPage('LOGIN')",
+            "relevant": false
+          },
+          {
+            "text": "Create An Account",
+            "href": "javascript:setDataAndNextPage('XIK_PREACT','xik_3HBJhmNkRnfhTk9MRE7jHfvEBzAwpEcLWNqHkQaaAq7Q6UBnv2SaE8SsnqSRRMd71Q','CREATE_ACCOUNT_1')",
+            "relevant": false
+          },
+          {
+            "text": "Resend",
+            "href": "#",
+            "relevant": false
+          },
+          {
+            "text": "Close",
+            "href": "",
+            "relevant": false
+          },
+          {
+            "text": "Verify",
+            "href": "",
+            "relevant": false
+          },
+          {
+            "text": "support",
+            "href": "https://support.silverchair.com/scholarone-manuscripts/",
+            "relevant": false
+          },
+          {
+            "text": "Close",
+            "href": "",
+            "relevant": false
+          },
+          {
+            "text": "Contact Support",
+            "href": "https://support.silverchair.com/scholarone-manuscripts/ ",
+            "relevant": false
+          },
+          {
+            "text": "\u00a9\u00a0Clarivate",
+            "href": "https://clarivate.com/legal/copyright/",
+            "relevant": false
+          },
+          {
+            "text": "#7,257,767",
+            "href": "http://patft.uspto.gov/netacgi/nph-Parser?Sect2=PTO1&Sect2=HITOFF&p=1&u=/netahtml/PTO/search-bool.html&r=1&f=G&l=50&d=PALL&RefSrch=yes&Query=PN/7257767",
+            "relevant": false
+          },
+          {
+            "text": "#7,263,655",
+            "href": "http://patft.uspto.gov/netacgi/nph-Parser?Sect2=PTO1&Sect2=HITOFF&p=1&u=/netahtml/PTO/search-bool.html&r=1&f=G&l=50&d=PALL&RefSrch=yes&Query=PN/7263655",
+            "relevant": false
+          },
+          {
+            "text": "@Clarivate for Academia & Government",
+            "href": "https://twitter.com/ClarivateAG",
+            "relevant": false
+          },
+          {
+            "text": "System Requirements",
+            "href": "mathor?PARAMS=xik_7cZsm19mKdmrvov61hY5e8X67CpEch1FH9WDAKLBDjbakBvvt8Uz4qZENQ1eGjX6Wa1KTmArbkL1mrTV9YJxu1C8FrZn3DRz232Py9dyKzmcHhfD2BSf8ynVjy7Nno7pJN1mswVNYh1wz6hA1HQgY73eE3XMtzEDn72c2cVtK3WpTwq",
+            "relevant": false
+          },
+          {
+            "text": "Privacy Statement",
+            "href": "https://clarivate.com/legal/scholarone-privacy-notice/scholarone-privacy-notice-en/",
+            "relevant": false
+          },
+          {
+            "text": "Terms of Use",
+            "href": "https://clarivate.com/legal/terms-of-use/",
+            "relevant": false
+          },
+          {
+            "text": "Cookies Settings",
+            "href": "#",
+            "relevant": false
+          },
+          {
+            "text": "Accessibility",
+            "href": "https://clarivate.com/webofsciencegroup/support/scholarone-manuscripts/accessibility/",
+            "relevant": false
+          }
+        ],
+        "status_indicators": [],
+        "manuscript_ids": [],
+        "tables_with_manuscripts": 0,
+        "navigation_options": [
+          "Mathematics of Operations ResearchScholarOne Manuscripts\u2122Instructions & FormsHelpLog InLog InCreate An Account\u00d7Unrecognized DeviceFor your security, please enter the verification code sent tody************@ma*******.chto authenticate this device. Look for an email with \"Mathematics of Operations Research Verification Code\" in the subject line.Enter Verification CodeEmail not arrive?ResendRemember this deviceCloseVerify\u00d7Account LockedYou have entered the wrong validation code too many times. For your security we have locked your account for 30 minutes. Please contactsupportfor assistance.CloseContact Support",
+          "Mathematics of Operations ResearchScholarOne Manuscripts\u2122Instructions & FormsHelpLog InLog InCreate An Account",
+          "Mathematics of Operations ResearchScholarOne Manuscripts\u2122Instructions & FormsHelpLog InLog InCreate An Account",
+          "Mathematics of Operations ResearchScholarOne Manuscripts\u2122Instructions & FormsHelpLog In",
+          "Mathematics of Operations ResearchScholarOne Manuscripts\u2122Instructions & FormsHelpLog In",
+          "ScholarOne Manuscripts\u2122Instructions & FormsHelpLog In",
+          "ScholarOne Manuscripts\u2122",
+          "\u00a9\u00a0Clarivate|\u00a9\u00a0ScholarOne, Inc., 2025.All Rights Reserved.ScholarOne Manuscripts and ScholarOne are registered trademarks of ScholarOne, Inc.ScholarOne Manuscripts Patents#7,257,767and#7,263,655.@Clarivate for Academia & Government|System Requirements|Privacy Statement|Terms of Use|Cookies Settings|Accessibility",
+          "\u00a9\u00a0Clarivate|\u00a9\u00a0ScholarOne, Inc., 2025.All Rights Reserved.ScholarOne Manuscripts and ScholarOne are registered trademarks of ScholarOne, Inc.ScholarOne Manuscripts Patents#7,257,767and#7,263,655.@Clarivate for Academia & Government|System Requirements|Privacy Statement|Terms of Use|Cookies Settings|Accessibility",
+          "\u00a9\u00a0Clarivate|\u00a9\u00a0ScholarOne, Inc., 2025.All Rights Reserved.ScholarOne Manuscripts and ScholarOne are registered trademarks of ScholarOne, Inc.ScholarOne Manuscripts Patents#7,257,767and#7,263,655.@Clarivate for Academia & Government|System Requirements|Privacy Statement|Terms of Use|Cookies Settings|Accessibility",
+          "\u00a9\u00a0Clarivate|\u00a9\u00a0ScholarOne, Inc., 2025.All Rights Reserved.ScholarOne Manuscripts and ScholarOne are registered trademarks of ScholarOne, Inc.ScholarOne Manuscripts Patents#7,257,767and#7,263,655.@Clarivate for Academia & Government|System Requirements|Privacy Statement|Terms of Use|Cookies Settings|Accessibility"
+        ],
+        "detailed_links": [
+          {
+            "text": "ScholarOne Manuscripts\u2122",
+            "href": "https://clarivate.com/webofsciencegroup/solutions/scholarone/",
+            "onclick": "",
+            "relevant_score": 1
+          },
+          {
+            "text": "Instructions & Forms",
+            "href": "javascript:popWindowSimple('mathor?PARAMS=xik_Q8UCYbz8p5DjvdvY8jchXBazUA6xyn28AmLAG6HSGECkgcEMx3s3HmogCCkZLh8LArtr1aCDiFiwKZdmN5UxRTUrtDNPGWBSvkKoSy4gdQG2Svyk97d92HGkZNahTHHLXmdM23btMafBqV1Q1wC2pRNDfaU48DtzeoNCzLdSh717qLz%27,%27forms_instructions_popup%27,%20700,%20400);",
+            "onclick": "",
+            "relevant_score": 0
+          },
+          {
+            "text": "Help",
+            "href": "https://support.silverchair.com/scholarone-manuscripts/",
+            "onclick": "",
+            "relevant_score": 0
+          },
+          {
+            "text": "Log In",
+            "href": "javascript:setNextPage('LOGIN')",
+            "onclick": "",
+            "relevant_score": 0
+          },
+          {
+            "text": "Log In",
+            "href": "javascript:setNextPage('LOGIN')",
+            "onclick": "return true;",
+            "relevant_score": 0
+          },
+          {
+            "text": "Create An Account",
+            "href": "javascript:setDataAndNextPage('XIK_PREACT','xik_3HBJhmNkRnfhTk9MRE7jHfvEBzAwpEcLWNqHkQaaAq7Q6UBnv2SaE8SsnqSRRMd71Q','CREATE_ACCOUNT_1')",
+            "onclick": "",
+            "relevant_score": 0
+          },
+          {
+            "text": "Resend",
+            "href": "https://mc.manuscriptcentral.com/mathor#",
+            "onclick": "",
+            "relevant_score": 0
+          },
+          {
+            "text": "Close",
+            "href": "",
+            "onclick": "",
+            "relevant_score": 0
+          },
+          {
+            "text": "Verify",
+            "href": "",
+            "onclick": "",
+            "relevant_score": 0
+          },
+          {
+            "text": "\u00a9 Clarivate",
+            "href": "https://clarivate.com/legal/copyright/",
+            "onclick": "",
+            "relevant_score": 0
+          },
+          {
+            "text": "#7,257,767",
+            "href": "http://patft.uspto.gov/netacgi/nph-Parser?Sect2=PTO1&Sect2=HITOFF&p=1&u=/netahtml/PTO/search-bool.html&r=1&f=G&l=50&d=PALL&RefSrch=yes&Query=PN/7257767",
+            "onclick": "",
+            "relevant_score": 0
+          },
+          {
+            "text": "#7,263,655",
+            "href": "http://patft.uspto.gov/netacgi/nph-Parser?Sect2=PTO1&Sect2=HITOFF&p=1&u=/netahtml/PTO/search-bool.html&r=1&f=G&l=50&d=PALL&RefSrch=yes&Query=PN/7263655",
+            "onclick": "",
+            "relevant_score": 0
+          },
+          {
+            "text": "@Clarivate for Academia & Government",
+            "href": "https://twitter.com/ClarivateAG",
+            "onclick": "",
+            "relevant_score": 0
+          },
+          {
+            "text": "System Requirements",
+            "href": "https://mc.manuscriptcentral.com/mathor?PARAMS=xik_7cZsm19mKdmrvov61hY5e8X67CpEch1FH9WDAKLBDjbakBvvt8Uz4qZENQ1eGjX6Wa1KTmArbkL1mrTV9YJxu1C8FrZn3DRz232Py9dyKzmcHhfD2BSf8ynVjy7Nno7pJN1mswVNYh1wz6hA1HQgY73eE3XMtzEDn72c2cVtK3WpTwq",
+            "onclick": "",
+            "relevant_score": 0
+          },
+          {
+            "text": "Privacy Statement",
+            "href": "https://clarivate.com/legal/scholarone-privacy-notice/scholarone-privacy-notice-en/",
+            "onclick": "",
+            "relevant_score": 0
+          },
+          {
+            "text": "Terms of Use",
+            "href": "https://clarivate.com/legal/terms-of-use/",
+            "onclick": "",
+            "relevant_score": 0
+          },
+          {
+            "text": "Cookies Settings",
+            "href": "https://mc.manuscriptcentral.com/mathor#",
+            "onclick": "",
+            "relevant_score": 0
+          },
+          {
+            "text": "Accessibility",
+            "href": "https://clarivate.com/webofsciencegroup/support/scholarone-manuscripts/accessibility/",
+            "onclick": "",
+            "relevant_score": 0
+          }
+        ]
+      }
+    },
+    "summary": {
+      "manuscripts_found": 0,
+      "status_indicators_found": 0,
+      "relevant_links_found": 1,
+      "ae_center_accessible": false,
+      "current_page_type": "unknown"
+    },
+    "recommendations": [
+      "\u274c No manuscripts found - may indicate no current assignments or navigation issues",
+      "\u26a0\ufe0f AE center not accessible - may need different navigation approach",
+      "\ud83d\udd17 Found 1 potentially relevant navigation links"
+    ],
+    "end_time": "2025-07-09T21:07:48.512680"
+  }
+}

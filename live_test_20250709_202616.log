@@ -1,0 +1,154 @@
+2025-07-09 20:26:16,266 - __main__ - INFO - 🎯 Starting Live Testing for MF and MOR
+2025-07-09 20:26:16,266 - __main__ - INFO - ============================================================
+2025-07-09 20:26:16,266 - __main__ - INFO - 🔍 Checking for credentials...
+2025-07-09 20:26:16,266 - __main__ - INFO - 📄 Loading credentials from .env file...
+2025-07-09 20:26:16,266 - __main__ - INFO - ✅ MF credentials complete
+2025-07-09 20:26:16,266 - __main__ - INFO - ✅ MOR credentials complete
+2025-07-09 20:26:16,266 - __main__ - INFO - 
+🔬 Testing MF with live credentials
+2025-07-09 20:26:16,266 - __main__ - INFO - ----------------------------------------
+2025-07-09 20:26:16,266 - __main__ - INFO - 🔬 Testing MF with live credentials
+2025-07-09 20:26:16,266 - __main__ - INFO - 🌐 Phase 1: Testing connection to MF
+2025-07-09 20:26:16,266 - __main__ - INFO - 🚗 Creating robust Chrome driver...
+2025-07-09 20:26:17,456 - undetected_chromedriver.patcher - INFO - patching driver executable /Users/dylanpossamai/Library/Application Support/undetected_chromedriver/undetected_chromedriver
+2025-07-09 20:26:19,452 - __main__ - INFO - ✅ Chrome driver created successfully
+2025-07-09 20:26:22,046 - __main__ - INFO - ✅ Connection successful: ScholarOne Manuscripts
+2025-07-09 20:26:22,272 - __main__ - INFO - 📸 Screenshot: live_test_output/MF_connection_20250709_202622.png
+2025-07-09 20:26:22,280 - __main__ - INFO - 📄 HTML: live_test_output/MF_connection_20250709_202622.html
+2025-07-09 20:26:22,283 - __main__ - INFO - 🔐 Phase 2: Testing login for MF
+2025-07-09 20:26:22,468 - [MF] - INFO - Navigating to MF dashboard...
+2025-07-09 20:26:26,052 - [MF] - INFO - Accepted cookies.
+2025-07-09 20:26:33,394 - [MF] - DEBUG - No reCAPTCHA present.
+2025-07-09 20:26:33,411 - [MF] - DEBUG - Found and visible: TOKEN_VALUE
+2025-07-09 20:26:33,613 - googleapiclient.discovery_cache - INFO - file_cache is only supported with oauth2client<4.0.0
+2025-07-09 20:26:33,616 - root - INFO - Waiting 5 seconds for verification email to arrive...
+2025-07-09 20:26:39,279 - root - INFO - Found newer verification code for MF: 628000 (timestamp: Wed, 9 Jul 2025 18:26:27 +0000)
+2025-07-09 20:26:41,397 - root - INFO - Returning latest verification code for MF: 628000
+2025-07-09 20:26:41,398 - [MF] - DEBUG - Verification code fetched: '628000'
+2025-07-09 20:26:45,463 - [MF] - INFO - Submitted verification code.
+2025-07-09 20:26:47,535 - [MF] - DEBUG - No reCAPTCHA present.
+2025-07-09 20:26:47,535 - [MF] - INFO - Ready to continue navigation after login.
+2025-07-09 20:26:47,535 - __main__ - INFO - ✅ Login successful for MF
+2025-07-09 20:26:47,536 - __main__ - INFO - 📧 Verification code was required and handled
+2025-07-09 20:26:47,784 - __main__ - INFO - 📸 Screenshot: live_test_output/MF_login_success_20250709_202647.png
+2025-07-09 20:26:47,790 - __main__ - INFO - 📄 HTML: live_test_output/MF_login_success_20250709_202647.html
+2025-07-09 20:26:47,793 - __main__ - INFO - 🧭 Phase 3: Testing navigation for MF
+2025-07-09 20:26:51,085 - __main__ - INFO - 📸 Screenshot: live_test_output/MF_navigation_20250709_202650.png
+2025-07-09 20:26:51,091 - __main__ - INFO - 📄 HTML: live_test_output/MF_navigation_20250709_202650.html
+2025-07-09 20:26:51,095 - __main__ - INFO - 📚 Phase 4: Testing manuscript scraping for MF
+2025-07-09 20:26:51,095 - [MF] - INFO - Navigating to MF dashboard...
+2025-07-09 20:26:54,675 - [MF] - DEBUG - No cookie accept button found.
+2025-07-09 20:27:00,867 - [MF] - DEBUG - No reCAPTCHA present.
+2025-07-09 20:27:00,879 - [MF] - DEBUG - Found and visible: TOKEN_VALUE
+2025-07-09 20:27:00,879 - googleapiclient.discovery_cache - INFO - file_cache is only supported with oauth2client<4.0.0
+2025-07-09 20:27:00,880 - root - INFO - Waiting 5 seconds for verification email to arrive...
+2025-07-09 20:27:06,541 - root - INFO - Found newer verification code for MF: 115710 (timestamp: Wed, 9 Jul 2025 18:26:55 +0000)
+2025-07-09 20:27:08,726 - root - INFO - Returning latest verification code for MF: 115710
+2025-07-09 20:27:08,726 - [MF] - DEBUG - Verification code fetched: '115710'
+2025-07-09 20:27:12,781 - [MF] - INFO - Submitted verification code.
+2025-07-09 20:27:14,869 - [MF] - DEBUG - No reCAPTCHA present.
+2025-07-09 20:27:14,869 - [MF] - INFO - Ready to continue navigation after login.
+2025-07-09 20:27:18,941 - [MF] - DEBUG - No reCAPTCHA present.
+2025-07-09 20:27:18,941 - [MF] - INFO - Fetching starred emails for MF...
+2025-07-09 20:27:18,942 - googleapiclient.discovery_cache - INFO - file_cache is only supported with oauth2client<4.0.0
+2025-07-09 20:27:19,298 - root - INFO - Found 9 messages to process for MF
+2025-07-09 20:27:21,522 - [MF] - INFO - Retrieved 4 flagged emails
+2025-07-09 20:27:21,522 - [MF] - DEBUG - Attempt 1 to find Associate Editor Center...
+2025-07-09 20:27:24,114 - [MF] - DEBUG - Clicked Associate Editor Center link: associate editor center
+2025-07-09 20:27:26,192 - [MF] - DEBUG - No reCAPTCHA present.
+2025-07-09 20:27:26,215 - [MF] - DEBUG - Found status 'Awaiting Reviewer Scores' with count 2
+2025-07-09 20:27:31,647 - [MF] - DEBUG - Clicked number link for status 'Awaiting Reviewer Scores' (2)
+2025-07-09 20:27:36,733 - [MF] - DEBUG - No reCAPTCHA present.
+2025-07-09 20:27:37,201 - [MF] - WARNING - Could not return to Associate Editor Center, continuing...
+2025-07-09 20:27:39,265 - [MF] - DEBUG - No reCAPTCHA present.
+2025-07-09 20:27:39,336 - [MF] - INFO - Final results (all parsed manuscripts): 1 manuscripts.
+2025-07-09 20:27:39,413 - core.paper_downloader - INFO - Found 0 potential paper download links
+2025-07-09 20:27:39,502 - core.paper_downloader - INFO - Found 7 potential report download links
+2025-07-09 20:27:39,506 - core.paper_downloader - ERROR - Failed to download javascript:popWindow('mafi?PARAMS=xik_BoqPfKW6PnUipnoe1i95VDpjF5RTTB1yUegyRkKvgupTKngFZebX2fMRwfesQjPhKKRjk5o4qqnw6Wsc1aNHBQkVvmTEkQtrtL2QHKZzPHmx1Efef9vnQbnrRAiHht9ggT8QrBniESWQ6KFyc4F67tNjczEukhTp5CcbDNEFHjxmfkX1hU1vppVQPWfnVwsqCDxpDxXEuM5CakgZW3o5ytNkhnKXBH7nkDBRRxNxNe5RYNXdDgXmRPQTmr5NzTG3z6ZcC25FyGnJvymnsnrYcdVFYX7mFXc4MhFdf4gZ8P28aNgsZMB62jGyqKWqEfEhCFwHF3c2%27,%27ms_preview%27,%20600,%20400);: No connection adapters were found for "javascript:popWindow('mafi?PARAMS=xik_BoqPfKW6PnUipnoe1i95VDpjF5RTTB1yUegyRkKvgupTKngFZebX2fMRwfesQjPhKKRjk5o4qqnw6Wsc1aNHBQkVvmTEkQtrtL2QHKZzPHmx1Efef9vnQbnrRAiHht9ggT8QrBniESWQ6KFyc4F67tNjczEukhTp5CcbDNEFHjxmfkX1hU1vppVQPWfnVwsqCDxpDxXEuM5CakgZW3o5ytNkhnKXBH7nkDBRRxNxNe5RYNXdDgXmRPQTmr5NzTG3z6ZcC25FyGnJvymnsnrYcdVFYX7mFXc4MhFdf4gZ8P28aNgsZMB62jGyqKWqEfEhCFwHF3c2%27,%27ms_preview%27,%20600,%20400);"
+2025-07-09 20:27:39,508 - core.paper_downloader - ERROR - Failed to download javascript:if (confirm('This reviewer has already declined an invitation. Invite the reviewer again?%27))%20popWindow(%27mafi?PARAMS=xik_ErnQ6dwEbPJpyBC43LHAbDq32wMS1r2eKQY68uscPwk8w5iKN7HxmvFbRf2TG4AMiY4iUtT1mSa2K2PkNzwAbh3WH3sAs45RuktpYPLFTuNHpGe12Qq6BjQvwdJ6wKsRjDrcRfnZXopQMGfNQ61ksCe1aKkw6BAQNWqH4kGUPRAdJSdvSf2wDZHDkcA61XDfJkbVdZAwpZ92vCtQmHgv4WQKF6kcMP59hVke5QfnbSs2nzTTMQMTbiK8hvPGZF2dqEJUzoXHXWaizAjTw4ZRawUAgsHdMTB4bYoEUbXiXzfCdx7Vx7nrDavLUzq3C4HMVKErqPSUzZPJmfkWjxCnyn5ZfjSvC3XiBDBhKPZPCozdmMfndnXAnzagQc158tEzz8f8JdUDVUHDVxEzJybEPU26kjquaTwHavorLLgioGL5d4Q9K1mM6xm3HYxYmtsfxfMh659UaAv3e8CudKRVb1iPTFCxijZwP%27,%27email_popup_stay_4233%27,%20900,%20775);: No connection adapters were found for "javascript:if (confirm('This reviewer has already declined an invitation. Invite the reviewer again?%27))%20popWindow(%27mafi?PARAMS=xik_ErnQ6dwEbPJpyBC43LHAbDq32wMS1r2eKQY68uscPwk8w5iKN7HxmvFbRf2TG4AMiY4iUtT1mSa2K2PkNzwAbh3WH3sAs45RuktpYPLFTuNHpGe12Qq6BjQvwdJ6wKsRjDrcRfnZXopQMGfNQ61ksCe1aKkw6BAQNWqH4kGUPRAdJSdvSf2wDZHDkcA61XDfJkbVdZAwpZ92vCtQmHgv4WQKF6kcMP59hVke5QfnbSs2nzTTMQMTbiK8hvPGZF2dqEJUzoXHXWaizAjTw4ZRawUAgsHdMTB4bYoEUbXiXzfCdx7Vx7nrDavLUzq3C4HMVKErqPSUzZPJmfkWjxCnyn5ZfjSvC3XiBDBhKPZPCozdmMfndnXAnzagQc158tEzz8f8JdUDVUHDVxEzJybEPU26kjquaTwHavorLLgioGL5d4Q9K1mM6xm3HYxYmtsfxfMh659UaAv3e8CudKRVb1iPTFCxijZwP%27,%27email_popup_stay_4233%27,%20900,%20775);"
+2025-07-09 20:27:39,509 - core.paper_downloader - ERROR - Failed to download javascript:if (confirm('This reviewer has already declined an invitation. Invite the reviewer again?%27))%20popWindow(%27mafi?PARAMS=xik_7SrmuREGmQKVGQZ7mQLneYZMEMtptrdipG6TupPAgytBNeifo2boHH8cfWHYb7VqDfphVQJqGhLWfzrr3mkX8ib7qP93qXiTaWm6xmq121g2YXNwVLQ9o4w1a21j7v86DY3YbAReGAzX2PJnNppsJMKq6Ns4kiRiqxHreBVMc2dHf5CePC9C5KnsJVsRNmJJUGixocxorRZYijkuv1bKE88j6He8gzHgmKkgjpuv6ZBTDkVXBQk2z7VMpYG9bJSNYkEArgsLv6FntbgW8pfaK5mbPUYpsgRAou4QtXgz7zUMnWD3PRBhe2G5WKdTEJ1GeFXMMDBPppLX8Ue89F3CShv8hWPep5UgANsAdqkwY7nyR9jV8TFXTbNvufuZ426Ug4fxiboerWuMyGVnEVVHku7GB7riry8zLLykoFu4KW9WdYKWZnQQ6rFwp9RgnpEYJcGNeF3rizgvEatX3SyrVDWay7De7ESdM%27,%27email_popup_stay_224%27,%20900,%20775);: No connection adapters were found for "javascript:if (confirm('This reviewer has already declined an invitation. Invite the reviewer again?%27))%20popWindow(%27mafi?PARAMS=xik_7SrmuREGmQKVGQZ7mQLneYZMEMtptrdipG6TupPAgytBNeifo2boHH8cfWHYb7VqDfphVQJqGhLWfzrr3mkX8ib7qP93qXiTaWm6xmq121g2YXNwVLQ9o4w1a21j7v86DY3YbAReGAzX2PJnNppsJMKq6Ns4kiRiqxHreBVMc2dHf5CePC9C5KnsJVsRNmJJUGixocxorRZYijkuv1bKE88j6He8gzHgmKkgjpuv6ZBTDkVXBQk2z7VMpYG9bJSNYkEArgsLv6FntbgW8pfaK5mbPUYpsgRAou4QtXgz7zUMnWD3PRBhe2G5WKdTEJ1GeFXMMDBPppLX8Ue89F3CShv8hWPep5UgANsAdqkwY7nyR9jV8TFXTbNvufuZ426Ug4fxiboerWuMyGVnEVVHku7GB7riry8zLLykoFu4KW9WdYKWZnQQ6rFwp9RgnpEYJcGNeF3rizgvEatX3SyrVDWay7De7ESdM%27,%27email_popup_stay_224%27,%20900,%20775);"
+2025-07-09 20:27:40,261 - core.paper_downloader - WARNING - Unexpected content type: text/html; charset=utf-8 for URL: https://publons.com/wos-op/partner/reviewer-connect/b60f9391ad5b4fedac3704055bec5ee6/
+2025-07-09 20:27:40,263 - core.paper_downloader - INFO - Downloaded: downloads/reports/MF_MAFI-2025-0166_View full interactive search on reviewerlocator.webofscience.com_report.pdf
+2025-07-09 20:27:40,270 - core.paper_downloader - ERROR - Failed to download javascript:if (confirm('This reviewer has already declined an invitation. Invite the reviewer again?%27))%20popWindow(%27mafi?PARAMS=xik_ErnQ6dwEbPJpyBC43LHAbDq32wMS1r2eKQY68uscPwk8w5iKN7HxmvFbRf2TG4AMiY4iUtT1mSa2K2PkNzwAbh3WH3sAs45RuktpYPLFTuNHpGe12Qq6BjQvwdJ6wKsRjDrcRfnZXopQMGfNQ61ksCe1aKkw6BAQNWqH4kGUPRAdJSdvSf2wDZHDkcA61XDfJkbVdZAwpZ92vCtQmHgv4WQKF6kcMP59hVke5QfnbSs2nzTTMQMTbiK8hvPGZF2dqEJUzoXHXWaizAjTw4ZRawUAgsHdMTB4bYoEUbXiXzfCdx7Vx7nrDavLUzq3C4HMVKErqPSUzZPJmfkWjxCnyn5ZfjSvC3XiBDBhKPZPCozdmMfndnXAnzagQc158tEzz8f8JdUDVUHDVxEzJybEPU26kjquaTwHavorLLgioGL5d4Q9K1mM6xm3HYxYmtsfxfMh659UaAv3e8CudKRVb1iPTFCxijZwP%27,%27email_popup_stay_4233%27,%20900,%20775);: No connection adapters were found for "javascript:if (confirm('This reviewer has already declined an invitation. Invite the reviewer again?%27))%20popWindow(%27mafi?PARAMS=xik_ErnQ6dwEbPJpyBC43LHAbDq32wMS1r2eKQY68uscPwk8w5iKN7HxmvFbRf2TG4AMiY4iUtT1mSa2K2PkNzwAbh3WH3sAs45RuktpYPLFTuNHpGe12Qq6BjQvwdJ6wKsRjDrcRfnZXopQMGfNQ61ksCe1aKkw6BAQNWqH4kGUPRAdJSdvSf2wDZHDkcA61XDfJkbVdZAwpZ92vCtQmHgv4WQKF6kcMP59hVke5QfnbSs2nzTTMQMTbiK8hvPGZF2dqEJUzoXHXWaizAjTw4ZRawUAgsHdMTB4bYoEUbXiXzfCdx7Vx7nrDavLUzq3C4HMVKErqPSUzZPJmfkWjxCnyn5ZfjSvC3XiBDBhKPZPCozdmMfndnXAnzagQc158tEzz8f8JdUDVUHDVxEzJybEPU26kjquaTwHavorLLgioGL5d4Q9K1mM6xm3HYxYmtsfxfMh659UaAv3e8CudKRVb1iPTFCxijZwP%27,%27email_popup_stay_4233%27,%20900,%20775);"
+2025-07-09 20:27:40,273 - core.paper_downloader - ERROR - Failed to download javascript:if (confirm('This reviewer has already declined an invitation. Invite the reviewer again?%27))%20popWindow(%27mafi?PARAMS=xik_7SrmuREGmQKVGQZ7mQLneYZMEMtptrdipG6TupPAgytBNeifo2boHH8cfWHYb7VqDfphVQJqGhLWfzrr3mkX8ib7qP93qXiTaWm6xmq121g2YXNwVLQ9o4w1a21j7v86DY3YbAReGAzX2PJnNppsJMKq6Ns4kiRiqxHreBVMc2dHf5CePC9C5KnsJVsRNmJJUGixocxorRZYijkuv1bKE88j6He8gzHgmKkgjpuv6ZBTDkVXBQk2z7VMpYG9bJSNYkEArgsLv6FntbgW8pfaK5mbPUYpsgRAou4QtXgz7zUMnWD3PRBhe2G5WKdTEJ1GeFXMMDBPppLX8Ue89F3CShv8hWPep5UgANsAdqkwY7nyR9jV8TFXTbNvufuZ426Ug4fxiboerWuMyGVnEVVHku7GB7riry8zLLykoFu4KW9WdYKWZnQQ6rFwp9RgnpEYJcGNeF3rizgvEatX3SyrVDWay7De7ESdM%27,%27email_popup_stay_224%27,%20900,%20775);: No connection adapters were found for "javascript:if (confirm('This reviewer has already declined an invitation. Invite the reviewer again?%27))%20popWindow(%27mafi?PARAMS=xik_7SrmuREGmQKVGQZ7mQLneYZMEMtptrdipG6TupPAgytBNeifo2boHH8cfWHYb7VqDfphVQJqGhLWfzrr3mkX8ib7qP93qXiTaWm6xmq121g2YXNwVLQ9o4w1a21j7v86DY3YbAReGAzX2PJnNppsJMKq6Ns4kiRiqxHreBVMc2dHf5CePC9C5KnsJVsRNmJJUGixocxorRZYijkuv1bKE88j6He8gzHgmKkgjpuv6ZBTDkVXBQk2z7VMpYG9bJSNYkEArgsLv6FntbgW8pfaK5mbPUYpsgRAou4QtXgz7zUMnWD3PRBhe2G5WKdTEJ1GeFXMMDBPppLX8Ue89F3CShv8hWPep5UgANsAdqkwY7nyR9jV8TFXTbNvufuZ426Ug4fxiboerWuMyGVnEVVHku7GB7riry8zLLykoFu4KW9WdYKWZnQQ6rFwp9RgnpEYJcGNeF3rizgvEatX3SyrVDWay7De7ESdM%27,%27email_popup_stay_224%27,%20900,%20775);"
+2025-07-09 20:27:40,273 - core.paper_downloader - INFO - Report already downloaded: downloads/reports/MF_MAFI-2025-0166_View full interactive search on reviewerlocator.webofscience.com_report.pdf
+2025-07-09 20:27:40,273 - __main__ - INFO - ✅ Scraping successful: 1 manuscripts found
+2025-07-09 20:27:40,490 - __main__ - INFO - 📸 Screenshot: live_test_output/MF_scraping_success_20250709_202740.png
+2025-07-09 20:27:40,502 - __main__ - INFO - 📄 HTML: live_test_output/MF_scraping_success_20250709_202740.html
+2025-07-09 20:27:40,688 - __main__ - INFO - ✅ MF test SUCCESSFUL
+2025-07-09 20:27:40,688 - __main__ - INFO -    Manuscripts found: 1
+2025-07-09 20:27:40,688 - __main__ - INFO -    1. MAFI-2025-0166: Optimal investment and consumption under forward u...
+2025-07-09 20:27:40,688 - __main__ - INFO -       Author: Anis Matoussi
+2025-07-09 20:27:40,688 - __main__ - INFO -       Referees: 3 (with emails)
+2025-07-09 20:27:40,688 - __main__ - INFO - 
+🔬 Testing MOR with live credentials
+2025-07-09 20:27:40,688 - __main__ - INFO - ----------------------------------------
+2025-07-09 20:27:40,688 - __main__ - INFO - 🔬 Testing MOR with live credentials
+2025-07-09 20:27:40,688 - __main__ - INFO - 🌐 Phase 1: Testing connection to MOR
+2025-07-09 20:27:40,688 - __main__ - INFO - 🚗 Creating robust Chrome driver...
+2025-07-09 20:27:41,926 - undetected_chromedriver.patcher - INFO - patching driver executable /Users/dylanpossamai/Library/Application Support/undetected_chromedriver/undetected_chromedriver
+2025-07-09 20:27:43,928 - __main__ - INFO - ✅ Chrome driver created successfully
+2025-07-09 20:27:45,855 - __main__ - INFO - ✅ Connection successful: ScholarOne Manuscripts
+2025-07-09 20:27:46,115 - __main__ - INFO - 📸 Screenshot: live_test_output/MOR_connection_20250709_202745.png
+2025-07-09 20:27:46,123 - __main__ - INFO - 📄 HTML: live_test_output/MOR_connection_20250709_202745.html
+2025-07-09 20:27:46,126 - __main__ - INFO - 🔐 Phase 2: Testing login for MOR
+2025-07-09 20:27:46,127 - [MOR] - INFO - Navigating to MOR dashboard...
+2025-07-09 20:27:48,645 - [MOR] - INFO - Accepted cookies.
+2025-07-09 20:27:55,838 - [MOR] - DEBUG - No reCAPTCHA found.
+2025-07-09 20:27:55,848 - [MOR] - DEBUG - Found and visible: TOKEN_VALUE
+2025-07-09 20:27:55,848 - [MOR] - INFO - Verification prompt visible. Fetching code from email...
+2025-07-09 20:27:55,849 - googleapiclient.discovery_cache - INFO - file_cache is only supported with oauth2client<4.0.0
+2025-07-09 20:27:55,849 - root - INFO - Waiting 5 seconds for verification email to arrive...
+2025-07-09 20:28:01,422 - root - INFO - Found newer verification code for MOR: 453512 (timestamp: Wed, 9 Jul 2025 18:27:50 +0000)
+2025-07-09 20:28:03,533 - root - INFO - Returning latest verification code for MOR: 453512
+2025-07-09 20:28:03,533 - [MOR] - DEBUG - Verification code fetched: '453512'
+2025-07-09 20:28:03,579 - [MOR] - INFO - Submitted verification code.
+2025-07-09 20:28:09,669 - [MOR] - DEBUG - No reCAPTCHA found.
+2025-07-09 20:28:09,669 - [MOR] - INFO - Ready to continue navigation after login.
+2025-07-09 20:28:09,670 - __main__ - INFO - ✅ Login successful for MOR
+2025-07-09 20:28:09,670 - __main__ - INFO - 📧 Verification code was required and handled
+2025-07-09 20:28:09,911 - __main__ - INFO - 📸 Screenshot: live_test_output/MOR_login_success_20250709_202809.png
+2025-07-09 20:28:09,918 - __main__ - INFO - 📄 HTML: live_test_output/MOR_login_success_20250709_202809.html
+2025-07-09 20:28:09,922 - __main__ - INFO - 🧭 Phase 3: Testing navigation for MOR
+2025-07-09 20:28:13,209 - __main__ - INFO - 📸 Screenshot: live_test_output/MOR_navigation_20250709_202812.png
+2025-07-09 20:28:13,215 - __main__ - INFO - 📄 HTML: live_test_output/MOR_navigation_20250709_202812.html
+2025-07-09 20:28:13,218 - __main__ - INFO - 📚 Phase 4: Testing manuscript scraping for MOR
+2025-07-09 20:28:13,218 - [MOR] - INFO - Navigating to MOR dashboard...
+2025-07-09 20:28:16,455 - [MOR] - DEBUG - No cookie accept button found.
+2025-07-09 20:28:22,636 - [MOR] - DEBUG - No reCAPTCHA found.
+2025-07-09 20:28:22,654 - [MOR] - DEBUG - Found and visible: TOKEN_VALUE
+2025-07-09 20:28:22,654 - [MOR] - INFO - Verification prompt visible. Fetching code from email...
+2025-07-09 20:28:22,655 - googleapiclient.discovery_cache - INFO - file_cache is only supported with oauth2client<4.0.0
+2025-07-09 20:28:22,656 - root - INFO - Waiting 5 seconds for verification email to arrive...
+2025-07-09 20:28:28,246 - root - INFO - Found newer verification code for MOR: 556893 (timestamp: Wed, 9 Jul 2025 18:28:17 +0000)
+2025-07-09 20:28:30,362 - root - INFO - Returning latest verification code for MOR: 556893
+2025-07-09 20:28:30,363 - [MOR] - DEBUG - Verification code fetched: '556893'
+2025-07-09 20:28:30,412 - [MOR] - INFO - Submitted verification code.
+2025-07-09 20:28:36,495 - [MOR] - DEBUG - No reCAPTCHA found.
+2025-07-09 20:28:36,496 - [MOR] - INFO - Ready to continue navigation after login.
+2025-07-09 20:28:40,560 - [MOR] - DEBUG - No reCAPTCHA found.
+2025-07-09 20:28:40,562 - googleapiclient.discovery_cache - INFO - file_cache is only supported with oauth2client<4.0.0
+2025-07-09 20:28:40,947 - root - INFO - Found 8 messages to process for MOR
+2025-07-09 20:28:46,129 - [MOR] - DEBUG - Clicked Associate Editor Center link: associate editor center
+2025-07-09 20:28:48,199 - [MOR] - DEBUG - No reCAPTCHA found.
+2025-07-09 20:28:48,224 - [MOR] - DEBUG - Found status 'Awaiting Reviewer Reports' with count 3
+2025-07-09 20:28:53,532 - [MOR] - DEBUG - Clicked number link for status 'Awaiting Reviewer Reports' (3)
+2025-07-09 20:28:58,601 - [MOR] - DEBUG - No reCAPTCHA found.
+2025-07-09 20:28:58,922 - [MOR] - WARNING - Could not return to Associate Editor Center, continuing...
+2025-07-09 20:29:00,981 - [MOR] - DEBUG - No reCAPTCHA found.
+2025-07-09 20:29:01,038 - [MOR] - INFO - Final results (all parsed manuscripts): 1 manuscripts.
+2025-07-09 20:29:01,105 - core.paper_downloader - INFO - Found 0 potential paper download links
+2025-07-09 20:29:01,173 - core.paper_downloader - INFO - Found 3 potential report download links
+2025-07-09 20:29:01,176 - core.paper_downloader - ERROR - Failed to download javascript:popWindow('mathor?PARAMS=xik_7truDQyd96JdNUNABMBNT4b3G5SLqRpciEv5f6BjNd3xaxMG8aMFTmwbBDrsEuyJkK4UsF4sLiu4auu7uRQAkpLVaM9nKnyYwuodbCc3kEZXKMiSEUBzdmeGrVK74FajivqUFk2Ma6CyrSsnMqStPeUBe4LZpchGa3aYDjtkMKcP1LCkm7K2EYEuqyDr7rXQp3oaYnoxZLSAmw638qWi1knMge4jpTYJ78i5izwqmDJR3KhJcCzoqbobjpct8xKjsJHbfb92JHRvSJzeZSu46fji6tVQu6LUUw6kGtwG9NQbepHqRE5vQQEniZrYRLqWcxXf2iND%27,%27ms_preview%27,%20600,%20400);: No connection adapters were found for "javascript:popWindow('mathor?PARAMS=xik_7truDQyd96JdNUNABMBNT4b3G5SLqRpciEv5f6BjNd3xaxMG8aMFTmwbBDrsEuyJkK4UsF4sLiu4auu7uRQAkpLVaM9nKnyYwuodbCc3kEZXKMiSEUBzdmeGrVK74FajivqUFk2Ma6CyrSsnMqStPeUBe4LZpchGa3aYDjtkMKcP1LCkm7K2EYEuqyDr7rXQp3oaYnoxZLSAmw638qWi1knMge4jpTYJ78i5izwqmDJR3KhJcCzoqbobjpct8xKjsJHbfb92JHRvSJzeZSu46fji6tVQu6LUUw6kGtwG9NQbepHqRE5vQQEniZrYRLqWcxXf2iND%27,%27ms_preview%27,%20600,%20400);"
+2025-07-09 20:29:01,178 - core.paper_downloader - ERROR - Failed to download javascript:popWindow('mathor?PARAMS=xik_7q18C43JaUc35DcMitc7FH86kVPe3ScGPbF5xkMHp3Hn6DzsREDS3D1Tsp3K6zm96byvsRXPYGFmoBo9jM81mZ4hB72CZowaXjAXmFHMjEQ9mQxCFNjuATP1yerQ417ViD9x3JsF1oLPRkKf1vEV9hvaHWZrteK7tvtz1i4LVDw7hfLCRNjj1BtvhcLRismv4ZdNtf42jaUdMMXtutQFSjW85gNGgurKqKrhQugqarZkxA3Hg9h5ec9oJhvURq6ctuvtnJmC47spmLxoMu9uSHHEF2uYJHE5CdRXojpQ7Z966LsFje92UaU3ncyfgjFk2tzJz1iR%27,%27reviewer_view_details%27,%20750,%20550): No connection adapters were found for "javascript:popWindow('mathor?PARAMS=xik_7q18C43JaUc35DcMitc7FH86kVPe3ScGPbF5xkMHp3Hn6DzsREDS3D1Tsp3K6zm96byvsRXPYGFmoBo9jM81mZ4hB72CZowaXjAXmFHMjEQ9mQxCFNjuATP1yerQ417ViD9x3JsF1oLPRkKf1vEV9hvaHWZrteK7tvtz1i4LVDw7hfLCRNjj1BtvhcLRismv4ZdNtf42jaUdMMXtutQFSjW85gNGgurKqKrhQugqarZkxA3Hg9h5ec9oJhvURq6ctuvtnJmC47spmLxoMu9uSHHEF2uYJHE5CdRXojpQ7Z966LsFje92UaU3ncyfgjFk2tzJz1iR%27,%27reviewer_view_details%27,%20750,%20550)"
+2025-07-09 20:29:01,180 - core.paper_downloader - ERROR - Failed to download javascript:popWindow('mathor?PARAMS=xik_7q18C43JaUc35DcMitc7FH86kVPe3ScGPbF5xkMHp3Hn6DzsREDS3D1Tsp3K6zm96byvsRXPYGFmoBo9jM81mZ4hB72CZowaXjAXmFHMjEQ9mQxCFNjuATP1yerQ417ViD9x3JsF1oLPRkKf1vEV9hvaHWZrteK7tvtz1i4LVDw7hfLCRNjj1BtvhcLRismv4ZdNtf42jaUdMMXtutQFSjW85gNGgurKqKrhQugqarZkxA3Hg9h5ec9oJhvURq6ctuvtnJmC47spmLxoMu9uSHHEF2uYJHE5CdRXojpQ7Z966LsFje92UaU3ncyfgjFk2tzJz1iR%27,%27reviewer_view_details%27,%20750,%20550): No connection adapters were found for "javascript:popWindow('mathor?PARAMS=xik_7q18C43JaUc35DcMitc7FH86kVPe3ScGPbF5xkMHp3Hn6DzsREDS3D1Tsp3K6zm96byvsRXPYGFmoBo9jM81mZ4hB72CZowaXjAXmFHMjEQ9mQxCFNjuATP1yerQ417ViD9x3JsF1oLPRkKf1vEV9hvaHWZrteK7tvtz1i4LVDw7hfLCRNjj1BtvhcLRismv4ZdNtf42jaUdMMXtutQFSjW85gNGgurKqKrhQugqarZkxA3Hg9h5ec9oJhvURq6ctuvtnJmC47spmLxoMu9uSHHEF2uYJHE5CdRXojpQ7Z966LsFje92UaU3ncyfgjFk2tzJz1iR%27,%27reviewer_view_details%27,%20750,%20550)"
+2025-07-09 20:29:01,180 - __main__ - INFO - ✅ Scraping successful: 1 manuscripts found
+2025-07-09 20:29:01,389 - __main__ - INFO - 📸 Screenshot: live_test_output/MOR_scraping_success_20250709_202901.png
+2025-07-09 20:29:01,398 - __main__ - INFO - 📄 HTML: live_test_output/MOR_scraping_success_20250709_202901.html
+2025-07-09 20:29:01,573 - __main__ - INFO - ✅ MOR test SUCCESSFUL
+2025-07-09 20:29:01,573 - __main__ - INFO -    Manuscripts found: 1
+2025-07-09 20:29:01,573 - __main__ - INFO -    1. MOR-2024-0804: Semi-static variance-optimal hedging with self-exc...
+2025-07-09 20:29:01,573 - __main__ - INFO -       Author: Giorgia Callegaro
+2025-07-09 20:29:01,573 - __main__ - INFO -       Referees: 2 (with emails)
+2025-07-09 20:29:01,573 - __main__ - INFO - 
+📄 Full results saved to: live_test_output/live_test_results_live_test_20250709_202616.json

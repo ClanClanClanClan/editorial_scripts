@@ -1,0 +1,31 @@
+[01:37:16] SUCCESS: Ultra-robust Chrome WebDriver initialized
+[01:37:16] INFO: Ultra-robust authentication with SICON
+[01:37:26] DEBUG: Screenshot saved: 01_journal_initial_013726.png Initial journal page
+[01:37:27] INFO: Clicked privacy notification Continue button
+[01:37:30] DEBUG: Screenshot saved: 01b_after_privacy_013730.png After privacy notification
+[01:37:30] INFO: Found ORCID link using strategy 1
+[01:37:30] INFO: Clicking ORCID link with enhanced strategies
+[01:37:30] INFO: Trying ORCID click strategy 1
+[01:37:37] INFO: On ORCID login page
+[01:37:37] DEBUG: Screenshot saved: 02_orcid_login_013737.png ORCID login page
+[01:38:37] DEBUG: Screenshot saved: 01_journal_initial_013837.png Initial journal page
+[01:38:52] INFO: No privacy notification found (already handled)
+[01:38:52] INFO: Found ORCID link using strategy 1
+[01:38:52] INFO: Clicking ORCID link with enhanced strategies
+[01:38:52] INFO: Trying ORCID click strategy 1
+[01:39:00] INFO: On ORCID login page
+[01:39:00] DEBUG: Screenshot saved: 02_orcid_login_013900.png ORCID login page
+[01:40:03] DEBUG: Screenshot saved: 01_journal_initial_014002.png Initial journal page
+[01:40:18] INFO: No privacy notification found (already handled)
+[01:40:18] INFO: Found ORCID link using strategy 1
+[01:40:18] INFO: Clicking ORCID link with enhanced strategies
+[01:40:18] INFO: Trying ORCID click strategy 1
+[01:40:25] INFO: On ORCID login page
+[01:40:26] DEBUG: Screenshot saved: 02_orcid_login_014025.png ORCID login page
+[01:41:34] DEBUG: Screenshot saved: 01_journal_initial_014134.png Initial journal page
+[01:41:50] INFO: No privacy notification found (already handled)
+[01:41:50] INFO: Found ORCID link using strategy 1
+[01:41:50] INFO: Clicking ORCID link with enhanced strategies
+[01:41:50] INFO: Trying ORCID click strategy 1
+[01:41:56] INFO: On ORCID login page
+[01:41:57] DEBUG: Screenshot saved: 02_orcid_login_014156.png ORCID login page

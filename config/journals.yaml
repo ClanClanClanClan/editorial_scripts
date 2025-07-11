@@ -1,0 +1,200 @@
+# Editorial Assistant - Journal Configuration
+# This file defines all supported journals and their specific settings
+
+journals:
+  MF:
+    name: "Mathematical Finance"
+    platform: "scholarone"
+    url: "https://mc.manuscriptcentral.com/mafi"
+    categories:
+      - "Awaiting Reviewer Scores"
+      - "Awaiting Reviewer Selection"
+      - "Awaiting Final Decision"
+    patterns:
+      manuscript_id: 'MAFI-\d{4}-\d{4}'
+      referee_row: 'tr[id^="reviewerInfo"]'
+    credentials:
+      username_env: "MF_USERNAME"
+      password_env: "MF_PASSWORD"
+      fallback_username_env: null
+      fallback_password_env: null
+    settings:
+      max_manuscripts_per_run: 50
+      download_timeout: 60
+      retry_attempts: 3
+
+  MOR:
+    name: "Mathematics of Operations Research"
+    platform: "scholarone"
+    url: "https://mc.manuscriptcentral.com/mathor"
+    categories:
+      - "Awaiting Reviewer Reports"
+      - "Awaiting Reviewer Selection"
+      - "Awaiting AE Recommendation"
+    patterns:
+      manuscript_id: 'MOR-\d{4}-\d{4}'
+      referee_row: 'tr[id^="reviewerInfo"]'
+    credentials:
+      username_env: "MOR_USERNAME"
+      password_env: "MOR_PASSWORD"
+      fallback_username_env: "MF_USERNAME"
+      fallback_password_env: "MF_PASSWORD"
+    settings:
+      max_manuscripts_per_run: 50
+      download_timeout: 60
+      retry_attempts: 3
+
+  JFE:
+    name: "Journal of Financial Economics"
+    platform: "editorial_manager"
+    url: "https://www.editorialmanager.com/jfec/"
+    categories:
+      - "With Referees"
+      - "Awaiting Referee Reports"
+    patterns:
+      manuscript_id: 'JFE-D-\d{2}-\d{5}'
+      referee_section: 'div.referee-section'
+    credentials:
+      username_env: "JFE_USERNAME"
+      password_env: "JFE_PASSWORD"
+      fallback_username_env: null
+      fallback_password_env: null
+    settings:
+      max_manuscripts_per_run: 100
+      download_timeout: 90
+      retry_attempts: 5
+
+  MS:
+    name: "Management Science"
+    platform: "scholarone"
+    url: "https://mc.manuscriptcentral.com/mnsc"
+    categories:
+      - "Awaiting Reviewer Scores"
+      - "Awaiting AE Recommendation"
+    patterns:
+      manuscript_id: 'MS-\d{4}-\d{4}'
+      referee_row: 'tr[id^="reviewerInfo"]'
+    credentials:
+      username_env: "MS_USERNAME"
+      password_env: "MS_PASSWORD"
+      fallback_username_env: null
+      fallback_password_env: null
+    settings:
+      max_manuscripts_per_run: 75
+      download_timeout: 60
+      retry_attempts: 3
+
+  RFS:
+    name: "Review of Financial Studies"
+    platform: "scholarone"
+    url: "https://mc.manuscriptcentral.com/rfs"
+    categories:
+      - "Awaiting Reviewer Scores"
+      - "Awaiting Editor Decision"
+    patterns:
+      manuscript_id: 'RFS-\d{4}-\d{4}'
+      referee_row: 'tr[class*="reviewer"]'
+    credentials:
+      username_env: "RFS_USERNAME"
+      password_env: "RFS_PASSWORD"
+      fallback_username_env: null
+      fallback_password_env: null
+    settings:
+      max_manuscripts_per_run: 50
+      download_timeout: 60
+      retry_attempts: 3
+
+  RAPS:
+    name: "Review of Asset Pricing Studies"
+    platform: "scholarone"
+    url: "https://mc.manuscriptcentral.com/raps"
+    categories:
+      - "Awaiting Reviewer Scores"
+      - "Awaiting Editor Decision"
+    patterns:
+      manuscript_id: 'RAPS-\d{4}-\d{4}'
+      referee_row: 'tr[id^="reviewerInfo"]'
+    credentials:
+      username_env: "RAPS_USERNAME"
+      password_env: "RAPS_PASSWORD"
+      fallback_username_env: null
+      fallback_password_env: null
+    settings:
+      max_manuscripts_per_run: 30
+      download_timeout: 60
+      retry_attempts: 3
+
+  JF:
+    name: "Journal of Finance"
+    platform: "editorial_manager"
+    url: "https://www.editorialmanager.com/jofi/"
+    categories:
+      - "With Referees"
+      - "Awaiting AE Recommendation"
+    patterns:
+      manuscript_id: 'JF-\d{2}-\d{4}'
+      referee_section: 'div.referee-details'
+    credentials:
+      username_env: "JF_USERNAME"
+      password_env: "JF_PASSWORD"
+      fallback_username_env: null
+      fallback_password_env: null
+    settings:
+      max_manuscripts_per_run: 100
+      download_timeout: 90
+      retry_attempts: 5
+
+  JFI:
+    name: "Journal of Financial Intermediation"
+    platform: "editorial_manager"
+    url: "https://www.editorialmanager.com/jfin/"
+    categories:
+      - "With Referees"
+      - "Under Review"
+    patterns:
+      manuscript_id: 'JFIN-D-\d{2}-\d{5}'
+      referee_section: 'table.referee-table'
+    credentials:
+      username_env: "JFI_USERNAME"
+      password_env: "JFI_PASSWORD"
+      fallback_username_env: null
+      fallback_password_env: null
+    settings:
+      max_manuscripts_per_run: 50
+      download_timeout: 90
+      retry_attempts: 5
+
+# Platform-specific settings
+platforms:
+  scholarone:
+    login_selectors:
+      username: 'input[name="USERID"]'
+      password: 'input[name="PASSWORD"]'
+      submit: 'input[name="SUBMIT"]'
+    navigation:
+      ae_center: 'a[title="Associate Editor"]'
+      manuscript_row: 'tr[id^="row_"]'
+    pdf_patterns:
+      - 'a[href*="ViewPDF"]'
+      - 'a[href*="DOWNLOAD=TRUE"]'
+      - 'input[value="PDF"]'
+    
+  editorial_manager:
+    login_selectors:
+      username: 'input[id="username"]'
+      password: 'input[id="password"]'
+      submit: 'button[type="submit"]'
+    navigation:
+      editor_menu: 'a[href*="editor.main.menu"]'
+      manuscript_list: 'a[href*="PendingTasks"]'
+    pdf_patterns:
+      - 'a[class*="pdf-link"]'
+      - 'a[title*="Download PDF"]'
+
+# Global settings
+global:
+  headless_mode: true
+  screenshot_on_error: true
+  max_concurrent_downloads: 3
+  request_delay: 2  # seconds between requests
+  user_agent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"

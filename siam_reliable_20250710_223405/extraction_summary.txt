@@ -1,0 +1,48 @@
+================================================================================
+SIAM COMPLETE EXTRACTION SUMMARY
+================================================================================
+Date: 2025-07-10 22:34:50
+
+SICON (SIAM Journal on Control and Optimization)
+--------------------------------------------------
+Manuscripts: 4
+Total referees: 8
+Reports received: 4
+Emails found: 0
+
+
+M172838Yu - Constrained Mean-Field Control with Singular Control: Existe...
+  Corresponding Author: Bayraktar
+  Files: MS=False, CL=False, Reports=0
+  ✓ Ferrari (None)
+  ⏳ LI (None)
+
+M173704Zhang - Scaling Limits for Exponential Hedging in the Brownian Frame...
+  Corresponding Author: Zhang
+  Files: MS=False, CL=False, Reports=0
+  ✓ Cohen (None)
+  ⏳ Guo (None)
+
+M173889Wan - Hamilton-Jacobi-Bellman Equations in the Wasserstein Space f...
+  Corresponding Author: Bayraktar
+  Files: MS=False, CL=False, Reports=0
+  ✓ Ekren (None)
+  ⏳ Ren (None)
+
+M176733Luo - Extended Mean Field Games with Terminal Constraint via Decou...
+  Corresponding Author: Bayraktar
+  Files: MS=False, CL=False, Reports=0
+  ✓ daudin (None)
+  ⏳ Tangpi (None)
+
+
+SIFIN (SIAM Journal on Financial Mathematics)
+--------------------------------------------------
+Manuscripts: 0
+Total referees: 0
+Reports received: 0
+Emails found: 0
+
+
+
+All files saved to: siam_reliable_20250710_223405

@@ -1,0 +1,103 @@
+{
+  "journal": "MOR",
+  "timestamp": "2025-07-10T00:31:44.658255",
+  "categories_checked": [
+    "Awaiting Reviewer Selection",
+    "Awaiting Reviewer Invitation",
+    "Overdue Reviewer Response",
+    "Awaiting Reviewer Assignment",
+    "Awaiting Reviewer Reports",
+    "Overdue Reviewer Reports",
+    "Awaiting AE Recommendation"
+  ],
+  "category_results": {
+    "Awaiting Reviewer Selection": {
+      "manuscripts": [],
+      "referee_count": 0,
+      "status": "unknown_format"
+    },
+    "Awaiting Reviewer Invitation": {
+      "manuscripts": [],
+      "referee_count": 0,
+      "status": "unknown_format"
+    },
+    "Overdue Reviewer Response": {
+      "manuscripts": [],
+      "referee_count": 0,
+      "status": "unknown_format"
+    },
+    "Awaiting Reviewer Assignment": {
+      "manuscripts": [],
+      "referee_count": 0,
+      "status": "unknown_format"
+    },
+    "Awaiting Reviewer Reports": {
+      "manuscripts": [
+        {
+          "Manuscript #": "MOR-2025-1037",
+          "Category": "Awaiting Reviewer Reports",
+          "Referee_Info": {
+            "active_selections": 2,
+            "invited": 2,
+            "agreed": 2,
+            "declined": 1,
+            "returned": 0,
+            "active": 2,
+            "raw_text": "MOR-2025-1037 \n\n\n\n        The Value of Partial Information\n [ View Submission]\n      \n\n        11-May-2025\n      \n\nAE: Possama\u00ef, DylanAreaED: Blanchet, JoseEIC: Scheinberg, KatyaME: Elmore (Editorial Office), JeffAwaiting Reviewer Scores (Due 02-Sep-2025)2 active selections; 2 invited; 2 agreed; 1 declined; 0 returned"
+          },
+          "Active_Referees": 2
+        },
+        {
+          "Manuscript #": "MOR-2023-0376",
+          "Category": "Awaiting Reviewer Reports",
+          "Referee_Info": {
+            "active_selections": 2,
+            "invited": 2,
+            "agreed": 2,
+            "declined": 0,
+            "returned": 1,
+            "active": 2,
+            "raw_text": "MOR-2023-0376.R1 \n\n\n\n        Utility maximization under endogenous pricing [ View Submission]\n      \n\n        12-Mar-2025\n      \n\nAE: Possama\u00ef, DylanAreaED: Blanchet, JoseEIC: Scheinberg, KatyaME: Elmore (Editorial Office), JeffAwaiting Reviewer Scores (Due 04-Aug-2025)2 active selections; 2 invited; 2 agreed; 0 declined; 1 returned"
+          },
+          "Active_Referees": 2
+        },
+        {
+          "Manuscript #": "MOR-2024-0804",
+          "Category": "Awaiting Reviewer Reports",
+          "Referee_Info": {
+            "active_selections": 2,
+            "invited": 2,
+            "agreed": 2,
+            "declined": 0,
+            "returned": 0,
+            "active": 2,
+            "raw_text": "MOR-2024-0804.R1 \n\n\n\n        Semi-static variance-optimal hedging with self-exciting jumps [ View Submission]\n      \n\n        07-Jun-2025\n      \n\nAE: Possama\u00ef, DylanAreaED: Srikant, R.EIC: Scheinberg, KatyaME: Elmore (Editorial Office), JeffAwaiting Reviewer Scores (Due 11-Jul-2025)2 active selections; 2 invited; 2 agreed; 0 declined; 0 returned"
+          },
+          "Active_Referees": 2
+        }
+      ],
+      "referee_count": 6,
+      "status": "success"
+    },
+    "Overdue Reviewer Reports": {
+      "manuscripts": [],
+      "referee_count": 0,
+      "status": "unknown_format"
+    },
+    "Awaiting AE Recommendation": {
+      "manuscripts": [],
+      "referee_count": 0,
+      "status": "unknown_format"
+    }
+  },
+  "total_manuscripts": 3,
+  "total_referees": 6,
+  "expected_manuscripts": 3,
+  "expected_referees": 5,
+  "success": true,
+  "unique_manuscripts": [
+    "MOR-2025-1037",
+    "MOR-2024-0804",
+    "MOR-2023-0376"
+  ]
+}

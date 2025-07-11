@@ -1,0 +1,25 @@
+REFEREE EXTRACTION REPORT FOR MF
+Generated: 2025-07-10 07:23:31
+================================================================================
+
+Manuscript: MAFI-2025-0166
+Title: Not extracted
+Category: Awaiting Reviewer Scores
+Extraction Status: failed
+Referees (0):
+
+--------------------------------------------------------------------------------
+
+Manuscript: MAFI-2024-0167
+Title: Not extracted
+Category: Awaiting Reviewer Scores
+Extraction Status: failed
+Referees (0):
+
+--------------------------------------------------------------------------------
+
+
+SUMMARY:
+Total Manuscripts: 2
+Successfully Processed: 0
+Total Referees Found: 0

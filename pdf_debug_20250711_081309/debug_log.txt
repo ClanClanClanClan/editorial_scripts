@@ -1,0 +1,26 @@
+[08:13:09.867] INFO: Starting full PDF download debug session
+[08:13:14.674] INFO: Driver setup complete
+[08:13:14.674] INFO: Starting authentication
+[08:13:21.342] ERROR: Authentication error: Alert Text: An error occurred: 403 -- 
+Message: unexpected alert open: {Alert text : An error occurred: 403 -- }
+  (Session info: chrome=138.0.7204.101)
+Stacktrace:
+0   chromedriver                        0x0000000100fc4ea4 cxxbridge1$str$ptr + 2722840
+1   chromedriver                        0x0000000100fbcdac cxxbridge1$str$ptr + 2689824
+2   chromedriver                        0x0000000100b0e3ec cxxbridge1$string$len + 90648
+3   chromedriver                        0x0000000100b9713c cxxbridge1$string$len + 651112
+4   chromedriver                        0x0000000100b49834 cxxbridge1$string$len + 333408
+5   chromedriver                        0x0000000100f87fc0 cxxbridge1$str$ptr + 2473268
+6   chromedriver                        0x0000000100f8b22c cxxbridge1$str$ptr + 2486176
+7   chromedriver                        0x0000000100f69a08 cxxbridge1$str$ptr + 2348924
+8   chromedriver                        0x0000000100f8bae8 cxxbridge1$str$ptr + 2488412
+9   chromedriver                        0x0000000100f5aa98 cxxbridge1$str$ptr + 2287628
+10  chromedriver                        0x0000000100fab9d8 cxxbridge1$str$ptr + 2619212
+11  chromedriver                        0x0000000100fabb64 cxxbridge1$str$ptr + 2619608
+12  chromedriver                        0x0000000100fbc9e8 cxxbridge1$str$ptr + 2688860
+13  libsystem_pthread.dylib             0x000000019690ec0c _pthread_start + 136
+14  libsystem_pthread.dylib             0x0000000196909b80 thread_start + 8
+
+[08:13:21.868] INFO: Current URL: https://sicon.siam.org/cgi-bin/main.plex
+[08:13:21.874] INFO: Cookies: 1 cookies present
+[08:13:21.875] ERROR: Authentication failed - cannot continue

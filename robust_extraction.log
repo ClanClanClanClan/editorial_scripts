@@ -1,0 +1,107 @@
+2025-07-10 13:18:36,172 - INFO - 🧪 Testing MF login and navigation
+2025-07-10 13:18:36,173 - INFO - 🚀 Creating simple Chrome driver...
+2025-07-10 13:18:47,979 - INFO - ✅ Simple Chrome driver created successfully
+2025-07-10 13:18:47,980 - INFO - 🌐 Navigating to: https://mc.manuscriptcentral.com/mafi (attempt 1)
+2025-07-10 13:18:53,037 - INFO - 📍 navigate_success_1 - URL: https://mc.manuscriptcentral.com/mafi
+2025-07-10 13:18:53,041 - INFO - 📑 navigate_success_1 - Title: ScholarOne Manuscripts
+2025-07-10 13:18:53,326 - INFO - 📍 initial_page - URL: https://mc.manuscriptcentral.com/mafi
+2025-07-10 13:18:53,330 - INFO - 📑 initial_page - Title: ScholarOne Manuscripts
+2025-07-10 13:18:53,331 - INFO - 🍪 Handling cookies...
+2025-07-10 13:18:53,331 - INFO - 🔍 Looking for: cookie accept button
+2025-07-10 13:18:53,922 - INFO - ✅ Successfully clicked: cookie accept button
+2025-07-10 13:18:56,174 - INFO - 📍 after_cookies - URL: https://mc.manuscriptcentral.com/mafi
+2025-07-10 13:18:56,177 - INFO - 📑 after_cookies - Title: ScholarOne Manuscripts
+2025-07-10 13:18:56,177 - INFO - 🔐 Checking for verification code...
+2025-07-10 13:19:21,424 - INFO - ℹ️  No verification code required
+2025-07-10 13:19:21,684 - INFO - 📍 after_verification - URL: https://mc.manuscriptcentral.com/mafi
+2025-07-10 13:19:21,687 - INFO - 📑 after_verification - Title: ScholarOne Manuscripts
+2025-07-10 13:19:21,687 - INFO - ⏳ Waiting for main page...
+2025-07-10 13:19:26,688 - INFO - 🔍 Checking page content...
+2025-07-10 13:19:26,702 - INFO - ✅ Found 'Center' in page content
+2025-07-10 13:19:26,702 - INFO - ✅ Found 'Manuscript' in page content
+2025-07-10 13:19:26,702 - INFO - 🔍 Looking for: Associate Editor Center
+2025-07-10 13:20:06,843 - ERROR - ❌ Could not find/click: Associate Editor Center
+2025-07-10 13:20:06,844 - ERROR - ❌ Could not find Associate Editor Center
+2025-07-10 13:20:06,844 - INFO - 🔍 Debug - All links on page:
+2025-07-10 13:20:06,897 - INFO -    3. 'Mathematical Finance' -> None
+2025-07-10 13:20:07,129 - INFO - 📍 ae_center_not_found - URL: https://mc.manuscriptcentral.com/mafi
+2025-07-10 13:20:07,132 - INFO - 📑 ae_center_not_found - Title: ScholarOne Manuscripts
+2025-07-10 13:20:07,242 - INFO - 🔄 Driver closed
+2025-07-10 13:24:23,861 - INFO - 🧪 Testing MF login and navigation
+2025-07-10 13:24:23,862 - INFO - 🚀 Creating simple Chrome driver...
+2025-07-10 13:24:27,888 - INFO - ✅ Simple Chrome driver created successfully
+2025-07-10 13:24:27,889 - INFO - 🌐 Navigating to: https://mc.manuscriptcentral.com/mafi (attempt 1)
+2025-07-10 13:24:32,739 - INFO - 📍 navigate_success_1 - URL: https://mc.manuscriptcentral.com/mafi
+2025-07-10 13:24:32,743 - INFO - 📑 navigate_success_1 - Title: ScholarOne Manuscripts
+2025-07-10 13:24:33,026 - INFO - 📍 initial_page - URL: https://mc.manuscriptcentral.com/mafi
+2025-07-10 13:24:33,028 - INFO - 📑 initial_page - Title: ScholarOne Manuscripts
+2025-07-10 13:24:33,028 - INFO - 🍪 Handling cookies...
+2025-07-10 13:24:33,029 - INFO - 🔍 Looking for: cookie accept button
+2025-07-10 13:24:33,611 - INFO - ✅ Successfully clicked: cookie accept button
+2025-07-10 13:24:35,881 - INFO - 📍 after_cookies - URL: https://mc.manuscriptcentral.com/mafi
+2025-07-10 13:24:35,884 - INFO - 📑 after_cookies - Title: ScholarOne Manuscripts
+2025-07-10 13:24:35,884 - INFO - 🔐 Starting login process...
+2025-07-10 13:24:35,910 - INFO - 📝 Found username input field
+2025-07-10 13:24:35,910 - INFO - 🔑 Login form detected, entering credentials...
+2025-07-10 13:24:35,917 - INFO - 🔒 Found password input field
+2025-07-10 13:24:37,360 - INFO - 📤 Submitted login form
+2025-07-10 13:24:41,628 - INFO - 📍 after_login_submit - URL: https://mc.manuscriptcentral.com/mafi
+2025-07-10 13:24:41,631 - INFO - 📑 after_login_submit - Title: ScholarOne Manuscripts
+2025-07-10 13:24:41,631 - INFO - 🔐 Checking for verification code...
+2025-07-10 13:24:51,669 - INFO - 📧 Found TOKEN_VALUE verification input
+2025-07-10 13:24:51,865 - ERROR - ❌ Login/verification failed: cannot import name 'fetch_verification_code_by_journal' from 'core.email_utils' (/Users/dylanpossamai/Library/CloudStorage/Dropbox/Work/editorial_scripts/core/email_utils.py)
+2025-07-10 13:24:51,865 - ERROR - ❌ Test failed: Login/verification failed
+2025-07-10 13:24:51,866 - ERROR - Traceback: Traceback (most recent call last):
+  File "/Users/dylanpossamai/Library/CloudStorage/Dropbox/Work/editorial_scripts/robust_mf_mor_extractor.py", line 339, in test_mf_login_and_navigation
+    raise Exception("Login/verification failed")
+Exception: Login/verification failed
+
+2025-07-10 13:24:52,122 - INFO - 📍 test_failure - URL: https://mc.manuscriptcentral.com/mafi
+2025-07-10 13:24:52,124 - INFO - 📑 test_failure - Title: ScholarOne Manuscripts
+2025-07-10 13:24:52,223 - INFO - 🔄 Driver closed
+2025-07-10 13:25:36,680 - INFO - 🧪 Testing MF login and navigation
+2025-07-10 13:25:36,681 - INFO - 🚀 Creating simple Chrome driver...
+2025-07-10 13:25:39,324 - INFO - ✅ Simple Chrome driver created successfully
+2025-07-10 13:25:39,324 - INFO - 🌐 Navigating to: https://mc.manuscriptcentral.com/mafi (attempt 1)
+2025-07-10 13:25:44,745 - INFO - 📍 navigate_success_1 - URL: https://mc.manuscriptcentral.com/mafi
+2025-07-10 13:25:44,750 - INFO - 📑 navigate_success_1 - Title: ScholarOne Manuscripts
+2025-07-10 13:25:45,067 - INFO - 📍 initial_page - URL: https://mc.manuscriptcentral.com/mafi
+2025-07-10 13:25:45,108 - INFO - 📑 initial_page - Title: ScholarOne Manuscripts
+2025-07-10 13:25:45,109 - INFO - 🍪 Handling cookies...
+2025-07-10 13:25:45,109 - INFO - 🔍 Looking for: cookie accept button
+2025-07-10 13:25:45,734 - INFO - ✅ Successfully clicked: cookie accept button
+2025-07-10 13:25:48,056 - INFO - 📍 after_cookies - URL: https://mc.manuscriptcentral.com/mafi
+2025-07-10 13:25:48,091 - INFO - 📑 after_cookies - Title: ScholarOne Manuscripts
+2025-07-10 13:25:48,092 - INFO - 🔐 Starting login process...
+2025-07-10 13:25:48,234 - INFO - 📝 Found username input field
+2025-07-10 13:25:48,234 - INFO - 🔑 Login form detected, entering credentials...
+2025-07-10 13:25:48,255 - INFO - 🔒 Found password input field
+2025-07-10 13:25:50,222 - INFO - 📤 Submitted login form
+2025-07-10 13:25:54,484 - INFO - 📍 after_login_submit - URL: https://mc.manuscriptcentral.com/mafi
+2025-07-10 13:25:54,487 - INFO - 📑 after_login_submit - Title: ScholarOne Manuscripts
+2025-07-10 13:25:54,487 - INFO - 🔐 Checking for verification code...
+2025-07-10 13:26:04,547 - INFO - 📧 Found TOKEN_VALUE verification input
+2025-07-10 13:26:04,742 - INFO - ⏳ Waiting for verification email...
+2025-07-10 13:26:09,750 - INFO - file_cache is only supported with oauth2client<4.0.0
+2025-07-10 13:26:09,752 - INFO - Waiting 5 seconds for verification email to arrive...
+2025-07-10 13:26:15,365 - INFO - Found newer verification code for MF: 036995 (timestamp: Thu, 10 Jul 2025 11:25:49 +0000)
+2025-07-10 13:26:17,522 - INFO - Returning latest verification code for MF: 036995
+2025-07-10 13:26:17,522 - INFO - ✅ Got verification code: 036995
+2025-07-10 13:26:17,621 - INFO - 📤 Submitted verification code
+2025-07-10 13:26:21,010 - INFO - 📍 after_verification - URL: https://mc.manuscriptcentral.com/mafi
+2025-07-10 13:26:21,012 - INFO - 📑 after_verification - Title: ScholarOne Manuscripts
+2025-07-10 13:26:21,013 - INFO - ⏳ Waiting for main page...
+2025-07-10 13:26:26,018 - INFO - 🔍 Checking page content...
+2025-07-10 13:26:26,047 - INFO - ✅ Found 'Associate Editor' in page content
+2025-07-10 13:26:26,047 - INFO - ✅ Found 'Center' in page content
+2025-07-10 13:26:26,047 - INFO - ✅ Found 'Manuscript' in page content
+2025-07-10 13:26:26,047 - INFO - 🔍 Looking for: Associate Editor Center
+2025-07-10 13:26:26,728 - INFO - ✅ Successfully clicked: Associate Editor Center
+2025-07-10 13:26:28,733 - INFO - 🎉 Successfully clicked Associate Editor Center!
+2025-07-10 13:26:29,040 - INFO - 📍 ae_center_success - URL: https://mc.manuscriptcentral.com/mafi
+2025-07-10 13:26:29,042 - INFO - 📑 ae_center_success - Title: ScholarOne Manuscripts
+2025-07-10 13:26:32,045 - INFO - 🔍 Looking for manuscript categories...
+2025-07-10 13:26:32,059 - INFO - ✅ Found category: Awaiting Reviewer Scores
+2025-07-10 13:26:42,390 - INFO - 📍 final_success - URL: https://mc.manuscriptcentral.com/mafi
+2025-07-10 13:26:42,394 - INFO - 📑 final_success - Title: ScholarOne Manuscripts
+2025-07-10 13:26:42,497 - INFO - 🔄 Driver closed

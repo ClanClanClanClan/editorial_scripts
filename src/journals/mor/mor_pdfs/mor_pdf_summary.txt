@@ -1,0 +1,24 @@
+PDF FETCH SUMMARY - MOR
+Generated: 2025-07-10 12:18:31
+============================================================
+
+Total manuscripts: 4
+PDFs downloaded: 0
+Success rate: 0.0%
+
+Manuscript: MOR-2025-1037
+PDF: ❌ Not downloaded
+------------------------------------------------------------
+
+Manuscript: MOR-2023-0376
+PDF: ❌ Not downloaded
+------------------------------------------------------------
+
+Manuscript: MOR-2023-0376.R1
+PDF: ❌ Not downloaded
+------------------------------------------------------------
+
+Manuscript: MOR-2024-0804
+PDF: ❌ Not downloaded
+------------------------------------------------------------
+

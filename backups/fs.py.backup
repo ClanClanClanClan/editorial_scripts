@@ -1,0 +1,418 @@
+import os
+import re
+from datetime import datetime, timedelta
+from core.base import JournalBase
+from core.email_utils import fetch_starred_emails
+
+import base64
+import pickle
+from googleapiclient.discovery import build
+from google_auth_oauthlib.flow import InstalledAppFlow
+from google.auth.transport.requests import Request
+
+SCOPES = [
+    'https://www.googleapis.com/auth/gmail.readonly',
+    'https://www.googleapis.com/auth/gmail.send'
+]
+
+KNOWN_EDITORS = {
+    "touzi@ceremade.dauphine.fr", "nt2635@nyu.edu", "cvitanic@caltech.edu",
+    "finasto@math.ethz.ch", "martin.schweizer@math.ethz.ch", "peter.tankov@ensae.fr",
+    "fukasawa.m.es@osaka-u.ac.jp", "aschied@uwaterloo.ca", "paolo.guasoni@dcu.ie"
+}
+
+USERNAME_ALIASES = {
+    'gxf1240': 'xfgao',  # group gxf1240@gmail.com and xfgao@se.cuhk.edu.hk
+    # Add more mappings here if you encounter similar cases
+}
+
+def gmail_api_authenticate():
+    creds = None
+    if os.path.exists('token.json'):
+        with open('token.json', 'rb') as token:
+            creds = pickle.load(token)
+    if not creds or not creds.valid:
+        if creds and creds.expired and creds.refresh_token:
+            creds.refresh(Request())
+        else:
+            flow = InstalledAppFlow.from_client_secrets_file(
+                'credentials.json', SCOPES)
+            creds = flow.run_local_server(port=0)
+        with open('token.json', 'wb') as token:
+            pickle.dump(creds, token)
+    service = build('gmail', 'v1', credentials=creds)
+    return service
+
+def gmail_search_messages(service, query, max_results=100):
+    results = service.users().messages().list(userId='me', q=query, maxResults=max_results).execute()
+    messages = results.get('messages', [])
+    full_messages = []
+    for msg in messages:
+        msg_data = service.users().messages().get(userId='me', id=msg['id'], format='full').execute()
+        full_messages.append(msg_data)
+    return full_messages
+
+def extract_pdf_attachments_from_gmail_message(service, message, download_dir="attachments"):
+    if not os.path.exists(download_dir):
+        os.makedirs(download_dir)
+    attachments = []
+    payload = message.get('payload', {})
+    parts = payload.get('parts', [])
+    for part in parts:
+        filename = part.get('filename')
+        body = part.get('body', {})
+        if filename and filename.lower().endswith('.pdf'):
+            att_id = body.get('attachmentId')
+            if att_id:
+                att = service.users().messages().attachments().get(
+                    userId='me', messageId=message['id'], id=att_id).execute()
+                data = att.get('data')
+                file_data = base64.urlsafe_b64decode(data.encode('UTF-8'))
+                filepath = os.path.join(download_dir, filename)
+                with open(filepath, 'wb') as f:
+                    f.write(file_data)
+                attachments.append(filepath)
+    return attachments
+
+def canonicalize_fs_id(subject):
+    if not subject:
+        return None
+    m = re.search(r'FS[\s\-:]*([0-9][0-9\s\-]+)', subject, re.IGNORECASE)
+    if not m:
+        return None
+    digits = ''.join(re.findall(r'\d', m.group(1)))
+    if len(digits) < 5:
+        return None
+    return digits.zfill(6)
+
+def display_fs_id(fs_id_str):
+    fs_id_str = fs_id_str.zfill(6)
+    return f"FS-{fs_id_str[:2]}-{fs_id_str[2:4]}-{fs_id_str[4:6]}"
+
+def extract_name_from_header(header):
+    if not header:
+        return ""
+    name_match = re.match(r'"?([^"<]+)"?\s*<.*>', header)
+    if name_match:
+        name = name_match.group(1)
+        if "," in name:
+            last, first = [part.strip() for part in name.split(",", 1)]
+            return f"{first} {last}"
+        return name
+    if '<' in header and '>' in header:
+        header = header.split('<')[1].split('>')[0]
+    if '@' in header:
+        parts = header.split('@')[0]
+        parts = re.split(r'[._]', parts)
+        if len(parts) > 1:
+            return " ".join(str(word).capitalize() for word in parts)
+        else:
+            return str(parts).capitalize()
+    return str(header)
+
+def extract_email_only(header):
+    match = re.search(r'<([^>]+)>', header)
+    if match:
+        return match.group(1).strip()
+    if '@' in header:
+        return header.strip().replace('"', '').replace("'", "")
+    return ""
+
+def plausible_human_name(s):
+    s = s.strip()
+    if not s or len(s) < 5: return False
+    if re.search(r'\d', s): return False
+    words = s.split()
+    if len(words) < 2 or len(words) > 5: return False
+    if len(words) == 1 and words[0].isupper(): return False
+    if any(len(w) > 15 for w in words): return False
+    badwords = set(['abstract', 'keywords', 'introduction', 'theorem', 'proof', 'section', 'university', 'department', 'optimization', 'portfolio', 'regularized', 'variance', 'mean', 'jumps', 'email'])
+    if any(w.lower() in badwords for w in words): return False
+    upperlike = [w for w in words if w and w[0].isupper()]
+    if len(upperlike) < 1: return False
+    return True
+
+def titlecase_human_name(s):
+    return " ".join([w.capitalize() for w in s.strip().split()])
+
+def ocr_pdf_first_author(pdf_path):
+    try:
+        from pdf2image import convert_from_path
+        import pytesseract
+        images = convert_from_path(pdf_path, first_page=1, last_page=1)
+        text = pytesseract.image_to_string(images[0])
+        lines = [l.strip() for l in text.split("\n") if l.strip()]
+        for line in lines:
+            clean_line = re.sub(r'\d+', ' ', line)
+            if plausible_human_name(clean_line):
+                return titlecase_human_name(clean_line)
+        return ""
+    except Exception:
+        return ""
+
+def parse_pdf_title_author(pdf_path):
+    try:
+        from PyPDF2 import PdfReader
+        reader = PdfReader(pdf_path)
+        text = ""
+        for i, page in enumerate(reader.pages[:2]):
+            t = page.extract_text()
+            text += (t or "") + "\n"
+        lines = [line.strip() for line in text.split("\n") if line.strip()]
+        title_lines = []
+        for idx, line in enumerate(lines):
+            if (line.isupper() or (line[0].isupper() and not re.search(r"[\d@]", line) and len(line) > 10)):
+                if len(title_lines) < 2:
+                    title_lines.append(line)
+                continue
+            else:
+                break
+        title = " ".join(title_lines).replace("  ", " ").strip(" :;")
+        if title.isupper():
+            title = title.title()
+        author_line = ""
+        for line in lines[len(title_lines):len(title_lines)+5]:
+            if line:
+                candidate = re.sub(r'\d+', ' ', line)
+                split_auth = re.split(r'\band\b', candidate, flags=re.IGNORECASE)
+                first_candidate = split_auth[0].strip()
+                first_candidate = re.sub(r'[,;:]+$', '', first_candidate)
+                first_candidate = re.sub(r'\s+', ' ', first_candidate)
+                if plausible_human_name(first_candidate):
+                    author_line = first_candidate
+                    break
+        if not author_line:
+            for line in lines[:40]:
+                candidate = re.sub(r'\d+', ' ', line)
+                split_auth = re.split(r'\band\b', candidate, flags=re.IGNORECASE)
+                first_candidate = split_auth[0].strip()
+                first_candidate = re.sub(r'[,;:]+$', '', first_candidate)
+                first_candidate = re.sub(r'\s+', ' ', first_candidate)
+                if plausible_human_name(first_candidate):
+                    author_line = first_candidate
+                    break
+        if not author_line:
+            author_line = ocr_pdf_first_author(pdf_path)
+        author_line = titlecase_human_name(author_line)
+        if not title:
+            title = "PDF_NOT_PARSED"
+        return title, author_line
+    except Exception:
+        return "PDF_NOT_PARSED", ""
+
+def parse_email_date(date_str):
+    from email.utils import parsedate_to_datetime
+    try:
+        dt = parsedate_to_datetime(date_str)
+        if not dt.tzinfo:
+            from datetime import timezone
+            dt = dt.replace(tzinfo=timezone.utc)
+        return dt
+    except Exception:
+        return None
+
+def is_real_referee(email, name):
+    if not email:
+        return False
+    if email.lower() in KNOWN_EDITORS:
+        return False
+    if "dylansmb@gmail.com" in email.lower() or "dylan.possamai@math.ethz.ch" in email.lower():
+        return False
+    return True
+
+def pick_best_name(names_set, uname):
+    def score(n):
+        n = n or ""
+        if not n.strip(): return -100
+        if n.startswith("["): return -10
+        words = n.strip().split()
+        if len(words) >= 2 and all(w[0].isupper() for w in words if w): return 100 + len(words)
+        if len(words) >= 2: return 80 + len(words)
+        return len(words)
+    candidates = [n for n in names_set if plausible_human_name(n)]
+    if candidates:
+        best = max(candidates, key=score)
+        return titlecase_human_name(best)
+    return titlecase_human_name(uname)
+
+def gather_thread_referee_clusters(emails, my_emails, known_editors):
+    clusters = {}
+    for mail in emails:
+        for field in ('from', 'to'):
+            addr = extract_email_only(mail.get(field, ""))
+            name = extract_name_from_header(mail.get(field, ""))
+            if addr:
+                addr_l = addr.lower()
+                if addr_l not in my_emails and addr_l not in known_editors:
+                    uname = addr.split('@')[0].lower()
+                    uname = USERNAME_ALIASES.get(uname, uname)  # Apply alias
+                    clusters.setdefault(uname, {'addresses': set(), 'names': set()})
+                    clusters[uname]['addresses'].add(addr_l)
+                    if name: clusters[uname]['names'].add(name)
+        cc_field = mail.get('cc') or mail.get('Cc') or mail.get('CC')
+        if cc_field:
+            for part in cc_field.split(','):
+                addr = extract_email_only(part.strip())
+                name = extract_name_from_header(part.strip())
+                if addr:
+                    addr_l = addr.lower()
+                    if addr_l not in my_emails and addr_l not in known_editors:
+                        uname = addr.split('@')[0].lower()
+                        uname = USERNAME_ALIASES.get(uname, uname)  # Apply alias
+                        clusters.setdefault(uname, {'addresses': set(), 'names': set()})
+                        clusters[uname]['addresses'].add(addr_l)
+                        if name: clusters[uname]['names'].add(name)
+    return clusters
+
+def deduplicate_referees_by_username(clusters, accepteds, contacts, contact_date):
+    merged_referees = []
+    for uname, data in clusters.items():
+        best_name = pick_best_name(data['names'], uname)
+        all_addresses = sorted(data['addresses'])
+        main_email = all_addresses[0]
+        alt_emails = ", ".join(all_addresses[1:])
+        status, accepted_date, due_date = "Unknown", "", ""
+        for r in accepteds:
+            ref_email = extract_email_only(r.get("from", "")).lower()
+            if ref_email in data['addresses']:
+                status = "Accepted"
+                adate = parse_email_date(r.get("date"))
+                accepted_date = adate.strftime("%d/%m/%Y") if adate else ""
+                due_date = (adate + timedelta(days=90)).strftime("%d/%m/%Y") if adate else ""
+                break
+        if status != "Accepted":
+            for r in contacts:
+                ref_email = extract_email_only(r.get("to", "")).lower()
+                if ref_email in data['addresses']:
+                    status = "Contacted"
+                    break
+        merged_referees.append({
+            "Referee Name": best_name,
+            "Referee Email": main_email,
+            "Alt Emails": alt_emails,
+            "Status": status,
+            "Contacted Date": contact_date.strftime("%d/%m/%Y") if contact_date else "",
+            "Accepted Date": accepted_date,
+            "Due Date": due_date,
+        })
+    return merged_referees
+
+class FSJournal(JournalBase):
+    def __init__(self, driver=None, debug=True):
+        self.driver = driver
+
+    def get_url(self):
+        return None
+
+    def login(self):
+        pass
+
+    def scrape_manuscripts_and_emails(self):
+        MY_EMAILS = {"dylansmb@gmail.com", "dylan.possamai@math.ethz.ch"}
+        MY_NAMES = {"dylan possamai", "dylan possamaï"}
+
+        try:
+            starred = fetch_starred_emails('FS')
+        except Exception:
+            return []
+
+        id_to_emails = {}
+        all_ms_ids = set()
+        for mail in starred:
+            ids = set()
+            for field in ("subject",):
+                can_id = canonicalize_fs_id(mail.get(field, ""))
+                if can_id:
+                    ids.add(can_id)
+            for id_str in ids:
+                if not id_str: continue
+                id_to_emails.setdefault(id_str, []).append(mail)
+                all_ms_ids.add(id_str)
+
+        try:
+            service = gmail_api_authenticate()
+        except Exception:
+            return []
+        ms_id_strings = set(all_ms_ids)
+        query = 'from:(dylansmb@gmail.com OR dylan.possamai@math.ethz.ch) subject:FS- newer_than:1y'
+        try:
+            sent_messages = gmail_search_messages(service, query, max_results=200)
+        except Exception:
+            sent_messages = []
+
+        sent_emails = []
+        for msg in sent_messages:
+            headers = msg['payload']['headers']
+            subject = next((h['value'] for h in headers if h['name'] == 'Subject'), '')
+            from_ = next((h['value'] for h in headers if h['name'] == 'From'), '')
+            to_ = next((h['value'] for h in headers if h['name'] == 'To'), '')
+            date = next((h['value'] for h in headers if h['name'] == 'Date'), '')
+            for ms_id in ms_id_strings:
+                if ms_id in (''.join(re.findall(r'\d', subject))):
+                    sent_emails.append({
+                        'raw_msg': None,
+                        'subject': subject,
+                        'date': date,
+                        'from': from_,
+                        'to': to_,
+                        'gmail_msg': msg,
+                    })
+                    break
+        for mail in sent_emails:
+            ids = set()
+            for field in ("subject",):
+                can_id = canonicalize_fs_id(mail.get(field, ""))
+                if can_id:
+                    ids.add(can_id)
+            for id_str in ids:
+                if not id_str: continue
+                id_to_emails.setdefault(id_str, []).append(mail)
+
+        manuscripts = []
+        for id_str, emails in id_to_emails.items():
+            ms_id = display_fs_id(id_str)
+            contacts = []
+            accepteds = []
+            for mail in emails:
+                from_addr = (mail.get("from") or "").lower()
+                from_addr_normalized = from_addr.replace("ï", "i").replace("ı", "i")
+                is_mine = (
+                    any(addr in from_addr for addr in MY_EMAILS)
+                    or any(addr in from_addr_normalized for addr in MY_EMAILS)
+                    or any(name in from_addr_normalized for name in MY_NAMES)
+                )
+                if is_mine:
+                    contacts.append(mail)
+                else:
+                    ref_email = extract_email_only(mail.get("from", ""))
+                    ref_name = extract_name_from_header(mail.get("from", ""))
+                    if is_real_referee(ref_email, ref_name):
+                        accepteds.append(mail)
+
+            title, first_author, contact_date = "", "", None
+            for mail in sorted(contacts, key=lambda m: m.get("date", ""), reverse=True):
+                if mail.get("gmail_msg"):
+                    try:
+                        pdf_paths = extract_pdf_attachments_from_gmail_message(service, mail["gmail_msg"])
+                        if pdf_paths:
+                            title, first_author = parse_pdf_title_author(pdf_paths[0])
+                            contact_date = parse_email_date(mail.get("date"))
+                            break
+                    except Exception:
+                        pass
+
+            clusters = gather_thread_referee_clusters(emails, MY_EMAILS, KNOWN_EDITORS)
+            referee_records = deduplicate_referees_by_username(
+                clusters, accepteds, contacts, contact_date
+            )
+
+            n_accepted = sum(1 for r in referee_records if r["Status"] == "Accepted")
+            current_stage = "All Referees Assigned" if n_accepted >= 2 else "Pending Referee Assignments"
+            manuscripts.append({
+                "Manuscript #": ms_id,
+                "Title": title,
+                "Contact Author": first_author,
+                "Current Stage": current_stage,
+                "Referees": referee_records,
+            })
+        return manuscripts

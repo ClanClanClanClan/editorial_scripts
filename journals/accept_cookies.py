@@ -1,0 +1,16 @@
+from core.paper_downloader import get_paper_downloader
+from playwright.sync_api import sync_playwright
+
+profile_path = "/Users/dylanpossamai/Library/Application Support/Google/Chrome/JOTAProfile"
+
+with sync_playwright() as p:
+    browser = p.chromium.launch_persistent_context(
+        profile_path,
+        headless=False,
+        args=["--window-size=1200,900"]
+    )
+    page = browser.new_page()
+    page.goto("https://www2.cloud.editorialmanager.com/jota/default2.aspx")
+    print("Please accept the cookies by hand, then close the browser window.")
+    input("Press Enter after closing the browser window...")
+    browser.close()

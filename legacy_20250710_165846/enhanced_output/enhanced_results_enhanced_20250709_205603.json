@@ -1,0 +1,120 @@
+{
+  "session_id": "enhanced_20250709_205603",
+  "start_time": "2025-07-09T20:56:03.417696",
+  "journals": {
+    "MF": {
+      "journal": "MF",
+      "test_start": "2025-07-09T20:56:03.417970",
+      "phases": {
+        "connection": {
+          "status": "success",
+          "url": "https://mc.manuscriptcentral.com/mafi",
+          "title": "ScholarOne Manuscripts",
+          "load_time": "< 30s"
+        },
+        "login": {
+          "status": "success",
+          "method": "enhanced"
+        },
+        "navigation": {
+          "status": "success",
+          "method": "enhanced"
+        },
+        "scraping": {
+          "status": "success",
+          "manuscripts_found": 0,
+          "has_referee_data": false,
+          "has_download_data": false,
+          "warning": "Expected 4 referees, found 0"
+        }
+      },
+      "manuscripts": [],
+      "error": null,
+      "success": true,
+      "test_end": "2025-07-09T20:57:38.860623"
+    },
+    "MOR": {
+      "journal": "MOR",
+      "test_start": "2025-07-09T20:57:38.860910",
+      "phases": {
+        "connection": {
+          "status": "success",
+          "url": "https://mc.manuscriptcentral.com/mathor",
+          "title": "ScholarOne Manuscripts",
+          "load_time": "< 30s"
+        },
+        "login": {
+          "status": "success",
+          "method": "enhanced"
+        },
+        "navigation": {
+          "status": "success",
+          "method": "enhanced"
+        },
+        "scraping": {
+          "status": "success",
+          "manuscripts_found": 1,
+          "has_referee_data": true,
+          "has_download_data": true,
+          "warning": "Expected 5 referees, found 2"
+        }
+      },
+      "manuscripts": [
+        {
+          "id": "MOR-2024-0804",
+          "title": "Semi-static variance-optimal hedging with self-exciting jumps",
+          "author": "Giorgia Callegaro",
+          "submission_date": "07-Jun-2025",
+          "referee_count": 2,
+          "has_emails": true,
+          "has_downloads": true,
+          "referees": [
+            {
+              "name": "Jan Kallsen",
+              "status": "Accepted",
+              "email": "kallsen@math.uni-kiel.de",
+              "contacted_date": "10-Jun-2025",
+              "accepted_date": "11-Jun-2025",
+              "due_date": "11-Jul-2025",
+              "lateness": ""
+            },
+            {
+              "name": "Alessandra Creatarola",
+              "status": "Accepted",
+              "email": "katyascheinberg@gmail.com",
+              "contacted_date": "10-Jun-2025",
+              "accepted_date": "01-Jul-2025",
+              "due_date": "31-Jul-2025",
+              "lateness": ""
+            }
+          ]
+        }
+      ],
+      "error": null,
+      "success": true,
+      "test_end": "2025-07-09T20:58:35.088721"
+    }
+  },
+  "summary": {
+    "total_tested": 2,
+    "successful": 2,
+    "success_rate": 1.0,
+    "total_manuscripts": 1,
+    "total_referees": 2,
+    "expected_vs_actual": {
+      "MF": {
+        "expected_manuscripts": 2,
+        "expected_referees": 4,
+        "actual_manuscripts": 0,
+        "actual_referees": 0
+      },
+      "MOR": {
+        "expected_manuscripts": 3,
+        "expected_referees": 5,
+        "actual_manuscripts": 1,
+        "actual_referees": 2
+      }
+    }
+  },
+  "end_time": "2025-07-09T20:58:35.089130"
+}

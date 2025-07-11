@@ -1,0 +1,18 @@
+2025-07-10 15:59:39,268 - INFO - 📝 Logging to: final_logs/mor_final_20250710_155939.log
+2025-07-10 15:59:39,269 - INFO - 🚀 Final Mathematics of Operations Research extractor initialized
+2025-07-10 15:59:39,269 - INFO -    Headless: True
+2025-07-10 15:59:39,269 - INFO - 🚀 Starting complete MOR extraction
+2025-07-10 15:59:39,269 - INFO - 🚀 Creating robust Chrome driver
+2025-07-10 15:59:39,269 - INFO -    Strategy 1/3: minimal_args
+2025-07-10 15:59:39,785 - INFO - patching driver executable /Users/dylanpossamai/Library/Application Support/undetected_chromedriver/undetected_chromedriver
+2025-07-10 15:59:48,495 - WARNING -    Strategy minimal_args failed: Message: invalid argument: cannot parse capability: goog:chromeOptions
+from invalid argument: unreco...
+2025-07-10 15:59:48,496 - INFO -    Strategy 2/3: stable_args
+2025-07-10 15:59:49,012 - INFO - patching driver executable /Users/dylanpossamai/Library/Application Support/undetected_chromedriver/undetected_chromedriver
+2025-07-10 15:59:58,244 - WARNING -    Strategy stable_args failed: Message: invalid argument: cannot parse capability: goog:chromeOptions
+from invalid argument: unreco...
+2025-07-10 15:59:58,244 - INFO -    Strategy 3/3: compatibility
+2025-07-10 15:59:58,721 - INFO - patching driver executable /Users/dylanpossamai/Library/Application Support/undetected_chromedriver/undetected_chromedriver
+2025-07-10 16:00:06,088 - WARNING -    Strategy compatibility failed: Message: invalid argument: cannot parse capability: goog:chromeOptions
+from invalid argument: unreco...
+2025-07-10 16:00:06,090 - ERROR - ❌ All driver creation strategies failed

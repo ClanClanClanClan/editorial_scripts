@@ -1,0 +1,166 @@
+import os
+import time
+from bs4 import BeautifulSoup
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import TimeoutException, NoSuchElementException, ElementClickInterceptedException
+
+from core.base import JournalBase
+
+class NACOJournal(JournalBase):
+    NACO_URL = "https://ef.msp.org/login.php"
+
+    def __init__(self, driver, debug=True, chrome_profile_dir=None):
+        super().__init__(driver)
+        self.debug = debug
+        self.chrome_profile_dir = chrome_profile_dir
+
+    def get_url(self):
+        return self.NACO_URL
+    
+    def _find_mine_link(self, driver, timeout=10):
+        """Find the 'Mine' link using multiple selectors"""
+        # Try different selectors for the Mine link
+        selectors = [
+            (By.LINK_TEXT, "Mine"),
+            (By.PARTIAL_LINK_TEXT, "Mine"),
+            (By.XPATH, "//a[contains(text(), 'Mine')]"),
+            (By.XPATH, "//a[contains(@href, 'mine')]"),
+            (By.XPATH, "//a[contains(@href, 'Mine')]"),
+            (By.CSS_SELECTOR, "a[href*='mine']"),
+            (By.CSS_SELECTOR, "a[href*='Mine']"),
+            (By.XPATH, "//a[text()='Mine']"),
+            (By.XPATH, "//span[contains(text(), 'Mine')]/parent::a"),
+            (By.XPATH, "//li[contains(text(), 'Mine')]//a"),
+        ]
+        
+        for by, selector in selectors:
+            try:
+                element = WebDriverWait(driver, timeout).until(
+                    EC.presence_of_element_located((by, selector))
+                )
+                if element and element.is_displayed():
+                    if self.debug:
+                        print(f"[NACO] Found 'Mine' link with selector: {selector}")
+                    return element
+            except TimeoutException:
+                continue
+        
+        # If not found, try a broader search
+        try:
+            all_links = driver.find_elements(By.TAG_NAME, "a")
+            for link in all_links:
+                try:
+                    text = link.text.strip().lower()
+                    href = link.get_attribute("href") or ""
+                    if ("mine" in text or "mine" in href.lower()) and link.is_displayed():
+                        if self.debug:
+                            print(f"[NACO] Found 'Mine' link via broad search: {link.text}")
+                        return link
+                except:
+                    continue
+        except:
+            pass
+        
+        return None
+
+    def login(self):
+        driver = self.driver
+        driver.get(self.NACO_URL)
+        time.sleep(1.0)
+
+        # 1. If already logged in, "Mine" should be present
+        try:
+            mine_link = self._find_mine_link(driver, timeout=5)
+            if mine_link and mine_link.is_displayed():
+                if self.debug:
+                    print("[NACO] Already logged in, skipping login form.")
+                return  # Already logged in!
+        except TimeoutException:
+            pass  # Not yet logged in, continue to login
+
+        # 2. Try normal login if not already logged in
+        user = os.environ.get("NACO_USER")
+        pw = os.environ.get("NACO_PASS")
+        try:
+            user_field = WebDriverWait(driver, 12).until(
+                EC.presence_of_element_located((By.ID, "login"))
+            )
+            pw_field = driver.find_element(By.NAME, "password")
+        except TimeoutException:
+            # If neither "Mine" nor login fields, something is wrong
+            raise Exception("[NACO] Login fields not found (page did not load?)")
+        user_field.clear()
+        user_field.send_keys(user)
+        pw_field.clear()
+        pw_field.send_keys(pw)
+        login_btn = driver.find_element(By.NAME, "signin")
+        login_btn.click()
+        if self.debug:
+            print("[NACO] Submitted login form.")
+        time.sleep(2)
+
+    def scrape_manuscripts_and_emails(self):
+        driver = self.driver
+        self.login()
+        time.sleep(1.5)
+        # Try to find and click the "Mine" link robustly
+        try:
+            mine_link = self._find_mine_link(driver, timeout=12)
+            if not mine_link:
+                raise Exception("Mine link not found")
+            
+            driver.execute_script("arguments[0].scrollIntoView(true);", mine_link)
+            # Sometimes in headless mode, element is present but not yet clickable
+            for attempt in range(5):
+                if mine_link.is_displayed() and mine_link.is_enabled():
+                    try:
+                        mine_link.click()
+                        if self.debug:
+                            print("[NACO] Clicked 'Mine' link.")
+                        break
+                    except ElementClickInterceptedException:
+                        time.sleep(0.8)
+                else:
+                    time.sleep(0.8)
+            else:
+                print("[NACO] 'Mine' link found but never became clickable.")
+                with open("naco_debug_nomine.html", "w", encoding="utf-8") as f:
+                    f.write(driver.page_source)
+                return []
+        except Exception as e:
+            print(f"[NACO] Could not find/click 'Mine' link: {e}")
+            with open("naco_debug_nomine.html", "w", encoding="utf-8") as f:
+                f.write(driver.page_source)
+            return []
+
+        # Wait briefly for Mine page to load (no error if no articles)
+        time.sleep(2.0)
+        soup = BeautifulSoup(driver.page_source, "html.parser")
+        articles = soup.find_all("article", class_="JournalView-Listing")
+
+        # If no articles, just save the HTML and quietly return
+        if not articles:
+            if self.debug:
+                print("[NACO] No articles assigned (empty AE queue).")
+            with open("naco_mine.html", "w", encoding="utf-8") as f:
+                f.write(driver.page_source)
+            return []
+
+        # Otherwise, parse your AE blocks and manuscripts (future logic)
+        manuscripts = []
+        for article in articles:
+            name_span = article.find("span", {"data-tooltip": "Associate Editor"})
+            if not name_span or "Possamaï" not in name_span.text:
+                continue  # not your AE block
+            h2 = article.find("h2")
+            if h2 and "no articles" in h2.text.lower():
+                continue  # nothing assigned
+            # Placeholder for future extraction logic when you have real manuscripts
+            # manuscripts.append({...})
+
+        # Save page source for reference
+        with open("naco_mine.html", "w", encoding="utf-8") as f:
+            f.write(driver.page_source)
+        return manuscripts

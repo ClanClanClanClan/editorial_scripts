@@ -1,0 +1,225 @@
+{
+  "generated_at": "2025-07-11T21:07:08.667524",
+  "legacy_analysis": {
+    "legacy_scrapers": [
+      {
+        "name": "mafe_hybrid",
+        "path": "journals/mafe_hybrid.py",
+        "size": 24349,
+        "modified": "2025-07-09T14:43:35.306964"
+      },
+      {
+        "name": "jota_enhanced",
+        "path": "journals/jota_enhanced.py",
+        "size": 19106,
+        "modified": "2025-07-09T13:20:09.612569"
+      },
+      {
+        "name": "sifin",
+        "path": "journals/sifin.py",
+        "size": 5851,
+        "modified": "2025-07-11T13:54:39.271079"
+      },
+      {
+        "name": "mafe",
+        "path": "journals/mafe.py",
+        "size": 27454,
+        "modified": "2025-07-09T15:01:48.031093"
+      },
+      {
+        "name": "siam_base",
+        "path": "journals/siam_base.py",
+        "size": 93194,
+        "modified": "2025-07-11T17:21:09.170654"
+      },
+      {
+        "name": "naco",
+        "path": "journals/naco.py",
+        "size": 15723,
+        "modified": "2025-07-09T14:42:32.403806"
+      },
+      {
+        "name": "accept_cookies",
+        "path": "journals/accept_cookies.py",
+        "size": 635,
+        "modified": "2025-07-09T11:39:00.271128"
+      },
+      {
+        "name": "sicon",
+        "path": "journals/sicon.py",
+        "size": 5605,
+        "modified": "2025-07-11T13:21:01.844808"
+      },
+      {
+        "name": "fs",
+        "path": "journals/fs.py",
+        "size": 46615,
+        "modified": "2025-07-09T14:42:09.742956"
+      },
+      {
+        "name": "base_journal",
+        "path": "journals/base_journal.py",
+        "size": 10486,
+        "modified": "2025-07-10T12:45:50.496001"
+      },
+      {
+        "name": "mor",
+        "path": "journals/mor.py",
+        "size": 44104,
+        "modified": "2025-07-11T17:45:22.091508"
+      },
+      {
+        "name": "mf",
+        "path": "journals/mf.py",
+        "size": 50427,
+        "modified": "2025-07-11T17:41:59.338135"
+      },
+      {
+        "name": "jota",
+        "path": "journals/jota.py",
+        "size": 8123,
+        "modified": "2025-07-09T15:02:30.738205"
+      },
+      {
+        "name": "jota_hybrid",
+        "path": "journals/jota_hybrid.py",
+        "size": 35560,
+        "modified": "2025-07-09T14:43:22.804284"
+      },
+      {
+        "name": "base",
+        "path": "journals/base.py",
+        "size": 5411,
+        "modified": "2025-05-27T12:51:16.329750"
+      }
+    ],
+    "config_files": [
+      {
+        "name": ".env",
+        "path": ".env",
+        "size": 525
+      },
+      {
+        "name": "credentials.json",
+        "path": "credentials.json",
+        "size": 412
+      }
+    ],
+    "data_files": [
+      {
+        "directory": "data",
+        "file_count": 2,
+        "size_mb": 0.16796875
+      },
+      {
+        "directory": "downloads",
+        "file_count": 1,
+        "size_mb": 0.004149436950683594
+      }
+    ],
+    "issues": [],
+    "recommendations": [
+      "Found legacy scrapers - consider running parallel extraction test"
+    ]
+  },
+  "extractor_comparisons": {
+    "sicon": {
+      "journal": "SICON",
+      "legacy_available": false,
+      "new_available": true,
+      "legacy_results": null,
+      "new_results": null,
+      "differences": [],
+      "recommendation": "Only new system available - ready for migration"
+    },
+    "sifin": {
+      "journal": "SIFIN",
+      "legacy_available": false,
+      "new_available": true,
+      "legacy_results": null,
+      "new_results": null,
+      "differences": [],
+      "recommendation": "Only new system available - ready for migration"
+    }
+  },
+  "migration_plan": {
+    "phases": [
+      {
+        "name": "Environment Setup",
+        "description": "Prepare new system environment",
+        "steps": [
+          "Activate clean virtual environment",
+          "Verify PostgreSQL database connection",
+          "Run integration tests to ensure system health",
+          "Backup existing data and configurations"
+        ],
+        "estimated_time": "30 minutes"
+      },
+      {
+        "name": "Data Migration",
+        "description": "Migrate existing data to new system",
+        "steps": [
+          "Export data from legacy system (if any)",
+          "Create database tables using new schema",
+          "Import historical data with transformation",
+          "Validate data integrity"
+        ],
+        "estimated_time": "1-2 hours"
+      },
+      {
+        "name": "Parallel Validation",
+        "description": "Run both systems in parallel",
+        "steps": [
+          "Run legacy extractors and save results",
+          "Run new extractors and save results",
+          "Compare outputs for accuracy",
+          "Document any differences"
+        ],
+        "estimated_time": "2-4 hours"
+      },
+      {
+        "name": "System Cutover",
+        "description": "Switch to new system",
+        "steps": [
+          "Stop legacy system scheduling",
+          "Update automation scripts to use new system",
+          "Monitor new system for 24 hours",
+          "Archive legacy system files"
+        ],
+        "estimated_time": "1 hour + monitoring"
+      }
+    ],
+    "timeline": {},
+    "risks": [
+      "Authentication credentials may need re-setup",
+      "Journal websites may have changed since legacy implementation",
+      "Data formats may be incompatible",
+      "Performance may differ between systems"
+    ],
+    "rollback_plan": {
+      "trigger_conditions": [
+        "New system fails to authenticate",
+        "Data extraction returns empty results",
+        "Critical errors in new scrapers"
+      ],
+      "steps": [
+        "Reactivate legacy virtual environment",
+        "Restore legacy cron jobs/scheduling",
+        "Continue with legacy system while debugging new system"
+      ]
+    },
+    "validation_steps": [
+      "Run integration tests successfully",
+      "Compare manuscript counts between systems",
+      "Verify referee data completeness",
+      "Check database integrity constraints"
+    ]
+  },
+  "next_steps": [
+    "Review this migration report",
+    "Run parallel extraction test using generated scripts",
+    "Backup any important legacy data",
+    "Set up credentials for new system",
+    "Execute migration plan phases in order"
+  ]
+}

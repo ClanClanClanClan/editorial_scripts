@@ -1,0 +1,21 @@
+{
+  "journal": "MF",
+  "timestamp": "2025-07-09T23:32:02.148378",
+  "total_manuscripts": 1,
+  "total_referees": 0,
+  "expected_manuscripts": 2,
+  "expected_referees": 4,
+  "success": false,
+  "unique_manuscripts": [
+    "MAFI-2025-0166"
+  ],
+  "manuscripts": [
+    {
+      "Manuscript #": "",
+      "Title": "",
+      "Contact Author": "",
+      "Submission Date": "",
+      "Referees": []
+    }
+  ]
+}

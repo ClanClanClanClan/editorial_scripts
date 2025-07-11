@@ -1,0 +1,25 @@
+2025-07-10 15:35:37,805 - PERFECT_MF - INFO - 🚀 Starting perfect MF extraction - Log: production_logs/mf_extraction_20250710_153537.log
+2025-07-10 15:35:37,805 - PERFECT_MF - INFO - 📋 Configured for Mathematical Finance
+2025-07-10 15:35:37,806 - PERFECT_MF - INFO - 🖥️  Headless mode: True
+2025-07-10 15:35:37,806 - PERFECT_MF - INFO - 🔄 Max retries: 3
+2025-07-10 15:35:37,806 - PERFECT_MF - INFO - 🚀 Starting perfect MF extraction
+2025-07-10 15:35:37,806 - PERFECT_MF - INFO -    Headless: True, Max retries: 3
+2025-07-10 15:35:37,806 - PERFECT_MF - INFO - 🚀 Creating Chrome driver with retry fallbacks
+2025-07-10 15:35:37,806 - PERFECT_MF - INFO -    Attempt 1/4: undetected_chrome_default
+2025-07-10 15:35:40,685 - undetected_chromedriver.patcher - INFO - patching driver executable /Users/dylanpossamai/Library/Application Support/undetected_chromedriver/undetected_chromedriver
+2025-07-10 15:35:54,447 - PERFECT_MF - WARNING -    ❌ Strategy undetected_chrome_default failed: Message: invalid argument: cannot parse capability: goog:chromeOptions
+from invalid argument: unreco...
+2025-07-10 15:35:54,447 - PERFECT_MF - INFO -    Attempt 2/4: undetected_chrome_126
+2025-07-10 15:35:58,451 - undetected_chromedriver.patcher - INFO - patching driver executable /Users/dylanpossamai/Library/Application Support/undetected_chromedriver/undetected_chromedriver
+2025-07-10 15:36:14,217 - PERFECT_MF - WARNING -    ❌ Strategy undetected_chrome_126 failed: Message: invalid argument: cannot parse capability: goog:chromeOptions
+from invalid argument: unreco...
+2025-07-10 15:36:14,218 - PERFECT_MF - INFO -    Attempt 3/4: undetected_chrome_stable
+2025-07-10 15:36:22,775 - undetected_chromedriver.patcher - INFO - patching driver executable /Users/dylanpossamai/Library/Application Support/undetected_chromedriver/undetected_chromedriver
+2025-07-10 15:36:35,508 - PERFECT_MF - WARNING -    ❌ Strategy undetected_chrome_stable failed: Message: invalid argument: cannot parse capability: goog:chromeOptions
+from invalid argument: unreco...
+2025-07-10 15:36:35,509 - PERFECT_MF - INFO -    Attempt 4/4: undetected_chrome_compatibility
+2025-07-10 15:36:39,483 - undetected_chromedriver.patcher - INFO - patching driver executable /Users/dylanpossamai/Library/Application Support/undetected_chromedriver/undetected_chromedriver
+2025-07-10 15:36:58,954 - PERFECT_MF - WARNING -    ❌ Strategy undetected_chrome_compatibility failed: Message: invalid argument: cannot parse capability: goog:chromeOptions
+from invalid argument: unreco...
+2025-07-10 15:36:58,956 - PERFECT_MF - ERROR - ❌ All driver creation strategies failed
+2025-07-10 15:36:58,957 - PERFECT_MF - ERROR - ❌ Failed to create driver

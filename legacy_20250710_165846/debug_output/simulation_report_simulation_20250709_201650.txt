@@ -1,0 +1,45 @@
+📋 DETAILED SIMULATION REPORT
+==================================================
+
+🔬 MF Journal Analysis:
+------------------------------
+Environment: ALL_SET
+Connection: SUCCESS (1.5s)
+Login: SUCCESS
+  - Verification: HANDLED
+Scraping: SUCCESS
+  - Manuscripts: 2
+  - Referee Data: YES
+  - PDF Links: YES
+
+📚 Sample Manuscripts:
+  1. MAFI-2024-001: A Novel Approach to Stochastic Volatility Models i...
+     Author: Dr. Sarah Thompson
+     Referees: 2 (2 with email)
+  2. MAFI-2024-002: Risk Management in Cryptocurrency Markets: A Machi...
+     Author: Dr. James Wilson
+     Referees: 1 (1 with email)
+
+🔬 MOR Journal Analysis:
+------------------------------
+Environment: ALL_SET
+Connection: SUCCESS (1.5s)
+Login: SUCCESS
+Scraping: SUCCESS
+  - Manuscripts: 2
+  - Referee Data: YES
+  - PDF Links: YES
+
+📚 Sample Manuscripts:
+  1. MOR-2024-001: Optimization of Supply Chain Networks under Uncert...
+     Author: Prof. David Kim
+     Referees: 2 (2 with email)
+  2. MOR-2024-002: Integer Programming Methods for Facility Location ...
+     Author: Dr. Maria Silva
+     Referees: 2 (2 with email)
+
+📊 OVERALL SUMMARY:
+Total Journals: 2
+Excellent Status: 2
+Success Rate: 100.0%
+Mode: SIMULATION

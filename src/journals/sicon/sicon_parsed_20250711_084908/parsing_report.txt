@@ -1,0 +1,72 @@
+SICON Referee Status Report
+============================================================
+
+Extraction Time: 2025-07-11T08:49:51.871976
+Total Manuscripts: 4
+Total Referees: 13
+
+REFEREE STATUS BREAKDOWN:
+  Accepted: 3 (23.1%)
+  Declined: 1 (7.7%)
+  Unknown: 9 (69.2%)
+
+============================================================
+
+DETAILED MANUSCRIPT INFORMATION:
+
+Manuscript M172838
+  Title: Constrained Mean-Field Control with Singular Control: Existence, Stochastic Maximum Principle and Constrained FBSDE
+  Corresponding Editor: Bayraktar
+  Associate Editor: Possamaï
+  Submitted: 2025-01-23
+  Days in System: 169
+
+  Referees (7):
+
+    Declined:
+      - Ferrari (due: 2025-07-15) [AcceptedAcceptedDeclinedDeclinedDeclinedDeclinedDeclined]
+
+----------------------------------------
+
+Manuscript M173704
+  Title: Scaling Limits for Exponential Hedging in the Brownian Framework
+  Corresponding Editor: Zhang
+  Associate Editor: Possamaï
+  Submitted: 2025-02-25
+  Days in System: 136
+
+  Referees (2):
+
+    Accepted:
+      - Cohen (due: 2025-07-15) [AcceptedAccepted]
+
+----------------------------------------
+
+Manuscript M173889
+  Title: Hamilton-Jacobi-Bellman Equations in the Wasserstein Space for the Optimal Control of the Kushner-Stratonovich Equation
+  Corresponding Editor: Bayraktar
+  Associate Editor: Possamaï
+  Submitted: 2025-03-04
+  Days in System: 129
+
+  Referees (2):
+
+    Accepted:
+      - Ekren (due: 2025-07-15) [AcceptedAccepted]
+
+----------------------------------------
+
+Manuscript M176733
+  Title: Extended Mean Field Games with Terminal Constraint via Decoupling Fields
+  Corresponding Editor: Bayraktar
+  Associate Editor: Possamaï
+  Submitted: 2025-06-09
+  Days in System: 32
+
+  Referees (2):
+
+    Accepted:
+      - daudin (due: 2025-08-14) [AcceptedAccepted]
+
+----------------------------------------
+

@@ -1,0 +1,13 @@
+[01:31:46] SUCCESS: Ultra-robust Chrome WebDriver initialized
+[01:31:46] INFO: Ultra-robust authentication with SIFIN
+[01:31:57] DEBUG: Screenshot saved: 01_journal_initial_013156.png Initial journal page
+[01:31:57] INFO: Clicking ORCID link
+[01:32:11] DEBUG: Screenshot saved: 01_journal_initial_013210.png Initial journal page
+[01:32:11] INFO: Clicking ORCID link
+[01:32:27] DEBUG: Screenshot saved: 01_journal_initial_013226.png Initial journal page
+[01:32:27] INFO: Clicking ORCID link
+[01:32:49] DEBUG: Screenshot saved: 01_journal_initial_013249.png Initial journal page
+[01:32:49] INFO: Clicking ORCID link
+[01:33:24] DEBUG: Screenshot saved: 01_journal_initial_013323.png Initial journal page
+[01:33:24] INFO: Clicking ORCID link
+[01:33:25] ERROR: Extraction failed: Authentication failed

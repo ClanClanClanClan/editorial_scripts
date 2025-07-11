@@ -1,0 +1,31 @@
+2025-07-10 13:45:36,872 - INFO - 🚀 Starting complete MF extraction
+2025-07-10 13:45:36,872 - INFO - 🚀 Creating Chrome driver...
+2025-07-10 13:45:45,053 - INFO - ✅ Chrome driver created
+2025-07-10 13:45:45,053 - INFO - 🔐 Logging into MF...
+2025-07-10 13:47:14,003 - WARNING - Could not capture state for initial_page: Message: timeout: Timed out receiving message from renderer: 30.000
+  (Session info: chrome=138.0.7204.100)
+Stacktrace:
+0   chromedriver                        0x0000000105378ea4 cxxbridge1$str$ptr + 2722840
+1   chromedriver                        0x0000000105370dac cxxbridge1$str$ptr + 2689824
+2   chromedriver                        0x0000000104ec23ec cxxbridge1$string$len + 90648
+3   chromedriver                        0x0000000104ead200 cxxbridge1$string$len + 4140
+4   chromedriver                        0x0000000104eacf78 cxxbridge1$string$len + 3492
+5   chromedriver                        0x0000000104eaad30 chromedriver + 191792
+6   chromedriver                        0x0000000104eab8c0 chromedriver + 194752
+7   chromedriver                        0x0000000104eb8af0 cxxbridge1$string$len + 51484
+8   chromedriver                        0x0000000104ecea08 cxxbridge1$string$len + 141364
+9   chromedriver                        0x0000000104eabf1c chromedriver + 196380
+10  chromedriver                        0x0000000104ece810 cxxbridge1$string$len + 140860
+11  chromedriver                        0x0000000104f4a87c cxxbridge1$string$len + 648872
+12  chromedriver                        0x0000000104efd834 cxxbridge1$string$len + 333408
+13  chromedriver                        0x000000010533bfc0 cxxbridge1$str$ptr + 2473268
+14  chromedriver                        0x000000010533f22c cxxbridge1$str$ptr + 2486176
+15  chromedriver                        0x000000010531da08 cxxbridge1$str$ptr + 2348924
+16  chromedriver                        0x000000010533fae8 cxxbridge1$str$ptr + 2488412
+17  chromedriver                        0x000000010530ea98 cxxbridge1$str$ptr + 2287628
+18  chromedriver                        0x000000010535f9d8 cxxbridge1$str$ptr + 2619212
+19  chromedriver                        0x000000010535fb64 cxxbridge1$str$ptr + 2619608
+20  chromedriver                        0x00000001053709e8 cxxbridge1$str$ptr + 2688860
+21  libsystem_pthread.dylib             0x000000019690ec0c _pthread_start + 136
+22  libsystem_pthread.dylib             0x0000000196909b80 thread_start + 8
+

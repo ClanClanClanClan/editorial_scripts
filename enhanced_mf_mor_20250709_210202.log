@@ -1,0 +1,170 @@
+2025-07-09 21:02:02,926 - __main__ - INFO - 🎯 Starting Enhanced MF and MOR Testing
+2025-07-09 21:02:02,926 - __main__ - INFO - ============================================================
+2025-07-09 21:02:02,926 - __main__ - INFO - 🎯 Target: MF = 2 manuscripts with 4 referees
+2025-07-09 21:02:02,926 - __main__ - INFO - 🎯 Target: MOR = 3 manuscripts with 5 referees
+2025-07-09 21:02:02,926 - __main__ - INFO - ============================================================
+2025-07-09 21:02:02,926 - __main__ - INFO - \n🔬 Enhanced testing for MF
+2025-07-09 21:02:02,926 - __main__ - INFO - ----------------------------------------
+2025-07-09 21:02:02,926 - __main__ - INFO - 🔬 Enhanced testing for MF to find ALL manuscripts
+2025-07-09 21:02:02,926 - __main__ - INFO - 🌐 Phase 1: Testing connection to MF
+2025-07-09 21:02:02,926 - __main__ - INFO - 🚗 Creating robust Chrome driver...
+2025-07-09 21:02:04,132 - undetected_chromedriver.patcher - INFO - patching driver executable /Users/dylanpossamai/Library/Application Support/undetected_chromedriver/undetected_chromedriver
+2025-07-09 21:02:06,112 - __main__ - INFO - ✅ Chrome driver created successfully
+2025-07-09 21:02:07,840 - __main__ - INFO - ✅ Connection successful: ScholarOne Manuscripts
+2025-07-09 21:02:08,089 - __main__ - INFO - 📸 Screenshot: enhanced_output/MF_connection_20250709_210207.png
+2025-07-09 21:02:08,097 - __main__ - INFO - 📄 HTML: enhanced_output/MF_connection_20250709_210207.html
+2025-07-09 21:02:08,102 - __main__ - INFO - 🔐 Phase 2: Enhanced login for MF
+2025-07-09 21:02:08,583 - __main__ - INFO - 📚 Phase 3: Enhanced manuscript scraping for MF
+2025-07-09 21:02:08,583 - [MF] - INFO - Navigating to MF dashboard...
+2025-07-09 21:02:11,360 - [MF] - INFO - Accepted cookies.
+2025-07-09 21:02:18,941 - [MF] - DEBUG - No reCAPTCHA present.
+2025-07-09 21:02:49,653 - [MF] - DEBUG - No visible verification input appeared within 15s.
+2025-07-09 21:02:51,720 - [MF] - DEBUG - No reCAPTCHA present.
+2025-07-09 21:02:51,720 - [MF] - INFO - Ready to continue navigation after login.
+2025-07-09 21:02:55,777 - [MF] - DEBUG - No reCAPTCHA present.
+2025-07-09 21:02:55,778 - [MF] - INFO - Fetching starred emails for MF...
+2025-07-09 21:02:55,780 - googleapiclient.discovery_cache - INFO - file_cache is only supported with oauth2client<4.0.0
+2025-07-09 21:02:56,177 - root - INFO - Found 9 messages to process for MF
+2025-07-09 21:02:58,940 - [MF] - INFO - Retrieved 4 flagged emails
+2025-07-09 21:02:58,941 - [MF] - DEBUG - Attempt 1 to find Associate Editor Center...
+2025-07-09 21:03:01,117 - [MF] - DEBUG - Attempt 2 to find Associate Editor Center...
+2025-07-09 21:03:03,292 - [MF] - DEBUG - Attempt 3 to find Associate Editor Center...
+2025-07-09 21:03:05,457 - [MF] - DEBUG - Attempt 4 to find Associate Editor Center...
+2025-07-09 21:03:07,621 - [MF] - DEBUG - Attempt 5 to find Associate Editor Center...
+2025-07-09 21:03:09,792 - [MF] - DEBUG - Attempt 6 to find Associate Editor Center...
+2025-07-09 21:03:11,957 - [MF] - DEBUG - Attempt 7 to find Associate Editor Center...
+2025-07-09 21:03:14,129 - [MF] - DEBUG - Attempt 8 to find Associate Editor Center...
+2025-07-09 21:03:16,293 - [MF] - DEBUG - Attempt 9 to find Associate Editor Center...
+2025-07-09 21:03:18,458 - [MF] - DEBUG - Attempt 10 to find Associate Editor Center...
+2025-07-09 21:03:20,625 - [MF] - DEBUG - Attempt 11 to find Associate Editor Center...
+2025-07-09 21:03:22,794 - [MF] - DEBUG - Attempt 12 to find Associate Editor Center...
+2025-07-09 21:03:24,959 - [MF] - DEBUG - Attempt 13 to find Associate Editor Center...
+2025-07-09 21:03:27,121 - [MF] - DEBUG - Attempt 14 to find Associate Editor Center...
+2025-07-09 21:03:29,280 - [MF] - DEBUG - Attempt 15 to find Associate Editor Center...
+2025-07-09 21:03:31,457 - [MF] - DEBUG - Final attempt with more aggressive searching...
+2025-07-09 21:03:31,464 - [MF] - DEBUG - Found 46 total links on page
+2025-07-09 21:03:31,600 - [MF] - DEBUG - Trying dashboard link: 'journal home'
+2025-07-09 21:03:35,700 - [MF] - DEBUG - No reCAPTCHA present.
+2025-07-09 21:03:35,719 - [MF] - DEBUG - No relevant status queues with count > 0 found.
+2025-07-09 21:03:35,719 - [MF] - INFO - Searching for direct navigation links to manuscripts...
+2025-07-09 21:03:35,743 - [MF] - INFO - Performing deep search for manuscripts in tables...
+2025-07-09 21:03:35,743 - [MF] - INFO - Final results (all parsed manuscripts): 0 manuscripts.
+2025-07-09 21:03:35,743 - __main__ - INFO - ✅ Enhanced scraping successful: 0 manuscripts found
+2025-07-09 21:03:35,743 - __main__ - INFO - 📊 MF Results:
+2025-07-09 21:03:35,743 - __main__ - INFO -    Expected: 2 manuscripts, 4 referees
+2025-07-09 21:03:35,743 - __main__ - INFO -    Found: 0 manuscripts, 0 referees
+2025-07-09 21:03:35,743 - __main__ - WARNING - ⚠️ Found fewer manuscripts than expected for MF
+2025-07-09 21:03:35,743 - __main__ - WARNING - ⚠️ Found fewer referees than expected for MF
+2025-07-09 21:03:36,523 - __main__ - INFO - 📸 Screenshot: enhanced_output/MF_scraping_success_20250709_210335.png
+2025-07-09 21:03:36,530 - __main__ - INFO - 📄 HTML: enhanced_output/MF_scraping_success_20250709_210335.html
+2025-07-09 21:03:36,706 - __main__ - INFO - ✅ MF test SUCCESSFUL
+2025-07-09 21:03:36,706 - __main__ - INFO -    📋 Manuscripts found: 0
+2025-07-09 21:03:36,706 - __main__ - INFO -    👥 Total referees: 0
+2025-07-09 21:03:36,706 - __main__ - INFO - \n🔬 Enhanced testing for MOR
+2025-07-09 21:03:36,706 - __main__ - INFO - ----------------------------------------
+2025-07-09 21:03:36,706 - __main__ - INFO - 🔬 Enhanced testing for MOR to find ALL manuscripts
+2025-07-09 21:03:36,706 - __main__ - INFO - 🌐 Phase 1: Testing connection to MOR
+2025-07-09 21:03:36,706 - __main__ - INFO - 🚗 Creating robust Chrome driver...
+2025-07-09 21:03:38,399 - undetected_chromedriver.patcher - INFO - patching driver executable /Users/dylanpossamai/Library/Application Support/undetected_chromedriver/undetected_chromedriver
+2025-07-09 21:03:40,869 - __main__ - INFO - ✅ Chrome driver created successfully
+2025-07-09 21:03:43,477 - __main__ - INFO - ✅ Connection successful: ScholarOne Manuscripts
+2025-07-09 21:03:43,722 - __main__ - INFO - 📸 Screenshot: enhanced_output/MOR_connection_20250709_210343.png
+2025-07-09 21:03:43,730 - __main__ - INFO - 📄 HTML: enhanced_output/MOR_connection_20250709_210343.html
+2025-07-09 21:03:43,736 - __main__ - INFO - 🔐 Phase 2: Enhanced login for MOR
+2025-07-09 21:03:43,736 - __main__ - INFO - 📚 Phase 3: Enhanced manuscript scraping for MOR
+2025-07-09 21:03:43,737 - [MOR] - INFO - Navigating to MOR dashboard...
+2025-07-09 21:03:46,641 - [MOR] - INFO - Accepted cookies.
+2025-07-09 21:03:55,084 - [MOR] - DEBUG - No reCAPTCHA found.
+2025-07-09 21:03:55,101 - [MOR] - DEBUG - Found and visible: TOKEN_VALUE
+2025-07-09 21:03:55,101 - [MOR] - INFO - Verification prompt visible. Fetching code from email...
+2025-07-09 21:03:55,103 - googleapiclient.discovery_cache - INFO - file_cache is only supported with oauth2client<4.0.0
+2025-07-09 21:03:55,104 - root - INFO - Waiting 5 seconds for verification email to arrive...
+2025-07-09 21:04:00,951 - root - INFO - Found newer verification code for MOR: 962477 (timestamp: Wed, 9 Jul 2025 18:57:50 +0000)
+2025-07-09 21:04:02,799 - root - INFO - Returning latest verification code for MOR: 962477
+2025-07-09 21:04:02,799 - [MOR] - DEBUG - Verification code fetched: '962477'
+2025-07-09 21:04:02,846 - [MOR] - INFO - Submitted verification code.
+2025-07-09 21:04:08,926 - [MOR] - DEBUG - No reCAPTCHA found.
+2025-07-09 21:04:08,926 - [MOR] - INFO - Ready to continue navigation after login.
+2025-07-09 21:04:13,000 - [MOR] - DEBUG - No reCAPTCHA found.
+2025-07-09 21:04:13,002 - googleapiclient.discovery_cache - INFO - file_cache is only supported with oauth2client<4.0.0
+2025-07-09 21:04:13,360 - root - INFO - Found 8 messages to process for MOR
+2025-07-09 21:04:40,834 - [MOR] - DEBUG - Trying alternative selectors for Associate Editor Center...
+2025-07-09 21:04:40,847 - [MOR] - ERROR - Could not find or click Associate Editor Center after login.
+2025-07-09 21:04:40,857 - [MOR] - INFO - Attempting deep search for manuscripts on current page...
+2025-07-09 21:04:40,862 - [MOR] - INFO - Found 4 potential manuscript links with pattern: //a[contains(@href, 'manuscript')]
+2025-07-09 21:04:41,920 - [MOR] - DEBUG - Pattern //a[contains(@href, 'manuscript')] failed: Message: element click intercepted: Element <a aria-current="step" target="_blank" href="https://support.silverchair.com/scholarone-manuscripts/ " hidefocus="true" style="outline: none;">...</a> is not clickable at point (1357, 15). Other element would receive the click: <div class="modal-backdrop fade in"></div>
+  (Session info: chrome=138.0.7204.100)
+Stacktrace:
+0   undetected_chromedriver             0x0000000102f70308 undetected_chromedriver + 6148872
+1   undetected_chromedriver             0x0000000102f678ba undetected_chromedriver + 6113466
+2   undetected_chromedriver             0x00000001029f8e10 undetected_chromedriver + 417296
+3   undetected_chromedriver             0x0000000102a51b20 undetected_chromedriver + 781088
+4   undetected_chromedriver             0x0000000102a4f97b undetected_chromedriver + 772475
+5   undetected_chromedriver             0x0000000102a4d012 undetected_chromedriver + 761874
+6   undetected_chromedriver             0x0000000102a4c730 undetected_chromedriver + 759600
+7   undetected_chromedriver             0x0000000102a3eeca undetected_chromedriver + 704202
+8   undetected_chromedriver             0x0000000102a70cc2 undetected_chromedriver + 908482
+9   undetected_chromedriver             0x0000000102a3e848 undetected_chromedriver + 702536
+10  undetected_chromedriver             0x0000000102a70e7e undetected_chromedriver + 908926
+11  undetected_chromedriver             0x0000000102a9818c undetected_chromedriver + 1069452
+12  undetected_chromedriver             0x0000000102a70a93 undetected_chromedriver + 907923
+13  undetected_chromedriver             0x0000000102a3d0f7 undetected_chromedriver + 696567
+14  undetected_chromedriver             0x0000000102a3dd61 undetected_chromedriver + 699745
+15  undetected_chromedriver             0x0000000102f2d250 undetected_chromedriver + 5874256
+16  undetected_chromedriver             0x0000000102f31289 undetected_chromedriver + 5890697
+17  undetected_chromedriver             0x0000000102f09022 undetected_chromedriver + 5726242
+18  undetected_chromedriver             0x0000000102f31bff undetected_chromedriver + 5893119
+19  undetected_chromedriver             0x0000000102ef7d14 undetected_chromedriver + 5655828
+20  undetected_chromedriver             0x0000000102f54de8 undetected_chromedriver + 6036968
+21  undetected_chromedriver             0x0000000102f54fb0 undetected_chromedriver + 6037424
+22  undetected_chromedriver             0x0000000102f67451 undetected_chromedriver + 6112337
+23  libsystem_pthread.dylib             0x00007ff8073f2df1 _pthread_start + 99
+24  libsystem_pthread.dylib             0x00007ff8073ee857 thread_start + 15
+
+2025-07-09 21:04:41,960 - [MOR] - INFO - Found 2 potential manuscript links with pattern: //a[contains(@href, 'mathor')]
+2025-07-09 21:04:43,026 - [MOR] - DEBUG - Pattern //a[contains(@href, 'mathor')] failed: Message: element click intercepted: Element <a aria-current="step" hidefocus="true" style="outline: none;" href="javascript:popWindowSimple('mathor?PARAMS=xik_3yNNwYAHXdVQzb9ER1Mk8xwnZKimrX6Q5pGsrngkrXmfeRoKRyau9QiFC9iaxrbrFcXeFuSdMhxtQzBNVnYMamERaecn868iVaDAqPDVZ8oHWfrcnL3DkGaFPKRe7z2NUY2rVATAfmcjG6fhr3QwZiHDpSPRf3R1Jp5Q4LwHNhXjbXz','forms_instructions_popup', 700, 400);">...</a> is not clickable at point (1259, 15). Other element would receive the click: <div class="modal-backdrop fade in"></div>
+  (Session info: chrome=138.0.7204.100)
+Stacktrace:
+0   undetected_chromedriver             0x0000000102f70308 undetected_chromedriver + 6148872
+1   undetected_chromedriver             0x0000000102f678ba undetected_chromedriver + 6113466
+2   undetected_chromedriver             0x00000001029f8e10 undetected_chromedriver + 417296
+3   undetected_chromedriver             0x0000000102a51b20 undetected_chromedriver + 781088
+4   undetected_chromedriver             0x0000000102a4f97b undetected_chromedriver + 772475
+5   undetected_chromedriver             0x0000000102a4d012 undetected_chromedriver + 761874
+6   undetected_chromedriver             0x0000000102a4c730 undetected_chromedriver + 759600
+7   undetected_chromedriver             0x0000000102a3eeca undetected_chromedriver + 704202
+8   undetected_chromedriver             0x0000000102a70cc2 undetected_chromedriver + 908482
+9   undetected_chromedriver             0x0000000102a3e848 undetected_chromedriver + 702536
+10  undetected_chromedriver             0x0000000102a70e7e undetected_chromedriver + 908926
+11  undetected_chromedriver             0x0000000102a9818c undetected_chromedriver + 1069452
+12  undetected_chromedriver             0x0000000102a70a93 undetected_chromedriver + 907923
+13  undetected_chromedriver             0x0000000102a3d0f7 undetected_chromedriver + 696567
+14  undetected_chromedriver             0x0000000102a3dd61 undetected_chromedriver + 699745
+15  undetected_chromedriver             0x0000000102f2d250 undetected_chromedriver + 5874256
+16  undetected_chromedriver             0x0000000102f31289 undetected_chromedriver + 5890697
+17  undetected_chromedriver             0x0000000102f09022 undetected_chromedriver + 5726242
+18  undetected_chromedriver             0x0000000102f31bff undetected_chromedriver + 5893119
+19  undetected_chromedriver             0x0000000102ef7d14 undetected_chromedriver + 5655828
+20  undetected_chromedriver             0x0000000102f54de8 undetected_chromedriver + 6036968
+21  undetected_chromedriver             0x0000000102f54fb0 undetected_chromedriver + 6037424
+22  undetected_chromedriver             0x0000000102f67451 undetected_chromedriver + 6112337
+23  libsystem_pthread.dylib             0x00007ff8073f2df1 _pthread_start + 99
+24  libsystem_pthread.dylib             0x00007ff8073ee857 thread_start + 15
+
+2025-07-09 21:04:43,026 - [MOR] - WARNING - Could not find any manuscript links, continuing anyway...
+2025-07-09 21:04:45,068 - [MOR] - DEBUG - No reCAPTCHA found.
+2025-07-09 21:04:45,083 - [MOR] - DEBUG - No relevant status queues with count > 0 found.
+2025-07-09 21:04:45,083 - [MOR] - INFO - Performing deep search for manuscripts in tables...
+2025-07-09 21:04:45,083 - [MOR] - INFO - Final results (all parsed manuscripts): 0 manuscripts.
+2025-07-09 21:04:45,083 - __main__ - INFO - ✅ Enhanced scraping successful: 0 manuscripts found
+2025-07-09 21:04:45,083 - __main__ - INFO - 📊 MOR Results:
+2025-07-09 21:04:45,083 - __main__ - INFO -    Expected: 3 manuscripts, 5 referees
+2025-07-09 21:04:45,083 - __main__ - INFO -    Found: 0 manuscripts, 0 referees
+2025-07-09 21:04:45,083 - __main__ - WARNING - ⚠️ Found fewer manuscripts than expected for MOR
+2025-07-09 21:04:45,083 - __main__ - WARNING - ⚠️ Found fewer referees than expected for MOR
+2025-07-09 21:04:45,283 - __main__ - INFO - 📸 Screenshot: enhanced_output/MOR_scraping_success_20250709_210445.png
+2025-07-09 21:04:45,289 - __main__ - INFO - 📄 HTML: enhanced_output/MOR_scraping_success_20250709_210445.html
+2025-07-09 21:04:45,450 - __main__ - INFO - ✅ MOR test SUCCESSFUL
+2025-07-09 21:04:45,450 - __main__ - INFO -    📋 Manuscripts found: 0
+2025-07-09 21:04:45,451 - __main__ - INFO -    👥 Total referees: 0
+2025-07-09 21:04:45,451 - __main__ - INFO - \n📄 Full results saved to: enhanced_output/enhanced_results_enhanced_20250709_210202.json

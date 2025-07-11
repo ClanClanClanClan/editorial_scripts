@@ -1,0 +1,22 @@
+{
+  "journal": "MF",
+  "extraction_date": "2025-07-10T07:23:31.328656",
+  "total_manuscripts": 2,
+  "successful_extractions": 0,
+  "manuscripts": [
+    {
+      "manuscript_id": "MAFI-2025-0166",
+      "category": "Awaiting Reviewer Scores",
+      "title": "",
+      "referees": [],
+      "extraction_status": "failed"
+    },
+    {
+      "manuscript_id": "MAFI-2024-0167",
+      "category": "Awaiting Reviewer Scores",
+      "title": "",
+      "referees": [],
+      "extraction_status": "failed"
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+PDF FETCH SUMMARY - MF
+Generated: 2025-07-10 12:19:07
+============================================================
+
+Total manuscripts: 2
+PDFs downloaded: 0
+Success rate: 0.0%
+
+Manuscript: MAFI-2024-0167
+PDF: ❌ Not downloaded
+------------------------------------------------------------
+
+Manuscript: MAFI-2025-0166
+PDF: ❌ Not downloaded
+------------------------------------------------------------
+

@@ -1,0 +1,1639 @@
+2025-07-10 13:53:39,690 - INFO - 🚀 Starting stable MF extraction (exact working system approach)
+2025-07-10 13:53:39,691 - INFO - 🚀 Creating undetected Chrome driver (exact working system approach)
+2025-07-10 13:53:41,271 - INFO - patching driver executable /Users/dylanpossamai/Library/Application Support/undetected_chromedriver/undetected_chromedriver
+2025-07-10 13:53:51,950 - ERROR - ❌ Driver creation failed: Message: Service /Users/dylanpossamai/Library/Application Support/undetected_chromedriver/undetected_chromedriver unexpectedly exited. Status code was: -9
+
+2025-07-10 13:53:51,951 - ERROR - ❌ Stable extraction failed: Driver creation failed
+2025-07-10 13:54:29,775 - INFO - 🚀 Starting stable MF extraction (exact working system approach)
+2025-07-10 13:54:29,775 - INFO - 🚀 Creating Chrome driver with fallback approaches
+2025-07-10 13:54:29,775 - INFO -    Attempting undetected chromedriver...
+2025-07-10 13:54:29,775 - INFO -      Trying version_main=None
+2025-07-10 13:54:31,553 - INFO - patching driver executable /Users/dylanpossamai/Library/Application Support/undetected_chromedriver/undetected_chromedriver
+2025-07-10 13:54:42,234 - INFO - ✅ Undetected Chrome driver created successfully
+2025-07-10 13:54:42,235 - INFO - 🔐 Logging into MF (exact working system approach)
+2025-07-10 13:54:42,235 - INFO - Navigating to MF dashboard: https://mc.manuscriptcentral.com/mafi
+2025-07-10 13:54:50,313 - INFO - Accepted cookies.
+2025-07-10 13:54:57,683 - INFO - Verification prompt visible. Fetching code from email...
+2025-07-10 13:54:57,871 - INFO - Waiting 5 seconds for verification email to arrive...
+2025-07-10 13:55:02,884 - INFO - file_cache is only supported with oauth2client<4.0.0
+2025-07-10 13:55:02,886 - INFO - Waiting 5 seconds for verification email to arrive...
+2025-07-10 13:55:08,616 - INFO - Found newer verification code for MF: 915249 (timestamp: Thu, 10 Jul 2025 11:54:52 +0000)
+2025-07-10 13:55:10,739 - INFO - Returning latest verification code for MF: 915249
+2025-07-10 13:55:10,831 - INFO - Submitted verification code.
+2025-07-10 13:55:13,840 - INFO - Ready to continue navigation after login.
+2025-07-10 13:55:13,840 - INFO - 🔍 Navigating to Associate Editor Center...
+2025-07-10 13:55:17,989 - INFO - ✅ Successfully navigated to Associate Editor Center
+2025-07-10 13:55:17,989 - INFO - 📂 Navigating to: Awaiting Reviewer Scores
+2025-07-10 13:55:22,458 - INFO - ✅ Successfully navigated to Awaiting Reviewer Scores
+2025-07-10 13:55:22,458 - INFO - 
+============================================================
+2025-07-10 13:55:22,458 - INFO - 📄 Processing: MAFI-2024-0167
+2025-07-10 13:55:22,458 - INFO - Expected: Competitive optimal portfolio selection in a non-M...
+2025-07-10 13:55:22,458 - INFO - ============================================================
+2025-07-10 13:55:22,458 - INFO - 🔍 Looking for manuscript checkbox: MAFI-2024-0167
+2025-07-10 13:55:22,472 - INFO - Found 2 checkbox images
+2025-07-10 13:55:22,594 - INFO -    Skipping row 8 (contains but doesn't start with MAFI-2024-0167): To take action on a manuscript or view the full ma...
+2025-07-10 13:55:22,667 - INFO -    Skipping row 12 (contains but doesn't start with MAFI-2024-0167): Awaiting Reviewer Scores
+Manuscripts 1-2 of 2
+Manu...
+2025-07-10 13:55:22,809 - INFO -    Skipping row 14 (contains but doesn't start with MAFI-2024-0167): Awaiting Reviewer Scores
+Manuscripts 1-2 of 2
+Manu...
+2025-07-10 13:55:22,880 - INFO -    Skipping row 18 (contains but doesn't start with MAFI-2024-0167): Manuscript ID  
+Manuscript Title
+Date Submitted  
+...
+2025-07-10 13:55:22,980 - INFO - ✅ Found manuscript data for MAFI-2024-0167 in row 26
+2025-07-10 13:55:22,980 - INFO -    Row preview: MAFI-2024-0167
+(REX-PROD-1-476BE50B-AB64-4991-B6F2-9023FD785014-3B4258C0-BE99-4580-B3D6-E5BB1C29C2D5...
+2025-07-10 13:55:22,980 - INFO - ✅ Clicking checkbox for MAFI-2024-0167
+2025-07-10 13:55:27,205 - INFO - Navigated to: https://mc.manuscriptcentral.com/mafi
+2025-07-10 13:55:27,206 - INFO - 📊 Extracting referee details for MAFI-2024-0167...
+2025-07-10 13:55:27,347 - INFO - ✅ Found Reviewer List section
+2025-07-10 13:55:27,347 - INFO - Found 1 rows in reviewer table
+2025-07-10 13:55:27,348 - INFO - 📧 Fetching email dates for MAFI-2024-0167...
+2025-07-10 13:55:27,348 - WARNING - Email processing error: fetch_starred_emails() missing 1 required positional argument: 'journal'
+2025-07-10 13:55:27,348 - INFO - ✅ Successfully extracted 0 referees
+2025-07-10 13:55:27,348 - INFO - 🔄 Navigating back to Associate Editor Center...
+2025-07-10 13:55:30,400 - INFO - ✅ Navigated back to Associate Editor Center
+2025-07-10 13:55:30,400 - INFO - 📂 Navigating to: Awaiting Reviewer Scores
+2025-07-10 13:55:34,907 - INFO - ✅ Successfully navigated to Awaiting Reviewer Scores
+2025-07-10 13:55:34,907 - INFO - 
+============================================================
+2025-07-10 13:55:34,907 - INFO - 📄 Processing: MAFI-2025-0166
+2025-07-10 13:55:34,907 - INFO - Expected: Optimal investment and consumption under forward u...
+2025-07-10 13:55:34,907 - INFO - ============================================================
+2025-07-10 13:55:34,907 - INFO - 🔍 Looking for manuscript checkbox: MAFI-2025-0166
+2025-07-10 13:55:34,937 - INFO - Found 2 checkbox images
+2025-07-10 13:55:35,130 - INFO -    Skipping row 8 (contains but doesn't start with MAFI-2025-0166): To take action on a manuscript or view the full ma...
+2025-07-10 13:55:35,194 - INFO -    Skipping row 12 (contains but doesn't start with MAFI-2025-0166): Awaiting Reviewer Scores
+Manuscripts 1-2 of 2
+Manu...
+2025-07-10 13:55:35,243 - INFO -    Skipping row 14 (contains but doesn't start with MAFI-2025-0166): Awaiting Reviewer Scores
+Manuscripts 1-2 of 2
+Manu...
+2025-07-10 13:55:35,315 - INFO -    Skipping row 18 (contains but doesn't start with MAFI-2025-0166): Manuscript ID  
+Manuscript Title
+Date Submitted  
+...
+2025-07-10 13:55:35,395 - INFO - ✅ Found manuscript data for MAFI-2025-0166 in row 22
+2025-07-10 13:55:35,395 - INFO -    Row preview: MAFI-2025-0166
+(REX-PROD-1-957B102A-FAD0-49EC-974F-4CE40BABDCFF-C109D069-488B-4649-9A62-3B5ECD0619E4...
+2025-07-10 13:55:35,395 - INFO - ✅ Clicking checkbox for MAFI-2025-0166
+2025-07-10 13:55:41,490 - INFO - Navigated to: https://mc.manuscriptcentral.com/mafi
+2025-07-10 13:55:41,490 - INFO - 📊 Extracting referee details for MAFI-2025-0166...
+2025-07-10 13:55:41,708 - INFO - ✅ Found Reviewer List section
+2025-07-10 13:55:41,710 - INFO - Found 1 rows in reviewer table
+2025-07-10 13:55:41,710 - INFO - 📧 Fetching email dates for MAFI-2025-0166...
+2025-07-10 13:55:41,710 - WARNING - Email processing error: fetch_starred_emails() missing 1 required positional argument: 'journal'
+2025-07-10 13:55:41,710 - INFO - ✅ Successfully extracted 0 referees
+2025-07-10 13:55:41,711 - INFO - 🔄 Navigating back to Associate Editor Center...
+2025-07-10 13:55:44,267 - INFO - ✅ Navigated back to Associate Editor Center
+2025-07-10 13:55:44,268 - INFO - 📂 Navigating to: Awaiting Reviewer Scores
+2025-07-10 13:55:48,438 - INFO - ✅ Successfully navigated to Awaiting Reviewer Scores
+2025-07-10 13:55:48,439 - INFO - 📄 Report saved: stable_results/mf_stable_report.txt
+2025-07-10 13:55:48,439 - INFO - 🎉 Stable MF extraction completed!
+2025-07-10 13:55:48,439 - INFO -    Results: stable_results/mf_stable_results.json
+2025-07-10 13:55:48,702 - INFO - 🔄 Driver closed
+2025-07-10 13:57:43,903 - INFO - 🚀 Starting stable MF extraction (exact working system approach)
+2025-07-10 13:57:43,903 - INFO - 🚀 Creating Chrome driver with fallback approaches
+2025-07-10 13:57:43,903 - INFO -    Attempting undetected chromedriver...
+2025-07-10 13:57:43,903 - INFO -      Trying version_main=None
+2025-07-10 13:57:46,004 - INFO - patching driver executable /Users/dylanpossamai/Library/Application Support/undetected_chromedriver/undetected_chromedriver
+2025-07-10 13:57:59,790 - INFO - ✅ Undetected Chrome driver created successfully
+2025-07-10 13:57:59,791 - INFO - 🔐 Logging into MF (exact working system approach)
+2025-07-10 13:57:59,791 - INFO - Navigating to MF dashboard: https://mc.manuscriptcentral.com/mafi
+2025-07-10 13:58:05,916 - INFO - Accepted cookies.
+2025-07-10 13:58:12,798 - INFO - Verification prompt visible. Fetching code from email...
+2025-07-10 13:58:13,007 - INFO - Waiting 5 seconds for verification email to arrive...
+2025-07-10 13:58:18,022 - INFO - file_cache is only supported with oauth2client<4.0.0
+2025-07-10 13:58:18,024 - INFO - Waiting 5 seconds for verification email to arrive...
+2025-07-10 13:58:23,800 - INFO - Found newer verification code for MF: 473687 (timestamp: Thu, 10 Jul 2025 11:58:08 +0000)
+2025-07-10 13:58:26,071 - INFO - Returning latest verification code for MF: 473687
+2025-07-10 13:58:26,262 - INFO - Submitted verification code.
+2025-07-10 13:58:29,273 - INFO - Ready to continue navigation after login.
+2025-07-10 13:58:29,274 - INFO - 🔍 Navigating to Associate Editor Center...
+2025-07-10 13:58:32,433 - INFO - ✅ Successfully navigated to Associate Editor Center
+2025-07-10 13:58:32,434 - INFO - 📂 Navigating to: Awaiting Reviewer Scores
+2025-07-10 13:58:36,692 - INFO - ✅ Successfully navigated to Awaiting Reviewer Scores
+2025-07-10 13:58:36,693 - INFO - 
+============================================================
+2025-07-10 13:58:36,693 - INFO - 📄 Processing: MAFI-2024-0167
+2025-07-10 13:58:36,693 - INFO - Expected: Competitive optimal portfolio selection in a non-M...
+2025-07-10 13:58:36,693 - INFO - ============================================================
+2025-07-10 13:58:36,693 - INFO - 🔍 Looking for manuscript checkbox: MAFI-2024-0167
+2025-07-10 13:58:36,721 - INFO - Found 2 checkbox images
+2025-07-10 13:58:36,933 - INFO -    Skipping row 8 (contains but doesn't start with MAFI-2024-0167): To take action on a manuscript or view the full ma...
+2025-07-10 13:58:37,019 - INFO -    Skipping row 12 (contains but doesn't start with MAFI-2024-0167): Awaiting Reviewer Scores
+Manuscripts 1-2 of 2
+Manu...
+2025-07-10 13:58:37,083 - INFO -    Skipping row 14 (contains but doesn't start with MAFI-2024-0167): Awaiting Reviewer Scores
+Manuscripts 1-2 of 2
+Manu...
+2025-07-10 13:58:37,157 - INFO -    Skipping row 18 (contains but doesn't start with MAFI-2024-0167): Manuscript ID  
+Manuscript Title
+Date Submitted  
+...
+2025-07-10 13:58:37,264 - INFO - ✅ Found manuscript data for MAFI-2024-0167 in row 26
+2025-07-10 13:58:37,264 - INFO -    Row preview: MAFI-2024-0167
+(REX-PROD-1-476BE50B-AB64-4991-B6F2-9023FD785014-3B4258C0-BE99-4580-B3D6-E5BB1C29C2D5...
+2025-07-10 13:58:37,265 - INFO - ✅ Clicking checkbox for MAFI-2024-0167
+2025-07-10 13:58:45,567 - INFO - Navigated to: https://mc.manuscriptcentral.com/mafi
+2025-07-10 13:58:45,568 - INFO - 📊 Extracting referee details for MAFI-2024-0167...
+2025-07-10 13:58:45,708 - INFO - ✅ Found Reviewer List section
+2025-07-10 13:58:45,708 - INFO - Found 18 rows in reviewer table
+2025-07-10 13:58:45,709 - INFO -       🔍 Cell[0]: '12'
+2025-07-10 13:58:45,709 - INFO -       🔍 Cell[1]: 'Mastrolia, ThibautUC Berkeley, IEORhttps://orcid.org/0000-0003-0578-0168'
+2025-07-10 13:58:45,709 - INFO -       🎯 Found name pattern: 'Mastrolia, ThibautUC' in cell[1]
+2025-07-10 13:58:45,709 - INFO -       🧹 Cleaned name: 'Mastrolia, ThibautUC'
+2025-07-10 13:58:45,709 - INFO -       ✅ Extracted name: 'Mastrolia, ThibautUC' from cell[1]
+2025-07-10 13:58:45,709 - INFO -       🔍 DEBUG: Analyzing 17 cells for referee 'Mastrolia, ThibautUC'
+2025-07-10 13:58:45,709 - INFO -          Cell[0]: '12'
+2025-07-10 13:58:45,709 - INFO -          Cell[1]: 'Mastrolia, ThibautUC Berkeley, IEORhttps://orcid.org/0000-0003-0578-0168'
+2025-07-10 13:58:45,710 - INFO -          Cell[2]: ''
+2025-07-10 13:58:45,710 - INFO -          Cell[3]: 'Mastrolia, ThibautUC Berkeley, IEORhttps://orcid.org/0000-0003-0578-0168'
+2025-07-10 13:58:45,710 - INFO -          Cell[4]: 'Agreed'
+2025-07-10 13:58:45,710 - INFO -          Cell[5]: 'Invited:01-May-2025Agreed
+				:01-May-2025Due Date:30-Jul-2025Time in Review:69 '
+2025-07-10 13:58:45,717 - INFO -          Cell[6]: 'Invited:'
+2025-07-10 13:58:45,717 - INFO -          Cell[7]: '01-May-2025'
+2025-07-10 13:58:45,717 - INFO -          Cell[8]: 'Agreed
+				:'
+2025-07-10 13:58:45,718 - INFO -          Cell[9]: '01-May-2025'
+2025-07-10 13:58:45,718 - INFO -          Cell[10]: 'Due Date:'
+2025-07-10 13:58:45,718 - INFO -          Cell[11]: '30-Jul-2025'
+2025-07-10 13:58:45,718 - INFO -          Cell[12]: 'Time in Review:'
+2025-07-10 13:58:45,718 - INFO -          Cell[13]: '69 Days.'
+2025-07-10 13:58:45,718 - INFO -          Cell[14]: 'view full history'
+2025-07-10 13:58:45,718 - INFO -          Cell[15]: 'edit reminders'
+2025-07-10 13:58:45,718 - INFO -          Cell[16]: ''
+2025-07-10 13:58:45,718 - INFO -          ✅ FOUND STATUS: 'Agreed' (matched 'agreed')
+2025-07-10 13:58:45,719 - INFO -      🏛️  Institution: Berkeley, IEORhttps://orcid.org/0000-0003-0578-0168
+2025-07-10 13:58:45,719 - INFO -      🏛️  Institution: Berkeley, IEORhttps://orcid.org/0000-0003-0578-0168
+2025-07-10 13:58:45,719 - INFO -      📅 Invited date: 01-May-2025
+2025-07-10 13:58:45,719 - INFO -      📅 Due date: 30-Jul-2025
+2025-07-10 13:58:45,719 - INFO -      ⏱️  Time in review: 69 Days
+2025-07-10 13:58:45,719 - INFO -    ✅ Mastrolia, ThibautUC (Agreed)
+2025-07-10 13:58:45,719 - INFO -       🔍 Cell[0]: '12'
+2025-07-10 13:58:45,720 - INFO -       🔍 Cell[1]: 'Hamadene, Said'
+2025-07-10 13:58:45,720 - INFO -       🎯 Found name pattern: 'Hamadene, Said' in cell[1]
+2025-07-10 13:58:45,720 - INFO -       🧹 Cleaned name: 'Hamadene, Said'
+2025-07-10 13:58:45,720 - INFO -       ✅ Extracted name: 'Hamadene, Said' from cell[1]
+2025-07-10 13:58:45,720 - INFO -       🔍 DEBUG: Analyzing 17 cells for referee 'Hamadene, Said'
+2025-07-10 13:58:45,720 - INFO -          Cell[0]: '12'
+2025-07-10 13:58:45,720 - INFO -          Cell[1]: 'Hamadene, Said'
+2025-07-10 13:58:45,720 - INFO -          Cell[2]: ''
+2025-07-10 13:58:45,720 - INFO -          Cell[3]: 'Hamadene, Said'
+2025-07-10 13:58:45,720 - INFO -          Cell[4]: 'Agreed'
+2025-07-10 13:58:45,720 - INFO -          Cell[5]: 'Invited:01-May-2025Agreed
+				:03-May-2025Due Date:01-Aug-2025Time in Review:68 '
+2025-07-10 13:58:45,720 - INFO -          Cell[6]: 'Invited:'
+2025-07-10 13:58:45,720 - INFO -          Cell[7]: '01-May-2025'
+2025-07-10 13:58:45,720 - INFO -          Cell[8]: 'Agreed
+				:'
+2025-07-10 13:58:45,720 - INFO -          Cell[9]: '03-May-2025'
+2025-07-10 13:58:45,720 - INFO -          Cell[10]: 'Due Date:'
+2025-07-10 13:58:45,720 - INFO -          Cell[11]: '01-Aug-2025'
+2025-07-10 13:58:45,720 - INFO -          Cell[12]: 'Time in Review:'
+2025-07-10 13:58:45,720 - INFO -          Cell[13]: '68 Days.'
+2025-07-10 13:58:45,720 - INFO -          Cell[14]: 'view full history'
+2025-07-10 13:58:45,720 - INFO -          Cell[15]: 'edit reminders'
+2025-07-10 13:58:45,720 - INFO -          Cell[16]: ''
+2025-07-10 13:58:45,720 - INFO -          ✅ FOUND STATUS: 'Agreed' (matched 'agreed')
+2025-07-10 13:58:45,721 - INFO -      📅 Invited date: 01-May-2025
+2025-07-10 13:58:45,721 - INFO -      📅 Due date: 01-Aug-2025
+2025-07-10 13:58:45,721 - INFO -      ⏱️  Time in review: 68 Days
+2025-07-10 13:58:45,721 - INFO -    ✅ Hamadene, Said (Agreed)
+2025-07-10 13:58:45,722 - INFO - 📧 Fetching email dates for MAFI-2024-0167...
+2025-07-10 13:58:45,724 - INFO - file_cache is only supported with oauth2client<4.0.0
+2025-07-10 13:58:46,091 - INFO - Found 9 messages to process for MF
+2025-07-10 13:58:48,407 - INFO -    ❌ No email match found for Mastrolia, ThibautUC
+2025-07-10 13:58:48,407 - INFO -    ❌ No email match found for Hamadene, Said
+2025-07-10 13:58:48,407 - INFO - ✅ Successfully extracted 2 referees
+2025-07-10 13:58:48,407 - INFO - 🔄 Navigating back to Associate Editor Center...
+2025-07-10 13:58:50,552 - INFO - ✅ Navigated back to Associate Editor Center
+2025-07-10 13:58:50,553 - INFO - 📂 Navigating to: Awaiting Reviewer Scores
+2025-07-10 13:58:55,336 - INFO - ✅ Successfully navigated to Awaiting Reviewer Scores
+2025-07-10 13:58:55,336 - INFO - 
+============================================================
+2025-07-10 13:58:55,336 - INFO - 📄 Processing: MAFI-2025-0166
+2025-07-10 13:58:55,336 - INFO - Expected: Optimal investment and consumption under forward u...
+2025-07-10 13:58:55,336 - INFO - ============================================================
+2025-07-10 13:58:55,336 - INFO - 🔍 Looking for manuscript checkbox: MAFI-2025-0166
+2025-07-10 13:58:55,346 - INFO - Found 2 checkbox images
+2025-07-10 13:58:55,481 - INFO -    Skipping row 8 (contains but doesn't start with MAFI-2025-0166): To take action on a manuscript or view the full ma...
+2025-07-10 13:58:55,564 - INFO -    Skipping row 12 (contains but doesn't start with MAFI-2025-0166): Awaiting Reviewer Scores
+Manuscripts 1-2 of 2
+Manu...
+2025-07-10 13:58:55,624 - INFO -    Skipping row 14 (contains but doesn't start with MAFI-2025-0166): Awaiting Reviewer Scores
+Manuscripts 1-2 of 2
+Manu...
+2025-07-10 13:58:55,696 - INFO -    Skipping row 18 (contains but doesn't start with MAFI-2025-0166): Manuscript ID  
+Manuscript Title
+Date Submitted  
+...
+2025-07-10 13:58:55,756 - INFO - ✅ Found manuscript data for MAFI-2025-0166 in row 22
+2025-07-10 13:58:55,756 - INFO -    Row preview: MAFI-2025-0166
+(REX-PROD-1-957B102A-FAD0-49EC-974F-4CE40BABDCFF-C109D069-488B-4649-9A62-3B5ECD0619E4...
+2025-07-10 13:58:55,757 - INFO - ✅ Clicking checkbox for MAFI-2025-0166
+2025-07-10 13:58:59,558 - INFO - Navigated to: https://mc.manuscriptcentral.com/mafi
+2025-07-10 13:58:59,558 - INFO - 📊 Extracting referee details for MAFI-2025-0166...
+2025-07-10 13:58:59,847 - INFO - ✅ Found Reviewer List section
+2025-07-10 13:58:59,848 - INFO - Found 28 rows in reviewer table
+2025-07-10 13:58:59,848 - INFO -       🔍 Cell[0]: '1234'
+2025-07-10 13:58:59,848 - INFO -       🔍 Cell[1]: 'Liang, GechunUniversity of Warwick, Department of Statisticshttps://orcid.org/0000-0003-0752-0773'
+2025-07-10 13:58:59,848 - INFO -       🎯 Found name pattern: 'Liang, GechunUniversity' in cell[1]
+2025-07-10 13:58:59,848 - INFO -       🧹 Cleaned name: 'Liang, GechunUniversity'
+2025-07-10 13:58:59,848 - INFO -       ✅ Extracted name: 'Liang, GechunUniversity' from cell[1]
+2025-07-10 13:58:59,849 - INFO -       🔍 DEBUG: Analyzing 17 cells for referee 'Liang, GechunUniversity'
+2025-07-10 13:58:59,849 - INFO -          Cell[0]: '1234'
+2025-07-10 13:58:59,849 - INFO -          Cell[1]: 'Liang, GechunUniversity of Warwick, Department of Statisticshttps://orcid.org/00'
+2025-07-10 13:58:59,849 - INFO -          Cell[2]: ''
+2025-07-10 13:58:59,849 - INFO -          Cell[3]: 'Liang, GechunUniversity of Warwick, Department of Statisticshttps://orcid.org/00'
+2025-07-10 13:58:59,849 - INFO -          Cell[4]: 'Agreed'
+2025-07-10 13:58:59,849 - INFO -          Cell[5]: 'Invited:22-Jun-2025Agreed
+				:22-Jun-2025Due Date:20-Sep-2025Time in Review:18 '
+2025-07-10 13:58:59,849 - INFO -          Cell[6]: 'Invited:'
+2025-07-10 13:58:59,849 - INFO -          Cell[7]: '22-Jun-2025'
+2025-07-10 13:58:59,849 - INFO -          Cell[8]: 'Agreed
+				:'
+2025-07-10 13:58:59,849 - INFO -          Cell[9]: '22-Jun-2025'
+2025-07-10 13:58:59,849 - INFO -          Cell[10]: 'Due Date:'
+2025-07-10 13:58:59,849 - INFO -          Cell[11]: '20-Sep-2025'
+2025-07-10 13:58:59,849 - INFO -          Cell[12]: 'Time in Review:'
+2025-07-10 13:58:59,850 - INFO -          Cell[13]: '18 Days.'
+2025-07-10 13:58:59,850 - INFO -          Cell[14]: 'view full history'
+2025-07-10 13:58:59,850 - INFO -          Cell[15]: 'edit reminders'
+2025-07-10 13:58:59,850 - INFO -          Cell[16]: ''
+2025-07-10 13:58:59,850 - INFO -          ✅ FOUND STATUS: 'Agreed' (matched 'agreed')
+2025-07-10 13:58:59,850 - INFO -      🏛️  Institution: of Warwick, Department of Statisticshttps://orcid.org/0000-0003-0752-0773
+2025-07-10 13:58:59,850 - INFO -      🏛️  Institution: of Warwick, Department of Statisticshttps://orcid.org/0000-0003-0752-0773
+2025-07-10 13:58:59,850 - INFO -      📅 Invited date: 22-Jun-2025
+2025-07-10 13:58:59,850 - INFO -      📅 Due date: 20-Sep-2025
+2025-07-10 13:58:59,850 - INFO -      ⏱️  Time in review: 18 Days
+2025-07-10 13:58:59,851 - INFO -    ✅ Liang, GechunUniversity (Agreed)
+2025-07-10 13:58:59,851 - INFO -       🔍 Cell[0]: '1234'
+2025-07-10 13:58:59,851 - INFO -       🔍 Cell[1]: 'Mrad, MohamedUniversité Sorbonne Paris Nord, LAGA'
+2025-07-10 13:58:59,856 - INFO -       🎯 Found name pattern: 'Mrad, MohamedUniversit' in cell[1]
+2025-07-10 13:58:59,856 - INFO -       🧹 Cleaned name: 'Mrad, MohamedUniversit'
+2025-07-10 13:58:59,856 - INFO -       ✅ Extracted name: 'Mrad, MohamedUniversit' from cell[1]
+2025-07-10 13:58:59,856 - INFO -       🔍 DEBUG: Analyzing 13 cells for referee 'Mrad, MohamedUniversit'
+2025-07-10 13:58:59,856 - INFO -          Cell[0]: '1234'
+2025-07-10 13:58:59,856 - INFO -          Cell[1]: 'Mrad, MohamedUniversité Sorbonne Paris Nord, LAGA'
+2025-07-10 13:58:59,856 - INFO -          Cell[2]: ''
+2025-07-10 13:58:59,856 - INFO -          Cell[3]: 'Mrad, MohamedUniversité Sorbonne Paris Nord, LAGA'
+2025-07-10 13:58:59,856 - INFO -          Cell[4]: 'Declinedinvite again'
+2025-07-10 13:58:59,857 - INFO -          Cell[5]: 'Invited:22-Jun-2025Declined
+				:01-Jul-2025view full history'
+2025-07-10 13:58:59,857 - INFO -          Cell[6]: 'Invited:'
+2025-07-10 13:58:59,857 - INFO -          Cell[7]: '22-Jun-2025'
+2025-07-10 13:58:59,857 - INFO -          Cell[8]: 'Declined
+				:'
+2025-07-10 13:58:59,857 - INFO -          Cell[9]: '01-Jul-2025'
+2025-07-10 13:58:59,857 - INFO -          Cell[10]: 'view full history'
+2025-07-10 13:58:59,857 - INFO -          Cell[11]: ''
+2025-07-10 13:58:59,857 - INFO -          Cell[12]: ''
+2025-07-10 13:58:59,857 - INFO -          ❌ FOUND STATUS: 'Declined'
+2025-07-10 13:58:59,857 - INFO -      🏛️  Institution: é Sorbonne Paris Nord, LAGA
+2025-07-10 13:58:59,857 - INFO -      🏛️  Institution: é Sorbonne Paris Nord, LAGA
+2025-07-10 13:58:59,857 - INFO -      📅 Invited date: 22-Jun-2025
+2025-07-10 13:58:59,857 - INFO -    ❌ Skipping Mrad, MohamedUniversit: declined (unavailable/declined)
+2025-07-10 13:58:59,857 - INFO -       🔍 Cell[0]: '1234'
+2025-07-10 13:58:59,858 - INFO -       🔍 Cell[1]: 'Dos Reis, GoncaloUniversity of Edinburgh, School of Mathematicshttps://orcid.org/0000-0002-4993-2672'
+2025-07-10 13:58:59,858 - INFO -       🎯 Found name pattern: 'Reis, GoncaloUniversity' in cell[1]
+2025-07-10 13:58:59,858 - INFO -       🧹 Cleaned name: 'Reis, GoncaloUniversity'
+2025-07-10 13:58:59,858 - INFO -       ✅ Extracted name: 'Reis, GoncaloUniversity' from cell[1]
+2025-07-10 13:58:59,858 - INFO -       🔍 DEBUG: Analyzing 13 cells for referee 'Reis, GoncaloUniversity'
+2025-07-10 13:58:59,858 - INFO -          Cell[0]: '1234'
+2025-07-10 13:58:59,858 - INFO -          Cell[1]: 'Dos Reis, GoncaloUniversity of Edinburgh, School of Mathematicshttps://orcid.org'
+2025-07-10 13:58:59,858 - INFO -          Cell[2]: ''
+2025-07-10 13:58:59,858 - INFO -          Cell[3]: 'Dos Reis, GoncaloUniversity of Edinburgh, School of Mathematicshttps://orcid.org'
+2025-07-10 13:58:59,858 - INFO -          Cell[4]: 'Unavailableinvite again'
+2025-07-10 13:58:59,858 - INFO -          Cell[5]: 'Invited:01-Jul-2025Unavailable
+				:01-Jul-2025view full history'
+2025-07-10 13:58:59,858 - INFO -          Cell[6]: 'Invited:'
+2025-07-10 13:58:59,858 - INFO -          Cell[7]: '01-Jul-2025'
+2025-07-10 13:58:59,858 - INFO -          Cell[8]: 'Unavailable
+				:'
+2025-07-10 13:58:59,858 - INFO -          Cell[9]: '01-Jul-2025'
+2025-07-10 13:58:59,858 - INFO -          Cell[10]: 'view full history'
+2025-07-10 13:58:59,858 - INFO -          Cell[11]: ''
+2025-07-10 13:58:59,858 - INFO -          Cell[12]: ''
+2025-07-10 13:58:59,858 - INFO -          ⚠️  No decision keyword found, looking for other status indicators
+2025-07-10 13:58:59,859 - INFO -          📄 Using status: '1234'
+2025-07-10 13:58:59,859 - INFO -      🏛️  Institution: of Edinburgh, School of Mathematicshttps://orcid.org/0000-0002-4993-2672
+2025-07-10 13:58:59,859 - INFO -      🏛️  Institution: of Edinburgh, School of Mathematicshttps://orcid.org/0000-0002-4993-2672
+2025-07-10 13:58:59,859 - INFO -      📅 Invited date: 01-Jul-2025
+2025-07-10 13:58:59,859 - INFO -    ❌ Skipping Reis, GoncaloUniversity: unavailable (unavailable/declined)
+2025-07-10 13:58:59,859 - INFO -       🔍 Cell[0]: '1234'
+2025-07-10 13:58:59,859 - INFO -       🔍 Cell[1]: 'Strub, MorisWarwick Business School, Information Systems Management & Analyticshttps://orcid.org/000'
+2025-07-10 13:58:59,859 - INFO -       🎯 Found name pattern: 'Strub, MorisWarwick' in cell[1]
+2025-07-10 13:58:59,859 - INFO -       🧹 Cleaned name: 'Strub, MorisWarwick'
+2025-07-10 13:58:59,859 - INFO -       ✅ Extracted name: 'Strub, MorisWarwick' from cell[1]
+2025-07-10 13:58:59,859 - INFO -       🔍 DEBUG: Analyzing 17 cells for referee 'Strub, MorisWarwick'
+2025-07-10 13:58:59,859 - INFO -          Cell[0]: '1234'
+2025-07-10 13:58:59,859 - INFO -          Cell[1]: 'Strub, MorisWarwick Business School, Information Systems Management & Analyticsh'
+2025-07-10 13:58:59,859 - INFO -          Cell[2]: ''
+2025-07-10 13:58:59,859 - INFO -          Cell[3]: 'Strub, MorisWarwick Business School, Information Systems Management & Analyticsh'
+2025-07-10 13:58:59,859 - INFO -          Cell[4]: 'Agreed'
+2025-07-10 13:58:59,860 - INFO -          Cell[5]: 'Invited:01-Jul-2025Agreed
+				:01-Jul-2025Due Date:29-Sep-2025Time in Review:8 D'
+2025-07-10 13:58:59,860 - INFO -          Cell[6]: 'Invited:'
+2025-07-10 13:58:59,860 - INFO -          Cell[7]: '01-Jul-2025'
+2025-07-10 13:58:59,860 - INFO -          Cell[8]: 'Agreed
+				:'
+2025-07-10 13:58:59,860 - INFO -          Cell[9]: '01-Jul-2025'
+2025-07-10 13:58:59,860 - INFO -          Cell[10]: 'Due Date:'
+2025-07-10 13:58:59,860 - INFO -          Cell[11]: '29-Sep-2025'
+2025-07-10 13:58:59,860 - INFO -          Cell[12]: 'Time in Review:'
+2025-07-10 13:58:59,860 - INFO -          Cell[13]: '8 Days.'
+2025-07-10 13:58:59,860 - INFO -          Cell[14]: 'view full history'
+2025-07-10 13:58:59,860 - INFO -          Cell[15]: 'edit reminders'
+2025-07-10 13:58:59,860 - INFO -          Cell[16]: ''
+2025-07-10 13:58:59,860 - INFO -          ✅ FOUND STATUS: 'Agreed' (matched 'agreed')
+2025-07-10 13:58:59,861 - INFO -      🏛️  Institution: Business School, Information Systems Management & Analyticshttps://orcid.org/0000-0002-6303-6700
+2025-07-10 13:58:59,861 - INFO -      🏛️  Institution: Business School, Information Systems Management & Analyticshttps://orcid.org/0000-0002-6303-6700
+2025-07-10 13:58:59,861 - INFO -      📅 Invited date: 01-Jul-2025
+2025-07-10 13:58:59,861 - INFO -      📅 Due date: 29-Sep-2025
+2025-07-10 13:58:59,861 - INFO -      ⏱️  Time in review: 8 Days
+2025-07-10 13:58:59,862 - INFO -    ✅ Strub, MorisWarwick (Agreed)
+2025-07-10 13:58:59,862 - INFO - 📧 Fetching email dates for MAFI-2025-0166...
+2025-07-10 13:58:59,864 - INFO - file_cache is only supported with oauth2client<4.0.0
+2025-07-10 13:59:00,462 - INFO - Found 9 messages to process for MF
+2025-07-10 13:59:02,639 - INFO -    ❌ No email match found for Liang, GechunUniversity
+2025-07-10 13:59:02,640 - INFO -    ❌ No email match found for Strub, MorisWarwick
+2025-07-10 13:59:02,640 - INFO - ✅ Successfully extracted 2 referees
+2025-07-10 13:59:02,640 - INFO - 🔄 Navigating back to Associate Editor Center...
+2025-07-10 13:59:04,829 - INFO - ✅ Navigated back to Associate Editor Center
+2025-07-10 13:59:04,830 - INFO - 📂 Navigating to: Awaiting Reviewer Scores
+2025-07-10 13:59:09,104 - INFO - ✅ Successfully navigated to Awaiting Reviewer Scores
+2025-07-10 13:59:09,105 - INFO - 📄 Report saved: stable_results/mf_stable_report.txt
+2025-07-10 13:59:09,105 - INFO - 🎉 Stable MF extraction completed!
+2025-07-10 13:59:09,105 - INFO -    Results: stable_results/mf_stable_results.json
+2025-07-10 13:59:09,401 - INFO - 🔄 Driver closed
+2025-07-10 14:09:01,064 - INFO - 🚀 Starting stable MF extraction (exact working system approach)
+2025-07-10 14:09:01,064 - INFO - 🚀 Creating Chrome driver with fallback approaches
+2025-07-10 14:09:01,064 - INFO -    Attempting undetected chromedriver...
+2025-07-10 14:09:01,064 - INFO -      Trying version_main=None
+2025-07-10 14:09:04,212 - INFO - patching driver executable /Users/dylanpossamai/Library/Application Support/undetected_chromedriver/undetected_chromedriver
+2025-07-10 14:09:11,796 - INFO -      Trying version_main=126
+2025-07-10 14:09:18,493 - INFO - patching driver executable /Users/dylanpossamai/Library/Application Support/undetected_chromedriver/undetected_chromedriver
+2025-07-10 14:09:18,519 - INFO -      Trying version_main=125
+2025-07-10 14:09:21,496 - INFO - patching driver executable /Users/dylanpossamai/Library/Application Support/undetected_chromedriver/undetected_chromedriver
+2025-07-10 14:09:21,528 - INFO -    Attempting regular Chrome driver...
+2025-07-10 14:09:26,959 - INFO - ✅ Regular Chrome driver created successfully
+2025-07-10 14:09:26,960 - INFO - 🔐 Logging into MF (exact working system approach)
+2025-07-10 14:09:26,960 - INFO - Navigating to MF dashboard: https://mc.manuscriptcentral.com/mafi
+2025-07-10 14:09:33,699 - INFO - Accepted cookies.
+2025-07-10 14:09:50,241 - INFO - Verification prompt visible. Fetching code from email...
+2025-07-10 14:09:50,381 - INFO - Waiting 5 seconds for verification email to arrive...
+2025-07-10 14:09:55,622 - INFO - file_cache is only supported with oauth2client<4.0.0
+2025-07-10 14:09:55,623 - INFO - Waiting 5 seconds for verification email to arrive...
+2025-07-10 14:10:01,481 - INFO - Found newer verification code for MF: 455700 (timestamp: Thu, 10 Jul 2025 12:09:35 +0000)
+2025-07-10 14:10:04,154 - INFO - Returning latest verification code for MF: 455700
+2025-07-10 14:10:04,211 - INFO - Submitted verification code.
+2025-07-10 14:10:07,211 - INFO - Ready to continue navigation after login.
+2025-07-10 14:10:07,212 - INFO - 🔍 Navigating to Associate Editor Center...
+2025-07-10 14:10:11,284 - INFO - ✅ Successfully navigated to Associate Editor Center
+2025-07-10 14:10:11,284 - INFO - 📂 Navigating to: Awaiting Reviewer Scores
+2025-07-10 14:10:15,626 - INFO - ✅ Successfully navigated to Awaiting Reviewer Scores
+2025-07-10 14:10:15,626 - INFO - 
+============================================================
+2025-07-10 14:10:15,626 - INFO - 📄 Processing: MAFI-2024-0167
+2025-07-10 14:10:15,626 - INFO - Expected: Competitive optimal portfolio selection in a non-M...
+2025-07-10 14:10:15,626 - INFO - ============================================================
+2025-07-10 14:10:15,626 - INFO - 🔍 Looking for manuscript checkbox: MAFI-2024-0167
+2025-07-10 14:10:15,635 - INFO - Found 2 checkbox images
+2025-07-10 14:10:15,723 - INFO -    Skipping row 8 (contains but doesn't start with MAFI-2024-0167): To take action on a manuscript or view the full ma...
+2025-07-10 14:10:15,770 - INFO -    Skipping row 12 (contains but doesn't start with MAFI-2024-0167): Awaiting Reviewer Scores
+Manuscripts 1-2 of 2
+Manu...
+2025-07-10 14:10:15,804 - INFO -    Skipping row 14 (contains but doesn't start with MAFI-2024-0167): Awaiting Reviewer Scores
+Manuscripts 1-2 of 2
+Manu...
+2025-07-10 14:10:15,872 - INFO -    Skipping row 18 (contains but doesn't start with MAFI-2024-0167): Manuscript ID  
+Manuscript Title
+Date Submitted  
+...
+2025-07-10 14:10:15,945 - INFO - ✅ Found manuscript data for MAFI-2024-0167 in row 26
+2025-07-10 14:10:15,945 - INFO -    Row preview: MAFI-2024-0167
+(REX-PROD-1-476BE50B-AB64-4991-B6F2-9023FD785014-3B4258C0-BE99-4580-B3D6-E5BB1C29C2D5...
+2025-07-10 14:10:15,945 - INFO - ✅ Clicking checkbox for MAFI-2024-0167
+2025-07-10 14:10:19,636 - INFO - Navigated to: https://mc.manuscriptcentral.com/mafi
+2025-07-10 14:10:19,637 - INFO - 📊 Extracting referee details for MAFI-2024-0167...
+2025-07-10 14:10:19,737 - INFO - ✅ Found Reviewer List section
+2025-07-10 14:10:19,737 - INFO - Found 18 rows in reviewer table
+2025-07-10 14:10:19,737 - INFO -       🔍 Cell[0]: '12'
+2025-07-10 14:10:19,738 - INFO -       🔍 Cell[1]: 'Mastrolia, ThibautUC Berkeley, IEORhttps://orcid.org/0000-0003-0578-0168'
+2025-07-10 14:10:19,738 - INFO -       🎯 Found name pattern: 'Mastrolia, ThibautUC' in cell[1]
+2025-07-10 14:10:19,738 - INFO -       🧹 Cleaned name: 'Mastrolia, ThibautUC'
+2025-07-10 14:10:19,738 - INFO -       ✅ Extracted name: 'Mastrolia, ThibautUC' from cell[1]
+2025-07-10 14:10:19,738 - INFO -       🔍 DEBUG: Analyzing 17 cells for referee 'Mastrolia, ThibautUC'
+2025-07-10 14:10:19,738 - INFO -          Cell[0]: '12'
+2025-07-10 14:10:19,738 - INFO -          Cell[1]: 'Mastrolia, ThibautUC Berkeley, IEORhttps://orcid.org/0000-0003-0578-0168'
+2025-07-10 14:10:19,738 - INFO -          Cell[2]: ''
+2025-07-10 14:10:19,738 - INFO -          Cell[3]: 'Mastrolia, ThibautUC Berkeley, IEORhttps://orcid.org/0000-0003-0578-0168'
+2025-07-10 14:10:19,738 - INFO -          Cell[4]: 'Agreed'
+2025-07-10 14:10:19,738 - INFO -          Cell[5]: 'Invited:01-May-2025Agreed
+				:01-May-2025Due Date:30-Jul-2025Time in Review:69 '
+2025-07-10 14:10:19,738 - INFO -          Cell[6]: 'Invited:'
+2025-07-10 14:10:19,738 - INFO -          Cell[7]: '01-May-2025'
+2025-07-10 14:10:19,738 - INFO -          Cell[8]: 'Agreed
+				:'
+2025-07-10 14:10:19,738 - INFO -          Cell[9]: '01-May-2025'
+2025-07-10 14:10:19,738 - INFO -          Cell[10]: 'Due Date:'
+2025-07-10 14:10:19,738 - INFO -          Cell[11]: '30-Jul-2025'
+2025-07-10 14:10:19,738 - INFO -          Cell[12]: 'Time in Review:'
+2025-07-10 14:10:19,738 - INFO -          Cell[13]: '69 Days.'
+2025-07-10 14:10:19,738 - INFO -          Cell[14]: 'view full history'
+2025-07-10 14:10:19,738 - INFO -          Cell[15]: 'edit reminders'
+2025-07-10 14:10:19,738 - INFO -          Cell[16]: ''
+2025-07-10 14:10:19,739 - INFO -          ✅ FOUND STATUS: 'Agreed' (matched 'agreed')
+2025-07-10 14:10:19,739 - INFO -      🏛️  Institution from name cell: Berkeley, IEOR
+2025-07-10 14:10:19,739 - INFO -      🏛️  Institution from name cell: Berkeley, IEOR
+2025-07-10 14:10:19,739 - INFO -      🏛️  Institution from name cell: Berkeley, IEOR
+2025-07-10 14:10:19,739 - INFO -      🏛️  Institution from name cell: Berkeley, IEOR
+2025-07-10 14:10:19,739 - INFO -      🏛️  Institution from name cell: Berkeley, IEOR
+2025-07-10 14:10:19,739 - INFO -      📅 Invited date: 01-May-2025
+2025-07-10 14:10:19,739 - INFO -      📅 Due date: 30-Jul-2025
+2025-07-10 14:10:19,739 - INFO -      ⏱️  Time in review: 69 Days
+2025-07-10 14:10:19,739 - INFO -      🏛️  Institution from name cell: Berkeley, IEOR
+2025-07-10 14:10:19,739 - INFO -      🏛️  Institution from name cell: Berkeley, IEOR
+2025-07-10 14:10:19,740 - INFO -      🏛️  Institution from name cell: Berkeley, IEOR
+2025-07-10 14:10:19,740 - INFO -      🏛️  Institution from name cell: Berkeley, IEOR
+2025-07-10 14:10:19,740 - INFO -      🏛️  Institution from name cell: Berkeley, IEOR
+2025-07-10 14:10:19,740 - INFO -      🏛️  Institution from name cell: Berkeley, IEOR
+2025-07-10 14:10:19,740 - INFO -      🏛️  Institution from name cell: Berkeley, IEOR
+2025-07-10 14:10:19,740 - INFO -      🏛️  Institution from name cell: Berkeley, IEOR
+2025-07-10 14:10:19,740 - INFO -      🏛️  Institution from name cell: Berkeley, IEOR
+2025-07-10 14:10:19,740 - INFO -      🏛️  Institution from name cell: Berkeley, IEOR
+2025-07-10 14:10:19,740 - INFO -      🏛️  Institution from name cell: Berkeley, IEOR
+2025-07-10 14:10:19,740 - INFO -      🏛️  Institution from name cell: Berkeley, IEOR
+2025-07-10 14:10:19,740 - INFO -    ✅ Mastrolia, ThibautUC (Agreed)
+2025-07-10 14:10:19,740 - INFO -       🔍 Cell[0]: '12'
+2025-07-10 14:10:19,740 - INFO -       🔍 Cell[1]: 'Hamadene, Said'
+2025-07-10 14:10:19,740 - INFO -       🎯 Found name pattern: 'Hamadene, Said' in cell[1]
+2025-07-10 14:10:19,740 - INFO -       🧹 Cleaned name: 'Hamadene, Said'
+2025-07-10 14:10:19,740 - INFO -       ✅ Extracted name: 'Hamadene, Said' from cell[1]
+2025-07-10 14:10:19,740 - INFO -       🔍 DEBUG: Analyzing 17 cells for referee 'Hamadene, Said'
+2025-07-10 14:10:19,740 - INFO -          Cell[0]: '12'
+2025-07-10 14:10:19,741 - INFO -          Cell[1]: 'Hamadene, Said'
+2025-07-10 14:10:19,741 - INFO -          Cell[2]: ''
+2025-07-10 14:10:19,741 - INFO -          Cell[3]: 'Hamadene, Said'
+2025-07-10 14:10:19,741 - INFO -          Cell[4]: 'Agreed'
+2025-07-10 14:10:19,741 - INFO -          Cell[5]: 'Invited:01-May-2025Agreed
+				:03-May-2025Due Date:01-Aug-2025Time in Review:68 '
+2025-07-10 14:10:19,741 - INFO -          Cell[6]: 'Invited:'
+2025-07-10 14:10:19,741 - INFO -          Cell[7]: '01-May-2025'
+2025-07-10 14:10:19,741 - INFO -          Cell[8]: 'Agreed
+				:'
+2025-07-10 14:10:19,741 - INFO -          Cell[9]: '03-May-2025'
+2025-07-10 14:10:19,741 - INFO -          Cell[10]: 'Due Date:'
+2025-07-10 14:10:19,741 - INFO -          Cell[11]: '01-Aug-2025'
+2025-07-10 14:10:19,741 - INFO -          Cell[12]: 'Time in Review:'
+2025-07-10 14:10:19,741 - INFO -          Cell[13]: '68 Days.'
+2025-07-10 14:10:19,741 - INFO -          Cell[14]: 'view full history'
+2025-07-10 14:10:19,741 - INFO -          Cell[15]: 'edit reminders'
+2025-07-10 14:10:19,741 - INFO -          Cell[16]: ''
+2025-07-10 14:10:19,742 - INFO -          ✅ FOUND STATUS: 'Agreed' (matched 'agreed')
+2025-07-10 14:10:19,743 - INFO -      📅 Invited date: 01-May-2025
+2025-07-10 14:10:19,743 - INFO -      📅 Due date: 01-Aug-2025
+2025-07-10 14:10:19,743 - INFO -      ⏱️  Time in review: 68 Days
+2025-07-10 14:10:19,744 - INFO -    ✅ Hamadene, Said (Agreed)
+2025-07-10 14:10:19,746 - INFO - 📧 Fetching email dates for MAFI-2024-0167...
+2025-07-10 14:10:19,747 - INFO - file_cache is only supported with oauth2client<4.0.0
+2025-07-10 14:10:20,241 - INFO - Found 9 messages to process for MF
+2025-07-10 14:10:22,994 - INFO -    ❌ No email match found for Mastrolia, ThibautUC
+2025-07-10 14:10:22,996 - INFO -    ❌ No email match found for Hamadene, Said
+2025-07-10 14:10:22,996 - INFO - ✅ Successfully extracted 2 referees
+2025-07-10 14:10:22,996 - INFO - 🔄 Navigating back to Associate Editor Center...
+2025-07-10 14:10:25,064 - INFO - ✅ Navigated back to Associate Editor Center
+2025-07-10 14:10:25,064 - INFO - 📂 Navigating to: Awaiting Reviewer Scores
+2025-07-10 14:10:29,089 - INFO - ✅ Successfully navigated to Awaiting Reviewer Scores
+2025-07-10 14:10:29,090 - INFO - 
+============================================================
+2025-07-10 14:10:29,090 - INFO - 📄 Processing: MAFI-2025-0166
+2025-07-10 14:10:29,090 - INFO - Expected: Optimal investment and consumption under forward u...
+2025-07-10 14:10:29,090 - INFO - ============================================================
+2025-07-10 14:10:29,090 - INFO - 🔍 Looking for manuscript checkbox: MAFI-2025-0166
+2025-07-10 14:10:29,097 - INFO - Found 2 checkbox images
+2025-07-10 14:10:29,178 - INFO -    Skipping row 8 (contains but doesn't start with MAFI-2025-0166): To take action on a manuscript or view the full ma...
+2025-07-10 14:10:29,263 - INFO -    Skipping row 12 (contains but doesn't start with MAFI-2025-0166): Awaiting Reviewer Scores
+Manuscripts 1-2 of 2
+Manu...
+2025-07-10 14:10:29,315 - INFO -    Skipping row 14 (contains but doesn't start with MAFI-2025-0166): Awaiting Reviewer Scores
+Manuscripts 1-2 of 2
+Manu...
+2025-07-10 14:10:29,376 - INFO -    Skipping row 18 (contains but doesn't start with MAFI-2025-0166): Manuscript ID  
+Manuscript Title
+Date Submitted  
+...
+2025-07-10 14:10:29,416 - INFO - ✅ Found manuscript data for MAFI-2025-0166 in row 22
+2025-07-10 14:10:29,416 - INFO -    Row preview: MAFI-2025-0166
+(REX-PROD-1-957B102A-FAD0-49EC-974F-4CE40BABDCFF-C109D069-488B-4649-9A62-3B5ECD0619E4...
+2025-07-10 14:10:29,416 - INFO - ✅ Clicking checkbox for MAFI-2025-0166
+2025-07-10 14:10:34,065 - INFO - Navigated to: https://mc.manuscriptcentral.com/mafi
+2025-07-10 14:10:34,065 - INFO - 📊 Extracting referee details for MAFI-2025-0166...
+2025-07-10 14:10:34,164 - INFO - ✅ Found Reviewer List section
+2025-07-10 14:10:34,165 - INFO - Found 28 rows in reviewer table
+2025-07-10 14:10:34,165 - INFO -       🔍 Cell[0]: '1234'
+2025-07-10 14:10:34,165 - INFO -       🔍 Cell[1]: 'Liang, GechunUniversity of Warwick, Department of Statisticshttps://orcid.org/0000-0003-0752-0773'
+2025-07-10 14:10:34,165 - INFO -       🎯 Found name pattern: 'Liang, GechunUniversity' in cell[1]
+2025-07-10 14:10:34,165 - INFO -       🧹 Cleaned name: 'Liang, GechunUniversity'
+2025-07-10 14:10:34,165 - INFO -       ✅ Extracted name: 'Liang, GechunUniversity' from cell[1]
+2025-07-10 14:10:34,165 - INFO -       🔍 DEBUG: Analyzing 17 cells for referee 'Liang, GechunUniversity'
+2025-07-10 14:10:34,165 - INFO -          Cell[0]: '1234'
+2025-07-10 14:10:34,165 - INFO -          Cell[1]: 'Liang, GechunUniversity of Warwick, Department of Statisticshttps://orcid.org/00'
+2025-07-10 14:10:34,165 - INFO -          Cell[2]: ''
+2025-07-10 14:10:34,165 - INFO -          Cell[3]: 'Liang, GechunUniversity of Warwick, Department of Statisticshttps://orcid.org/00'
+2025-07-10 14:10:34,165 - INFO -          Cell[4]: 'Agreed'
+2025-07-10 14:10:34,165 - INFO -          Cell[5]: 'Invited:22-Jun-2025Agreed
+				:22-Jun-2025Due Date:20-Sep-2025Time in Review:18 '
+2025-07-10 14:10:34,165 - INFO -          Cell[6]: 'Invited:'
+2025-07-10 14:10:34,165 - INFO -          Cell[7]: '22-Jun-2025'
+2025-07-10 14:10:34,165 - INFO -          Cell[8]: 'Agreed
+				:'
+2025-07-10 14:10:34,165 - INFO -          Cell[9]: '22-Jun-2025'
+2025-07-10 14:10:34,165 - INFO -          Cell[10]: 'Due Date:'
+2025-07-10 14:10:34,165 - INFO -          Cell[11]: '20-Sep-2025'
+2025-07-10 14:10:34,165 - INFO -          Cell[12]: 'Time in Review:'
+2025-07-10 14:10:34,165 - INFO -          Cell[13]: '18 Days.'
+2025-07-10 14:10:34,166 - INFO -          Cell[14]: 'view full history'
+2025-07-10 14:10:34,166 - INFO -          Cell[15]: 'edit reminders'
+2025-07-10 14:10:34,166 - INFO -          Cell[16]: ''
+2025-07-10 14:10:34,166 - INFO -          ✅ FOUND STATUS: 'Agreed' (matched 'agreed')
+2025-07-10 14:10:34,166 - INFO -      🏛️  Institution from name cell: of Warwick, Department of Statistics
+2025-07-10 14:10:34,166 - INFO -      🏛️  Institution from name cell: of Warwick, Department of Statistics
+2025-07-10 14:10:34,166 - INFO -      🏛️  Institution from name cell: of Warwick, Department of Statistics
+2025-07-10 14:10:34,166 - INFO -      🏛️  Institution from name cell: of Warwick, Department of Statistics
+2025-07-10 14:10:34,166 - INFO -      🏛️  Institution from name cell: of Warwick, Department of Statistics
+2025-07-10 14:10:34,166 - INFO -      📅 Invited date: 22-Jun-2025
+2025-07-10 14:10:34,166 - INFO -      📅 Due date: 20-Sep-2025
+2025-07-10 14:10:34,166 - INFO -      ⏱️  Time in review: 18 Days
+2025-07-10 14:10:34,166 - INFO -      🏛️  Institution from name cell: of Warwick, Department of Statistics
+2025-07-10 14:10:34,166 - INFO -      🏛️  Institution from name cell: of Warwick, Department of Statistics
+2025-07-10 14:10:34,166 - INFO -      🏛️  Institution from name cell: of Warwick, Department of Statistics
+2025-07-10 14:10:34,166 - INFO -      🏛️  Institution from name cell: of Warwick, Department of Statistics
+2025-07-10 14:10:34,166 - INFO -      🏛️  Institution from name cell: of Warwick, Department of Statistics
+2025-07-10 14:10:34,166 - INFO -      🏛️  Institution from name cell: of Warwick, Department of Statistics
+2025-07-10 14:10:34,166 - INFO -      🏛️  Institution from name cell: of Warwick, Department of Statistics
+2025-07-10 14:10:34,166 - INFO -      🏛️  Institution from name cell: of Warwick, Department of Statistics
+2025-07-10 14:10:34,166 - INFO -      🏛️  Institution from name cell: of Warwick, Department of Statistics
+2025-07-10 14:10:34,166 - INFO -      🏛️  Institution from name cell: of Warwick, Department of Statistics
+2025-07-10 14:10:34,166 - INFO -      🏛️  Institution from name cell: of Warwick, Department of Statistics
+2025-07-10 14:10:34,166 - INFO -      🏛️  Institution from name cell: of Warwick, Department of Statistics
+2025-07-10 14:10:34,167 - INFO -    ✅ Liang, GechunUniversity (Agreed)
+2025-07-10 14:10:34,167 - INFO -       🔍 Cell[0]: '1234'
+2025-07-10 14:10:34,167 - INFO -       🔍 Cell[1]: 'Mrad, MohamedUniversité Sorbonne Paris Nord, LAGA'
+2025-07-10 14:10:34,167 - INFO -       🎯 Found name pattern: 'Mrad, MohamedUniversit' in cell[1]
+2025-07-10 14:10:34,167 - INFO -       🧹 Cleaned name: 'Mrad, MohamedUniversit'
+2025-07-10 14:10:34,167 - INFO -       ✅ Extracted name: 'Mrad, MohamedUniversit' from cell[1]
+2025-07-10 14:10:34,167 - INFO -       🔍 DEBUG: Analyzing 13 cells for referee 'Mrad, MohamedUniversit'
+2025-07-10 14:10:34,167 - INFO -          Cell[0]: '1234'
+2025-07-10 14:10:34,167 - INFO -          Cell[1]: 'Mrad, MohamedUniversité Sorbonne Paris Nord, LAGA'
+2025-07-10 14:10:34,167 - INFO -          Cell[2]: ''
+2025-07-10 14:10:34,167 - INFO -          Cell[3]: 'Mrad, MohamedUniversité Sorbonne Paris Nord, LAGA'
+2025-07-10 14:10:34,167 - INFO -          Cell[4]: 'Declinedinvite again'
+2025-07-10 14:10:34,167 - INFO -          Cell[5]: 'Invited:22-Jun-2025Declined
+				:01-Jul-2025view full history'
+2025-07-10 14:10:34,167 - INFO -          Cell[6]: 'Invited:'
+2025-07-10 14:10:34,167 - INFO -          Cell[7]: '22-Jun-2025'
+2025-07-10 14:10:34,167 - INFO -          Cell[8]: 'Declined
+				:'
+2025-07-10 14:10:34,167 - INFO -          Cell[9]: '01-Jul-2025'
+2025-07-10 14:10:34,167 - INFO -          Cell[10]: 'view full history'
+2025-07-10 14:10:34,167 - INFO -          Cell[11]: ''
+2025-07-10 14:10:34,168 - INFO -          Cell[12]: ''
+2025-07-10 14:10:34,168 - INFO -          ❌ FOUND STATUS: 'Declined'
+2025-07-10 14:10:34,168 - INFO -      🏛️  Institution from name cell: é Sorbonne Paris Nord, LAGA
+2025-07-10 14:10:34,168 - INFO -      🏛️  Institution from name cell: é Sorbonne Paris Nord, LAGA
+2025-07-10 14:10:34,168 - INFO -      🏛️  Institution from name cell: é Sorbonne Paris Nord, LAGA
+2025-07-10 14:10:34,168 - INFO -      🏛️  Institution from name cell: é Sorbonne Paris Nord, LAGA
+2025-07-10 14:10:34,168 - INFO -      🏛️  Institution from name cell: é Sorbonne Paris Nord, LAGA
+2025-07-10 14:10:34,168 - INFO -      📅 Invited date: 22-Jun-2025
+2025-07-10 14:10:34,168 - INFO -      🏛️  Institution from name cell: é Sorbonne Paris Nord, LAGA
+2025-07-10 14:10:34,168 - INFO -      🏛️  Institution from name cell: é Sorbonne Paris Nord, LAGA
+2025-07-10 14:10:34,168 - INFO -      🏛️  Institution from name cell: é Sorbonne Paris Nord, LAGA
+2025-07-10 14:10:34,168 - INFO -      🏛️  Institution from name cell: é Sorbonne Paris Nord, LAGA
+2025-07-10 14:10:34,168 - INFO -      🏛️  Institution from name cell: é Sorbonne Paris Nord, LAGA
+2025-07-10 14:10:34,168 - INFO -      🏛️  Institution from name cell: é Sorbonne Paris Nord, LAGA
+2025-07-10 14:10:34,168 - INFO -      🏛️  Institution from name cell: é Sorbonne Paris Nord, LAGA
+2025-07-10 14:10:34,168 - INFO -      🏛️  Institution from name cell: é Sorbonne Paris Nord, LAGA
+2025-07-10 14:10:34,168 - INFO -    ❌ Skipping Mrad, MohamedUniversit: declined (unavailable/declined)
+2025-07-10 14:10:34,168 - INFO -       🔍 Cell[0]: '1234'
+2025-07-10 14:10:34,168 - INFO -       🔍 Cell[1]: 'Dos Reis, GoncaloUniversity of Edinburgh, School of Mathematicshttps://orcid.org/0000-0002-4993-2672'
+2025-07-10 14:10:34,168 - INFO -       🎯 Found name pattern: 'Reis, GoncaloUniversity' in cell[1]
+2025-07-10 14:10:34,168 - INFO -       🧹 Cleaned name: 'Reis, GoncaloUniversity'
+2025-07-10 14:10:34,168 - INFO -       ✅ Extracted name: 'Reis, GoncaloUniversity' from cell[1]
+2025-07-10 14:10:34,169 - INFO -       🔍 DEBUG: Analyzing 13 cells for referee 'Reis, GoncaloUniversity'
+2025-07-10 14:10:34,169 - INFO -          Cell[0]: '1234'
+2025-07-10 14:10:34,169 - INFO -          Cell[1]: 'Dos Reis, GoncaloUniversity of Edinburgh, School of Mathematicshttps://orcid.org'
+2025-07-10 14:10:34,169 - INFO -          Cell[2]: ''
+2025-07-10 14:10:34,169 - INFO -          Cell[3]: 'Dos Reis, GoncaloUniversity of Edinburgh, School of Mathematicshttps://orcid.org'
+2025-07-10 14:10:34,169 - INFO -          Cell[4]: 'Unavailableinvite again'
+2025-07-10 14:10:34,169 - INFO -          Cell[5]: 'Invited:01-Jul-2025Unavailable
+				:01-Jul-2025view full history'
+2025-07-10 14:10:34,169 - INFO -          Cell[6]: 'Invited:'
+2025-07-10 14:10:34,169 - INFO -          Cell[7]: '01-Jul-2025'
+2025-07-10 14:10:34,169 - INFO -          Cell[8]: 'Unavailable
+				:'
+2025-07-10 14:10:34,169 - INFO -          Cell[9]: '01-Jul-2025'
+2025-07-10 14:10:34,169 - INFO -          Cell[10]: 'view full history'
+2025-07-10 14:10:34,169 - INFO -          Cell[11]: ''
+2025-07-10 14:10:34,169 - INFO -          Cell[12]: ''
+2025-07-10 14:10:34,169 - INFO -          ⚠️  No decision keyword found, looking for other status indicators
+2025-07-10 14:10:34,169 - INFO -          📄 Using status: '1234'
+2025-07-10 14:10:34,169 - INFO -      🏛️  Institution from name cell: of Edinburgh, School of Mathematics
+2025-07-10 14:10:34,169 - INFO -      🏛️  Institution from name cell: of Edinburgh, School of Mathematics
+2025-07-10 14:10:34,169 - INFO -      🏛️  Institution from name cell: of Edinburgh, School of Mathematics
+2025-07-10 14:10:34,169 - INFO -      🏛️  Institution from name cell: of Edinburgh, School of Mathematics
+2025-07-10 14:10:34,169 - INFO -      🏛️  Institution from name cell: of Edinburgh, School of Mathematics
+2025-07-10 14:10:34,169 - INFO -      📅 Invited date: 01-Jul-2025
+2025-07-10 14:10:34,169 - INFO -      🏛️  Institution from name cell: of Edinburgh, School of Mathematics
+2025-07-10 14:10:34,169 - INFO -      🏛️  Institution from name cell: of Edinburgh, School of Mathematics
+2025-07-10 14:10:34,170 - INFO -      🏛️  Institution from name cell: of Edinburgh, School of Mathematics
+2025-07-10 14:10:34,170 - INFO -      🏛️  Institution from name cell: of Edinburgh, School of Mathematics
+2025-07-10 14:10:34,170 - INFO -      🏛️  Institution from name cell: of Edinburgh, School of Mathematics
+2025-07-10 14:10:34,170 - INFO -      🏛️  Institution from name cell: of Edinburgh, School of Mathematics
+2025-07-10 14:10:34,170 - INFO -      🏛️  Institution from name cell: of Edinburgh, School of Mathematics
+2025-07-10 14:10:34,170 - INFO -      🏛️  Institution from name cell: of Edinburgh, School of Mathematics
+2025-07-10 14:10:34,170 - INFO -    ❌ Skipping Reis, GoncaloUniversity: unavailable (unavailable/declined)
+2025-07-10 14:10:34,170 - INFO -       🔍 Cell[0]: '1234'
+2025-07-10 14:10:34,170 - INFO -       🔍 Cell[1]: 'Strub, MorisWarwick Business School, Information Systems Management & Analyticshttps://orcid.org/000'
+2025-07-10 14:10:34,170 - INFO -       🎯 Found name pattern: 'Strub, MorisWarwick' in cell[1]
+2025-07-10 14:10:34,170 - INFO -       🧹 Cleaned name: 'Strub, MorisWarwick'
+2025-07-10 14:10:34,170 - INFO -       ✅ Extracted name: 'Strub, MorisWarwick' from cell[1]
+2025-07-10 14:10:34,170 - INFO -       🔍 DEBUG: Analyzing 17 cells for referee 'Strub, MorisWarwick'
+2025-07-10 14:10:34,170 - INFO -          Cell[0]: '1234'
+2025-07-10 14:10:34,170 - INFO -          Cell[1]: 'Strub, MorisWarwick Business School, Information Systems Management & Analyticsh'
+2025-07-10 14:10:34,170 - INFO -          Cell[2]: ''
+2025-07-10 14:10:34,170 - INFO -          Cell[3]: 'Strub, MorisWarwick Business School, Information Systems Management & Analyticsh'
+2025-07-10 14:10:34,170 - INFO -          Cell[4]: 'Agreed'
+2025-07-10 14:10:34,170 - INFO -          Cell[5]: 'Invited:01-Jul-2025Agreed
+				:01-Jul-2025Due Date:29-Sep-2025Time in Review:8 D'
+2025-07-10 14:10:34,170 - INFO -          Cell[6]: 'Invited:'
+2025-07-10 14:10:34,170 - INFO -          Cell[7]: '01-Jul-2025'
+2025-07-10 14:10:34,170 - INFO -          Cell[8]: 'Agreed
+				:'
+2025-07-10 14:10:34,170 - INFO -          Cell[9]: '01-Jul-2025'
+2025-07-10 14:10:34,170 - INFO -          Cell[10]: 'Due Date:'
+2025-07-10 14:10:34,170 - INFO -          Cell[11]: '29-Sep-2025'
+2025-07-10 14:10:34,170 - INFO -          Cell[12]: 'Time in Review:'
+2025-07-10 14:10:34,171 - INFO -          Cell[13]: '8 Days.'
+2025-07-10 14:10:34,171 - INFO -          Cell[14]: 'view full history'
+2025-07-10 14:10:34,171 - INFO -          Cell[15]: 'edit reminders'
+2025-07-10 14:10:34,171 - INFO -          Cell[16]: ''
+2025-07-10 14:10:34,171 - INFO -          ✅ FOUND STATUS: 'Agreed' (matched 'agreed')
+2025-07-10 14:10:34,171 - INFO -      🏛️  Institution from name cell: Business School, Information Systems Management & Analytics
+2025-07-10 14:10:34,171 - INFO -      🏛️  Institution from name cell: Business School, Information Systems Management & Analytics
+2025-07-10 14:10:34,171 - INFO -      🏛️  Institution from name cell: Business School, Information Systems Management & Analytics
+2025-07-10 14:10:34,171 - INFO -      🏛️  Institution from name cell: Business School, Information Systems Management & Analytics
+2025-07-10 14:10:34,171 - INFO -      🏛️  Institution from name cell: Business School, Information Systems Management & Analytics
+2025-07-10 14:10:34,171 - INFO -      📅 Invited date: 01-Jul-2025
+2025-07-10 14:10:34,171 - INFO -      📅 Due date: 29-Sep-2025
+2025-07-10 14:10:34,171 - INFO -      ⏱️  Time in review: 8 Days
+2025-07-10 14:10:34,171 - INFO -      🏛️  Institution from name cell: Business School, Information Systems Management & Analytics
+2025-07-10 14:10:34,171 - INFO -      🏛️  Institution from name cell: Business School, Information Systems Management & Analytics
+2025-07-10 14:10:34,171 - INFO -      🏛️  Institution from name cell: Business School, Information Systems Management & Analytics
+2025-07-10 14:10:34,171 - INFO -      🏛️  Institution from name cell: Business School, Information Systems Management & Analytics
+2025-07-10 14:10:34,171 - INFO -      🏛️  Institution from name cell: Business School, Information Systems Management & Analytics
+2025-07-10 14:10:34,171 - INFO -      🏛️  Institution from name cell: Business School, Information Systems Management & Analytics
+2025-07-10 14:10:34,171 - INFO -      🏛️  Institution from name cell: Business School, Information Systems Management & Analytics
+2025-07-10 14:10:34,171 - INFO -      🏛️  Institution from name cell: Business School, Information Systems Management & Analytics
+2025-07-10 14:10:34,171 - INFO -      🏛️  Institution from name cell: Business School, Information Systems Management & Analytics
+2025-07-10 14:10:34,171 - INFO -      🏛️  Institution from name cell: Business School, Information Systems Management & Analytics
+2025-07-10 14:10:34,171 - INFO -      🏛️  Institution from name cell: Business School, Information Systems Management & Analytics
+2025-07-10 14:10:34,171 - INFO -      🏛️  Institution from name cell: Business School, Information Systems Management & Analytics
+2025-07-10 14:10:34,172 - INFO -    ✅ Strub, MorisWarwick (Agreed)
+2025-07-10 14:10:34,172 - INFO - 📧 Fetching email dates for MAFI-2025-0166...
+2025-07-10 14:10:34,173 - INFO - file_cache is only supported with oauth2client<4.0.0
+2025-07-10 14:10:34,698 - INFO - Found 9 messages to process for MF
+2025-07-10 14:10:37,319 - INFO -    ❌ No email match found for Liang, GechunUniversity
+2025-07-10 14:10:37,319 - INFO -    ❌ No email match found for Strub, MorisWarwick
+2025-07-10 14:10:37,319 - INFO - ✅ Successfully extracted 2 referees
+2025-07-10 14:10:37,319 - INFO - 🔄 Navigating back to Associate Editor Center...
+2025-07-10 14:10:39,843 - INFO - ✅ Navigated back to Associate Editor Center
+2025-07-10 14:10:39,843 - INFO - 📂 Navigating to: Awaiting Reviewer Scores
+2025-07-10 14:10:44,233 - INFO - ✅ Successfully navigated to Awaiting Reviewer Scores
+2025-07-10 14:10:44,234 - INFO - 📄 Report saved: stable_results/mf_stable_report.txt
+2025-07-10 14:10:44,234 - INFO - 🎉 Stable MF extraction completed!
+2025-07-10 14:10:44,235 - INFO -    Results: stable_results/mf_stable_results.json
+2025-07-10 14:10:44,341 - INFO - 🔄 Driver closed
+2025-07-10 14:12:21,071 - INFO - 🚀 Starting stable MF extraction (exact working system approach)
+2025-07-10 14:12:21,072 - INFO - 🚀 Creating Chrome driver with fallback approaches
+2025-07-10 14:12:21,072 - INFO -    Attempting undetected chromedriver...
+2025-07-10 14:12:21,072 - INFO -      Trying version_main=None
+2025-07-10 14:12:22,981 - INFO - patching driver executable /Users/dylanpossamai/Library/Application Support/undetected_chromedriver/undetected_chromedriver
+2025-07-10 14:12:30,590 - INFO -      Trying version_main=126
+2025-07-10 14:12:33,799 - INFO - patching driver executable /Users/dylanpossamai/Library/Application Support/undetected_chromedriver/undetected_chromedriver
+2025-07-10 14:12:33,843 - INFO -      Trying version_main=125
+2025-07-10 14:12:35,720 - INFO - patching driver executable /Users/dylanpossamai/Library/Application Support/undetected_chromedriver/undetected_chromedriver
+2025-07-10 14:12:35,756 - INFO -    Attempting regular Chrome driver...
+2025-07-10 14:12:38,573 - INFO - ✅ Regular Chrome driver created successfully
+2025-07-10 14:12:38,573 - INFO - 🔐 Logging into MF (exact working system approach)
+2025-07-10 14:12:38,574 - INFO - Navigating to MF dashboard: https://mc.manuscriptcentral.com/mafi
+2025-07-10 14:12:44,562 - INFO - Accepted cookies.
+2025-07-10 14:13:01,580 - INFO - Verification prompt visible. Fetching code from email...
+2025-07-10 14:13:01,716 - INFO - Waiting 5 seconds for verification email to arrive...
+2025-07-10 14:13:06,724 - INFO - file_cache is only supported with oauth2client<4.0.0
+2025-07-10 14:13:06,726 - INFO - Waiting 5 seconds for verification email to arrive...
+2025-07-10 14:13:12,383 - INFO - Found newer verification code for MF: 792237 (timestamp: Thu, 10 Jul 2025 12:12:46 +0000)
+2025-07-10 14:13:14,989 - INFO - Returning latest verification code for MF: 792237
+2025-07-10 14:13:15,047 - INFO - Submitted verification code.
+2025-07-10 14:13:18,050 - INFO - Ready to continue navigation after login.
+2025-07-10 14:13:18,053 - INFO - 🔍 Navigating to Associate Editor Center...
+2025-07-10 14:13:21,175 - INFO - ✅ Successfully navigated to Associate Editor Center
+2025-07-10 14:13:21,175 - INFO - 📂 Navigating to: Awaiting Reviewer Scores
+2025-07-10 14:13:25,766 - INFO - ✅ Successfully navigated to Awaiting Reviewer Scores
+2025-07-10 14:13:25,766 - INFO - 
+============================================================
+2025-07-10 14:13:25,766 - INFO - 📄 Processing: MAFI-2024-0167
+2025-07-10 14:13:25,766 - INFO - Expected: Competitive optimal portfolio selection in a non-M...
+2025-07-10 14:13:25,766 - INFO - ============================================================
+2025-07-10 14:13:25,766 - INFO - 🔍 Looking for manuscript checkbox: MAFI-2024-0167
+2025-07-10 14:13:25,799 - INFO - Found 2 checkbox images
+2025-07-10 14:13:25,976 - INFO -    Skipping row 8 (contains but doesn't start with MAFI-2024-0167): To take action on a manuscript or view the full ma...
+2025-07-10 14:13:26,023 - INFO -    Skipping row 12 (contains but doesn't start with MAFI-2024-0167): Awaiting Reviewer Scores
+Manuscripts 1-2 of 2
+Manu...
+2025-07-10 14:13:26,059 - INFO -    Skipping row 14 (contains but doesn't start with MAFI-2024-0167): Awaiting Reviewer Scores
+Manuscripts 1-2 of 2
+Manu...
+2025-07-10 14:13:26,113 - INFO -    Skipping row 18 (contains but doesn't start with MAFI-2024-0167): Manuscript ID  
+Manuscript Title
+Date Submitted  
+...
+2025-07-10 14:13:26,204 - INFO - ✅ Found manuscript data for MAFI-2024-0167 in row 26
+2025-07-10 14:13:26,204 - INFO -    Row preview: MAFI-2024-0167
+(REX-PROD-1-476BE50B-AB64-4991-B6F2-9023FD785014-3B4258C0-BE99-4580-B3D6-E5BB1C29C2D5...
+2025-07-10 14:13:26,204 - INFO - ✅ Clicking checkbox for MAFI-2024-0167
+2025-07-10 14:13:32,349 - INFO - Navigated to: https://mc.manuscriptcentral.com/mafi
+2025-07-10 14:13:32,349 - INFO - 📊 Extracting referee details for MAFI-2024-0167...
+2025-07-10 14:13:32,439 - INFO - ✅ Found Reviewer List section
+2025-07-10 14:13:32,439 - INFO - Found 18 rows in reviewer table
+2025-07-10 14:13:32,439 - INFO -       🔍 Cell[0]: '12'
+2025-07-10 14:13:32,440 - INFO -       🔍 Cell[1]: 'Mastrolia, ThibautUC Berkeley, IEORhttps://orcid.org/0000-0003-0578-0168'
+2025-07-10 14:13:32,440 - INFO -       🎯 Found clean name: 'Berkeley, IEO' using pattern 1 in cell[1]
+2025-07-10 14:13:32,440 - INFO -       🔍 DEBUG: Analyzing 17 cells for referee 'Berkeley, IEO'
+2025-07-10 14:13:32,440 - INFO -          Cell[0]: '12'
+2025-07-10 14:13:32,440 - INFO -          Cell[1]: 'Mastrolia, ThibautUC Berkeley, IEORhttps://orcid.org/0000-0003-0578-0168'
+2025-07-10 14:13:32,440 - INFO -          Cell[2]: ''
+2025-07-10 14:13:32,440 - INFO -          Cell[3]: 'Mastrolia, ThibautUC Berkeley, IEORhttps://orcid.org/0000-0003-0578-0168'
+2025-07-10 14:13:32,440 - INFO -          Cell[4]: 'Agreed'
+2025-07-10 14:13:32,440 - INFO -          Cell[5]: 'Invited:01-May-2025Agreed
+				:01-May-2025Due Date:30-Jul-2025Time in Review:69 '
+2025-07-10 14:13:32,440 - INFO -          Cell[6]: 'Invited:'
+2025-07-10 14:13:32,440 - INFO -          Cell[7]: '01-May-2025'
+2025-07-10 14:13:32,440 - INFO -          Cell[8]: 'Agreed
+				:'
+2025-07-10 14:13:32,440 - INFO -          Cell[9]: '01-May-2025'
+2025-07-10 14:13:32,440 - INFO -          Cell[10]: 'Due Date:'
+2025-07-10 14:13:32,440 - INFO -          Cell[11]: '30-Jul-2025'
+2025-07-10 14:13:32,440 - INFO -          Cell[12]: 'Time in Review:'
+2025-07-10 14:13:32,440 - INFO -          Cell[13]: '69 Days.'
+2025-07-10 14:13:32,440 - INFO -          Cell[14]: 'view full history'
+2025-07-10 14:13:32,440 - INFO -          Cell[15]: 'edit reminders'
+2025-07-10 14:13:32,440 - INFO -          Cell[16]: ''
+2025-07-10 14:13:32,441 - INFO -          ✅ FOUND STATUS: 'Agreed' (matched 'agreed')
+2025-07-10 14:13:32,441 - INFO -      📅 Invited date: 01-May-2025
+2025-07-10 14:13:32,441 - INFO -      📅 Due date: 30-Jul-2025
+2025-07-10 14:13:32,441 - INFO -      ⏱️  Time in review: 69 Days
+2025-07-10 14:13:32,443 - INFO -    ✅ Berkeley, IEO (Agreed)
+2025-07-10 14:13:32,443 - INFO -       🔍 Cell[0]: '12'
+2025-07-10 14:13:32,443 - INFO -       🔍 Cell[1]: 'Hamadene, Said'
+2025-07-10 14:13:32,443 - INFO -       🎯 Found clean name: 'Hamadene, Said' using pattern 3 in cell[1]
+2025-07-10 14:13:32,443 - INFO -       🔍 DEBUG: Analyzing 17 cells for referee 'Hamadene, Said'
+2025-07-10 14:13:32,443 - INFO -          Cell[0]: '12'
+2025-07-10 14:13:32,443 - INFO -          Cell[1]: 'Hamadene, Said'
+2025-07-10 14:13:32,443 - INFO -          Cell[2]: ''
+2025-07-10 14:13:32,443 - INFO -          Cell[3]: 'Hamadene, Said'
+2025-07-10 14:13:32,443 - INFO -          Cell[4]: 'Agreed'
+2025-07-10 14:13:32,443 - INFO -          Cell[5]: 'Invited:01-May-2025Agreed
+				:03-May-2025Due Date:01-Aug-2025Time in Review:68 '
+2025-07-10 14:13:32,444 - INFO -          Cell[6]: 'Invited:'
+2025-07-10 14:13:32,444 - INFO -          Cell[7]: '01-May-2025'
+2025-07-10 14:13:32,444 - INFO -          Cell[8]: 'Agreed
+				:'
+2025-07-10 14:13:32,444 - INFO -          Cell[9]: '03-May-2025'
+2025-07-10 14:13:32,444 - INFO -          Cell[10]: 'Due Date:'
+2025-07-10 14:13:32,444 - INFO -          Cell[11]: '01-Aug-2025'
+2025-07-10 14:13:32,444 - INFO -          Cell[12]: 'Time in Review:'
+2025-07-10 14:13:32,444 - INFO -          Cell[13]: '68 Days.'
+2025-07-10 14:13:32,444 - INFO -          Cell[14]: 'view full history'
+2025-07-10 14:13:32,444 - INFO -          Cell[15]: 'edit reminders'
+2025-07-10 14:13:32,444 - INFO -          Cell[16]: ''
+2025-07-10 14:13:32,444 - INFO -          ✅ FOUND STATUS: 'Agreed' (matched 'agreed')
+2025-07-10 14:13:32,445 - INFO -      📅 Invited date: 01-May-2025
+2025-07-10 14:13:32,445 - INFO -      📅 Due date: 01-Aug-2025
+2025-07-10 14:13:32,445 - INFO -      ⏱️  Time in review: 68 Days
+2025-07-10 14:13:32,446 - INFO -    ✅ Hamadene, Said (Agreed)
+2025-07-10 14:13:32,447 - INFO - 📧 Fetching email dates for MAFI-2024-0167...
+2025-07-10 14:13:32,449 - INFO - file_cache is only supported with oauth2client<4.0.0
+2025-07-10 14:13:32,869 - INFO - Found 9 messages to process for MF
+2025-07-10 14:13:35,416 - INFO -    ❌ No email match found for Berkeley, IEO
+2025-07-10 14:13:35,416 - INFO -    ❌ No email match found for Hamadene, Said
+2025-07-10 14:13:35,416 - INFO - ✅ Successfully extracted 2 referees
+2025-07-10 14:13:35,416 - INFO - 🔄 Navigating back to Associate Editor Center...
+2025-07-10 14:13:37,573 - INFO - ✅ Navigated back to Associate Editor Center
+2025-07-10 14:13:37,574 - INFO - 📂 Navigating to: Awaiting Reviewer Scores
+2025-07-10 14:13:42,125 - INFO - ✅ Successfully navigated to Awaiting Reviewer Scores
+2025-07-10 14:13:42,125 - INFO - 
+============================================================
+2025-07-10 14:13:42,125 - INFO - 📄 Processing: MAFI-2025-0166
+2025-07-10 14:13:42,125 - INFO - Expected: Optimal investment and consumption under forward u...
+2025-07-10 14:13:42,125 - INFO - ============================================================
+2025-07-10 14:13:42,125 - INFO - 🔍 Looking for manuscript checkbox: MAFI-2025-0166
+2025-07-10 14:13:42,132 - INFO - Found 2 checkbox images
+2025-07-10 14:13:42,275 - INFO -    Skipping row 8 (contains but doesn't start with MAFI-2025-0166): To take action on a manuscript or view the full ma...
+2025-07-10 14:13:42,332 - INFO -    Skipping row 12 (contains but doesn't start with MAFI-2025-0166): Awaiting Reviewer Scores
+Manuscripts 1-2 of 2
+Manu...
+2025-07-10 14:13:42,368 - INFO -    Skipping row 14 (contains but doesn't start with MAFI-2025-0166): Awaiting Reviewer Scores
+Manuscripts 1-2 of 2
+Manu...
+2025-07-10 14:13:42,486 - INFO -    Skipping row 18 (contains but doesn't start with MAFI-2025-0166): Manuscript ID  
+Manuscript Title
+Date Submitted  
+...
+2025-07-10 14:13:42,582 - INFO - ✅ Found manuscript data for MAFI-2025-0166 in row 22
+2025-07-10 14:13:42,582 - INFO -    Row preview: MAFI-2025-0166
+(REX-PROD-1-957B102A-FAD0-49EC-974F-4CE40BABDCFF-C109D069-488B-4649-9A62-3B5ECD0619E4...
+2025-07-10 14:13:42,582 - INFO - ✅ Clicking checkbox for MAFI-2025-0166
+2025-07-10 14:13:47,168 - INFO - Navigated to: https://mc.manuscriptcentral.com/mafi
+2025-07-10 14:13:47,168 - INFO - 📊 Extracting referee details for MAFI-2025-0166...
+2025-07-10 14:13:47,267 - INFO - ✅ Found Reviewer List section
+2025-07-10 14:13:47,268 - INFO - Found 28 rows in reviewer table
+2025-07-10 14:13:47,268 - INFO -       🔍 Cell[0]: '1234'
+2025-07-10 14:13:47,268 - INFO -       🔍 Cell[1]: 'Liang, GechunUniversity of Warwick, Department of Statisticshttps://orcid.org/0000-0003-0752-0773'
+2025-07-10 14:13:47,268 - INFO -       🎯 Found clean name: 'Liang, Gechun' using pattern 1 in cell[1]
+2025-07-10 14:13:47,268 - INFO -       🔍 DEBUG: Analyzing 17 cells for referee 'Liang, Gechun'
+2025-07-10 14:13:47,268 - INFO -          Cell[0]: '1234'
+2025-07-10 14:13:47,268 - INFO -          Cell[1]: 'Liang, GechunUniversity of Warwick, Department of Statisticshttps://orcid.org/00'
+2025-07-10 14:13:47,268 - INFO -          Cell[2]: ''
+2025-07-10 14:13:47,268 - INFO -          Cell[3]: 'Liang, GechunUniversity of Warwick, Department of Statisticshttps://orcid.org/00'
+2025-07-10 14:13:47,268 - INFO -          Cell[4]: 'Agreed'
+2025-07-10 14:13:47,268 - INFO -          Cell[5]: 'Invited:22-Jun-2025Agreed
+				:22-Jun-2025Due Date:20-Sep-2025Time in Review:18 '
+2025-07-10 14:13:47,269 - INFO -          Cell[6]: 'Invited:'
+2025-07-10 14:13:47,269 - INFO -          Cell[7]: '22-Jun-2025'
+2025-07-10 14:13:47,269 - INFO -          Cell[8]: 'Agreed
+				:'
+2025-07-10 14:13:47,269 - INFO -          Cell[9]: '22-Jun-2025'
+2025-07-10 14:13:47,269 - INFO -          Cell[10]: 'Due Date:'
+2025-07-10 14:13:47,269 - INFO -          Cell[11]: '20-Sep-2025'
+2025-07-10 14:13:47,269 - INFO -          Cell[12]: 'Time in Review:'
+2025-07-10 14:13:47,269 - INFO -          Cell[13]: '18 Days.'
+2025-07-10 14:13:47,269 - INFO -          Cell[14]: 'view full history'
+2025-07-10 14:13:47,269 - INFO -          Cell[15]: 'edit reminders'
+2025-07-10 14:13:47,269 - INFO -          Cell[16]: ''
+2025-07-10 14:13:47,269 - INFO -          ✅ FOUND STATUS: 'Agreed' (matched 'agreed')
+2025-07-10 14:13:47,269 - INFO -      🏛️  Institution from name cell: University of Warwick, Department of Statistics
+2025-07-10 14:13:47,269 - INFO -      🏛️  Institution from name cell: University of Warwick, Department of Statistics
+2025-07-10 14:13:47,269 - INFO -      🏛️  Institution from name cell: University of Warwick, Department of Statistics
+2025-07-10 14:13:47,269 - INFO -      🏛️  Institution from name cell: University of Warwick, Department of Statistics
+2025-07-10 14:13:47,269 - INFO -      🏛️  Institution from name cell: University of Warwick, Department of Statistics
+2025-07-10 14:13:47,269 - INFO -      📅 Invited date: 22-Jun-2025
+2025-07-10 14:13:47,269 - INFO -      📅 Due date: 20-Sep-2025
+2025-07-10 14:13:47,269 - INFO -      ⏱️  Time in review: 18 Days
+2025-07-10 14:13:47,269 - INFO -      🏛️  Institution from name cell: University of Warwick, Department of Statistics
+2025-07-10 14:13:47,269 - INFO -      🏛️  Institution from name cell: University of Warwick, Department of Statistics
+2025-07-10 14:13:47,269 - INFO -      🏛️  Institution from name cell: University of Warwick, Department of Statistics
+2025-07-10 14:13:47,269 - INFO -      🏛️  Institution from name cell: University of Warwick, Department of Statistics
+2025-07-10 14:13:47,270 - INFO -      🏛️  Institution from name cell: University of Warwick, Department of Statistics
+2025-07-10 14:13:47,270 - INFO -      🏛️  Institution from name cell: University of Warwick, Department of Statistics
+2025-07-10 14:13:47,270 - INFO -      🏛️  Institution from name cell: University of Warwick, Department of Statistics
+2025-07-10 14:13:47,270 - INFO -      🏛️  Institution from name cell: University of Warwick, Department of Statistics
+2025-07-10 14:13:47,270 - INFO -      🏛️  Institution from name cell: University of Warwick, Department of Statistics
+2025-07-10 14:13:47,270 - INFO -      🏛️  Institution from name cell: University of Warwick, Department of Statistics
+2025-07-10 14:13:47,270 - INFO -      🏛️  Institution from name cell: University of Warwick, Department of Statistics
+2025-07-10 14:13:47,270 - INFO -      🏛️  Institution from name cell: University of Warwick, Department of Statistics
+2025-07-10 14:13:47,270 - INFO -    ✅ Liang, Gechun (Agreed)
+2025-07-10 14:13:47,270 - INFO -       🔍 Cell[0]: '1234'
+2025-07-10 14:13:47,270 - INFO -       🔍 Cell[1]: 'Mrad, MohamedUniversité Sorbonne Paris Nord, LAGA'
+2025-07-10 14:13:47,270 - INFO -       🎯 Found clean name: 'Mrad, Mohamed' using pattern 1 in cell[1]
+2025-07-10 14:13:47,270 - INFO -       🔍 DEBUG: Analyzing 13 cells for referee 'Mrad, Mohamed'
+2025-07-10 14:13:47,270 - INFO -          Cell[0]: '1234'
+2025-07-10 14:13:47,270 - INFO -          Cell[1]: 'Mrad, MohamedUniversité Sorbonne Paris Nord, LAGA'
+2025-07-10 14:13:47,270 - INFO -          Cell[2]: ''
+2025-07-10 14:13:47,270 - INFO -          Cell[3]: 'Mrad, MohamedUniversité Sorbonne Paris Nord, LAGA'
+2025-07-10 14:13:47,270 - INFO -          Cell[4]: 'Declinedinvite again'
+2025-07-10 14:13:47,271 - INFO -          Cell[5]: 'Invited:22-Jun-2025Declined
+				:01-Jul-2025view full history'
+2025-07-10 14:13:47,271 - INFO -          Cell[6]: 'Invited:'
+2025-07-10 14:13:47,271 - INFO -          Cell[7]: '22-Jun-2025'
+2025-07-10 14:13:47,271 - INFO -          Cell[8]: 'Declined
+				:'
+2025-07-10 14:13:47,271 - INFO -          Cell[9]: '01-Jul-2025'
+2025-07-10 14:13:47,271 - INFO -          Cell[10]: 'view full history'
+2025-07-10 14:13:47,271 - INFO -          Cell[11]: ''
+2025-07-10 14:13:47,271 - INFO -          Cell[12]: ''
+2025-07-10 14:13:47,271 - INFO -          ❌ FOUND STATUS: 'Declined'
+2025-07-10 14:13:47,271 - INFO -      🏛️  Institution from name cell: Université Sorbonne Paris Nord, LAGA
+2025-07-10 14:13:47,271 - INFO -      🏛️  Institution from name cell: Université Sorbonne Paris Nord, LAGA
+2025-07-10 14:13:47,271 - INFO -      🏛️  Institution from name cell: Université Sorbonne Paris Nord, LAGA
+2025-07-10 14:13:47,271 - INFO -      🏛️  Institution from name cell: Université Sorbonne Paris Nord, LAGA
+2025-07-10 14:13:47,271 - INFO -      🏛️  Institution from name cell: Université Sorbonne Paris Nord, LAGA
+2025-07-10 14:13:47,271 - INFO -      📅 Invited date: 22-Jun-2025
+2025-07-10 14:13:47,271 - INFO -      🏛️  Institution from name cell: Université Sorbonne Paris Nord, LAGA
+2025-07-10 14:13:47,271 - INFO -      🏛️  Institution from name cell: Université Sorbonne Paris Nord, LAGA
+2025-07-10 14:13:47,271 - INFO -      🏛️  Institution from name cell: Université Sorbonne Paris Nord, LAGA
+2025-07-10 14:13:47,271 - INFO -      🏛️  Institution from name cell: Université Sorbonne Paris Nord, LAGA
+2025-07-10 14:13:47,271 - INFO -      🏛️  Institution from name cell: Université Sorbonne Paris Nord, LAGA
+2025-07-10 14:13:47,271 - INFO -      🏛️  Institution from name cell: Université Sorbonne Paris Nord, LAGA
+2025-07-10 14:13:47,271 - INFO -      🏛️  Institution from name cell: Université Sorbonne Paris Nord, LAGA
+2025-07-10 14:13:47,271 - INFO -      🏛️  Institution from name cell: Université Sorbonne Paris Nord, LAGA
+2025-07-10 14:13:47,271 - INFO -    ❌ Skipping Mrad, Mohamed: declined (unavailable/declined)
+2025-07-10 14:13:47,272 - INFO -       🔍 Cell[0]: '1234'
+2025-07-10 14:13:47,272 - INFO -       🔍 Cell[1]: 'Dos Reis, GoncaloUniversity of Edinburgh, School of Mathematicshttps://orcid.org/0000-0002-4993-2672'
+2025-07-10 14:13:47,272 - INFO -       🎯 Found clean name: 'Reis, Goncalo' using pattern 1 in cell[1]
+2025-07-10 14:13:47,272 - INFO -       🔍 DEBUG: Analyzing 13 cells for referee 'Reis, Goncalo'
+2025-07-10 14:13:47,272 - INFO -          Cell[0]: '1234'
+2025-07-10 14:13:47,272 - INFO -          Cell[1]: 'Dos Reis, GoncaloUniversity of Edinburgh, School of Mathematicshttps://orcid.org'
+2025-07-10 14:13:47,272 - INFO -          Cell[2]: ''
+2025-07-10 14:13:47,272 - INFO -          Cell[3]: 'Dos Reis, GoncaloUniversity of Edinburgh, School of Mathematicshttps://orcid.org'
+2025-07-10 14:13:47,272 - INFO -          Cell[4]: 'Unavailableinvite again'
+2025-07-10 14:13:47,272 - INFO -          Cell[5]: 'Invited:01-Jul-2025Unavailable
+				:01-Jul-2025view full history'
+2025-07-10 14:13:47,272 - INFO -          Cell[6]: 'Invited:'
+2025-07-10 14:13:47,272 - INFO -          Cell[7]: '01-Jul-2025'
+2025-07-10 14:13:47,272 - INFO -          Cell[8]: 'Unavailable
+				:'
+2025-07-10 14:13:47,272 - INFO -          Cell[9]: '01-Jul-2025'
+2025-07-10 14:13:47,272 - INFO -          Cell[10]: 'view full history'
+2025-07-10 14:13:47,272 - INFO -          Cell[11]: ''
+2025-07-10 14:13:47,272 - INFO -          Cell[12]: ''
+2025-07-10 14:13:47,272 - INFO -          ⚠️  No decision keyword found, looking for other status indicators
+2025-07-10 14:13:47,272 - INFO -          📄 Using status: '1234'
+2025-07-10 14:13:47,272 - INFO -      🏛️  Institution from name cell: University of Edinburgh, School of Mathematics
+2025-07-10 14:13:47,272 - INFO -      🏛️  Institution from name cell: University of Edinburgh, School of Mathematics
+2025-07-10 14:13:47,272 - INFO -      🏛️  Institution from name cell: University of Edinburgh, School of Mathematics
+2025-07-10 14:13:47,272 - INFO -      🏛️  Institution from name cell: University of Edinburgh, School of Mathematics
+2025-07-10 14:13:47,272 - INFO -      🏛️  Institution from name cell: University of Edinburgh, School of Mathematics
+2025-07-10 14:13:47,272 - INFO -      📅 Invited date: 01-Jul-2025
+2025-07-10 14:13:47,273 - INFO -      🏛️  Institution from name cell: University of Edinburgh, School of Mathematics
+2025-07-10 14:13:47,273 - INFO -      🏛️  Institution from name cell: University of Edinburgh, School of Mathematics
+2025-07-10 14:13:47,273 - INFO -      🏛️  Institution from name cell: University of Edinburgh, School of Mathematics
+2025-07-10 14:13:47,273 - INFO -      🏛️  Institution from name cell: University of Edinburgh, School of Mathematics
+2025-07-10 14:13:47,273 - INFO -      🏛️  Institution from name cell: University of Edinburgh, School of Mathematics
+2025-07-10 14:13:47,273 - INFO -      🏛️  Institution from name cell: University of Edinburgh, School of Mathematics
+2025-07-10 14:13:47,273 - INFO -      🏛️  Institution from name cell: University of Edinburgh, School of Mathematics
+2025-07-10 14:13:47,273 - INFO -      🏛️  Institution from name cell: University of Edinburgh, School of Mathematics
+2025-07-10 14:13:47,273 - INFO -    ❌ Skipping Reis, Goncalo: unavailable (unavailable/declined)
+2025-07-10 14:13:47,273 - INFO -       🔍 Cell[0]: '1234'
+2025-07-10 14:13:47,273 - INFO -       🔍 Cell[1]: 'Strub, MorisWarwick Business School, Information Systems Management & Analyticshttps://orcid.org/000'
+2025-07-10 14:13:47,273 - INFO -       🎯 Found clean name: 'Strub, Moris' using pattern 1 in cell[1]
+2025-07-10 14:13:47,273 - INFO -       🔍 DEBUG: Analyzing 17 cells for referee 'Strub, Moris'
+2025-07-10 14:13:47,273 - INFO -          Cell[0]: '1234'
+2025-07-10 14:13:47,273 - INFO -          Cell[1]: 'Strub, MorisWarwick Business School, Information Systems Management & Analyticsh'
+2025-07-10 14:13:47,273 - INFO -          Cell[2]: ''
+2025-07-10 14:13:47,273 - INFO -          Cell[3]: 'Strub, MorisWarwick Business School, Information Systems Management & Analyticsh'
+2025-07-10 14:13:47,273 - INFO -          Cell[4]: 'Agreed'
+2025-07-10 14:13:47,273 - INFO -          Cell[5]: 'Invited:01-Jul-2025Agreed
+				:01-Jul-2025Due Date:29-Sep-2025Time in Review:8 D'
+2025-07-10 14:13:47,273 - INFO -          Cell[6]: 'Invited:'
+2025-07-10 14:13:47,273 - INFO -          Cell[7]: '01-Jul-2025'
+2025-07-10 14:13:47,273 - INFO -          Cell[8]: 'Agreed
+				:'
+2025-07-10 14:13:47,273 - INFO -          Cell[9]: '01-Jul-2025'
+2025-07-10 14:13:47,273 - INFO -          Cell[10]: 'Due Date:'
+2025-07-10 14:13:47,274 - INFO -          Cell[11]: '29-Sep-2025'
+2025-07-10 14:13:47,274 - INFO -          Cell[12]: 'Time in Review:'
+2025-07-10 14:13:47,274 - INFO -          Cell[13]: '8 Days.'
+2025-07-10 14:13:47,274 - INFO -          Cell[14]: 'view full history'
+2025-07-10 14:13:47,274 - INFO -          Cell[15]: 'edit reminders'
+2025-07-10 14:13:47,274 - INFO -          Cell[16]: ''
+2025-07-10 14:13:47,274 - INFO -          ✅ FOUND STATUS: 'Agreed' (matched 'agreed')
+2025-07-10 14:13:47,274 - INFO -      🏛️  Institution from name cell: Warwick Business School, Information Systems Management & Analytics
+2025-07-10 14:13:47,274 - INFO -      🏛️  Institution from name cell: Warwick Business School, Information Systems Management & Analytics
+2025-07-10 14:13:47,274 - INFO -      🏛️  Institution from name cell: Warwick Business School, Information Systems Management & Analytics
+2025-07-10 14:13:47,274 - INFO -      🏛️  Institution from name cell: Warwick Business School, Information Systems Management & Analytics
+2025-07-10 14:13:47,274 - INFO -      🏛️  Institution from name cell: Warwick Business School, Information Systems Management & Analytics
+2025-07-10 14:13:47,274 - INFO -      📅 Invited date: 01-Jul-2025
+2025-07-10 14:13:47,274 - INFO -      📅 Due date: 29-Sep-2025
+2025-07-10 14:13:47,274 - INFO -      ⏱️  Time in review: 8 Days
+2025-07-10 14:13:47,274 - INFO -      🏛️  Institution from name cell: Warwick Business School, Information Systems Management & Analytics
+2025-07-10 14:13:47,274 - INFO -      🏛️  Institution from name cell: Warwick Business School, Information Systems Management & Analytics
+2025-07-10 14:13:47,274 - INFO -      🏛️  Institution from name cell: Warwick Business School, Information Systems Management & Analytics
+2025-07-10 14:13:47,274 - INFO -      🏛️  Institution from name cell: Warwick Business School, Information Systems Management & Analytics
+2025-07-10 14:13:47,274 - INFO -      🏛️  Institution from name cell: Warwick Business School, Information Systems Management & Analytics
+2025-07-10 14:13:47,274 - INFO -      🏛️  Institution from name cell: Warwick Business School, Information Systems Management & Analytics
+2025-07-10 14:13:47,274 - INFO -      🏛️  Institution from name cell: Warwick Business School, Information Systems Management & Analytics
+2025-07-10 14:13:47,274 - INFO -      🏛️  Institution from name cell: Warwick Business School, Information Systems Management & Analytics
+2025-07-10 14:13:47,274 - INFO -      🏛️  Institution from name cell: Warwick Business School, Information Systems Management & Analytics
+2025-07-10 14:13:47,274 - INFO -      🏛️  Institution from name cell: Warwick Business School, Information Systems Management & Analytics
+2025-07-10 14:13:47,275 - INFO -      🏛️  Institution from name cell: Warwick Business School, Information Systems Management & Analytics
+2025-07-10 14:13:47,275 - INFO -      🏛️  Institution from name cell: Warwick Business School, Information Systems Management & Analytics
+2025-07-10 14:13:47,275 - INFO -    ✅ Strub, Moris (Agreed)
+2025-07-10 14:13:47,275 - INFO - 📧 Fetching email dates for MAFI-2025-0166...
+2025-07-10 14:13:47,276 - INFO - file_cache is only supported with oauth2client<4.0.0
+2025-07-10 14:13:47,656 - INFO - Found 9 messages to process for MF
+2025-07-10 14:13:49,898 - INFO -    ❌ No email match found for Liang, Gechun
+2025-07-10 14:13:49,899 - INFO -    ❌ No email match found for Strub, Moris
+2025-07-10 14:13:49,899 - INFO - ✅ Successfully extracted 2 referees
+2025-07-10 14:13:49,899 - INFO - 🔄 Navigating back to Associate Editor Center...
+2025-07-10 14:13:51,975 - INFO - ✅ Navigated back to Associate Editor Center
+2025-07-10 14:13:51,976 - INFO - 📂 Navigating to: Awaiting Reviewer Scores
+2025-07-10 14:13:56,316 - INFO - ✅ Successfully navigated to Awaiting Reviewer Scores
+2025-07-10 14:13:56,318 - INFO - 📄 Report saved: stable_results/mf_stable_report.txt
+2025-07-10 14:13:56,318 - INFO - 🎉 Stable MF extraction completed!
+2025-07-10 14:13:56,318 - INFO -    Results: stable_results/mf_stable_results.json
+2025-07-10 14:13:56,418 - INFO - 🔄 Driver closed
+2025-07-10 14:15:21,572 - INFO - 🚀 Starting stable MF extraction (exact working system approach)
+2025-07-10 14:15:21,575 - INFO - 🚀 Creating Chrome driver with fallback approaches
+2025-07-10 14:15:21,575 - INFO -    Attempting undetected chromedriver...
+2025-07-10 14:15:21,575 - INFO -      Trying version_main=None
+2025-07-10 14:15:23,619 - INFO - patching driver executable /Users/dylanpossamai/Library/Application Support/undetected_chromedriver/undetected_chromedriver
+2025-07-10 14:15:32,685 - INFO - ✅ Undetected Chrome driver created successfully
+2025-07-10 14:15:32,686 - INFO - 🔐 Logging into MF (exact working system approach)
+2025-07-10 14:15:32,686 - INFO - Navigating to MF dashboard: https://mc.manuscriptcentral.com/mafi
+2025-07-10 14:15:36,065 - INFO - Accepted cookies.
+2025-07-10 14:15:43,267 - INFO - Verification prompt visible. Fetching code from email...
+2025-07-10 14:15:43,414 - INFO - Waiting 5 seconds for verification email to arrive...
+2025-07-10 14:15:48,421 - INFO - file_cache is only supported with oauth2client<4.0.0
+2025-07-10 14:15:48,423 - INFO - Waiting 5 seconds for verification email to arrive...
+2025-07-10 14:15:54,087 - INFO - Found newer verification code for MF: 201820 (timestamp: Thu, 10 Jul 2025 12:15:38 +0000)
+2025-07-10 14:15:56,401 - INFO - Returning latest verification code for MF: 201820
+2025-07-10 14:15:56,473 - INFO - Submitted verification code.
+2025-07-10 14:15:59,478 - INFO - Ready to continue navigation after login.
+2025-07-10 14:15:59,479 - INFO - 🔍 Navigating to Associate Editor Center...
+2025-07-10 14:16:02,969 - INFO - ✅ Successfully navigated to Associate Editor Center
+2025-07-10 14:16:02,969 - INFO - 📂 Navigating to: Awaiting Reviewer Scores
+2025-07-10 14:16:07,772 - INFO - ✅ Successfully navigated to Awaiting Reviewer Scores
+2025-07-10 14:16:07,772 - INFO - 
+============================================================
+2025-07-10 14:16:07,772 - INFO - 📄 Processing: MAFI-2024-0167
+2025-07-10 14:16:07,773 - INFO - Expected: Competitive optimal portfolio selection in a non-M...
+2025-07-10 14:16:07,773 - INFO - ============================================================
+2025-07-10 14:16:07,773 - INFO - 🔍 Looking for manuscript checkbox: MAFI-2024-0167
+2025-07-10 14:16:07,786 - INFO - Found 2 checkbox images
+2025-07-10 14:16:07,892 - INFO -    Skipping row 8 (contains but doesn't start with MAFI-2024-0167): To take action on a manuscript or view the full ma...
+2025-07-10 14:16:07,943 - INFO -    Skipping row 12 (contains but doesn't start with MAFI-2024-0167): Awaiting Reviewer Scores
+Manuscripts 1-2 of 2
+Manu...
+2025-07-10 14:16:07,979 - INFO -    Skipping row 14 (contains but doesn't start with MAFI-2024-0167): Awaiting Reviewer Scores
+Manuscripts 1-2 of 2
+Manu...
+2025-07-10 14:16:08,040 - INFO -    Skipping row 18 (contains but doesn't start with MAFI-2024-0167): Manuscript ID  
+Manuscript Title
+Date Submitted  
+...
+2025-07-10 14:16:08,121 - INFO - ✅ Found manuscript data for MAFI-2024-0167 in row 26
+2025-07-10 14:16:08,121 - INFO -    Row preview: MAFI-2024-0167
+(REX-PROD-1-476BE50B-AB64-4991-B6F2-9023FD785014-3B4258C0-BE99-4580-B3D6-E5BB1C29C2D5...
+2025-07-10 14:16:08,121 - INFO - ✅ Clicking checkbox for MAFI-2024-0167
+2025-07-10 14:16:15,436 - INFO - Navigated to: https://mc.manuscriptcentral.com/mafi
+2025-07-10 14:16:15,436 - INFO - 📊 Extracting referee details for MAFI-2024-0167...
+2025-07-10 14:16:15,529 - INFO - ✅ Found Reviewer List section
+2025-07-10 14:16:15,529 - INFO - Found 18 rows in reviewer table
+2025-07-10 14:16:15,530 - INFO -       🔍 Cell[0]: '12'
+2025-07-10 14:16:15,530 - INFO -       🔍 Cell[1]: 'Mastrolia, ThibautUC Berkeley, IEORhttps://orcid.org/0000-0003-0578-0168'
+2025-07-10 14:16:15,530 - INFO -       🎯 Found clean name: 'Mastrolia, Thibaut' using pattern 3 in cell[1]
+2025-07-10 14:16:15,530 - INFO -       🔍 DEBUG: Analyzing 17 cells for referee 'Mastrolia, Thibaut'
+2025-07-10 14:16:15,530 - INFO -          Cell[0]: '12'
+2025-07-10 14:16:15,530 - INFO -          Cell[1]: 'Mastrolia, ThibautUC Berkeley, IEORhttps://orcid.org/0000-0003-0578-0168'
+2025-07-10 14:16:15,530 - INFO -          Cell[2]: ''
+2025-07-10 14:16:15,530 - INFO -          Cell[3]: 'Mastrolia, ThibautUC Berkeley, IEORhttps://orcid.org/0000-0003-0578-0168'
+2025-07-10 14:16:15,530 - INFO -          Cell[4]: 'Agreed'
+2025-07-10 14:16:15,530 - INFO -          Cell[5]: 'Invited:01-May-2025Agreed
+				:01-May-2025Due Date:30-Jul-2025Time in Review:69 '
+2025-07-10 14:16:15,530 - INFO -          Cell[6]: 'Invited:'
+2025-07-10 14:16:15,531 - INFO -          Cell[7]: '01-May-2025'
+2025-07-10 14:16:15,531 - INFO -          Cell[8]: 'Agreed
+				:'
+2025-07-10 14:16:15,531 - INFO -          Cell[9]: '01-May-2025'
+2025-07-10 14:16:15,531 - INFO -          Cell[10]: 'Due Date:'
+2025-07-10 14:16:15,531 - INFO -          Cell[11]: '30-Jul-2025'
+2025-07-10 14:16:15,531 - INFO -          Cell[12]: 'Time in Review:'
+2025-07-10 14:16:15,531 - INFO -          Cell[13]: '69 Days.'
+2025-07-10 14:16:15,531 - INFO -          Cell[14]: 'view full history'
+2025-07-10 14:16:15,531 - INFO -          Cell[15]: 'edit reminders'
+2025-07-10 14:16:15,531 - INFO -          Cell[16]: ''
+2025-07-10 14:16:15,531 - INFO -          ✅ FOUND STATUS: 'Agreed' (matched 'agreed')
+2025-07-10 14:16:15,531 - INFO -      🏛️  Institution from name cell: UC Berkeley, IEOR
+2025-07-10 14:16:15,531 - INFO -      🏛️  Institution from name cell: UC Berkeley, IEOR
+2025-07-10 14:16:15,532 - INFO -      🏛️  Institution from name cell: UC Berkeley, IEOR
+2025-07-10 14:16:15,532 - INFO -      🏛️  Institution from name cell: UC Berkeley, IEOR
+2025-07-10 14:16:15,532 - INFO -      🏛️  Institution from name cell: UC Berkeley, IEOR
+2025-07-10 14:16:15,532 - INFO -      📅 Invited date: 01-May-2025
+2025-07-10 14:16:15,532 - INFO -      📅 Due date: 30-Jul-2025
+2025-07-10 14:16:15,532 - INFO -      ⏱️  Time in review: 69 Days
+2025-07-10 14:16:15,532 - INFO -      🏛️  Institution from name cell: UC Berkeley, IEOR
+2025-07-10 14:16:15,532 - INFO -      🏛️  Institution from name cell: UC Berkeley, IEOR
+2025-07-10 14:16:15,532 - INFO -      🏛️  Institution from name cell: UC Berkeley, IEOR
+2025-07-10 14:16:15,532 - INFO -      🏛️  Institution from name cell: UC Berkeley, IEOR
+2025-07-10 14:16:15,532 - INFO -      🏛️  Institution from name cell: UC Berkeley, IEOR
+2025-07-10 14:16:15,532 - INFO -      🏛️  Institution from name cell: UC Berkeley, IEOR
+2025-07-10 14:16:15,532 - INFO -      🏛️  Institution from name cell: UC Berkeley, IEOR
+2025-07-10 14:16:15,532 - INFO -      🏛️  Institution from name cell: UC Berkeley, IEOR
+2025-07-10 14:16:15,532 - INFO -      🏛️  Institution from name cell: UC Berkeley, IEOR
+2025-07-10 14:16:15,532 - INFO -      🏛️  Institution from name cell: UC Berkeley, IEOR
+2025-07-10 14:16:15,532 - INFO -      🏛️  Institution from name cell: UC Berkeley, IEOR
+2025-07-10 14:16:15,532 - INFO -      🏛️  Institution from name cell: UC Berkeley, IEOR
+2025-07-10 14:16:15,533 - INFO -    ✅ Mastrolia, Thibaut (Agreed)
+2025-07-10 14:16:15,533 - INFO -       🔍 Cell[0]: '12'
+2025-07-10 14:16:15,533 - INFO -       🔍 Cell[1]: 'Hamadene, Said'
+2025-07-10 14:16:15,533 - INFO -       🎯 Found clean name: 'Hamadene, Said' using pattern 4 in cell[1]
+2025-07-10 14:16:15,533 - INFO -       🔍 DEBUG: Analyzing 17 cells for referee 'Hamadene, Said'
+2025-07-10 14:16:15,533 - INFO -          Cell[0]: '12'
+2025-07-10 14:16:15,533 - INFO -          Cell[1]: 'Hamadene, Said'
+2025-07-10 14:16:15,533 - INFO -          Cell[2]: ''
+2025-07-10 14:16:15,533 - INFO -          Cell[3]: 'Hamadene, Said'
+2025-07-10 14:16:15,533 - INFO -          Cell[4]: 'Agreed'
+2025-07-10 14:16:15,533 - INFO -          Cell[5]: 'Invited:01-May-2025Agreed
+				:03-May-2025Due Date:01-Aug-2025Time in Review:68 '
+2025-07-10 14:16:15,533 - INFO -          Cell[6]: 'Invited:'
+2025-07-10 14:16:15,533 - INFO -          Cell[7]: '01-May-2025'
+2025-07-10 14:16:15,533 - INFO -          Cell[8]: 'Agreed
+				:'
+2025-07-10 14:16:15,533 - INFO -          Cell[9]: '03-May-2025'
+2025-07-10 14:16:15,533 - INFO -          Cell[10]: 'Due Date:'
+2025-07-10 14:16:15,533 - INFO -          Cell[11]: '01-Aug-2025'
+2025-07-10 14:16:15,533 - INFO -          Cell[12]: 'Time in Review:'
+2025-07-10 14:16:15,533 - INFO -          Cell[13]: '68 Days.'
+2025-07-10 14:16:15,533 - INFO -          Cell[14]: 'view full history'
+2025-07-10 14:16:15,533 - INFO -          Cell[15]: 'edit reminders'
+2025-07-10 14:16:15,533 - INFO -          Cell[16]: ''
+2025-07-10 14:16:15,533 - INFO -          ✅ FOUND STATUS: 'Agreed' (matched 'agreed')
+2025-07-10 14:16:15,534 - INFO -      📅 Invited date: 01-May-2025
+2025-07-10 14:16:15,534 - INFO -      📅 Due date: 01-Aug-2025
+2025-07-10 14:16:15,534 - INFO -      ⏱️  Time in review: 68 Days
+2025-07-10 14:16:15,535 - INFO -    ✅ Hamadene, Said (Agreed)
+2025-07-10 14:16:15,536 - INFO - 📧 Fetching email dates for MAFI-2024-0167...
+2025-07-10 14:16:15,537 - INFO - file_cache is only supported with oauth2client<4.0.0
+2025-07-10 14:16:16,099 - INFO - Found 9 messages to process for MF
+2025-07-10 14:16:18,787 - INFO -    ❌ No email match found for Mastrolia, Thibaut
+2025-07-10 14:16:18,787 - INFO -    ❌ No email match found for Hamadene, Said
+2025-07-10 14:16:18,787 - INFO - ✅ Successfully extracted 2 referees
+2025-07-10 14:16:18,787 - INFO - 🔄 Navigating back to Associate Editor Center...
+2025-07-10 14:16:20,862 - INFO - ✅ Navigated back to Associate Editor Center
+2025-07-10 14:16:20,862 - INFO - 📂 Navigating to: Awaiting Reviewer Scores
+2025-07-10 14:16:25,497 - INFO - ✅ Successfully navigated to Awaiting Reviewer Scores
+2025-07-10 14:16:25,497 - INFO - 
+============================================================
+2025-07-10 14:16:25,498 - INFO - 📄 Processing: MAFI-2025-0166
+2025-07-10 14:16:25,498 - INFO - Expected: Optimal investment and consumption under forward u...
+2025-07-10 14:16:25,498 - INFO - ============================================================
+2025-07-10 14:16:25,498 - INFO - 🔍 Looking for manuscript checkbox: MAFI-2025-0166
+2025-07-10 14:16:25,505 - INFO - Found 2 checkbox images
+2025-07-10 14:16:25,592 - INFO -    Skipping row 8 (contains but doesn't start with MAFI-2025-0166): To take action on a manuscript or view the full ma...
+2025-07-10 14:16:25,642 - INFO -    Skipping row 12 (contains but doesn't start with MAFI-2025-0166): Awaiting Reviewer Scores
+Manuscripts 1-2 of 2
+Manu...
+2025-07-10 14:16:25,679 - INFO -    Skipping row 14 (contains but doesn't start with MAFI-2025-0166): Awaiting Reviewer Scores
+Manuscripts 1-2 of 2
+Manu...
+2025-07-10 14:16:25,733 - INFO -    Skipping row 18 (contains but doesn't start with MAFI-2025-0166): Manuscript ID  
+Manuscript Title
+Date Submitted  
+...
+2025-07-10 14:16:25,783 - INFO - ✅ Found manuscript data for MAFI-2025-0166 in row 22
+2025-07-10 14:16:25,783 - INFO -    Row preview: MAFI-2025-0166
+(REX-PROD-1-957B102A-FAD0-49EC-974F-4CE40BABDCFF-C109D069-488B-4649-9A62-3B5ECD0619E4...
+2025-07-10 14:16:25,783 - INFO - ✅ Clicking checkbox for MAFI-2025-0166
+2025-07-10 14:16:29,971 - INFO - Navigated to: https://mc.manuscriptcentral.com/mafi
+2025-07-10 14:16:29,971 - INFO - 📊 Extracting referee details for MAFI-2025-0166...
+2025-07-10 14:16:30,079 - INFO - ✅ Found Reviewer List section
+2025-07-10 14:16:30,079 - INFO - Found 28 rows in reviewer table
+2025-07-10 14:16:30,079 - INFO -       🔍 Cell[0]: '1234'
+2025-07-10 14:16:30,080 - INFO -       🔍 Cell[1]: 'Liang, GechunUniversity of Warwick, Department of Statisticshttps://orcid.org/0000-0003-0752-0773'
+2025-07-10 14:16:30,080 - INFO -       🎯 Found clean name: 'Liang, Gechun' using pattern 1 in cell[1]
+2025-07-10 14:16:30,080 - INFO -       🔍 DEBUG: Analyzing 17 cells for referee 'Liang, Gechun'
+2025-07-10 14:16:30,080 - INFO -          Cell[0]: '1234'
+2025-07-10 14:16:30,080 - INFO -          Cell[1]: 'Liang, GechunUniversity of Warwick, Department of Statisticshttps://orcid.org/00'
+2025-07-10 14:16:30,080 - INFO -          Cell[2]: ''
+2025-07-10 14:16:30,080 - INFO -          Cell[3]: 'Liang, GechunUniversity of Warwick, Department of Statisticshttps://orcid.org/00'
+2025-07-10 14:16:30,080 - INFO -          Cell[4]: 'Agreed'
+2025-07-10 14:16:30,080 - INFO -          Cell[5]: 'Invited:22-Jun-2025Agreed
+				:22-Jun-2025Due Date:20-Sep-2025Time in Review:18 '
+2025-07-10 14:16:30,080 - INFO -          Cell[6]: 'Invited:'
+2025-07-10 14:16:30,080 - INFO -          Cell[7]: '22-Jun-2025'
+2025-07-10 14:16:30,080 - INFO -          Cell[8]: 'Agreed
+				:'
+2025-07-10 14:16:30,080 - INFO -          Cell[9]: '22-Jun-2025'
+2025-07-10 14:16:30,080 - INFO -          Cell[10]: 'Due Date:'
+2025-07-10 14:16:30,080 - INFO -          Cell[11]: '20-Sep-2025'
+2025-07-10 14:16:30,080 - INFO -          Cell[12]: 'Time in Review:'
+2025-07-10 14:16:30,080 - INFO -          Cell[13]: '18 Days.'
+2025-07-10 14:16:30,080 - INFO -          Cell[14]: 'view full history'
+2025-07-10 14:16:30,080 - INFO -          Cell[15]: 'edit reminders'
+2025-07-10 14:16:30,080 - INFO -          Cell[16]: ''
+2025-07-10 14:16:30,080 - INFO -          ✅ FOUND STATUS: 'Agreed' (matched 'agreed')
+2025-07-10 14:16:30,080 - INFO -      🏛️  Institution from name cell: University of Warwick, Department of Statistics
+2025-07-10 14:16:30,080 - INFO -      🏛️  Institution from name cell: University of Warwick, Department of Statistics
+2025-07-10 14:16:30,080 - INFO -      🏛️  Institution from name cell: University of Warwick, Department of Statistics
+2025-07-10 14:16:30,081 - INFO -      🏛️  Institution from name cell: University of Warwick, Department of Statistics
+2025-07-10 14:16:30,081 - INFO -      🏛️  Institution from name cell: University of Warwick, Department of Statistics
+2025-07-10 14:16:30,081 - INFO -      📅 Invited date: 22-Jun-2025
+2025-07-10 14:16:30,081 - INFO -      📅 Due date: 20-Sep-2025
+2025-07-10 14:16:30,081 - INFO -      ⏱️  Time in review: 18 Days
+2025-07-10 14:16:30,081 - INFO -      🏛️  Institution from name cell: University of Warwick, Department of Statistics
+2025-07-10 14:16:30,081 - INFO -      🏛️  Institution from name cell: University of Warwick, Department of Statistics
+2025-07-10 14:16:30,081 - INFO -      🏛️  Institution from name cell: University of Warwick, Department of Statistics
+2025-07-10 14:16:30,081 - INFO -      🏛️  Institution from name cell: University of Warwick, Department of Statistics
+2025-07-10 14:16:30,081 - INFO -      🏛️  Institution from name cell: University of Warwick, Department of Statistics
+2025-07-10 14:16:30,081 - INFO -      🏛️  Institution from name cell: University of Warwick, Department of Statistics
+2025-07-10 14:16:30,081 - INFO -      🏛️  Institution from name cell: University of Warwick, Department of Statistics
+2025-07-10 14:16:30,081 - INFO -      🏛️  Institution from name cell: University of Warwick, Department of Statistics
+2025-07-10 14:16:30,081 - INFO -      🏛️  Institution from name cell: University of Warwick, Department of Statistics
+2025-07-10 14:16:30,081 - INFO -      🏛️  Institution from name cell: University of Warwick, Department of Statistics
+2025-07-10 14:16:30,081 - INFO -      🏛️  Institution from name cell: University of Warwick, Department of Statistics
+2025-07-10 14:16:30,081 - INFO -      🏛️  Institution from name cell: University of Warwick, Department of Statistics
+2025-07-10 14:16:30,082 - INFO -    ✅ Liang, Gechun (Agreed)
+2025-07-10 14:16:30,082 - INFO -       🔍 Cell[0]: '1234'
+2025-07-10 14:16:30,082 - INFO -       🔍 Cell[1]: 'Mrad, MohamedUniversité Sorbonne Paris Nord, LAGA'
+2025-07-10 14:16:30,082 - INFO -       🎯 Found clean name: 'Mrad, Mohamed' using pattern 1 in cell[1]
+2025-07-10 14:16:30,082 - INFO -       🔍 DEBUG: Analyzing 13 cells for referee 'Mrad, Mohamed'
+2025-07-10 14:16:30,082 - INFO -          Cell[0]: '1234'
+2025-07-10 14:16:30,082 - INFO -          Cell[1]: 'Mrad, MohamedUniversité Sorbonne Paris Nord, LAGA'
+2025-07-10 14:16:30,082 - INFO -          Cell[2]: ''
+2025-07-10 14:16:30,082 - INFO -          Cell[3]: 'Mrad, MohamedUniversité Sorbonne Paris Nord, LAGA'
+2025-07-10 14:16:30,082 - INFO -          Cell[4]: 'Declinedinvite again'
+2025-07-10 14:16:30,083 - INFO -          Cell[5]: 'Invited:22-Jun-2025Declined
+				:01-Jul-2025view full history'
+2025-07-10 14:16:30,083 - INFO -          Cell[6]: 'Invited:'
+2025-07-10 14:16:30,083 - INFO -          Cell[7]: '22-Jun-2025'
+2025-07-10 14:16:30,083 - INFO -          Cell[8]: 'Declined
+				:'
+2025-07-10 14:16:30,083 - INFO -          Cell[9]: '01-Jul-2025'
+2025-07-10 14:16:30,083 - INFO -          Cell[10]: 'view full history'
+2025-07-10 14:16:30,083 - INFO -          Cell[11]: ''
+2025-07-10 14:16:30,083 - INFO -          Cell[12]: ''
+2025-07-10 14:16:30,083 - INFO -          ❌ FOUND STATUS: 'Declined'
+2025-07-10 14:16:30,083 - INFO -      🏛️  Institution from name cell: Université Sorbonne Paris Nord, LAGA
+2025-07-10 14:16:30,083 - INFO -      🏛️  Institution from name cell: Université Sorbonne Paris Nord, LAGA
+2025-07-10 14:16:30,083 - INFO -      🏛️  Institution from name cell: Université Sorbonne Paris Nord, LAGA
+2025-07-10 14:16:30,083 - INFO -      🏛️  Institution from name cell: Université Sorbonne Paris Nord, LAGA
+2025-07-10 14:16:30,084 - INFO -      🏛️  Institution from name cell: Université Sorbonne Paris Nord, LAGA
+2025-07-10 14:16:30,084 - INFO -      📅 Invited date: 22-Jun-2025
+2025-07-10 14:16:30,084 - INFO -      🏛️  Institution from name cell: Université Sorbonne Paris Nord, LAGA
+2025-07-10 14:16:30,084 - INFO -      🏛️  Institution from name cell: Université Sorbonne Paris Nord, LAGA
+2025-07-10 14:16:30,084 - INFO -      🏛️  Institution from name cell: Université Sorbonne Paris Nord, LAGA
+2025-07-10 14:16:30,084 - INFO -      🏛️  Institution from name cell: Université Sorbonne Paris Nord, LAGA
+2025-07-10 14:16:30,084 - INFO -      🏛️  Institution from name cell: Université Sorbonne Paris Nord, LAGA
+2025-07-10 14:16:30,084 - INFO -      🏛️  Institution from name cell: Université Sorbonne Paris Nord, LAGA
+2025-07-10 14:16:30,084 - INFO -      🏛️  Institution from name cell: Université Sorbonne Paris Nord, LAGA
+2025-07-10 14:16:30,084 - INFO -      🏛️  Institution from name cell: Université Sorbonne Paris Nord, LAGA
+2025-07-10 14:16:30,084 - INFO -    ❌ Skipping Mrad, Mohamed: declined (unavailable/declined)
+2025-07-10 14:16:30,084 - INFO -       🔍 Cell[0]: '1234'
+2025-07-10 14:16:30,084 - INFO -       🔍 Cell[1]: 'Dos Reis, GoncaloUniversity of Edinburgh, School of Mathematicshttps://orcid.org/0000-0002-4993-2672'
+2025-07-10 14:16:30,084 - INFO -       🔍 Cell[2]: ''
+2025-07-10 14:16:30,085 - INFO -       🔍 Cell[3]: 'Dos Reis, GoncaloUniversity of Edinburgh, School of Mathematicshttps://orcid.org/0000-0002-4993-2672'
+2025-07-10 14:16:30,085 - INFO -       🔍 Cell[4]: 'Unavailableinvite again'
+2025-07-10 14:16:30,085 - INFO -       🔍 Cell[0]: '1234'
+2025-07-10 14:16:30,085 - INFO -       🔍 Cell[1]: 'Strub, MorisWarwick Business School, Information Systems Management & Analyticshttps://orcid.org/000'
+2025-07-10 14:16:30,085 - INFO -       🎯 Found clean name: 'Strub, Moris' using pattern 1 in cell[1]
+2025-07-10 14:16:30,085 - INFO -       🔍 DEBUG: Analyzing 17 cells for referee 'Strub, Moris'
+2025-07-10 14:16:30,085 - INFO -          Cell[0]: '1234'
+2025-07-10 14:16:30,085 - INFO -          Cell[1]: 'Strub, MorisWarwick Business School, Information Systems Management & Analyticsh'
+2025-07-10 14:16:30,085 - INFO -          Cell[2]: ''
+2025-07-10 14:16:30,085 - INFO -          Cell[3]: 'Strub, MorisWarwick Business School, Information Systems Management & Analyticsh'
+2025-07-10 14:16:30,085 - INFO -          Cell[4]: 'Agreed'
+2025-07-10 14:16:30,085 - INFO -          Cell[5]: 'Invited:01-Jul-2025Agreed
+				:01-Jul-2025Due Date:29-Sep-2025Time in Review:8 D'
+2025-07-10 14:16:30,085 - INFO -          Cell[6]: 'Invited:'
+2025-07-10 14:16:30,085 - INFO -          Cell[7]: '01-Jul-2025'
+2025-07-10 14:16:30,085 - INFO -          Cell[8]: 'Agreed
+				:'
+2025-07-10 14:16:30,085 - INFO -          Cell[9]: '01-Jul-2025'
+2025-07-10 14:16:30,085 - INFO -          Cell[10]: 'Due Date:'
+2025-07-10 14:16:30,086 - INFO -          Cell[11]: '29-Sep-2025'
+2025-07-10 14:16:30,086 - INFO -          Cell[12]: 'Time in Review:'
+2025-07-10 14:16:30,086 - INFO -          Cell[13]: '8 Days.'
+2025-07-10 14:16:30,086 - INFO -          Cell[14]: 'view full history'
+2025-07-10 14:16:30,086 - INFO -          Cell[15]: 'edit reminders'
+2025-07-10 14:16:30,086 - INFO -          Cell[16]: ''
+2025-07-10 14:16:30,086 - INFO -          ✅ FOUND STATUS: 'Agreed' (matched 'agreed')
+2025-07-10 14:16:30,086 - INFO -      🏛️  Institution from name cell: Warwick Business School, Information Systems Management & Analytics
+2025-07-10 14:16:30,086 - INFO -      🏛️  Institution from name cell: Warwick Business School, Information Systems Management & Analytics
+2025-07-10 14:16:30,086 - INFO -      🏛️  Institution from name cell: Warwick Business School, Information Systems Management & Analytics
+2025-07-10 14:16:30,086 - INFO -      🏛️  Institution from name cell: Warwick Business School, Information Systems Management & Analytics
+2025-07-10 14:16:30,086 - INFO -      🏛️  Institution from name cell: Warwick Business School, Information Systems Management & Analytics
+2025-07-10 14:16:30,086 - INFO -      📅 Invited date: 01-Jul-2025
+2025-07-10 14:16:30,086 - INFO -      📅 Due date: 29-Sep-2025
+2025-07-10 14:16:30,086 - INFO -      ⏱️  Time in review: 8 Days
+2025-07-10 14:16:30,086 - INFO -      🏛️  Institution from name cell: Warwick Business School, Information Systems Management & Analytics
+2025-07-10 14:16:30,086 - INFO -      🏛️  Institution from name cell: Warwick Business School, Information Systems Management & Analytics
+2025-07-10 14:16:30,086 - INFO -      🏛️  Institution from name cell: Warwick Business School, Information Systems Management & Analytics
+2025-07-10 14:16:30,087 - INFO -      🏛️  Institution from name cell: Warwick Business School, Information Systems Management & Analytics
+2025-07-10 14:16:30,087 - INFO -      🏛️  Institution from name cell: Warwick Business School, Information Systems Management & Analytics
+2025-07-10 14:16:30,087 - INFO -      🏛️  Institution from name cell: Warwick Business School, Information Systems Management & Analytics
+2025-07-10 14:16:30,087 - INFO -      🏛️  Institution from name cell: Warwick Business School, Information Systems Management & Analytics
+2025-07-10 14:16:30,087 - INFO -      🏛️  Institution from name cell: Warwick Business School, Information Systems Management & Analytics
+2025-07-10 14:16:30,087 - INFO -      🏛️  Institution from name cell: Warwick Business School, Information Systems Management & Analytics
+2025-07-10 14:16:30,087 - INFO -      🏛️  Institution from name cell: Warwick Business School, Information Systems Management & Analytics
+2025-07-10 14:16:30,087 - INFO -      🏛️  Institution from name cell: Warwick Business School, Information Systems Management & Analytics
+2025-07-10 14:16:30,087 - INFO -      🏛️  Institution from name cell: Warwick Business School, Information Systems Management & Analytics
+2025-07-10 14:16:30,087 - INFO -    ✅ Strub, Moris (Agreed)
+2025-07-10 14:16:30,088 - INFO - 📧 Fetching email dates for MAFI-2025-0166...
+2025-07-10 14:16:30,089 - INFO - file_cache is only supported with oauth2client<4.0.0
+2025-07-10 14:16:30,763 - INFO - Found 9 messages to process for MF
+2025-07-10 14:16:33,330 - INFO -    ❌ No email match found for Liang, Gechun
+2025-07-10 14:16:33,330 - INFO -    ❌ No email match found for Strub, Moris
+2025-07-10 14:16:33,331 - INFO - ✅ Successfully extracted 2 referees
+2025-07-10 14:16:33,331 - INFO - 🔄 Navigating back to Associate Editor Center...
+2025-07-10 14:16:35,983 - INFO - ✅ Navigated back to Associate Editor Center
+2025-07-10 14:16:35,983 - INFO - 📂 Navigating to: Awaiting Reviewer Scores
+2025-07-10 14:16:40,389 - INFO - ✅ Successfully navigated to Awaiting Reviewer Scores
+2025-07-10 14:16:40,391 - INFO - 📄 Report saved: stable_results/mf_stable_report.txt
+2025-07-10 14:16:40,391 - INFO - 🎉 Stable MF extraction completed!
+2025-07-10 14:16:40,391 - INFO -    Results: stable_results/mf_stable_results.json
+2025-07-10 14:16:40,448 - INFO - 🔄 Driver closed
+2025-07-10 14:23:39,700 - INFO - 🚀 Starting stable MF extraction (exact working system approach)
+2025-07-10 14:23:39,702 - INFO - 🚀 Creating Chrome driver with fallback approaches
+2025-07-10 14:23:39,702 - INFO -    Attempting undetected chromedriver...
+2025-07-10 14:23:39,702 - INFO -      Trying version_main=None
+2025-07-10 14:23:44,010 - INFO - patching driver executable /Users/dylanpossamai/Library/Application Support/undetected_chromedriver/undetected_chromedriver
+2025-07-10 14:23:53,614 - INFO - ✅ Undetected Chrome driver created successfully
+2025-07-10 14:23:53,615 - INFO - 🔐 Logging into MF (exact working system approach)
+2025-07-10 14:23:53,615 - INFO - Navigating to MF dashboard: https://mc.manuscriptcentral.com/mafi
+2025-07-10 14:24:04,577 - INFO - Verification prompt visible. Fetching code from email...
+2025-07-10 14:24:04,730 - INFO - Waiting 5 seconds for verification email to arrive...
+2025-07-10 14:24:09,738 - INFO - file_cache is only supported with oauth2client<4.0.0
+2025-07-10 14:24:09,739 - INFO - Waiting 5 seconds for verification email to arrive...
+2025-07-10 14:24:15,451 - INFO - Found newer verification code for MF: 855318 (timestamp: Thu, 10 Jul 2025 12:23:59 +0000)
+2025-07-10 14:24:18,666 - INFO - Returning latest verification code for MF: 855318
+2025-07-10 14:24:18,755 - INFO - Submitted verification code.
+2025-07-10 14:24:21,760 - INFO - Ready to continue navigation after login.
+2025-07-10 14:24:21,760 - INFO - 🔍 Navigating to Associate Editor Center...
+2025-07-10 14:24:25,564 - INFO - ✅ Successfully navigated to Associate Editor Center
+2025-07-10 14:24:25,565 - INFO - 📂 Navigating to: Awaiting Reviewer Scores
+2025-07-10 14:24:30,038 - INFO - ✅ Successfully navigated to Awaiting Reviewer Scores
+2025-07-10 14:24:30,038 - INFO - 
+============================================================
+2025-07-10 14:24:30,038 - INFO - 📄 Processing: MAFI-2024-0167
+2025-07-10 14:24:30,038 - INFO - Expected: Competitive optimal portfolio selection in a non-M...
+2025-07-10 14:24:30,038 - INFO - ============================================================
+2025-07-10 14:24:30,038 - INFO - 🔍 Looking for manuscript checkbox: MAFI-2024-0167
+2025-07-10 14:24:30,051 - INFO - Found 2 checkbox images
+2025-07-10 14:24:30,177 - INFO -    Skipping row 8 (contains but doesn't start with MAFI-2024-0167): To take action on a manuscript or view the full ma...
+2025-07-10 14:24:30,322 - INFO -    Skipping row 12 (contains but doesn't start with MAFI-2024-0167): Awaiting Reviewer Scores
+Manuscripts 1-2 of 2
+Manu...
+2025-07-10 14:24:30,364 - INFO -    Skipping row 14 (contains but doesn't start with MAFI-2024-0167): Awaiting Reviewer Scores
+Manuscripts 1-2 of 2
+Manu...
+2025-07-10 14:24:30,561 - INFO -    Skipping row 18 (contains but doesn't start with MAFI-2024-0167): Manuscript ID  
+Manuscript Title
+Date Submitted  
+...
+2025-07-10 14:24:30,730 - INFO - ✅ Found manuscript data for MAFI-2024-0167 in row 26
+2025-07-10 14:24:30,730 - INFO -    Row preview: MAFI-2024-0167
+(REX-PROD-1-476BE50B-AB64-4991-B6F2-9023FD785014-3B4258C0-BE99-4580-B3D6-E5BB1C29C2D5...
+2025-07-10 14:24:30,730 - INFO - ✅ Clicking checkbox for MAFI-2024-0167
+2025-07-10 14:24:34,651 - INFO - Navigated to: https://mc.manuscriptcentral.com/mafi
+2025-07-10 14:24:34,651 - INFO - 📊 Extracting referee details for MAFI-2024-0167...
+2025-07-10 14:24:34,814 - INFO - ✅ Found Reviewer List section
+2025-07-10 14:24:34,815 - INFO - Found 18 rows in reviewer table
+2025-07-10 14:24:34,815 - INFO -       🔍 Cell[0]: '12'
+2025-07-10 14:24:34,815 - INFO -       🔍 Cell[1]: 'Mastrolia, ThibautUC Berkeley, IEORhttps://orcid.org/0000-0003-0578-0168'
+2025-07-10 14:24:34,815 - INFO -       🎯 Found clean name: 'Mastrolia, Thibaut' using pattern 3 in cell[1]
+2025-07-10 14:24:34,815 - INFO -       🔍 DEBUG: Analyzing 17 cells for referee 'Mastrolia, Thibaut'
+2025-07-10 14:24:34,815 - INFO -          Cell[0]: '12'
+2025-07-10 14:24:34,815 - INFO -          Cell[1]: 'Mastrolia, ThibautUC Berkeley, IEORhttps://orcid.org/0000-0003-0578-0168'
+2025-07-10 14:24:34,816 - INFO -          Cell[2]: ''
+2025-07-10 14:24:34,816 - INFO -          Cell[3]: 'Mastrolia, ThibautUC Berkeley, IEORhttps://orcid.org/0000-0003-0578-0168'
+2025-07-10 14:24:34,816 - INFO -          Cell[4]: 'Agreed'
+2025-07-10 14:24:34,816 - INFO -          Cell[5]: 'Invited:01-May-2025Agreed
+				:01-May-2025Due Date:30-Jul-2025Time in Review:69 '
+2025-07-10 14:24:34,816 - INFO -          Cell[6]: 'Invited:'
+2025-07-10 14:24:34,816 - INFO -          Cell[7]: '01-May-2025'
+2025-07-10 14:24:34,816 - INFO -          Cell[8]: 'Agreed
+				:'
+2025-07-10 14:24:34,816 - INFO -          Cell[9]: '01-May-2025'
+2025-07-10 14:24:34,816 - INFO -          Cell[10]: 'Due Date:'
+2025-07-10 14:24:34,816 - INFO -          Cell[11]: '30-Jul-2025'
+2025-07-10 14:24:34,816 - INFO -          Cell[12]: 'Time in Review:'
+2025-07-10 14:24:34,816 - INFO -          Cell[13]: '69 Days.'
+2025-07-10 14:24:34,816 - INFO -          Cell[14]: 'view full history'
+2025-07-10 14:24:34,816 - INFO -          Cell[15]: 'edit reminders'
+2025-07-10 14:24:34,817 - INFO -          Cell[16]: ''
+2025-07-10 14:24:34,817 - INFO -          ✅ FOUND STATUS: 'Agreed' (matched 'agreed')
+2025-07-10 14:24:34,818 - INFO -      🏛️  Institution from name cell: UC Berkeley, IEOR
+2025-07-10 14:24:34,818 - INFO -      🏛️  Institution from name cell: UC Berkeley, IEOR
+2025-07-10 14:24:34,818 - INFO -      🏛️  Institution from name cell: UC Berkeley, IEOR
+2025-07-10 14:24:34,818 - INFO -      🏛️  Institution from name cell: UC Berkeley, IEOR
+2025-07-10 14:24:34,818 - INFO -      🏛️  Institution from name cell: UC Berkeley, IEOR
+2025-07-10 14:24:34,818 - INFO -      📅 Invited date: 01-May-2025
+2025-07-10 14:24:34,818 - INFO -      📅 Due date: 30-Jul-2025
+2025-07-10 14:24:34,818 - INFO -      ⏱️  Time in review: 69 Days
+2025-07-10 14:24:34,818 - INFO -      🏛️  Institution from name cell: UC Berkeley, IEOR
+2025-07-10 14:24:34,818 - INFO -      🏛️  Institution from name cell: UC Berkeley, IEOR
+2025-07-10 14:24:34,818 - INFO -      🏛️  Institution from name cell: UC Berkeley, IEOR
+2025-07-10 14:24:34,818 - INFO -      🏛️  Institution from name cell: UC Berkeley, IEOR
+2025-07-10 14:24:34,819 - INFO -      🏛️  Institution from name cell: UC Berkeley, IEOR
+2025-07-10 14:24:34,819 - INFO -      🏛️  Institution from name cell: UC Berkeley, IEOR
+2025-07-10 14:24:34,819 - INFO -      🏛️  Institution from name cell: UC Berkeley, IEOR
+2025-07-10 14:24:34,819 - INFO -      🏛️  Institution from name cell: UC Berkeley, IEOR
+2025-07-10 14:24:34,819 - INFO -      🏛️  Institution from name cell: UC Berkeley, IEOR
+2025-07-10 14:24:34,820 - INFO -      🏛️  Institution from name cell: UC Berkeley, IEOR
+2025-07-10 14:24:34,820 - INFO -      🏛️  Institution from name cell: UC Berkeley, IEOR
+2025-07-10 14:24:34,820 - INFO -      🏛️  Institution from name cell: UC Berkeley, IEOR
+2025-07-10 14:24:34,820 - INFO -    ✅ Mastrolia, Thibaut (Agreed)
+2025-07-10 14:24:34,820 - INFO -       🔍 Cell[0]: '12'
+2025-07-10 14:24:34,820 - INFO -       🔍 Cell[1]: 'Hamadene, Said'
+2025-07-10 14:24:34,820 - INFO -       🎯 Found clean name: 'Hamadene, Said' using pattern 4 in cell[1]
+2025-07-10 14:24:34,820 - INFO -       🔍 DEBUG: Analyzing 17 cells for referee 'Hamadene, Said'
+2025-07-10 14:24:34,820 - INFO -          Cell[0]: '12'
+2025-07-10 14:24:34,820 - INFO -          Cell[1]: 'Hamadene, Said'
+2025-07-10 14:24:34,820 - INFO -          Cell[2]: ''
+2025-07-10 14:24:34,820 - INFO -          Cell[3]: 'Hamadene, Said'
+2025-07-10 14:24:34,820 - INFO -          Cell[4]: 'Agreed'
+2025-07-10 14:24:34,820 - INFO -          Cell[5]: 'Invited:01-May-2025Agreed
+				:03-May-2025Due Date:01-Aug-2025Time in Review:68 '
+2025-07-10 14:24:34,820 - INFO -          Cell[6]: 'Invited:'
+2025-07-10 14:24:34,820 - INFO -          Cell[7]: '01-May-2025'
+2025-07-10 14:24:34,820 - INFO -          Cell[8]: 'Agreed
+				:'
+2025-07-10 14:24:34,821 - INFO -          Cell[9]: '03-May-2025'
+2025-07-10 14:24:34,821 - INFO -          Cell[10]: 'Due Date:'
+2025-07-10 14:24:34,821 - INFO -          Cell[11]: '01-Aug-2025'
+2025-07-10 14:24:34,821 - INFO -          Cell[12]: 'Time in Review:'
+2025-07-10 14:24:34,821 - INFO -          Cell[13]: '68 Days.'
+2025-07-10 14:24:34,821 - INFO -          Cell[14]: 'view full history'
+2025-07-10 14:24:34,821 - INFO -          Cell[15]: 'edit reminders'
+2025-07-10 14:24:34,821 - INFO -          Cell[16]: ''
+2025-07-10 14:24:34,821 - INFO -          ✅ FOUND STATUS: 'Agreed' (matched 'agreed')
+2025-07-10 14:24:34,821 - INFO -      📅 Invited date: 01-May-2025
+2025-07-10 14:24:34,821 - INFO -      📅 Due date: 01-Aug-2025
+2025-07-10 14:24:34,821 - INFO -      ⏱️  Time in review: 68 Days
+2025-07-10 14:24:34,822 - INFO -    ✅ Hamadene, Said (Agreed)
+2025-07-10 14:24:34,824 - INFO - 📧 Fetching email dates for MAFI-2024-0167...
+2025-07-10 14:24:34,825 - INFO - file_cache is only supported with oauth2client<4.0.0
+2025-07-10 14:24:35,568 - INFO - Found 9 messages to process for MF
+2025-07-10 14:24:38,670 - INFO -    ❌ No email match found for Mastrolia, Thibaut
+2025-07-10 14:24:38,670 - INFO -    ❌ No email match found for Hamadene, Said
+2025-07-10 14:24:38,670 - INFO - ✅ Successfully extracted 2 referees
+2025-07-10 14:24:38,670 - INFO - 🔄 Navigating back to Associate Editor Center...
+2025-07-10 14:24:40,744 - INFO - ✅ Navigated back to Associate Editor Center
+2025-07-10 14:24:40,744 - INFO - 📂 Navigating to: Awaiting Reviewer Scores
+2025-07-10 14:24:45,208 - INFO - ✅ Successfully navigated to Awaiting Reviewer Scores
+2025-07-10 14:24:45,209 - INFO - 
+============================================================
+2025-07-10 14:24:45,209 - INFO - 📄 Processing: MAFI-2025-0166
+2025-07-10 14:24:45,209 - INFO - Expected: Optimal investment and consumption under forward u...
+2025-07-10 14:24:45,209 - INFO - ============================================================
+2025-07-10 14:24:45,210 - INFO - 🔍 Looking for manuscript checkbox: MAFI-2025-0166
+2025-07-10 14:24:45,216 - INFO - Found 2 checkbox images
+2025-07-10 14:24:45,302 - INFO -    Skipping row 8 (contains but doesn't start with MAFI-2025-0166): To take action on a manuscript or view the full ma...
+2025-07-10 14:24:45,352 - INFO -    Skipping row 12 (contains but doesn't start with MAFI-2025-0166): Awaiting Reviewer Scores
+Manuscripts 1-2 of 2
+Manu...
+2025-07-10 14:24:45,390 - INFO -    Skipping row 14 (contains but doesn't start with MAFI-2025-0166): Awaiting Reviewer Scores
+Manuscripts 1-2 of 2
+Manu...
+2025-07-10 14:24:45,469 - INFO -    Skipping row 18 (contains but doesn't start with MAFI-2025-0166): Manuscript ID  
+Manuscript Title
+Date Submitted  
+...
+2025-07-10 14:24:45,587 - INFO - ✅ Found manuscript data for MAFI-2025-0166 in row 22
+2025-07-10 14:24:45,587 - INFO -    Row preview: MAFI-2025-0166
+(REX-PROD-1-957B102A-FAD0-49EC-974F-4CE40BABDCFF-C109D069-488B-4649-9A62-3B5ECD0619E4...
+2025-07-10 14:24:45,587 - INFO - ✅ Clicking checkbox for MAFI-2025-0166
+2025-07-10 14:24:49,940 - INFO - Navigated to: https://mc.manuscriptcentral.com/mafi
+2025-07-10 14:24:49,940 - INFO - 📊 Extracting referee details for MAFI-2025-0166...
+2025-07-10 14:24:50,121 - INFO - ✅ Found Reviewer List section
+2025-07-10 14:24:50,121 - INFO - Found 28 rows in reviewer table
+2025-07-10 14:24:50,121 - INFO -       🔍 Cell[0]: '1234'
+2025-07-10 14:24:50,122 - INFO -       🔍 Cell[1]: 'Liang, GechunUniversity of Warwick, Department of Statisticshttps://orcid.org/0000-0003-0752-0773'
+2025-07-10 14:24:50,122 - INFO -       🎯 Found clean name: 'Liang, Gechun' using pattern 1 in cell[1]
+2025-07-10 14:24:50,122 - INFO -       🔍 DEBUG: Analyzing 17 cells for referee 'Liang, Gechun'
+2025-07-10 14:24:50,122 - INFO -          Cell[0]: '1234'
+2025-07-10 14:24:50,122 - INFO -          Cell[1]: 'Liang, GechunUniversity of Warwick, Department of Statisticshttps://orcid.org/00'
+2025-07-10 14:24:50,122 - INFO -          Cell[2]: ''
+2025-07-10 14:24:50,122 - INFO -          Cell[3]: 'Liang, GechunUniversity of Warwick, Department of Statisticshttps://orcid.org/00'
+2025-07-10 14:24:50,122 - INFO -          Cell[4]: 'Agreed'
+2025-07-10 14:24:50,122 - INFO -          Cell[5]: 'Invited:22-Jun-2025Agreed
+				:22-Jun-2025Due Date:20-Sep-2025Time in Review:18 '
+2025-07-10 14:24:50,122 - INFO -          Cell[6]: 'Invited:'
+2025-07-10 14:24:50,122 - INFO -          Cell[7]: '22-Jun-2025'
+2025-07-10 14:24:50,122 - INFO -          Cell[8]: 'Agreed
+				:'
+2025-07-10 14:24:50,122 - INFO -          Cell[9]: '22-Jun-2025'
+2025-07-10 14:24:50,123 - INFO -          Cell[10]: 'Due Date:'
+2025-07-10 14:24:50,123 - INFO -          Cell[11]: '20-Sep-2025'
+2025-07-10 14:24:50,123 - INFO -          Cell[12]: 'Time in Review:'
+2025-07-10 14:24:50,123 - INFO -          Cell[13]: '18 Days.'
+2025-07-10 14:24:50,123 - INFO -          Cell[14]: 'view full history'
+2025-07-10 14:24:50,123 - INFO -          Cell[15]: 'edit reminders'
+2025-07-10 14:24:50,123 - INFO -          Cell[16]: ''
+2025-07-10 14:24:50,123 - INFO -          ✅ FOUND STATUS: 'Agreed' (matched 'agreed')
+2025-07-10 14:24:50,123 - INFO -      🏛️  Institution from name cell: University of Warwick, Department of Statistics
+2025-07-10 14:24:50,123 - INFO -      🏛️  Institution from name cell: University of Warwick, Department of Statistics
+2025-07-10 14:24:50,123 - INFO -      🏛️  Institution from name cell: University of Warwick, Department of Statistics
+2025-07-10 14:24:50,123 - INFO -      🏛️  Institution from name cell: University of Warwick, Department of Statistics
+2025-07-10 14:24:50,123 - INFO -      🏛️  Institution from name cell: University of Warwick, Department of Statistics
+2025-07-10 14:24:50,123 - INFO -      📅 Invited date: 22-Jun-2025
+2025-07-10 14:24:50,124 - INFO -      📅 Due date: 20-Sep-2025
+2025-07-10 14:24:50,126 - INFO -      ⏱️  Time in review: 18 Days
+2025-07-10 14:24:50,127 - INFO -      🏛️  Institution from name cell: University of Warwick, Department of Statistics
+2025-07-10 14:24:50,128 - INFO -      🏛️  Institution from name cell: University of Warwick, Department of Statistics
+2025-07-10 14:24:50,128 - INFO -      🏛️  Institution from name cell: University of Warwick, Department of Statistics
+2025-07-10 14:24:50,128 - INFO -      🏛️  Institution from name cell: University of Warwick, Department of Statistics
+2025-07-10 14:24:50,128 - INFO -      🏛️  Institution from name cell: University of Warwick, Department of Statistics
+2025-07-10 14:24:50,128 - INFO -      🏛️  Institution from name cell: University of Warwick, Department of Statistics
+2025-07-10 14:24:50,128 - INFO -      🏛️  Institution from name cell: University of Warwick, Department of Statistics
+2025-07-10 14:24:50,129 - INFO -      🏛️  Institution from name cell: University of Warwick, Department of Statistics
+2025-07-10 14:24:50,129 - INFO -      🏛️  Institution from name cell: University of Warwick, Department of Statistics
+2025-07-10 14:24:50,129 - INFO -      🏛️  Institution from name cell: University of Warwick, Department of Statistics
+2025-07-10 14:24:50,129 - INFO -      🏛️  Institution from name cell: University of Warwick, Department of Statistics
+2025-07-10 14:24:50,129 - INFO -      🏛️  Institution from name cell: University of Warwick, Department of Statistics
+2025-07-10 14:24:50,129 - INFO -    ✅ Liang, Gechun (Agreed)
+2025-07-10 14:24:50,129 - INFO -       🔍 Cell[0]: '1234'
+2025-07-10 14:24:50,129 - INFO -       🔍 Cell[1]: 'Mrad, MohamedUniversité Sorbonne Paris Nord, LAGA'
+2025-07-10 14:24:50,129 - INFO -       🎯 Found clean name: 'Mrad, Mohamed' using pattern 1 in cell[1]
+2025-07-10 14:24:50,129 - INFO -       🔍 DEBUG: Analyzing 13 cells for referee 'Mrad, Mohamed'
+2025-07-10 14:24:50,129 - INFO -          Cell[0]: '1234'
+2025-07-10 14:24:50,129 - INFO -          Cell[1]: 'Mrad, MohamedUniversité Sorbonne Paris Nord, LAGA'
+2025-07-10 14:24:50,129 - INFO -          Cell[2]: ''
+2025-07-10 14:24:50,129 - INFO -          Cell[3]: 'Mrad, MohamedUniversité Sorbonne Paris Nord, LAGA'
+2025-07-10 14:24:50,129 - INFO -          Cell[4]: 'Declinedinvite again'
+2025-07-10 14:24:50,129 - INFO -          Cell[5]: 'Invited:22-Jun-2025Declined
+				:01-Jul-2025view full history'
+2025-07-10 14:24:50,130 - INFO -          Cell[6]: 'Invited:'
+2025-07-10 14:24:50,130 - INFO -          Cell[7]: '22-Jun-2025'
+2025-07-10 14:24:50,130 - INFO -          Cell[8]: 'Declined
+				:'
+2025-07-10 14:24:50,130 - INFO -          Cell[9]: '01-Jul-2025'
+2025-07-10 14:24:50,130 - INFO -          Cell[10]: 'view full history'
+2025-07-10 14:24:50,130 - INFO -          Cell[11]: ''
+2025-07-10 14:24:50,130 - INFO -          Cell[12]: ''
+2025-07-10 14:24:50,130 - INFO -          ❌ FOUND STATUS: 'Declined'
+2025-07-10 14:24:50,130 - INFO -      🏛️  Institution from name cell: Université Sorbonne Paris Nord, LAGA
+2025-07-10 14:24:50,130 - INFO -      🏛️  Institution from name cell: Université Sorbonne Paris Nord, LAGA
+2025-07-10 14:24:50,130 - INFO -      🏛️  Institution from name cell: Université Sorbonne Paris Nord, LAGA
+2025-07-10 14:24:50,130 - INFO -      🏛️  Institution from name cell: Université Sorbonne Paris Nord, LAGA
+2025-07-10 14:24:50,130 - INFO -      🏛️  Institution from name cell: Université Sorbonne Paris Nord, LAGA
+2025-07-10 14:24:50,130 - INFO -      📅 Invited date: 22-Jun-2025
+2025-07-10 14:24:50,130 - INFO -      🏛️  Institution from name cell: Université Sorbonne Paris Nord, LAGA
+2025-07-10 14:24:50,130 - INFO -      🏛️  Institution from name cell: Université Sorbonne Paris Nord, LAGA
+2025-07-10 14:24:50,130 - INFO -      🏛️  Institution from name cell: Université Sorbonne Paris Nord, LAGA
+2025-07-10 14:24:50,130 - INFO -      🏛️  Institution from name cell: Université Sorbonne Paris Nord, LAGA
+2025-07-10 14:24:50,130 - INFO -      🏛️  Institution from name cell: Université Sorbonne Paris Nord, LAGA
+2025-07-10 14:24:50,130 - INFO -      🏛️  Institution from name cell: Université Sorbonne Paris Nord, LAGA
+2025-07-10 14:24:50,130 - INFO -      🏛️  Institution from name cell: Université Sorbonne Paris Nord, LAGA
+2025-07-10 14:24:50,130 - INFO -      🏛️  Institution from name cell: Université Sorbonne Paris Nord, LAGA
+2025-07-10 14:24:50,130 - INFO -    ❌ Skipping Mrad, Mohamed: declined (unavailable/declined)
+2025-07-10 14:24:50,131 - INFO -       🔍 Cell[0]: '1234'
+2025-07-10 14:24:50,131 - INFO -       🔍 Cell[1]: 'Dos Reis, GoncaloUniversity of Edinburgh, School of Mathematicshttps://orcid.org/0000-0002-4993-2672'
+2025-07-10 14:24:50,131 - INFO -       🔍 Cell[2]: ''
+2025-07-10 14:24:50,131 - INFO -       🔍 Cell[3]: 'Dos Reis, GoncaloUniversity of Edinburgh, School of Mathematicshttps://orcid.org/0000-0002-4993-2672'
+2025-07-10 14:24:50,131 - INFO -       🔍 Cell[4]: 'Unavailableinvite again'
+2025-07-10 14:24:50,131 - INFO -       🔍 Cell[0]: '1234'
+2025-07-10 14:24:50,131 - INFO -       🔍 Cell[1]: 'Strub, MorisWarwick Business School, Information Systems Management & Analyticshttps://orcid.org/000'
+2025-07-10 14:24:50,131 - INFO -       🎯 Found clean name: 'Strub, Moris' using pattern 1 in cell[1]
+2025-07-10 14:24:50,131 - INFO -       🔍 DEBUG: Analyzing 17 cells for referee 'Strub, Moris'
+2025-07-10 14:24:50,131 - INFO -          Cell[0]: '1234'
+2025-07-10 14:24:50,131 - INFO -          Cell[1]: 'Strub, MorisWarwick Business School, Information Systems Management & Analyticsh'
+2025-07-10 14:24:50,131 - INFO -          Cell[2]: ''
+2025-07-10 14:24:50,131 - INFO -          Cell[3]: 'Strub, MorisWarwick Business School, Information Systems Management & Analyticsh'
+2025-07-10 14:24:50,131 - INFO -          Cell[4]: 'Agreed'
+2025-07-10 14:24:50,131 - INFO -          Cell[5]: 'Invited:01-Jul-2025Agreed
+				:01-Jul-2025Due Date:29-Sep-2025Time in Review:8 D'
+2025-07-10 14:24:50,131 - INFO -          Cell[6]: 'Invited:'
+2025-07-10 14:24:50,131 - INFO -          Cell[7]: '01-Jul-2025'
+2025-07-10 14:24:50,131 - INFO -          Cell[8]: 'Agreed
+				:'
+2025-07-10 14:24:50,131 - INFO -          Cell[9]: '01-Jul-2025'
+2025-07-10 14:24:50,131 - INFO -          Cell[10]: 'Due Date:'
+2025-07-10 14:24:50,131 - INFO -          Cell[11]: '29-Sep-2025'
+2025-07-10 14:24:50,132 - INFO -          Cell[12]: 'Time in Review:'
+2025-07-10 14:24:50,132 - INFO -          Cell[13]: '8 Days.'
+2025-07-10 14:24:50,132 - INFO -          Cell[14]: 'view full history'
+2025-07-10 14:24:50,132 - INFO -          Cell[15]: 'edit reminders'
+2025-07-10 14:24:50,132 - INFO -          Cell[16]: ''
+2025-07-10 14:24:50,132 - INFO -          ✅ FOUND STATUS: 'Agreed' (matched 'agreed')
+2025-07-10 14:24:50,132 - INFO -      🏛️  Institution from name cell: Warwick Business School, Information Systems Management & Analytics
+2025-07-10 14:24:50,132 - INFO -      🏛️  Institution from name cell: Warwick Business School, Information Systems Management & Analytics
+2025-07-10 14:24:50,132 - INFO -      🏛️  Institution from name cell: Warwick Business School, Information Systems Management & Analytics
+2025-07-10 14:24:50,132 - INFO -      🏛️  Institution from name cell: Warwick Business School, Information Systems Management & Analytics
+2025-07-10 14:24:50,132 - INFO -      🏛️  Institution from name cell: Warwick Business School, Information Systems Management & Analytics
+2025-07-10 14:24:50,132 - INFO -      📅 Invited date: 01-Jul-2025
+2025-07-10 14:24:50,132 - INFO -      📅 Due date: 29-Sep-2025
+2025-07-10 14:24:50,132 - INFO -      ⏱️  Time in review: 8 Days
+2025-07-10 14:24:50,132 - INFO -      🏛️  Institution from name cell: Warwick Business School, Information Systems Management & Analytics
+2025-07-10 14:24:50,132 - INFO -      🏛️  Institution from name cell: Warwick Business School, Information Systems Management & Analytics
+2025-07-10 14:24:50,132 - INFO -      🏛️  Institution from name cell: Warwick Business School, Information Systems Management & Analytics
+2025-07-10 14:24:50,132 - INFO -      🏛️  Institution from name cell: Warwick Business School, Information Systems Management & Analytics
+2025-07-10 14:24:50,132 - INFO -      🏛️  Institution from name cell: Warwick Business School, Information Systems Management & Analytics
+2025-07-10 14:24:50,132 - INFO -      🏛️  Institution from name cell: Warwick Business School, Information Systems Management & Analytics
+2025-07-10 14:24:50,132 - INFO -      🏛️  Institution from name cell: Warwick Business School, Information Systems Management & Analytics
+2025-07-10 14:24:50,132 - INFO -      🏛️  Institution from name cell: Warwick Business School, Information Systems Management & Analytics
+2025-07-10 14:24:50,132 - INFO -      🏛️  Institution from name cell: Warwick Business School, Information Systems Management & Analytics
+2025-07-10 14:24:50,132 - INFO -      🏛️  Institution from name cell: Warwick Business School, Information Systems Management & Analytics
+2025-07-10 14:24:50,133 - INFO -      🏛️  Institution from name cell: Warwick Business School, Information Systems Management & Analytics
+2025-07-10 14:24:50,133 - INFO -      🏛️  Institution from name cell: Warwick Business School, Information Systems Management & Analytics
+2025-07-10 14:24:50,133 - INFO -    ✅ Strub, Moris (Agreed)
+2025-07-10 14:24:50,133 - INFO - 📧 Fetching email dates for MAFI-2025-0166...
+2025-07-10 14:24:50,136 - INFO - file_cache is only supported with oauth2client<4.0.0
+2025-07-10 14:24:50,765 - INFO - Found 9 messages to process for MF
+2025-07-10 14:24:54,128 - INFO -    ❌ No email match found for Liang, Gechun
+2025-07-10 14:24:54,128 - INFO -    ❌ No email match found for Strub, Moris
+2025-07-10 14:24:54,128 - INFO - ✅ Successfully extracted 2 referees
+2025-07-10 14:24:54,128 - INFO - 🔄 Navigating back to Associate Editor Center...
+2025-07-10 14:24:56,192 - INFO - ✅ Navigated back to Associate Editor Center
+2025-07-10 14:24:56,192 - INFO - 📂 Navigating to: Awaiting Reviewer Scores
+2025-07-10 14:25:00,484 - INFO - ✅ Successfully navigated to Awaiting Reviewer Scores
+2025-07-10 14:25:00,486 - INFO - 📄 Report saved: stable_results/mf_stable_report.txt
+2025-07-10 14:25:00,487 - INFO - 🎉 Stable MF extraction completed!
+2025-07-10 14:25:00,487 - INFO -    Results: stable_results/mf_stable_results.json
+2025-07-10 14:25:00,671 - INFO - 🔄 Driver closed

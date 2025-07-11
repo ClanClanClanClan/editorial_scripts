@@ -1,0 +1,489 @@
+"""
+Enhanced JOTA journal email scraping with proper manuscript formatting
+"""
+import os
+import re
+import logging
+import base64
+import random
+from email.utils import parsedate_to_datetime
+from datetime import datetime, timedelta
+from dateutil.relativedelta import relativedelta
+from typing import List, Dict, Optional, Tuple
+from googleapiclient.discovery import build
+from google.oauth2.credentials import Credentials
+from core.paper_downloader import get_paper_downloader
+
+logger = logging.getLogger(__name__)
+
+class JOTAJournal:
+    """Email-based scraping for JOTA journal using Gmail API"""
+    
+    def __init__(self, gmail_service, user_id="me", debug=True):
+        self.service = gmail_service
+        self.user_id = user_id
+        self.debug = debug
+        
+        self.paper_downloader = get_paper_downloader()
+    def log(self, msg):
+        if self.debug:
+            logger.info(f"[JOTA] {msg}")
+    
+    def scrape_manuscripts_and_emails(self) -> List[Dict]:
+        """
+        Main entry point - returns manuscripts in standard format
+        """
+        self.log("Starting email scraping for JOTA")
+        
+        try:
+            # Fetch and parse all emails
+            email_data = self.fetch_and_parse_emails()
+            
+            # Transform to standard manuscript format
+            manuscripts = self.transform_to_manuscript_format(email_data)
+            
+            self.log(f"Successfully processed {len(manuscripts)} manuscripts")
+            return manuscripts
+            
+        except Exception as e:
+            logger.error(f"[JOTA] Email scraping failed: {e}")
+            return []
+    
+    def fetch_and_parse_emails(self, days_back=90) -> Dict:
+        """Fetch all relevant JOTA emails"""
+        
+        email_data = {
+            'acceptance_emails': [],
+            'invitation_emails': [],
+            'decline_emails': [],
+            'reminder_emails': [],
+            'weekly_overviews': [],
+            'status_updates': []
+        }
+        
+        # Define search patterns
+        searches = [
+            ('acceptance_emails', 'subject:"JOTA - Reviewer has agreed to review"'),
+            ('invitation_emails', 'subject:"JOTA - Reviewer Invitation"'),
+            ('decline_emails', 'subject:"JOTA - Reviewer has declined"'),
+            ('reminder_emails', 'subject:"JOTA - Reminder"'),
+            ('weekly_overviews', 'subject:"JOTA - Weekly Overview Of Your Assignments"'),
+            ('status_updates', 'subject:"JOTA - Status Update"')
+        ]
+        
+        # Add time filter
+        date_filter = f' newer_than:{days_back}d'
+        
+        for category, query in searches:
+            self.log(f"Searching for {category}")
+            messages = self.list_messages(query + date_filter)
+            
+            for msg_info in messages:
+                try:
+                    msg_data = self.get_and_parse_message(msg_info['id'], category)
+                    if msg_data:
+                        email_data[category].append(msg_data)
+                except Exception as e:
+                    logger.warning(f"Failed to parse message {msg_info['id']}: {e}")
+        
+        return email_data
+    
+    def list_messages(self, query: str) -> List[Dict]:
+        """List all messages matching query"""
+        messages = []
+        request = self.service.users().messages().list(userId=self.user_id, q=query)
+        
+        while request is not None:
+            response = request.execute()
+            messages.extend(response.get('messages', []))
+            request = self.service.users().messages().list_next(request, response)
+        
+        self.log(f"Found {len(messages)} messages for query: {query}")
+        return messages
+    
+    def get_and_parse_message(self, msg_id: str, category: str) -> Optional[Dict]:
+        """Fetch and parse a single message"""
+        msg = self.service.users().messages().get(
+            userId=self.user_id, 
+            id=msg_id, 
+            format='full'
+        ).execute()
+        
+        payload = msg.get('payload', {})
+        headers = {h['name'].lower(): h['value'] 
+                  for h in payload.get('headers', [])}
+        
+        subject = headers.get('subject', '')
+        date_str = headers.get('date', '')
+        from_addr = headers.get('from', '')
+        to_addr = headers.get('to', '')
+        
+        # Parse date
+        date = None
+        try:
+            date = parsedate_to_datetime(date_str)
+        except:
+            date = datetime.now()
+        
+        # Extract body
+        body = self._extract_body(payload)
+        
+        # Parse based on category
+        if category == 'acceptance_emails':
+            return self.parse_acceptance_email(subject, body, date, to_addr)
+        elif category == 'invitation_emails':
+            return self.parse_invitation_email(subject, body, date, to_addr)
+        elif category == 'decline_emails':
+            return self.parse_decline_email(subject, body, date)
+        elif category == 'weekly_overviews':
+            return self.parse_weekly_overview(subject, body, date)
+        elif category == 'status_updates':
+            return self.parse_status_update(subject, body, date)
+        else:
+            return {
+                'type': category,
+                'subject': subject,
+                'body': body,
+                'date': date
+            }
+    
+    def _extract_body(self, payload: Dict) -> str:
+        """Extract text body from email payload"""
+        if 'parts' in payload:
+            for part in payload['parts']:
+                if part.get('mimeType') == 'text/plain':
+                    data = part.get('body', {}).get('data')
+                    if data:
+                        return base64.urlsafe_b64decode(data).decode('utf-8', errors='ignore')
+                elif 'parts' in part:
+                    # Recursive for nested parts
+                    result = self._extract_body(part)
+                    if result:
+                        return result
+        
+        # Fallback to body data
+        body_data = payload.get('body', {}).get('data')
+        if body_data:
+            return base64.urlsafe_b64decode(body_data).decode('utf-8', errors='ignore')
+        
+        return ""
+    
+    def parse_acceptance_email(self, subject: str, body: str, date: datetime, to_addr: str) -> Dict:
+        """Parse reviewer acceptance email"""
+        # Extract manuscript ID
+        ms_id_match = re.search(r'(JOTA-D-\d{2}-\d{5}R?\d*)', subject + " " + body)
+        ms_id = ms_id_match.group(1) if ms_id_match else None
+        
+        # Extract referee name - multiple patterns
+        referee_name = None
+        patterns = [
+            r"([A-Z][a-zA-Z\s\.\-']+?)(?:,?\s*(?:Ph\.?D\.?|PhD|MD|Dr\.|Prof\.))*\s+has agreed",
+            r"Reviewer\s+([A-Z][a-zA-Z\s\.\-']+?)\s+has agreed",
+            r"([A-Z][a-zA-Z\s\.\-']+?)\s+\([^)]+\)\s+has agreed"
+        ]
+        
+        for pattern in patterns:
+            match = re.search(pattern, body, re.IGNORECASE)
+            if match:
+                referee_name = match.group(1).strip()
+                break
+        
+        # Try to extract referee email from body or use to_addr
+        referee_email = self._extract_email_from_text(body) or ""
+        
+        # Sometimes the referee email is in the "to" field
+        if not referee_email and to_addr and 'editorial' not in to_addr.lower():
+            referee_email = to_addr
+        
+        return {
+            'type': 'acceptance',
+            'manuscript_id': ms_id,
+            'referee_name': referee_name,
+            'referee_email': referee_email,
+            'date': date,
+            'subject': subject
+        }
+    
+    def parse_invitation_email(self, subject: str, body: str, date: datetime, to_addr: str) -> Dict:
+        """Parse reviewer invitation email"""
+        ms_id_match = re.search(r'(JOTA-D-\d{2}-\d{5}R?\d*)', subject + " " + body)
+        ms_id = ms_id_match.group(1) if ms_id_match else None
+        
+        # Extract referee name from salutation
+        referee_name = None
+        patterns = [
+            r"Dear\s+(?:Prof\.|Dr\.|Mr\.|Ms\.)?\s*([A-Z][a-zA-Z\s\.\-']+),",
+            r"Dear\s+([A-Z][a-zA-Z\s\.\-']+),"
+        ]
+        
+        for pattern in patterns:
+            match = re.search(pattern, body)
+            if match:
+                referee_name = match.group(1).strip()
+                break
+        
+        # Extract title
+        title_match = re.search(r'(?:for the (?:article|manuscript)|entitled|titled)\s*["\'](.+?)["\']', 
+                              body, re.IGNORECASE | re.DOTALL)
+        title = title_match.group(1).strip() if title_match else None
+        
+        # Clean up title
+        if title:
+            title = re.sub(r'\s+', ' ', title)
+            title = title.replace('\n', ' ').replace('\r', '')
+        
+        referee_email = self._extract_email_from_text(body) or to_addr or ""
+        
+        return {
+            'type': 'invitation',
+            'manuscript_id': ms_id,
+            'referee_name': referee_name,
+            'referee_email': referee_email,
+            'title': title,
+            'date': date,
+            'subject': subject
+        }
+    
+    def parse_decline_email(self, subject: str, body: str, date: datetime) -> Dict:
+        """Parse reviewer decline email"""
+        ms_id_match = re.search(r'(JOTA-D-\d{2}-\d{5}R?\d*)', subject + " " + body)
+        ms_id = ms_id_match.group(1) if ms_id_match else None
+        
+        # Extract referee name
+        referee_name = None
+        patterns = [
+            r"([A-Z][a-zA-Z\s\.\-']+?)\s+has declined",
+            r"Reviewer\s+([A-Z][a-zA-Z\s\.\-']+?)\s+has declined"
+        ]
+        
+        for pattern in patterns:
+            match = re.search(pattern, body, re.IGNORECASE)
+            if match:
+                referee_name = match.group(1).strip()
+                break
+        
+        return {
+            'type': 'decline',
+            'manuscript_id': ms_id,
+            'referee_name': referee_name,
+            'date': date,
+            'subject': subject
+        }
+    
+    def parse_weekly_overview(self, subject: str, body: str, date: datetime) -> Dict:
+        """Parse weekly overview email with manuscript list"""
+        manuscripts = []
+        
+        # Pattern to extract manuscript entries
+        # Format: JOTA-D-XX-XXXXX  submitted X days ago  Status (X days) X Agreed
+        pattern = re.compile(
+            r'(JOTA-D-\d{2}-\d{5}R?\d*)\s+'
+            r'submitted\s+(\d+)\s+days?\s+ago\s+'
+            r'([^(]+)\s*\((\d+)\s+days?\)\s*'
+            r'(?:(\d+)\s+Agreed)?.*?'
+            r'Title:\s*(.+?)\s*'
+            r'Authors?:\s*(.+?)(?=(?:JOTA-D-|$))',
+            re.DOTALL | re.MULTILINE
+        )
+        
+        for match in pattern.finditer(body):
+            ms_id = match.group(1).strip()
+            days_since_submission = int(match.group(2))
+            status = match.group(3).strip()
+            days_in_status = int(match.group(4))
+            agreed_count = int(match.group(5)) if match.group(5) else 0
+            title = match.group(6).strip()
+            authors = match.group(7).strip()
+            
+            # Clean up multi-line text
+            title = re.sub(r'\s+', ' ', title)
+            authors = re.sub(r'\s+', ' ', authors)
+            
+            manuscripts.append({
+                'manuscript_id': ms_id,
+                'title': title,
+                'authors': authors,
+                'status': status,
+                'days_since_submission': days_since_submission,
+                'days_in_status': days_in_status,
+                'agreed_referees': agreed_count,
+                'submission_date': date - timedelta(days=days_since_submission)
+            })
+        
+        return {
+            'type': 'weekly_overview',
+            'date': date,
+            'manuscripts': manuscripts
+        }
+    
+    def parse_status_update(self, subject: str, body: str, date: datetime) -> Dict:
+        """Parse status update email"""
+        ms_id_match = re.search(r'(JOTA-D-\d{2}-\d{5}R?\d*)', subject + " " + body)
+        ms_id = ms_id_match.group(1) if ms_id_match else None
+        
+        return {
+            'type': 'status_update',
+            'manuscript_id': ms_id,
+            'date': date,
+            'subject': subject,
+            'body': body
+        }
+    
+    def _extract_email_from_text(self, text: str) -> Optional[str]:
+        """Extract first email address from text"""
+        email_pattern = r'[\w\.-]+@[\w\.-]+\.\w+'
+        matches = re.findall(email_pattern, text)
+        
+        # Filter out common system emails
+        system_emails = ['editorial', 'noreply', 'system', 'admin', 'jota@']
+        
+        for email in matches:
+            if not any(sys in email.lower() for sys in system_emails):
+                return email
+        
+        return None
+    
+    def transform_to_manuscript_format(self, email_data: Dict) -> List[Dict]:
+        """Transform email data into standard manuscript format"""
+        manuscripts = {}
+        
+        # First, build manuscript index from weekly overviews
+        for overview in email_data['weekly_overviews']:
+            for ms in overview['manuscripts']:
+                ms_id = ms['manuscript_id']
+                
+                if ms_id not in manuscripts:
+                    manuscripts[ms_id] = {
+                        'Manuscript #': ms_id,
+                        'Title': ms['title'],
+                        'Contact Author': ms['authors'].split(',')[0].strip() if ms['authors'] else '',
+                        'Current Stage': self._determine_stage(ms['status']),
+                        'Submission Date': ms['submission_date'],
+                        'Days Since Submission': ms['days_since_submission'],
+                        'Referees': []
+                    }
+                else:
+                    # Update with latest info
+                    manuscripts[ms_id]['Title'] = ms['title']
+                    manuscripts[ms_id]['Current Stage'] = self._determine_stage(ms['status'])
+                    manuscripts[ms_id]['Days Since Submission'] = ms['days_since_submission']
+        
+        # Add referee information from individual emails
+        referee_events = []
+        
+        # Process acceptances
+        for email in email_data['acceptance_emails']:
+            if email['manuscript_id'] and email['referee_name']:
+                referee_events.append({
+                    'manuscript_id': email['manuscript_id'],
+                    'referee_name': email['referee_name'],
+                    'referee_email': email['referee_email'],
+                    'type': 'accepted',
+                    'date': email['date']
+                })
+        
+        # Process invitations
+        for email in email_data['invitation_emails']:
+            if email['manuscript_id'] and email['referee_name']:
+                referee_events.append({
+                    'manuscript_id': email['manuscript_id'],
+                    'referee_name': email['referee_name'],
+                    'referee_email': email['referee_email'],
+                    'type': 'invited',
+                    'date': email['date'],
+                    'title': email.get('title')
+                })
+        
+        # Process declines
+        for email in email_data['decline_emails']:
+            if email['manuscript_id'] and email['referee_name']:
+                referee_events.append({
+                    'manuscript_id': email['manuscript_id'],
+                    'referee_name': email['referee_name'],
+                    'type': 'declined',
+                    'date': email['date']
+                })
+        
+        # Sort events by date
+        referee_events.sort(key=lambda x: x['date'])
+        
+        # Build referee status for each manuscript
+        for event in referee_events:
+            ms_id = event['manuscript_id']
+            
+            # Create manuscript entry if not from weekly overview
+            if ms_id not in manuscripts:
+                manuscripts[ms_id] = {
+                    'Manuscript #': ms_id,
+                    'Title': event.get('title', 'Title not available'),
+                    'Contact Author': '',
+                    'Current Stage': 'Under Review',
+                    'Referees': []
+                }
+            
+            # Find or create referee entry
+            referee_name = event['referee_name']
+            referee = None
+            
+            for ref in manuscripts[ms_id]['Referees']:
+                if ref['Referee Name'] == referee_name:
+                    referee = ref
+                    break
+            
+            if not referee:
+                referee = {
+                    'Referee Name': referee_name,
+                    'Status': 'Unknown',
+                    'Referee Email': event.get('referee_email', ''),
+                    'Contacted Date': '',
+                    'Accepted Date': '',
+                    'Declined Date': '',
+                    'Due Date': ''
+                }
+                manuscripts[ms_id]['Referees'].append(referee)
+            
+            # Update referee status based on event
+            if event['type'] == 'invited':
+                referee['Status'] = 'Contacted'
+                referee['Contacted Date'] = event['date'].isoformat()
+                if event.get('referee_email'):
+                    referee['Referee Email'] = event['referee_email']
+            
+            elif event['type'] == 'accepted':
+                referee['Status'] = 'Accepted'
+                referee['Accepted Date'] = event['date'].isoformat()
+                if event.get('referee_email'):
+                    referee['Referee Email'] = event['referee_email']
+                # Set due date (typically 1 month from acceptance)
+                referee['Due Date'] = (event['date'] + relativedelta(months=1)).isoformat()
+            
+            elif event['type'] == 'declined':
+                referee['Status'] = 'Declined'
+                referee['Declined Date'] = event['date'].isoformat()
+        
+        # Convert to list and sort by manuscript ID
+        manuscript_list = list(manuscripts.values())
+        manuscript_list.sort(key=lambda x: x['Manuscript #'])
+        
+        return manuscript_list
+    
+    def _determine_stage(self, status: str) -> str:
+        """Determine manuscript stage from status string"""
+        status_lower = status.lower()
+        
+        if 'under review' in status_lower:
+            return 'Under Review'
+        elif 'awaiting' in status_lower and 'reviewer' in status_lower:
+            return 'Pending Referee Assignment'
+        elif 'awaiting' in status_lower and 'decision' in status_lower:
+            return 'Awaiting Decision'
+        elif 'revision' in status_lower:
+            return 'Awaiting Revision'
+        else:
+            return status
+
+
+def set_jota_consent_cookies(browser_ctx):
+    """Set consent cookies for JOTA (if needed for web scraping)"""
+    # This would be used if we ever need to do web scraping
+    pass

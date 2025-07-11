@@ -1,0 +1,154 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+
+# Environments
+.env
+.env.local
+.env.*.local
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Credentials and sensitive data
+config/credentials.yaml
+config/gmail_credentials.json
+config/gmail_token.pickle
+credentials.json
+token.json
+token.pickle
+*.pickle
+.credentials/
+.credentials.json
+*.pem
+*.key
+
+# Data and results
+data/
+!data/.gitkeep
+logs/
+!logs/.gitkeep
+checkpoints/
+!checkpoints/.gitkeep
+*.pdf
+*.xlsx
+*.csv
+
+# Chrome profiles
+my_jota_profile/
+my_jota_profile_backup/
+.mor_chrome_profile/
+.mf_chrome_profile/
+.naco_chrome_profile/
+*_chrome_profile/
+*_profile/
+playwright_*/
+
+# Legacy and temporary files
+legacy/
+temp/
+tmp/
+*.tmp
+*.bak
+*.old
+*~
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+data/referees.db
+
+# Output files
+*_results/
+*_results_*/
+*_digest.html
+*_report_*.md
+digests/
+drafts/
+reports/
+*.html
+screenshots/
+*.png
+
+# Cache
+.cache/
+*.cache
+
+# ML models
+models/
+*.pkl
+*.h5
+*.pt
+*.pth

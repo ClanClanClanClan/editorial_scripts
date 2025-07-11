@@ -1,0 +1,32 @@
+{
+  "start_time": "2025-07-10T20:50:08.797627",
+  "credentials_check": true,
+  "sicon_results": {
+    "journal": "SICON",
+    "success": true,
+    "error": null,
+    "manuscripts": [],
+    "extraction_time": "2025-07-10T20:50:08.797640",
+    "stats": {
+      "total_manuscripts": 0,
+      "total_referees": 0
+    }
+  },
+  "sifin_results": {
+    "journal": "SIFIN",
+    "success": true,
+    "error": null,
+    "manuscripts": [],
+    "extraction_time": "2025-07-10T20:50:08.798424",
+    "stats": {
+      "total_manuscripts": 0,
+      "total_referees": 0
+    }
+  },
+  "overall_success": true,
+  "total_stats": {
+    "total_manuscripts": 0,
+    "total_referees": 0,
+    "successful_extractions": 2
+  }
+}

@@ -1,0 +1,134 @@
+{
+  "extraction_time": "2025-07-11T08:49:51.871976",
+  "total_manuscripts": 4,
+  "total_referees": 13,
+  "referee_status_breakdown": {
+    "Declined": 1,
+    "Accepted": 3,
+    "Report Submitted": 0,
+    "Overdue": 0,
+    "Invited": 0,
+    "Has Due Date": 0,
+    "Unknown": 9
+  },
+  "manuscripts": [
+    {
+      "manuscript_id": "M172838",
+      "title": "Constrained Mean-Field Control with Singular Control: Existence, Stochastic Maximum Principle and Constrained FBSDE",
+      "corresponding_editor": "Bayraktar",
+      "associate_editor": "Possamaï",
+      "submitted": "2025-01-23",
+      "days_in_system": "169",
+      "referees": [
+        {
+          "name": "Ferrari",
+          "status": "Declined",
+          "status_detail": "AcceptedAcceptedDeclinedDeclinedDeclinedDeclinedDeclined",
+          "due_date": "2025-07-15"
+        },
+        {
+          "name": "LI",
+          "status": "Unknown",
+          "status_detail": null,
+          "due_date": null
+        },
+        {
+          "name": "daudin",
+          "status": "Unknown",
+          "status_detail": null,
+          "due_date": null
+        },
+        {
+          "name": "Denkert",
+          "status": "Unknown",
+          "status_detail": null,
+          "due_date": null
+        },
+        {
+          "name": "Djehiche",
+          "status": "Unknown",
+          "status_detail": null,
+          "due_date": null
+        },
+        {
+          "name": "Mimikos-Stamatopoulos",
+          "status": "Unknown",
+          "status_detail": null,
+          "due_date": null
+        },
+        {
+          "name": "Pfeiffer",
+          "status": "Unknown",
+          "status_detail": null,
+          "due_date": null
+        }
+      ]
+    },
+    {
+      "manuscript_id": "M173704",
+      "title": "Scaling Limits for Exponential Hedging in the Brownian Framework",
+      "corresponding_editor": "Zhang",
+      "associate_editor": "Possamaï",
+      "submitted": "2025-02-25",
+      "days_in_system": "136",
+      "referees": [
+        {
+          "name": "Cohen",
+          "status": "Accepted",
+          "status_detail": "AcceptedAccepted",
+          "due_date": "2025-07-15"
+        },
+        {
+          "name": "Guo",
+          "status": "Unknown",
+          "status_detail": null,
+          "due_date": null
+        }
+      ]
+    },
+    {
+      "manuscript_id": "M173889",
+      "title": "Hamilton-Jacobi-Bellman Equations in the Wasserstein Space for the Optimal Control of the Kushner-Stratonovich Equation",
+      "corresponding_editor": "Bayraktar",
+      "associate_editor": "Possamaï",
+      "submitted": "2025-03-04",
+      "days_in_system": "129",
+      "referees": [
+        {
+          "name": "Ekren",
+          "status": "Accepted",
+          "status_detail": "AcceptedAccepted",
+          "due_date": "2025-07-15"
+        },
+        {
+          "name": "Ren",
+          "status": "Unknown",
+          "status_detail": null,
+          "due_date": null
+        }
+      ]
+    },
+    {
+      "manuscript_id": "M176733",
+      "title": "Extended Mean Field Games with Terminal Constraint via Decoupling Fields",
+      "corresponding_editor": "Bayraktar",
+      "associate_editor": "Possamaï",
+      "submitted": "2025-06-09",
+      "days_in_system": "32",
+      "referees": [
+        {
+          "name": "daudin",
+          "status": "Accepted",
+          "status_detail": "AcceptedAccepted",
+          "due_date": "2025-08-14"
+        },
+        {
+          "name": "Tangpi",
+          "status": "Unknown",
+          "status_detail": null,
+          "due_date": null
+        }
+      ]
+    }
+  ]
+}

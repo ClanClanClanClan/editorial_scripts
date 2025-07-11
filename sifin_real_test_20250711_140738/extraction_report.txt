@@ -1,0 +1,71 @@
+
+SIFIN Extraction Report
+==================================================
+Extraction Time: 2025-07-11 14:08:29
+Total Manuscripts: 4
+
+Changes Detected:
+- New Manuscripts: 4
+- Status Changes: 0
+- New Reports: 0
+- New Referees: 0
+- Overdue Reviews: 0
+- Approaching Deadlines: 0
+
+Manuscript Details:
+
+----------------------------------------
+ID: M174160
+Title: Complex Discontinuities of $\sqrt{\text{Fredholm Determinant...
+Submitted: 2025-03-13  09:24
+Days in System: N/A
+Paper Type: general
+Priority: normal
+Needs Attention: No
+
+Referees (2):
+  Accepted (2):
+    - Nicolas Privault #1 
+    - Antoine Jacquier #2 
+
+----------------------------------------
+ID: M174727
+Title: Dynamic Mean-Variance Asset Allocation in General Incomplete...
+Submitted: 2025-04-01  09:52
+Days in System: N/A
+Paper Type: general
+Priority: normal
+Needs Attention: No
+
+Referees (2):
+  Accepted (2):
+    - Camilo hernandez #1 
+    - Qingmeng Wei #2 
+
+----------------------------------------
+ID: M175988
+Title: Numerical Analysis of a Particle System for the Calibrated H...
+Submitted: 2025-05-19  15:13
+Days in System: N/A
+Paper Type: general
+Priority: normal
+Needs Attention: No
+
+Referees (2):
+  Accepted (2):
+    - Andreas Neuenkirch #1 
+    - Aurélien Alfonsi #2 ✓
+
+----------------------------------------
+ID: M176140
+Title: Optimal Investment and Consumption Strategies with General C...
+Submitted: 2025-05-26  10:28
+Days in System: N/A
+Paper Type: general
+Priority: normal
+Needs Attention: No
+
+Referees (2):
+  Accepted (2):
+    - Xiaofei Shi #1 
+    - Frank Seifried #2 

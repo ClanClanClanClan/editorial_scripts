@@ -1,0 +1,57 @@
+{
+  "session_id": "live_test_20250709_202540",
+  "start_time": "2025-07-09T20:25:40.181433",
+  "journals": {
+    "MF": {
+      "journal": "MF",
+      "test_start": "2025-07-09T20:25:40.182060",
+      "phases": {
+        "connection": {
+          "status": "pending"
+        },
+        "login": {
+          "status": "pending"
+        },
+        "navigation": {
+          "status": "pending"
+        },
+        "scraping": {
+          "status": "pending"
+        }
+      },
+      "manuscripts": [],
+      "error": "Message: unknown error: cannot connect to chrome at 127.0.0.1:56291\nfrom session not created: This version of ChromeDriver only supports Chrome version 120\nCurrent browser version is 138.0.7204.100\nStacktrace:\n0   undetected_chromedriver             0x000000010328dcc8 undetected_chromedriver + 4844744\n1   undetected_chromedriver             0x0000000103285243 undetected_chromedriver + 4809283\n2   undetected_chromedriver             0x0000000102e5377d undetected_chromedriver + 411517\n3   undetected_chromedriver             0x0000000102e91f06 undetected_chromedriver + 667398\n4   undetected_chromedriver             0x0000000102e90edd undetected_chromedriver + 663261\n5   undetected_chromedriver             0x0000000102e878c6 undetected_chromedriver + 624838\n6   undetected_chromedriver             0x0000000102ed9833 undetected_chromedriver + 960563\n7   undetected_chromedriver             0x0000000102ecda63 undetected_chromedriver + 911971\n8   undetected_chromedriver             0x0000000102e951b3 undetected_chromedriver + 680371\n9   undetected_chromedriver             0x0000000102e967ce undetected_chromedriver + 686030\n10  undetected_chromedriver             0x000000010324d642 undetected_chromedriver + 4580930\n11  undetected_chromedriver             0x00000001032529cc undetected_chromedriver + 4602316\n12  undetected_chromedriver             0x0000000103232e11 undetected_chromedriver + 4472337\n13  undetected_chromedriver             0x0000000103253746 undetected_chromedriver + 4605766\n14  undetected_chromedriver             0x000000010322439c undetected_chromedriver + 4412316\n15  undetected_chromedriver             0x0000000103273868 undetected_chromedriver + 4737128\n16  undetected_chromedriver             0x0000000103273a1e undetected_chromedriver + 4737566\n17  undetected_chromedriver             0x0000000103284e83 undetected_chromedriver + 4808323\n18  libsystem_pthread.dylib             0x00007ff8073f2df1 _pthread_start + 99\n19  libsystem_pthread.dylib             0x00007ff8073ee857 thread_start + 15\n",
+      "success": false,
+      "test_end": "2025-07-09T20:25:45.356217"
+    },
+    "MOR": {
+      "journal": "MOR",
+      "test_start": "2025-07-09T20:25:45.356319",
+      "phases": {
+        "connection": {
+          "status": "pending"
+        },
+        "login": {
+          "status": "pending"
+        },
+        "navigation": {
+          "status": "pending"
+        },
+        "scraping": {
+          "status": "pending"
+        }
+      },
+      "manuscripts": [],
+      "error": "Message: unknown error: cannot connect to chrome at 127.0.0.1:56353\nfrom session not created: This version of ChromeDriver only supports Chrome version 120\nCurrent browser version is 138.0.7204.100\nStacktrace:\n0   undetected_chromedriver             0x0000000102800cc8 undetected_chromedriver + 4844744\n1   undetected_chromedriver             0x00000001027f8243 undetected_chromedriver + 4809283\n2   undetected_chromedriver             0x00000001023c677d undetected_chromedriver + 411517\n3   undetected_chromedriver             0x0000000102404f06 undetected_chromedriver + 667398\n4   undetected_chromedriver             0x0000000102403edd undetected_chromedriver + 663261\n5   undetected_chromedriver             0x00000001023fa8c6 undetected_chromedriver + 624838\n6   undetected_chromedriver             0x000000010244c833 undetected_chromedriver + 960563\n7   undetected_chromedriver             0x0000000102440a63 undetected_chromedriver + 911971\n8   undetected_chromedriver             0x00000001024081b3 undetected_chromedriver + 680371\n9   undetected_chromedriver             0x00000001024097ce undetected_chromedriver + 686030\n10  undetected_chromedriver             0x00000001027c0642 undetected_chromedriver + 4580930\n11  undetected_chromedriver             0x00000001027c59cc undetected_chromedriver + 4602316\n12  undetected_chromedriver             0x00000001027a5e11 undetected_chromedriver + 4472337\n13  undetected_chromedriver             0x00000001027c6746 undetected_chromedriver + 4605766\n14  undetected_chromedriver             0x000000010279739c undetected_chromedriver + 4412316\n15  undetected_chromedriver             0x00000001027e6868 undetected_chromedriver + 4737128\n16  undetected_chromedriver             0x00000001027e6a1e undetected_chromedriver + 4737566\n17  undetected_chromedriver             0x00000001027f7e83 undetected_chromedriver + 4808323\n18  libsystem_pthread.dylib             0x00007ff8073f2df1 _pthread_start + 99\n19  libsystem_pthread.dylib             0x00007ff8073ee857 thread_start + 15\n",
+      "success": false,
+      "test_end": "2025-07-09T20:25:50.176427"
+    }
+  },
+  "summary": {
+    "total_tested": 2,
+    "successful": 0,
+    "success_rate": 0.0,
+    "total_manuscripts": 0
+  },
+  "end_time": "2025-07-09T20:25:50.176509"
+}

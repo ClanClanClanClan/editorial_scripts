@@ -13,12 +13,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from ...core.domain.ports import CacheService
-import sys
-from pathlib import Path
-# Add analytics to path for imports
-sys.path.append(str(Path(__file__).parent.parent.parent.parent / 'analytics'))
-
-from models.referee_metrics import (
+# Import analytics models using absolute imports
+from analytics.models.referee_metrics import (
     RefereeMetrics, TimeMetrics, QualityMetrics, WorkloadMetrics,
     ReliabilityMetrics, ExpertiseMetrics, JournalSpecificMetrics,
     PercentileRanks, PerformanceTier

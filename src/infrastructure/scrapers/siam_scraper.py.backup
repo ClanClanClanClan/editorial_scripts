@@ -1,0 +1,1103 @@
+"""
+Production-ready SIAM journal scraper using modern async architecture
+Supports SICON and SIFIN with robust authentication and anti-bot measures
+"""
+
+import asyncio
+import logging
+import time
+import json
+import re
+import os
+from typing import Dict, List, Optional, Any, Union
+from datetime import datetime, timedelta
+from pathlib import Path
+from dataclasses import dataclass, field
+
+from playwright.async_api import Page, Browser, BrowserContext, TimeoutError as PlaywrightTimeoutError
+from bs4 import BeautifulSoup
+
+from src.infrastructure.config import settings
+from core.credential_manager import get_credential_manager
+from src.core.domain.manuscript import Manuscript, ManuscriptStatus, RefereeInfo, RefereeStatus
+from src.infrastructure.scrapers.base_scraper import BaseScraper, ScrapingResult
+from src.infrastructure.scrapers.stealth_manager import StealthManager, StealthConfig
+
+
+@dataclass
+class SIAMConfig:
+    """Configuration for SIAM journal scraping"""
+    journal_code: str
+    base_url: str
+    folder_id: str
+    max_manuscripts: int = 50
+    retry_attempts: int = 3
+    page_timeout: int = 30000
+    element_timeout: int = 15000
+    anti_bot_delay_range: tuple = (2, 5)
+    stealth_mode: bool = True
+
+
+class SIAMScraper(BaseScraper):
+    """Modern async SIAM journal scraper with production features"""
+    
+    # Journal configurations
+    JOURNAL_CONFIGS = {
+        'SICON': SIAMConfig(
+            journal_code='SICON',
+            base_url='http://sicon.siam.org',
+            folder_id='1800',
+            max_manuscripts=30
+        ),
+        'SIFIN': SIAMConfig(
+            journal_code='SIFIN', 
+            base_url='http://sifin.siam.org',
+            folder_id='1802',
+            max_manuscripts=25
+        )
+    }
+    
+    def __init__(self, journal_code: str):
+        """Initialize SIAM scraper for specific journal"""
+        if journal_code not in self.JOURNAL_CONFIGS:
+            raise ValueError(f"Unsupported journal: {journal_code}")
+            
+        self.config = self.JOURNAL_CONFIGS[journal_code]
+        self.journal_code = journal_code
+        
+        super().__init__(
+            name=f"SIAM_{journal_code}_Scraper",
+            base_url=self.config.base_url,
+            rate_limit_delay=self.config.anti_bot_delay_range[0]
+        )
+        
+        # Initialize stealth manager
+        stealth_config = StealthConfig(
+            randomize_viewport=True,
+            randomize_user_agent=True,
+            inject_webdriver_stealth=True,
+            randomize_timing=True,
+            block_tracking=True,
+            base_delay_range=self.config.anti_bot_delay_range,
+            typing_delay_range=(0.05, 0.15)
+        )
+        self.stealth_manager = StealthManager(stealth_config)
+        
+        self.authenticated = False
+        self.session_start_time = None
+        self.extracted_manuscripts: List[Manuscript] = []
+        
+    async def setup_browser_context(self, browser: Browser) -> BrowserContext:
+        """Setup browser context with advanced stealth and anti-detection measures"""
+        # Get stealth-enhanced context options
+        context_options = self.stealth_manager.get_context_options()
+        
+        # Create context with stealth options
+        context = await browser.new_context(**context_options)
+        
+        # Configure stealth measures
+        if self.config.stealth_mode:
+            await self.stealth_manager.configure_context(context)
+            
+        return context
+    
+    
+    async def authenticate(self, page: Page) -> bool:
+        """Authenticate with ORCID SSO"""
+        try:
+            self.logger.info(f"🔐 Starting ORCID authentication for {self.journal_code}")
+            
+            # Navigate to login page
+            login_url = f"{self.config.base_url}/cgi-bin/main.plex"
+            await page.goto(login_url, timeout=self.config.page_timeout)
+            
+            # Check for Cloudflare challenge
+            await self._handle_cloudflare_challenge(page)
+            
+            await self.stealth_manager.wait_for_page_stability(page)
+            await self.stealth_manager.human_like_delay()
+            
+            # Handle journal-specific modals
+            await self._handle_privacy_modals(page)
+            
+            # Wait for page to stabilize after modal
+            await self.stealth_manager.wait_for_page_stability(page)
+            await self.stealth_manager.human_like_delay()
+            
+            # Find and click ORCID login
+            await self._click_orcid_login(page)
+            
+            # Enter ORCID credentials
+            await self._enter_orcid_credentials(page)
+            
+            # Handle 2FA if required
+            if await self._check_2fa_required(page):
+                await self._handle_2fa(page)
+            
+            # Check for bot detection or challenges
+            if await self.stealth_manager.detect_captcha_or_challenge(page):
+                self.logger.error("❌ Bot detection or CAPTCHA challenge detected")
+                await self._save_debug_screenshot(page, "challenge_detected")
+                return False
+            
+            # Verify authentication success
+            await page.wait_for_timeout(3000)
+            success = await self._verify_authentication(page)
+            
+            if success:
+                self.authenticated = True
+                self.session_start_time = datetime.now()
+                self.logger.info(f"✅ ORCID authentication successful for {self.journal_code}")
+                return True
+            else:
+                self.logger.error(f"❌ Authentication verification failed for {self.journal_code}")
+                return False
+                
+        except Exception as e:
+            self.logger.error(f"❌ Authentication failed for {self.journal_code}: {e}")
+            await self._save_debug_screenshot(page, "auth_error")
+            return False
+    
+    async def _handle_cloudflare_challenge(self, page: Page):
+        """Handle Cloudflare challenge if present"""
+        try:
+            # Check for Cloudflare challenge indicators
+            challenge_indicators = [
+                "Verifying you are human",
+                "Checking your browser",
+                "cloudflare",
+                "cf-challenge"
+            ]
+            
+            page_content = await page.content()
+            is_challenge = any(indicator in page_content for indicator in challenge_indicators)
+            
+            if is_challenge:
+                self.logger.info("🛡️ Cloudflare challenge detected - waiting for verification...")
+                
+                # Wait for challenge to complete (up to 60 seconds - proven to work)
+                try:
+                    await page.wait_for_function(
+                        """() => {
+                            const content = document.body.innerText.toLowerCase();
+                            return content.includes('login') || 
+                                   content.includes('orcid') || 
+                                   content.includes('sign in');
+                        }""",
+                        timeout=60000
+                    )
+                    self.logger.info("✅ Cloudflare challenge completed successfully")
+                except:
+                    # If wait fails, try a shorter fallback wait
+                    await page.wait_for_timeout(15000)
+                    self.logger.warning("⚠️ Cloudflare challenge timeout - continuing with fallback delay")
+        except Exception as e:
+            self.logger.debug(f"Cloudflare check error: {e}")
+    
+    async def _handle_privacy_modals(self, page: Page):
+        """Handle privacy notification and cookie policy modals"""
+        try:
+            await page.wait_for_timeout(3000)  # Give modals time to appear
+            
+            # First handle cookie policy modal - this blocks everything else
+            self.logger.info(f"🔍 Checking for cookie policy modal for {self.journal_code}")
+            try:
+                # Hide cookie policy modal with JavaScript if present
+                cookie_modal = page.locator("#cookie-policy-layer-bg")
+                if await cookie_modal.is_visible():
+                    self.logger.info(f"🍪 Found cookie policy modal for {self.journal_code} - dismissing with JS")
+                    await page.evaluate("document.getElementById('cookie-policy-layer-bg').style.display = 'none';")
+                    await page.wait_for_timeout(1000)
+                    self.logger.info(f"✅ Dismissed cookie policy modal for {self.journal_code}")
+            except Exception as e:
+                self.logger.debug(f"Cookie modal handling: {e}")
+            
+            # Then handle privacy notification modal
+            self.logger.info(f"🔍 Checking for privacy notification modal for {self.journal_code}")
+            continue_selectors = [
+                "button:has-text('Continue')",
+                "input[value='Continue']",
+                "//button[contains(text(), 'Continue')]",
+                "//input[@value='Continue']"
+            ]
+            
+            modal_dismissed = False
+            for selector in continue_selectors:
+                try:
+                    continue_button = page.locator(selector).first
+                    if await continue_button.is_visible():
+                        self.logger.info(f"🔍 Found privacy modal for {self.journal_code} with selector: {selector}")
+                        await self.stealth_manager.human_like_click(page, selector)
+                        await page.wait_for_timeout(3000)  # Wait for modal to disappear
+                        self.logger.info(f"✅ Dismissed {self.journal_code} privacy modal")
+                        modal_dismissed = True
+                        break
+                except:
+                    continue
+            
+            if not modal_dismissed:
+                self.logger.debug(f"No privacy notification modal found for {self.journal_code}")
+                
+        except Exception as e:
+            self.logger.debug(f"Modal handling error: {e}")
+    
+    async def _click_orcid_login(self, page: Page):
+        """Find and click ORCID login with multiple strategies"""
+        # Primary strategy: Look for ORCID image and click its parent (proven to work)
+        try:
+            orcid_img = page.locator("img[src*='orcid']").first
+            if await orcid_img.is_visible():
+                self.logger.info("Found ORCID image - clicking parent link")
+                parent_link = orcid_img.locator("..")
+                if await parent_link.is_visible():
+                    await parent_link.click()
+                    await self.stealth_manager.human_like_delay()
+                    self.logger.info("🔗 Clicked ORCID image parent link")
+                    return
+        except Exception as e:
+            self.logger.debug(f"ORCID image strategy failed: {e}")
+        
+        # Fallback strategies
+        orcid_selectors = [
+            "a[href*='orcid']",
+            "text=Sign in with ORCID", 
+            "text=ORCID",
+            "button:has-text('ORCID')",
+            "input[value*='ORCID']",
+            "a:has-text('Sign in with ORCID')"
+        ]
+        
+        orcid_element = None
+        found_selector = None
+        for selector in orcid_selectors:
+            try:
+                element = page.locator(selector).first
+                # Remove timeout parameter - not supported in is_visible()
+                if await element.is_visible():
+                    orcid_element = element
+                    found_selector = selector
+                    self.logger.info(f"Found ORCID element with selector: {selector}")
+                    break
+            except:
+                continue
+        
+        if not orcid_element:
+            raise Exception("Could not find ORCID sign-in element")
+        
+        # Click the actual found element, not the first selector
+        try:
+            await orcid_element.click()
+            await self.stealth_manager.human_like_delay()
+            self.logger.info(f"🔗 Clicked ORCID element: {found_selector}")
+        except Exception as e:
+            # Fallback to stealth manager click
+            self.logger.info(f"Direct click failed, trying stealth click: {e}")
+            await self.stealth_manager.human_like_click(page, found_selector)
+            await self.stealth_manager.human_like_delay()
+            self.logger.info(f"🔗 Stealth clicked ORCID element: {found_selector}")
+    
+    async def _enter_orcid_credentials(self, page: Page):
+        """Enter ORCID username and password with stealth measures"""
+        # Multi-tier credential retrieval strategy
+        orcid_email = None
+        orcid_password = None
+        
+        # Strategy 1: Environment variables (most reliable for automation)
+        if os.environ.get('ORCID_EMAIL') and os.environ.get('ORCID_PASSWORD'):
+            orcid_email = os.environ.get('ORCID_EMAIL')
+            orcid_password = os.environ.get('ORCID_PASSWORD')
+            self.logger.info(f"✅ Got ORCID credentials from environment: {orcid_email[:3]}****")
+        
+        # Strategy 2: Try 1Password direct access (with short timeout)
+        elif not orcid_email:
+            try:
+                import subprocess
+                userId_cmd = subprocess.run(['op', 'item', 'get', 'Orcid', '--fields=userId'], 
+                                           capture_output=True, text=True, timeout=5)
+                password_cmd = subprocess.run(['op', 'item', 'get', 'Orcid', '--fields=password'], 
+                                             capture_output=True, text=True, timeout=5)
+                
+                if userId_cmd.returncode == 0 and password_cmd.returncode == 0:
+                    orcid_email = userId_cmd.stdout.strip()
+                    orcid_password = password_cmd.stdout.strip()
+                    self.logger.info(f"✅ Got ORCID credentials from 1Password: {orcid_email[:3]}****")
+                else:
+                    self.logger.debug("1Password direct access failed")
+                    
+            except Exception as e:
+                self.logger.debug(f"1Password access failed: {e}")
+        
+        # Strategy 3: Fallback to settings
+        if not orcid_email or not orcid_password:
+            orcid_email = getattr(settings, 'orcid_email', None)
+            orcid_password = getattr(settings, 'orcid_password', None)
+            if orcid_email:
+                self.logger.info(f"✅ Got ORCID credentials from settings: {orcid_email[:3]}****")
+        
+        if not orcid_email or not orcid_password:
+            raise Exception("ORCID credentials not found. Set ORCID_EMAIL and ORCID_PASSWORD environment variables.")
+        
+        # Wait for ORCID page to load with stability check
+        await self.stealth_manager.wait_for_page_stability(page)
+        await self.stealth_manager.human_like_delay()
+        
+        # Handle ORCID cookie consent modal if present
+        try:
+            # First check if we need to accept cookies
+            accept_cookies_btn = page.locator("button:has-text('Accept All Cookies')").first
+            if await accept_cookies_btn.is_visible():
+                self.logger.info("🍪 Found ORCID cookie consent - accepting cookies...")
+                await accept_cookies_btn.click()
+                await page.wait_for_timeout(3000)
+                self.logger.info("✅ ORCID cookies accepted")
+                
+            # Now click "Sign in to ORCID" button
+            signin_btn = page.get_by_role("button", name="Sign in to ORCID")
+            if await signin_btn.is_visible():
+                self.logger.info("🔐 Clicking 'Sign in to ORCID' button...")
+                await signin_btn.click()
+                await page.wait_for_timeout(5000)
+                self.logger.info("✅ Clicked Sign in to ORCID")
+        except Exception as e:
+            self.logger.debug(f"ORCID modal handling error: {e}")
+        
+        # Enter username - try multiple selectors with human-like typing
+        username_selectors = [
+            "input[placeholder*='Email or']",  # Current ORCID form
+            "input[placeholder*='ORCID iD']",  # Alternative placeholder
+            "#username",  # Legacy selector
+            "#username-input",
+            "[name='userId']",
+            "[name='username']"
+        ]
+        username_entered = False
+        
+        for selector in username_selectors:
+            try:
+                username_field = page.locator(selector).first
+                if await username_field.is_visible():
+                    await username_field.fill(orcid_email)
+                    username_entered = True
+                    self.logger.info(f"✅ Entered username with selector: {selector}")
+                    break
+            except:
+                continue
+        
+        if not username_entered:
+            raise Exception("Could not find username field")
+        
+        # Small delay before entering password
+        await self.stealth_manager.human_like_delay(0.5, 1.5)
+        
+        # Enter password - also try multiple selectors
+        password_selectors = [
+            "input[placeholder*='password']",
+            "input[type='password']",
+            "#password"
+        ]
+        
+        password_entered = False
+        for selector in password_selectors:
+            try:
+                password_field = page.locator(selector).first
+                if await password_field.is_visible():
+                    await password_field.fill(orcid_password)
+                    password_entered = True
+                    self.logger.info(f"✅ Entered password with selector: {selector}")
+                    break
+            except:
+                continue
+        
+        if not password_entered:
+            raise Exception("Could not find password field")
+        
+        # Add random mouse movement before submit
+        await self.stealth_manager.random_mouse_movement(page)
+        
+        # Submit login - try multiple selectors
+        submit_selectors = [
+            "button:has-text('Sign in to ORCID')",
+            "button[type='submit']",
+            "input[type='submit']"
+        ]
+        
+        submitted = False
+        for selector in submit_selectors:
+            try:
+                submit_btn = page.locator(selector).first
+                if await submit_btn.is_visible():
+                    await submit_btn.click()
+                    submitted = True
+                    self.logger.info(f"🔑 Submitted ORCID credentials with selector: {selector}")
+                    break
+            except:
+                continue
+                
+        if not submitted:
+            raise Exception("Could not find submit button")
+    
+    async def _check_2fa_required(self, page: Page) -> bool:
+        """Check if 2FA is required"""
+        try:
+            await page.wait_for_selector("[name='recoveryCode']", timeout=5000)
+            self.logger.info("⚠️ 2FA required")
+            return True
+        except:
+            return False
+    
+    async def _handle_2fa(self, page: Page):
+        """Handle 2FA verification (placeholder for now)"""
+        self.logger.warning("🚨 2FA required but not implemented yet")
+        # TODO: Implement Gmail integration for 2FA codes
+        raise Exception("2FA required but not implemented")
+    
+    async def _verify_authentication(self, page: Page) -> bool:
+        """Verify authentication was successful"""
+        current_url = page.url
+        
+        # Check for successful authentication indicators
+        success_indicators = [
+            "main.plex" in current_url,
+            "/cgi-bin/" in current_url and "login" not in current_url,
+        ]
+        
+        # Also check page content for authentication success
+        try:
+            # Look for logout link or user info
+            logout_present = await page.locator("text=Logout").is_visible(timeout=5000)
+            if logout_present:
+                success_indicators.append(True)
+        except:
+            pass
+        
+        return any(success_indicators)
+    
+    async def extract_manuscripts(self, page: Page) -> List[Manuscript]:
+        """Extract manuscripts with full details"""
+        try:
+            self.logger.info(f"📄 Starting manuscript extraction for {self.journal_code}")
+            
+            if not self.authenticated:
+                raise Exception("Not authenticated - cannot extract manuscripts")
+            
+            # Navigate to manuscripts section
+            await self._navigate_to_manuscripts(page)
+            
+            # Parse manuscripts table/list
+            manuscript_data = await self._parse_manuscripts_table(page)
+            
+            # Extract detailed information for each manuscript
+            manuscripts = []
+            for i, ms_data in enumerate(manuscript_data):
+                try:
+                    self.logger.info(f"📋 Processing manuscript {i+1}/{len(manuscript_data)}: {ms_data.get('id', 'Unknown')}")
+                    
+                    # Extract referee details
+                    await self._extract_referee_details(page, ms_data)
+                    
+                    # Extract document information
+                    await self._extract_document_info(page, ms_data)
+                    
+                    # Create Manuscript domain object
+                    manuscript = self._create_manuscript_object(ms_data)
+                    manuscripts.append(manuscript)
+                    
+                    # Rate limiting between manuscripts with stealth
+                    await self.stealth_manager.human_like_delay()
+                    
+                except Exception as e:
+                    self.logger.error(f"❌ Error processing manuscript {ms_data.get('id', 'Unknown')}: {e}")
+                    continue
+            
+            self.extracted_manuscripts = manuscripts
+            self.logger.info(f"✅ Extracted {len(manuscripts)} manuscripts from {self.journal_code}")
+            
+            return manuscripts
+            
+        except Exception as e:
+            self.logger.error(f"❌ Manuscript extraction failed for {self.journal_code}: {e}")
+            raise
+    
+    async def _navigate_to_manuscripts(self, page: Page):
+        """Navigate to manuscripts section"""
+        if self.journal_code == 'SICON':
+            await self._navigate_sicon_manuscripts(page)
+        else:
+            await self._navigate_sifin_manuscripts(page)
+    
+    async def _navigate_sicon_manuscripts(self, page: Page):
+        """Navigate to SICON manuscripts folder"""
+        try:
+            # Set shorter timeout for SICON due to slow loading
+            page.set_default_timeout(20000)
+            
+            # Handle potential cookie popup
+            try:
+                cookie_popup = page.locator("#cookie-policy-layer-bg")
+                if await cookie_popup.is_visible(timeout=2000):
+                    await page.evaluate("document.getElementById('cookie-policy-layer-bg').style.display = 'none';")
+                    self.logger.info("Dismissed cookie popup")
+            except:
+                pass
+            
+            # Try multiple navigation strategies - updated based on actual SICON page
+            navigation_strategies = [
+                "//a[contains(text(), 'Under Review') and contains(text(), 'AE')]",
+                "//a[contains(text(), 'All Pending Manuscripts') and contains(text(), 'AE')]",
+                "//a[contains(text(), 'Live Manuscripts')]",
+                "//a[contains(@href, 'dat_live_ms')]",
+                "//a[contains(@href, 'ndt_folder') and contains(text(), 'AE')]",
+                f"//a[contains(@href, 'folder_id={self.config.folder_id}')]"
+            ]
+            
+            for i, strategy in enumerate(navigation_strategies):
+                try:
+                    folder_link = page.locator(strategy).first
+                    if await folder_link.is_visible():
+                        # For simple navigation, just click directly
+                        await folder_link.click()
+                        await page.wait_for_timeout(3000)
+                        self.logger.info(f"✅ Navigated using strategy {i+1}: Found manuscripts folder")
+                        return
+                except Exception as e:
+                    self.logger.debug(f"Strategy {i+1} failed: {e}")
+                    continue
+            
+            # Final check: look for manuscripts table on current page
+            try:
+                manuscripts_table = page.locator("table[border='1']")
+                if await manuscripts_table.is_visible():
+                    self.logger.info("✅ Found manuscripts table on current page")
+                    return
+            except:
+                pass
+            
+            # If no specific folder worked, click any manuscript-related link
+            try:
+                any_ms_link = page.locator("a:has-text('Manuscript')").first
+                if await any_ms_link.is_visible():
+                    await any_ms_link.click()
+                    await page.wait_for_timeout(3000)
+                    self.logger.info("✅ Clicked on a manuscript-related link")
+                    return
+            except:
+                pass
+            
+            # Last resort: check if we're already on a page with manuscript info
+            content = await page.content()
+            if "manuscript" in content.lower() and ("table" in content or "no manuscripts" in content.lower()):
+                self.logger.info("✅ Already on manuscripts page")
+                return
+            
+            raise Exception("Could not navigate to SICON manuscripts - all strategies failed")
+            
+        except Exception as e:
+            self.logger.error(f"❌ SICON navigation failed: {e}")
+            raise
+    
+    async def _navigate_sifin_manuscripts(self, page: Page):
+        """Navigate to SIFIN manuscripts (already on dashboard)"""
+        self.logger.info("✅ SIFIN manuscripts are listed on dashboard")
+        # SIFIN displays manuscripts directly on the main page after login
+    
+    async def _parse_manuscripts_table(self, page: Page) -> List[Dict[str, Any]]:
+        """Parse manuscripts from table or list"""
+        if self.journal_code == 'SICON':
+            return await self._parse_sicon_manuscripts(page)
+        else:
+            return await self._parse_sifin_manuscripts(page)
+    
+    async def _parse_sicon_manuscripts(self, page: Page) -> List[Dict[str, Any]]:
+        """Parse SICON manuscripts table"""
+        manuscripts = []
+        
+        # Check for "No Manuscripts" message
+        try:
+            no_manuscripts = page.locator("//i[contains(text(), 'No Manuscripts')]")
+            if await no_manuscripts.is_visible(timeout=2000):
+                self.logger.info("ℹ️ No manuscripts found in SICON folder")
+                return manuscripts
+        except:
+            pass
+        
+        # Get manuscripts table
+        try:
+            table = page.locator("table[border='1']")
+            await table.wait_for(timeout=10000)
+        except:
+            self.logger.warning("⚠️ No manuscripts table found")
+            return manuscripts
+        
+        # Parse table rows
+        rows = await table.locator("tr").all()
+        
+        for i, row in enumerate(rows[1:]):  # Skip header
+            try:
+                cells = await row.locator("td").all()
+                if len(cells) < 5:
+                    continue
+                
+                # Extract manuscript data
+                ms_link = await cells[0].locator("a").first.text_content()
+                title = await cells[1].text_content()
+                corresponding_editor = await cells[2].text_content()
+                associate_editor = await cells[3].text_content()
+                submitted = await cells[4].text_content()
+                
+                manuscript_data = {
+                    'id': ms_link.strip() if ms_link else f"SICON-{i}",
+                    'title': title.strip() if title else "Untitled",
+                    'corresponding_editor': corresponding_editor.strip() if corresponding_editor else "",
+                    'associate_editor': associate_editor.strip() if associate_editor else "",
+                    'submitted': submitted.strip() if submitted else "",
+                    'submission_date': self._parse_date(submitted) if submitted else None,
+                    'status': ManuscriptStatus.UNDER_REVIEW,
+                    'journal_code': self.journal_code,
+                    'referees': [],
+                    'documents': {}
+                }
+                
+                manuscripts.append(manuscript_data)
+                self.logger.info(f"📄 Found manuscript: {manuscript_data['id']}")
+                
+            except Exception as e:
+                self.logger.warning(f"⚠️ Error parsing manuscript row {i}: {e}")
+                continue
+        
+        return manuscripts
+    
+    async def _parse_sifin_manuscripts(self, page: Page) -> List[Dict[str, Any]]:
+        """Parse SIFIN manuscripts from dashboard"""
+        manuscripts = []
+        
+        # Get page content
+        content = await page.content()
+        soup = BeautifulSoup(content, 'html.parser')
+        
+        # Find associate editor section
+        assoc_ed_section = soup.find('tbody', {'role': 'assoc_ed'})
+        if not assoc_ed_section:
+            self.logger.warning("⚠️ No associate editor section found")
+            return manuscripts
+        
+        # Find manuscript links
+        ms_links = assoc_ed_section.find_all('a', {'class': 'ndt_task_link'})
+        
+        for link in ms_links:
+            try:
+                link_text = link.text.strip()
+                if not link_text.startswith('#'):
+                    continue
+                
+                # Parse manuscript info
+                parts = link_text.split(' - ', 2)
+                if len(parts) < 3:
+                    continue
+                
+                ms_id = parts[0].replace('#', '').strip()
+                status = parts[1].strip()
+                title = parts[2].split('(')[0].strip()
+                href = link.get('href', '')
+                
+                manuscript_data = {
+                    'id': ms_id,
+                    'title': title,
+                    'status_text': status,
+                    'url': href,
+                    'corresponding_editor': 'TBD',
+                    'associate_editor': 'Possamaï',
+                    'submitted': 'TBD',
+                    'submission_date': None,
+                    'status': ManuscriptStatus.UNDER_REVIEW,
+                    'journal_code': self.journal_code,
+                    'referees': [],
+                    'documents': {}
+                }
+                
+                manuscripts.append(manuscript_data)
+                self.logger.info(f"📄 Found manuscript: {ms_id} - {title[:50]}...")
+                
+            except Exception as e:
+                self.logger.warning(f"⚠️ Error parsing SIFIN manuscript: {e}")
+                continue
+        
+        return manuscripts
+    
+    async def _extract_referee_details(self, page: Page, manuscript_data: Dict[str, Any]):
+        """Extract referee information for a manuscript"""
+        try:
+            # Navigate to manuscript detail page
+            if self.journal_code == 'SICON':
+                # Click manuscript link with stealth
+                ms_link_selector = f"//a[contains(text(), '{manuscript_data['id']}')]"
+                await self.stealth_manager.human_like_click(page, ms_link_selector)
+                
+                # Click referee list with stealth
+                await self.stealth_manager.human_like_click(page, "//input[@value='Referee List']")
+                
+            else:
+                # SIFIN - navigate to manuscript URL
+                if manuscript_data.get('url'):
+                    full_url = f"{self.config.base_url}/{manuscript_data['url']}"
+                    await page.goto(full_url)
+                    await self._random_delay()
+            
+            # Extract referee data
+            referees = await self._extract_referee_list(page)
+            manuscript_data['referees'] = referees
+            
+            # Navigate back for SICON with stealth delay
+            if self.journal_code == 'SICON':
+                await page.go_back()
+                await self.stealth_manager.human_like_delay()
+            
+        except Exception as e:
+            self.logger.error(f"❌ Error extracting referee details: {e}")
+            manuscript_data['referees'] = []
+    
+    async def _extract_referee_list(self, page: Page) -> List[Dict[str, Any]]:
+        """Extract referee information from current page"""
+        referees = []
+        
+        try:
+            # Get page content for parsing
+            content = await page.content()
+            soup = BeautifulSoup(content, 'html.parser')
+            
+            if self.journal_code == 'SICON':
+                # Parse SICON referee table
+                ref_table = soup.find('table', {'border': '1'})
+                if ref_table:
+                    referees = await self._parse_sicon_referee_table(page, ref_table)
+            else:
+                # Parse SIFIN referee sections
+                referees = await self._parse_sifin_referee_sections(page, soup)
+            
+        except Exception as e:
+            self.logger.error(f"❌ Error extracting referee list: {e}")
+        
+        return referees
+    
+    async def _parse_sicon_referee_table(self, page: Page, table) -> List[Dict[str, Any]]:
+        """Parse SICON referee table"""
+        referees = []
+        
+        try:
+            rows = table.find_all('tr')[1:]  # Skip header
+            
+            for row in rows:
+                cells = row.find_all('td')
+                if len(cells) >= 2:
+                    name_cell = cells[0]
+                    status_cell = cells[1] if len(cells) > 1 else None
+                    
+                    # Extract name
+                    name_link = name_cell.find('a')
+                    if name_link:
+                        name = name_link.get_text(strip=True)
+                        
+                        # Extract status information
+                        status_info = self._parse_referee_status(status_cell.get_text(strip=True) if status_cell else "")
+                        
+                        referee_data = {
+                            'name': name,
+                            'email': '',  # Will be extracted separately if needed
+                            'status': status_info.get('status', 'Unknown'),
+                            'invited_date': status_info.get('invited_date'),
+                            'due_date': status_info.get('due_date'),
+                            'domain_status': self._map_to_domain_status(status_info.get('status', 'Unknown'))
+                        }
+                        
+                        referees.append(referee_data)
+            
+        except Exception as e:
+            self.logger.error(f"❌ Error parsing SICON referee table: {e}")
+        
+        return referees
+    
+    async def _parse_sifin_referee_sections(self, page: Page, soup) -> List[Dict[str, Any]]:
+        """Parse SIFIN referee sections"""
+        referees = []
+        
+        try:
+            details_table = soup.find('table', {'id': 'ms_details_expanded'})
+            if not details_table:
+                return referees
+            
+            for row in details_table.find_all('tr'):
+                th = row.find('th')
+                td = row.find('td')
+                if not th or not td:
+                    continue
+                
+                label = th.get_text(strip=True)
+                
+                if label == "Referees":
+                    # Extract accepted referees
+                    for ref_link in td.find_all('a'):
+                        name = ref_link.get_text(strip=True)
+                        
+                        referee_data = {
+                            'name': name,
+                            'email': '',
+                            'status': 'Accepted',
+                            'invited_date': None,
+                            'due_date': None,
+                            'domain_status': RefereeStatus.ACCEPTED
+                        }
+                        
+                        referees.append(referee_data)
+                
+                elif "Potential Referees" in label:
+                    # Extract potential referees
+                    for ref_link in td.find_all('a'):
+                        name = ref_link.get_text(strip=True)
+                        
+                        referee_data = {
+                            'name': name,
+                            'email': '',
+                            'status': 'Contacted',
+                            'invited_date': None,
+                            'due_date': None,
+                            'domain_status': RefereeStatus.INVITED
+                        }
+                        
+                        referees.append(referee_data)
+            
+        except Exception as e:
+            self.logger.error(f"❌ Error parsing SIFIN referee sections: {e}")
+        
+        return referees
+    
+    def _parse_referee_status(self, status_text: str) -> Dict[str, Any]:
+        """Parse referee status text to extract structured information"""
+        info = {
+            'status': 'Unknown',
+            'invited_date': None,
+            'due_date': None
+        }
+        
+        # Determine status
+        if 'Accepted' in status_text:
+            info['status'] = 'Accepted'
+        elif 'Declined' in status_text:
+            info['status'] = 'Declined'
+        elif 'Report Submitted' in status_text:
+            info['status'] = 'Report Submitted'
+        elif 'Invited' in status_text:
+            info['status'] = 'Invited'
+        
+        # Extract dates
+        invited_match = re.search(r'Invited[:\s]+(\d{4}-\d{2}-\d{2})', status_text)
+        if invited_match:
+            info['invited_date'] = invited_match.group(1)
+        
+        due_match = re.search(r'Due[:\s]+(\d{4}-\d{2}-\d{2})', status_text)
+        if due_match:
+            info['due_date'] = due_match.group(1)
+        
+        return info
+    
+    def _map_to_domain_status(self, status_text: str) -> RefereeStatus:
+        """Map status text to domain enum"""
+        status_mapping = {
+            'Accepted': RefereeStatus.ACCEPTED,
+            'Declined': RefereeStatus.DECLINED,
+            'Report Submitted': RefereeStatus.COMPLETED,
+            'Invited': RefereeStatus.INVITED,
+            'Contacted': RefereeStatus.INVITED,
+            'Unknown': RefereeStatus.INVITED
+        }
+        
+        return status_mapping.get(status_text, RefereeStatus.INVITED)
+    
+    async def _extract_document_info(self, page: Page, manuscript_data: Dict[str, Any]):
+        """Extract document information (URLs for download)"""
+        try:
+            # Navigate to manuscript view if needed
+            if self.journal_code == 'SICON':
+                # Navigate to manuscript details with stealth
+                ms_link_selector = f"//a[contains(text(), '{manuscript_data['id']}')]"
+                await self.stealth_manager.human_like_click(page, ms_link_selector)
+                
+                # Click View Manuscript with stealth
+                view_button = page.locator("//input[@value='View Manuscript']")
+                if await view_button.is_visible(timeout=5000):
+                    await self.stealth_manager.human_like_click(page, "//input[@value='View Manuscript']")
+            
+            # Extract document URLs
+            content = await page.content()
+            soup = BeautifulSoup(content, 'html.parser')
+            
+            documents = {}
+            
+            # Look for PDF links
+            pdf_links = soup.find_all('a', href=lambda x: x and '.pdf' in x.lower())
+            
+            # Also look for file download links
+            download_links = soup.find_all('a', href=lambda x: x and 'view_ms_obj' in str(x))
+            all_doc_links = pdf_links + download_links
+            
+            for i, link in enumerate(all_doc_links):
+                href = link.get('href')
+                if not href:
+                    continue
+                    
+                link_text = link.get_text(strip=True).lower()
+                parent_text = link.parent.get_text(strip=True).lower() if link.parent else ""
+                
+                # Make URL absolute
+                if href.startswith('/'):
+                    href = f"{self.config.base_url}{href}"
+                elif not href.startswith('http'):
+                    href = f"{self.config.base_url}/{href}"
+                
+                # Categorize document
+                if 'cover' in link_text or 'cover' in parent_text:
+                    documents['cover_letter'] = href
+                elif 'referee' in link_text or 'referee' in parent_text or 'report' in parent_text:
+                    if 'referee_reports' not in documents:
+                        documents['referee_reports'] = []
+                    documents['referee_reports'].append(href)
+                elif i == 0 or 'article' in parent_text or 'manuscript' in parent_text:
+                    # First PDF is usually the main manuscript
+                    if 'manuscript_pdf' not in documents:
+                        documents['manuscript_pdf'] = href
+                    # Store all manuscript versions
+                    if 'manuscript_versions' not in documents:
+                        documents['manuscript_versions'] = []
+                    documents['manuscript_versions'].append({
+                        'url': href,
+                        'type': link_text or 'PDF'
+                    })
+            
+            manuscript_data['documents'] = documents
+            
+            # Navigate back for SICON with stealth delays
+            if self.journal_code == 'SICON':
+                await page.go_back()
+                await self.stealth_manager.human_like_delay()
+                await page.go_back()
+                await self.stealth_manager.human_like_delay()
+            
+        except Exception as e:
+            self.logger.error(f"❌ Error extracting document info: {e}")
+            manuscript_data['documents'] = {}
+    
+    def _create_manuscript_object(self, manuscript_data: Dict[str, Any]) -> Manuscript:
+        """Create domain Manuscript object from extracted data"""
+        
+        # Create referee objects
+        referees = []
+        for ref_data in manuscript_data.get('referees', []):
+            referee = RefereeInfo(
+                name=ref_data['name'],
+                email=ref_data.get('email', ''),
+                status=ref_data.get('domain_status', RefereeStatus.INVITED),
+                invited_date=self._parse_date(ref_data.get('invited_date')) if ref_data.get('invited_date') else None,
+                due_date=self._parse_date(ref_data.get('due_date')) if ref_data.get('due_date') else None
+            )
+            referees.append(referee)
+        
+        # Create manuscript object
+        manuscript = Manuscript(
+            id=manuscript_data['id'],
+            title=manuscript_data['title'],
+            journal_code=manuscript_data['journal_code'],
+            status=manuscript_data.get('status', ManuscriptStatus.UNDER_REVIEW),
+            submission_date=manuscript_data.get('submission_date'),
+            corresponding_editor=manuscript_data.get('corresponding_editor', ''),
+            associate_editor=manuscript_data.get('associate_editor', ''),
+            referees=referees,
+            metadata={
+                'documents': manuscript_data.get('documents', {}),
+                'scraped_at': datetime.now().isoformat(),
+                'journal_url': manuscript_data.get('url', ''),
+                'extraction_source': f"SIAM_{self.journal_code}_Scraper"
+            }
+        )
+        
+        return manuscript
+    
+    def _parse_date(self, date_str: str) -> Optional[datetime]:
+        """Parse date string to datetime object"""
+        if not date_str:
+            return None
+            
+        try:
+            from dateutil import parser
+            return parser.parse(date_str)
+        except:
+            return None
+    
+    async def _random_delay(self):
+        """Add random delay for anti-bot measures (deprecated - use stealth_manager.human_like_delay)"""
+        # Delegate to stealth manager for consistency
+        await self.stealth_manager.human_like_delay()
+    
+    async def _save_debug_screenshot(self, page: Page, suffix: str):
+        """Save screenshot for debugging"""
+        try:
+            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+            screenshot_path = f"debug_{self.journal_code}_{suffix}_{timestamp}.png"
+            await page.screenshot(path=screenshot_path)
+            self.logger.info(f"📸 Debug screenshot saved: {screenshot_path}")
+        except:
+            pass
+    
+    async def run_extraction(self) -> ScrapingResult:
+        """Run complete extraction process"""
+        start_time = datetime.now()
+        
+        try:
+            # Setup browser with stealth features
+            browser = await self.create_browser()
+            context = await self.setup_browser_context(browser)
+            page = await context.new_page()
+            
+            # Authenticate
+            auth_success = await self.authenticate(page)
+            if not auth_success:
+                raise Exception("Authentication failed")
+            
+            # Extract manuscripts
+            manuscripts = await self.extract_manuscripts(page)
+            
+            # Clean up
+            await context.close()
+            await browser.close()
+            
+            # Create result
+            result = ScrapingResult(
+                success=True,
+                manuscripts=manuscripts,
+                total_count=len(manuscripts),
+                extraction_time=datetime.now() - start_time,
+                journal_code=self.journal_code,
+                metadata={
+                    'scraper_version': '2.0',
+                    'authentication_method': 'ORCID_SSO',
+                    'anti_bot_measures': True,
+                    'extraction_timestamp': datetime.now().isoformat()
+                }
+            )
+            
+            self.logger.info(f"🎉 Extraction completed successfully: {len(manuscripts)} manuscripts from {self.journal_code}")
+            return result
+            
+        except Exception as e:
+            error_result = ScrapingResult(
+                success=False,
+                manuscripts=[],
+                total_count=0,
+                extraction_time=datetime.now() - start_time,
+                journal_code=self.journal_code,
+                error_message=str(e),
+                metadata={
+                    'scraper_version': '2.0',
+                    'error_timestamp': datetime.now().isoformat()
+                }
+            )
+            
+            self.logger.error(f"❌ Extraction failed for {self.journal_code}: {e}")
+            return error_result

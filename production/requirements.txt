@@ -1,0 +1,15 @@
+# Production Editorial Scripts Requirements
+# Minimal dependencies for clean system
+
+# Core dependencies
+playwright==1.40.0
+beautifulsoup4==4.12.2
+aiohttp==3.9.1
+aiofiles==23.2.1
+
+# Utilities
+python-dotenv==1.0.0
+
+# Optional but recommended
+pandas==2.1.4  # For data analysis
+openpyxl==3.1.2  # For Excel export

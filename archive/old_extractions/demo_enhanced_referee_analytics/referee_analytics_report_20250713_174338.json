@@ -1,0 +1,41 @@
+{
+  "report_timestamp": "2025-07-13T17:43:38.862599",
+  "global_statistics": {
+    "total_referees": 3,
+    "total_reports": 4,
+    "total_words_written": 336,
+    "average_reports_per_referee": 1.3,
+    "average_words_per_referee": 112.0
+  },
+  "quality_analytics": {
+    "average_quality_score": 0,
+    "quality_distribution": {
+      "excellent": 0,
+      "good": 0,
+      "moderate": 0,
+      "poor": 0
+    }
+  },
+  "expertise_landscape": {},
+  "journal_activity": {
+    "SIFIN": 4
+  },
+  "performance_distributions": {
+    "productivity": {
+      "low": 3
+    },
+    "review_thoroughness": {
+      "low": 3
+    },
+    "quality_consistency": {
+      "low": 3
+    },
+    "technical_expertise": {
+      "null": 3
+    },
+    "review_tone": {
+      "null": 3
+    }
+  },
+  "top_performers": []
+}

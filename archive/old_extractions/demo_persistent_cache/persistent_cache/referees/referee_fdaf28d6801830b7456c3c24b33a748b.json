@@ -1,0 +1,30 @@
+{
+  "review_history": [
+    {
+      "timestamp": "2025-07-13T17:36:57.453233",
+      "manuscript_id": "M176140",
+      "journal": "SIFIN",
+      "role": "reviewer",
+      "extraction_session": "20250713_173652",
+      "referee_data": {
+        "name": "Referee_4_B",
+        "full_name": "Prof. Referee 4 Beta",
+        "email": "referee4b@institute.org",
+        "status": "Active",
+        "extraction_success": true
+      },
+      "entry_id": "13ea43ed"
+    }
+  ],
+  "referee_email": "referee4b@institute.org",
+  "last_activity": "2025-07-13T17:36:57.453264",
+  "total_manuscripts_reviewed": 1,
+  "journals_active": [
+    "SIFIN"
+  ],
+  "career_analytics": {
+    "first_review_date": "2025-07-13T17:36:57.453233",
+    "most_recent_review": "2025-07-13T17:36:57.453233",
+    "review_frequency": 1
+  }
+}

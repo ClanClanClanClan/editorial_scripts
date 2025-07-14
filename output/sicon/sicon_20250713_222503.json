@@ -1,0 +1,70 @@
+{
+  "journal": "SICON",
+  "session_id": "20250713_222503",
+  "extraction_time": "2025-07-13T22:26:58.434815",
+  "total_manuscripts": 4,
+  "manuscripts": [
+    {
+      "id": "M172838",
+      "title": "Review needed (144 days pending)",
+      "authors": [],
+      "status": "Under Review",
+      "submission_date": "Due: 2025-04-17",
+      "journal": "SICON",
+      "corresponding_editor": "LI",
+      "associate_editor": "Yu",
+      "referees": [],
+      "pdf_urls": {},
+      "pdf_paths": {},
+      "referee_reports": {}
+    },
+    {
+      "id": "M173704",
+      "title": "Review needed (129 days pending)",
+      "authors": [],
+      "status": "Under Review",
+      "submission_date": "Due: 2025-05-01",
+      "journal": "SICON",
+      "corresponding_editor": "Guo",
+      "associate_editor": "Zhang",
+      "referees": [],
+      "pdf_urls": {},
+      "pdf_paths": {},
+      "referee_reports": {}
+    },
+    {
+      "id": "M173889",
+      "title": "Review needed (126 days pending)",
+      "authors": [],
+      "status": "Under Review",
+      "submission_date": "Due: 2025-05-04",
+      "journal": "SICON",
+      "corresponding_editor": "Ren",
+      "associate_editor": "Wan",
+      "referees": [],
+      "pdf_urls": {},
+      "pdf_paths": {},
+      "referee_reports": {}
+    },
+    {
+      "id": "M176733",
+      "title": "Review needed (25 days pending)",
+      "authors": [],
+      "status": "Under Review",
+      "submission_date": "Due: 2025-08-13",
+      "journal": "SICON",
+      "corresponding_editor": "Tangpi",
+      "associate_editor": "Luo",
+      "referees": [],
+      "pdf_urls": {},
+      "pdf_paths": {},
+      "referee_reports": {}
+    }
+  ],
+  "statistics": {
+    "total_referees": 0,
+    "manuscripts_with_reports": 0,
+    "pdfs_found": 0,
+    "pdfs_downloaded": 0
+  }
+}

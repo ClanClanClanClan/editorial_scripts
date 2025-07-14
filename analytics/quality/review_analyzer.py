@@ -10,8 +10,10 @@ import sqlite3
 from pathlib import Path
 import re
 from dataclasses import dataclass
-import spacy
 from textblob import TextBlob
+import nltk
+from collections import Counter
+import string
 
 logger = logging.getLogger(__name__)
 
@@ -109,12 +111,18 @@ class ReviewQualityAnalyzer:
     def __init__(self, db_path: str = "data/referees.db"):
         self.db_path = Path(db_path)
         
-        # Load spaCy model for NLP analysis
+        # Initialize NLP components
         try:
-            self.nlp = spacy.load("en_core_web_sm")
-        except:
-            logger.warning("spaCy model not found. Install with: python -m spacy download en_core_web_sm")
-            self.nlp = None
+            # Download required NLTK data if not present
+            import nltk
+            nltk.download('punkt', quiet=True)
+            nltk.download('averaged_perceptron_tagger', quiet=True)
+            nltk.download('brown', quiet=True)
+            nltk.download('wordnet', quiet=True)
+            self.nlp_available = True
+        except Exception as e:
+            logger.warning(f"Could not initialize NLP components: {e}")
+            self.nlp_available = False
     
     def analyze_review_quality(self, review_id: str) -> QualityAnalysis:
         """Perform comprehensive quality analysis on a review"""
@@ -241,8 +249,8 @@ class ReviewQualityAnalyzer:
         )
     
     def _extract_unique_concepts(self, text: str) -> int:
-        """Extract unique technical concepts from review"""
-        if not self.nlp:
+        """Extract unique technical concepts from review using TextBlob"""
+        if not self.nlp_available:
             # Fallback to simple word analysis
             technical_words = set()
             for word in text.split():
@@ -250,22 +258,26 @@ class ReviewQualityAnalyzer:
                     technical_words.add(word.lower())
             return len(technical_words)
         
-        # Use NLP to extract noun phrases and entities
-        doc = self.nlp(text[:1000000])  # Limit text length for processing
-        
-        concepts = set()
-        
-        # Extract noun phrases
-        for chunk in doc.noun_chunks:
-            if len(chunk.text.split()) <= 3:  # Limit to reasonable length
-                concepts.add(chunk.text.lower())
-        
-        # Extract named entities
-        for ent in doc.ents:
-            if ent.label_ in ['ORG', 'PRODUCT', 'LAW', 'LANGUAGE']:
-                concepts.add(ent.text.lower())
-        
-        return len(concepts)
+        try:
+            # Use TextBlob for NLP analysis
+            blob = TextBlob(text[:50000])  # Limit text length
+            concepts = set()
+            
+            # Extract noun phrases
+            for phrase in blob.noun_phrases:
+                if 2 <= len(phrase.split()) <= 4:  # Reasonable length phrases
+                    concepts.add(phrase.lower())
+            
+            # Extract technical terms (nouns and proper nouns)
+            for word, tag in blob.tags:
+                if tag in ['NN', 'NNS', 'NNP', 'NNPS'] and len(word) > 4:
+                    concepts.add(word.lower())
+            
+            return len(concepts)
+        except Exception as e:
+            logger.warning(f"Error extracting concepts: {e}")
+            # Fallback to simple analysis
+            return len(set(word.lower() for word in text.split() if len(word) > 6 and word.isalpha()))
     
     def _assess_technical_depth(self, text: str) -> float:
         """Assess the technical depth of the review"""

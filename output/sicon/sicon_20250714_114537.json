@@ -1,0 +1,215 @@
+{
+  "journal": "SICON",
+  "session_id": "20250714_114537",
+  "extraction_time": "2025-07-14T11:52:05.082469",
+  "total_manuscripts": 4,
+  "manuscripts": [
+    {
+      "id": "M172838",
+      "title": "",
+      "authors": [],
+      "status": "Under Review",
+      "submission_date": null,
+      "journal": "SICON",
+      "corresponding_editor": null,
+      "associate_editor": null,
+      "referees": [
+        {
+          "name": "Samuel Daudin",
+          "email": "samuel.daudin@u-paris.fr",
+          "status": "Declined",
+          "institution": null,
+          "report_submitted": false,
+          "report_date": null,
+          "reminder_count": 0,
+          "days_since_invited": null
+        },
+        {
+          "name": "Boualem Djehiche",
+          "email": "boualem@kth.se",
+          "status": "Declined",
+          "institution": "Department of Mathematics, KTH",
+          "report_submitted": false,
+          "report_date": null,
+          "reminder_count": 0,
+          "days_since_invited": null
+        },
+        {
+          "name": "Laurent Pfeiffer",
+          "email": "laurent.pfeiffer@inria.fr",
+          "status": "Declined",
+          "institution": "Department",
+          "report_submitted": false,
+          "report_date": null,
+          "reminder_count": 0,
+          "days_since_invited": null
+        },
+        {
+          "name": "Nikiforos Stamatopoulos",
+          "email": "nmimikos@math.uchicago.edu",
+          "status": "Declined",
+          "institution": "Mathematics",
+          "report_submitted": false,
+          "report_date": null,
+          "reminder_count": 0,
+          "days_since_invited": null
+        },
+        {
+          "name": "Robert Denkert",
+          "email": "denkertr@hu-berlin.de",
+          "status": "Declined",
+          "institution": "Mathematics",
+          "report_submitted": false,
+          "report_date": null,
+          "reminder_count": 0,
+          "days_since_invited": null
+        },
+        {
+          "name": "Giorgio Ferrari",
+          "email": "giorgio.ferrari@uni-bielefeld.de",
+          "status": "Report submitted",
+          "institution": "Center for Mathematical Economics (IMW)",
+          "report_submitted": true,
+          "report_date": "2025-06-02",
+          "reminder_count": 0,
+          "days_since_invited": null
+        },
+        {
+          "name": "Juan Li",
+          "email": "juanli@sdu.edu.cn",
+          "status": "Accepted, awaiting report",
+          "institution": "School of Mathematics and Statistics",
+          "report_submitted": false,
+          "report_date": null,
+          "reminder_count": 0,
+          "days_since_invited": null
+        }
+      ],
+      "pdf_urls": {
+        "pdf__481kb_": "https://sicon.siam.org/sicon_files/2025/01/22/00145756/00/145756_0_art_file_604195_sqjy0j_sc.pdf"
+      },
+      "pdf_paths": {},
+      "referee_reports": {}
+    },
+    {
+      "id": "M173704",
+      "title": "",
+      "authors": [],
+      "status": "Under Review",
+      "submission_date": null,
+      "journal": "SICON",
+      "corresponding_editor": null,
+      "associate_editor": null,
+      "referees": [
+        {
+          "name": "Asaf Cohen",
+          "email": "shloshim@gmail.com",
+          "status": "Report submitted",
+          "institution": "530 Church St.",
+          "report_submitted": true,
+          "report_date": "2025-03-18",
+          "reminder_count": 0,
+          "days_since_invited": null
+        },
+        {
+          "name": "Gaoyue Guo",
+          "email": "gaoyue.guo@centralesupelec.fr",
+          "status": "Accepted, awaiting report",
+          "institution": "Department",
+          "report_submitted": false,
+          "report_date": null,
+          "reminder_count": 0,
+          "days_since_invited": null
+        }
+      ],
+      "pdf_urls": {
+        "pdf__140kb_": "https://sicon.siam.org/sicon_files/2025/02/24/00146717/00/146717_0_auth_cover_letter_608664_ss7q9d_sc.pdf",
+        "pdf__338kb_": "https://sicon.siam.org/sicon_files/2025/02/24/00146717/00/146717_0_art_file_608663_ss7q8p_sc.pdf"
+      },
+      "pdf_paths": {},
+      "referee_reports": {}
+    },
+    {
+      "id": "M173889",
+      "title": "",
+      "authors": [],
+      "status": "Under Review",
+      "submission_date": null,
+      "journal": "SICON",
+      "corresponding_editor": null,
+      "associate_editor": null,
+      "referees": [
+        {
+          "name": "Ibrahim Ekren",
+          "email": "iekren@umich.edu",
+          "status": "Report submitted",
+          "institution": "Mathematics",
+          "report_submitted": true,
+          "report_date": "2025-07-03",
+          "reminder_count": 0,
+          "days_since_invited": null
+        },
+        {
+          "name": "Zhenjie Ren",
+          "email": "zhenjie.ren@univ-evry.fr",
+          "status": "Accepted, awaiting report",
+          "institution": "UNIV",
+          "report_submitted": false,
+          "report_date": null,
+          "reminder_count": 0,
+          "days_since_invited": null
+        }
+      ],
+      "pdf_urls": {
+        "pdf__34kb_": "https://sicon.siam.org/sicon_files/2025/03/04/00146919/00/146919_0_auth_cover_letter_609642_ssll4h_sc.pdf",
+        "pdf__517kb_": "https://sicon.siam.org/sicon_files/2025/03/04/00146919/00/146919_0_art_file_609638_ssll25_sc.pdf"
+      },
+      "pdf_paths": {},
+      "referee_reports": {}
+    },
+    {
+      "id": "M176733",
+      "title": "",
+      "authors": [],
+      "status": "Under Review",
+      "submission_date": null,
+      "journal": "SICON",
+      "corresponding_editor": null,
+      "associate_editor": null,
+      "referees": [
+        {
+          "name": "Samuel Daudin",
+          "email": "samuel.daudin@u-paris.fr",
+          "status": "Report submitted",
+          "institution": null,
+          "report_submitted": true,
+          "report_date": "2025-06-17",
+          "reminder_count": 0,
+          "days_since_invited": null
+        },
+        {
+          "name": "Ludovic Tangpi",
+          "email": "ludovic.tangpi@princeton.edu",
+          "status": "Accepted, awaiting report",
+          "institution": "ORFE",
+          "report_submitted": false,
+          "report_date": null,
+          "reminder_count": 0,
+          "days_since_invited": null
+        }
+      ],
+      "pdf_urls": {
+        "pdf__38kb_": "https://sicon.siam.org/sicon_files/2025/06/09/00150094/00/150094_0_auth_cover_letter_622995_sxktbj_sc.pdf",
+        "pdf__208kb_": "https://sicon.siam.org/sicon_files/2025/06/09/00150094/00/150094_0_art_file_622994_sxktb1_sc.pdf"
+      },
+      "pdf_paths": {},
+      "referee_reports": {}
+    }
+  ],
+  "statistics": {
+    "total_referees": 13,
+    "manuscripts_with_reports": 0,
+    "pdfs_found": 7,
+    "pdfs_downloaded": 0
+  }
+}

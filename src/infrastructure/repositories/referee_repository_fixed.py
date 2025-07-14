@@ -12,17 +12,12 @@ from uuid import UUID, uuid4
 from sqlalchemy import select, update, delete, func, and_, or_, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
-import sys
-from pathlib import Path
-# Add analytics to path for imports
-sys.path.append(str(Path(__file__).parent.parent.parent.parent / 'analytics'))
-
-from models.referee_metrics import (
+from analytics.models.referee_metrics import (
     RefereeMetrics, TimeMetrics, QualityMetrics, WorkloadMetrics,
     ReliabilityMetrics, ExpertiseMetrics, JournalSpecificMetrics
 )
 from ..database.engine import get_session
-from ..database.referee_models_fixed import (
+from ..database.referee_models import (
     RefereeAnalyticsModel, RefereeAnalyticsCacheModel, 
     ManuscriptAnalyticsModel, RefereeMetricsHistoryModel
 )

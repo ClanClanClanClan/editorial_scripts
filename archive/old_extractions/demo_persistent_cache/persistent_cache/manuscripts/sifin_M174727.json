@@ -1,0 +1,35 @@
+{
+  "id": "M174727",
+  "title": "# M174727 - Under Review / Chase Referees - Dynamic Mean-Variance Asset Allocation i...  79 days",
+  "status": "extracted",
+  "referees": [
+    {
+      "name": "Referee_2_A",
+      "full_name": "Dr. Referee 2 Alpha",
+      "email": "referee2a@university.edu",
+      "status": "Active",
+      "extraction_success": true
+    },
+    {
+      "name": "Referee_2_B",
+      "full_name": "Prof. Referee 2 Beta",
+      "email": "referee2b@institute.org",
+      "status": "Active",
+      "extraction_success": true
+    }
+  ],
+  "journal": "SIFIN",
+  "extraction_timestamp": "2025-07-13T17:36:52.963525",
+  "email_enhancement": {
+    "related_emails_count": 3,
+    "emails_searched": true,
+    "search_timestamp": "2025-07-13T17:36:55.240094"
+  },
+  "cache_metadata": {
+    "last_updated": "2025-07-13T17:36:55.240193",
+    "journal": "SIFIN",
+    "manuscript_id": "M174727",
+    "status": "active",
+    "cache_version": "1.0"
+  }
+}

@@ -1,0 +1,522 @@
+{
+  "journal": "SICON",
+  "session_id": "20250714_102442",
+  "extraction_time": "2025-07-14T10:28:31.972826",
+  "total_manuscripts": 4,
+  "manuscripts": [
+    {
+      "id": "M172838",
+      "title": "Constrained Mean-Field Control with Singular Control: Existence, Stochastic Maximum Principle and Constrained FBSDE",
+      "authors": [
+        "Xiang Yu (The Hong Kong Polytechnic University)"
+      ],
+      "status": "Under Review",
+      "submission_date": "2025-01-23",
+      "journal": "SICON",
+      "corresponding_editor": "Bayraktar",
+      "associate_editor": "Dylan Possama\u00ef",
+      "referees": [
+        {
+          "name": "Xiang Yu (The Hong Kong Polytechnic University)",
+          "email": "XIANG.YU@POLYU.EDU.HK",
+          "status": "Review pending",
+          "institution": null,
+          "report_submitted": false,
+          "report_date": null,
+          "reminder_count": 0,
+          "days_since_invited": null
+        },
+        {
+          "name": "Lijun Bo",
+          "email": "LIJUNBO@USTC.EDU.CN",
+          "status": "Review pending",
+          "institution": "of Science and Technology of China",
+          "report_submitted": false,
+          "report_date": null,
+          "reminder_count": 0,
+          "days_since_invited": null
+        },
+        {
+          "name": "Jingfei Wang",
+          "email": "WJF2104296@MAIL.USTC.EDU.CN",
+          "status": "Review pending",
+          "institution": "of Science and Technology of China",
+          "report_submitted": false,
+          "report_date": null,
+          "reminder_count": 0,
+          "days_since_invited": null
+        },
+        {
+          "name": "Dylan Possama\u00ef",
+          "email": "DYLAN.POSSAMAI@MATH.ETHZ.CH",
+          "status": "Review pending",
+          "institution": null,
+          "report_submitted": false,
+          "report_date": null,
+          "reminder_count": 0,
+          "days_since_invited": null
+        },
+        {
+          "name": "Xiang Yu (The Hong Kong Polytechnic University)",
+          "email": "XIANG.YU@POLYU.EDU.HK",
+          "status": "Review pending",
+          "institution": null,
+          "report_submitted": false,
+          "report_date": null,
+          "reminder_count": 0,
+          "days_since_invited": null
+        },
+        {
+          "name": "Lijun Bo",
+          "email": "LIJUNBO@USTC.EDU.CN",
+          "status": "Review pending",
+          "institution": "of Science and Technology of China",
+          "report_submitted": false,
+          "report_date": null,
+          "reminder_count": 0,
+          "days_since_invited": null
+        },
+        {
+          "name": "Jingfei Wang",
+          "email": "WJF2104296@MAIL.USTC.EDU.CN",
+          "status": "Review pending",
+          "institution": "of Science and Technology of China",
+          "report_submitted": false,
+          "report_date": null,
+          "reminder_count": 0,
+          "days_since_invited": null
+        },
+        {
+          "name": "Dylan Possama\u00ef",
+          "email": "DYLAN.POSSAMAI@MATH.ETHZ.CH",
+          "status": "Review pending",
+          "institution": null,
+          "report_submitted": false,
+          "report_date": null,
+          "reminder_count": 0,
+          "days_since_invited": null
+        },
+        {
+          "name": "Xiang Yu (The Hong Kong Polytechnic University)",
+          "email": "XIANG.YU@POLYU.EDU.HK",
+          "status": "Review pending",
+          "institution": null,
+          "report_submitted": false,
+          "report_date": null,
+          "reminder_count": 0,
+          "days_since_invited": null
+        },
+        {
+          "name": "Lijun Bo",
+          "email": "LIJUNBO@USTC.EDU.CN",
+          "status": "Review pending",
+          "institution": "of Science and Technology of China",
+          "report_submitted": false,
+          "report_date": null,
+          "reminder_count": 0,
+          "days_since_invited": null
+        },
+        {
+          "name": "Jingfei Wang",
+          "email": "WJF2104296@MAIL.USTC.EDU.CN",
+          "status": "Review pending",
+          "institution": "of Science and Technology of China",
+          "report_submitted": false,
+          "report_date": null,
+          "reminder_count": 0,
+          "days_since_invited": null
+        },
+        {
+          "name": "Dylan Possama\u00ef",
+          "email": "DYLAN.POSSAMAI@MATH.ETHZ.CH",
+          "status": "Review pending",
+          "institution": null,
+          "report_submitted": false,
+          "report_date": null,
+          "reminder_count": 0,
+          "days_since_invited": null
+        },
+        {
+          "name": "Samuel Daudin",
+          "email": "SAMUEL.DAUDIN@UNIV-COTEDAZUR.FR",
+          "status": "Suggested (not contacted)",
+          "institution": "Univ-Cotedazur University",
+          "report_submitted": false,
+          "report_date": null,
+          "reminder_count": 0,
+          "days_since_invited": null
+        },
+        {
+          "name": "Laurent Pfeiffer",
+          "email": "firstname.lastname@inria.fr",
+          "status": "Suggested (not contacted)",
+          "institution": "INRIA",
+          "report_submitted": false,
+          "report_date": null,
+          "reminder_count": 0,
+          "days_since_invited": null
+        },
+        {
+          "name": "Juan Li",
+          "email": "juanli@sdu.edu.cn",
+          "status": "Suggested (not contacted)",
+          "institution": null,
+          "report_submitted": false,
+          "report_date": null,
+          "reminder_count": 0,
+          "days_since_invited": null
+        },
+        {
+          "name": "Boualem Djehiche",
+          "email": "boualem@math.kth.se",
+          "status": "Suggested (not contacted)",
+          "institution": null,
+          "report_submitted": false,
+          "report_date": null,
+          "reminder_count": 0,
+          "days_since_invited": null
+        },
+        {
+          "name": "Shanjian Tang",
+          "email": "sjtang@fudan.edu.cn",
+          "status": "Suggested (not contacted)",
+          "institution": null,
+          "report_submitted": false,
+          "report_date": null,
+          "reminder_count": 0,
+          "days_since_invited": null
+        }
+      ],
+      "pdf_urls": {},
+      "pdf_paths": {},
+      "referee_reports": {}
+    },
+    {
+      "id": "M173704",
+      "title": "Scaling Limits for Exponential Hedging in the Brownian Framework",
+      "authors": [
+        "Xin Zhang (New York University)"
+      ],
+      "status": "Under Review",
+      "submission_date": "2025-02-25",
+      "journal": "SICON",
+      "corresponding_editor": "Zhang",
+      "associate_editor": "Dylan Possama\u00ef",
+      "referees": [
+        {
+          "name": "Xin Zhang (New York University)",
+          "email": "XZ1662@NYU.EDU",
+          "status": "Review pending",
+          "institution": null,
+          "report_submitted": false,
+          "report_date": null,
+          "reminder_count": 0,
+          "days_since_invited": null
+        },
+        {
+          "name": "Yan Dolinsky",
+          "email": "YAN.DOLINSKY@MAIL.HUJI.AC.IL",
+          "status": "Review pending",
+          "institution": null,
+          "report_submitted": false,
+          "report_date": null,
+          "reminder_count": 0,
+          "days_since_invited": null
+        },
+        {
+          "name": "Dylan Possama\u00ef",
+          "email": "DYLAN.POSSAMAI@MATH.ETHZ.CH",
+          "status": "Review pending",
+          "institution": null,
+          "report_submitted": false,
+          "report_date": null,
+          "reminder_count": 0,
+          "days_since_invited": null
+        },
+        {
+          "name": "Xin Zhang (New York University)",
+          "email": "XZ1662@NYU.EDU",
+          "status": "Review pending",
+          "institution": null,
+          "report_submitted": false,
+          "report_date": null,
+          "reminder_count": 0,
+          "days_since_invited": null
+        },
+        {
+          "name": "Yan Dolinsky",
+          "email": "YAN.DOLINSKY@MAIL.HUJI.AC.IL",
+          "status": "Review pending",
+          "institution": null,
+          "report_submitted": false,
+          "report_date": null,
+          "reminder_count": 0,
+          "days_since_invited": null
+        },
+        {
+          "name": "Dylan Possama\u00ef",
+          "email": "DYLAN.POSSAMAI@MATH.ETHZ.CH",
+          "status": "Review pending",
+          "institution": null,
+          "report_submitted": false,
+          "report_date": null,
+          "reminder_count": 0,
+          "days_since_invited": null
+        },
+        {
+          "name": "Xin Zhang (New York University)",
+          "email": "XZ1662@NYU.EDU",
+          "status": "Review pending",
+          "institution": null,
+          "report_submitted": false,
+          "report_date": null,
+          "reminder_count": 0,
+          "days_since_invited": null
+        },
+        {
+          "name": "Yan Dolinsky",
+          "email": "YAN.DOLINSKY@MAIL.HUJI.AC.IL",
+          "status": "Review pending",
+          "institution": null,
+          "report_submitted": false,
+          "report_date": null,
+          "reminder_count": 0,
+          "days_since_invited": null
+        },
+        {
+          "name": "Dylan Possama\u00ef",
+          "email": "DYLAN.POSSAMAI@MATH.ETHZ.CH",
+          "status": "Review pending",
+          "institution": null,
+          "report_submitted": false,
+          "report_date": null,
+          "reminder_count": 0,
+          "days_since_invited": null
+        }
+      ],
+      "pdf_urls": {},
+      "pdf_paths": {},
+      "referee_reports": {}
+    },
+    {
+      "id": "M173889",
+      "title": "Hamilton-Jacobi-Bellman Equations in the Wasserstein Space for the Optimal Control of the Kushner-Stratonovich Equation",
+      "authors": [
+        "Hexiang Wan (Shandong University)"
+      ],
+      "status": "Under Review",
+      "submission_date": "2025-03-04",
+      "journal": "SICON",
+      "corresponding_editor": "Bayraktar",
+      "associate_editor": "Dylan Possama\u00ef",
+      "referees": [
+        {
+          "name": "Hexiang Wan (Shandong University)",
+          "email": "MATH.HILBERTWAN@GMAIL.COM",
+          "status": "Review pending",
+          "institution": null,
+          "report_submitted": false,
+          "report_date": null,
+          "reminder_count": 0,
+          "days_since_invited": null
+        },
+        {
+          "name": "Jie Xiong",
+          "email": "XIONGJ@SUSTECH.EDU.CN",
+          "status": "Review pending",
+          "institution": "of Science and Technology",
+          "report_submitted": false,
+          "report_date": null,
+          "reminder_count": 0,
+          "days_since_invited": null
+        },
+        {
+          "name": "Dylan Possama\u00ef",
+          "email": "DYLAN.POSSAMAI@MATH.ETHZ.CH",
+          "status": "Review pending",
+          "institution": null,
+          "report_submitted": false,
+          "report_date": null,
+          "reminder_count": 0,
+          "days_since_invited": null
+        },
+        {
+          "name": "Hexiang Wan (Shandong University)",
+          "email": "MATH.HILBERTWAN@GMAIL.COM",
+          "status": "Review pending",
+          "institution": null,
+          "report_submitted": false,
+          "report_date": null,
+          "reminder_count": 0,
+          "days_since_invited": null
+        },
+        {
+          "name": "Jie Xiong",
+          "email": "XIONGJ@SUSTECH.EDU.CN",
+          "status": "Review pending",
+          "institution": "of Science and Technology",
+          "report_submitted": false,
+          "report_date": null,
+          "reminder_count": 0,
+          "days_since_invited": null
+        },
+        {
+          "name": "Dylan Possama\u00ef",
+          "email": "DYLAN.POSSAMAI@MATH.ETHZ.CH",
+          "status": "Review pending",
+          "institution": null,
+          "report_submitted": false,
+          "report_date": null,
+          "reminder_count": 0,
+          "days_since_invited": null
+        },
+        {
+          "name": "Hexiang Wan (Shandong University)",
+          "email": "MATH.HILBERTWAN@GMAIL.COM",
+          "status": "Review pending",
+          "institution": null,
+          "report_submitted": false,
+          "report_date": null,
+          "reminder_count": 0,
+          "days_since_invited": null
+        },
+        {
+          "name": "Jie Xiong",
+          "email": "XIONGJ@SUSTECH.EDU.CN",
+          "status": "Review pending",
+          "institution": "of Science and Technology",
+          "report_submitted": false,
+          "report_date": null,
+          "reminder_count": 0,
+          "days_since_invited": null
+        },
+        {
+          "name": "Dylan Possama\u00ef",
+          "email": "DYLAN.POSSAMAI@MATH.ETHZ.CH",
+          "status": "Review pending",
+          "institution": null,
+          "report_submitted": false,
+          "report_date": null,
+          "reminder_count": 0,
+          "days_since_invited": null
+        }
+      ],
+      "pdf_urls": {},
+      "pdf_paths": {},
+      "referee_reports": {}
+    },
+    {
+      "id": "M176733",
+      "title": "Extended Mean Field Games with Terminal Constraint via Decoupling Fields",
+      "authors": [
+        "Peng Luo (Shanghai Jiao Tong University)"
+      ],
+      "status": "Under Review",
+      "submission_date": "2025-06-09",
+      "journal": "SICON",
+      "corresponding_editor": "Bayraktar",
+      "associate_editor": "Dylan Possama\u00ef",
+      "referees": [
+        {
+          "name": "Peng Luo (Shanghai Jiao Tong University)",
+          "email": "PENGLUO1989@GMAIL.COM",
+          "status": "Review pending",
+          "institution": null,
+          "report_submitted": false,
+          "report_date": null,
+          "reminder_count": 0,
+          "days_since_invited": null
+        },
+        {
+          "name": "Tianjiao Hua",
+          "email": "HTJ960127@SJTU.EDU.CN",
+          "status": "Review pending",
+          "institution": null,
+          "report_submitted": false,
+          "report_date": null,
+          "reminder_count": 0,
+          "days_since_invited": null
+        },
+        {
+          "name": "Dylan Possama\u00ef",
+          "email": "DYLAN.POSSAMAI@MATH.ETHZ.CH",
+          "status": "Review pending",
+          "institution": null,
+          "report_submitted": false,
+          "report_date": null,
+          "reminder_count": 0,
+          "days_since_invited": null
+        },
+        {
+          "name": "Peng Luo (Shanghai Jiao Tong University)",
+          "email": "PENGLUO1989@GMAIL.COM",
+          "status": "Review pending",
+          "institution": null,
+          "report_submitted": false,
+          "report_date": null,
+          "reminder_count": 0,
+          "days_since_invited": null
+        },
+        {
+          "name": "Tianjiao Hua",
+          "email": "HTJ960127@SJTU.EDU.CN",
+          "status": "Review pending",
+          "institution": null,
+          "report_submitted": false,
+          "report_date": null,
+          "reminder_count": 0,
+          "days_since_invited": null
+        },
+        {
+          "name": "Dylan Possama\u00ef",
+          "email": "DYLAN.POSSAMAI@MATH.ETHZ.CH",
+          "status": "Review pending",
+          "institution": null,
+          "report_submitted": false,
+          "report_date": null,
+          "reminder_count": 0,
+          "days_since_invited": null
+        },
+        {
+          "name": "Peng Luo (Shanghai Jiao Tong University)",
+          "email": "PENGLUO1989@GMAIL.COM",
+          "status": "Review pending",
+          "institution": null,
+          "report_submitted": false,
+          "report_date": null,
+          "reminder_count": 0,
+          "days_since_invited": null
+        },
+        {
+          "name": "Tianjiao Hua",
+          "email": "HTJ960127@SJTU.EDU.CN",
+          "status": "Review pending",
+          "institution": null,
+          "report_submitted": false,
+          "report_date": null,
+          "reminder_count": 0,
+          "days_since_invited": null
+        },
+        {
+          "name": "Dylan Possama\u00ef",
+          "email": "DYLAN.POSSAMAI@MATH.ETHZ.CH",
+          "status": "Review pending",
+          "institution": null,
+          "report_submitted": false,
+          "report_date": null,
+          "reminder_count": 0,
+          "days_since_invited": null
+        }
+      ],
+      "pdf_urls": {},
+      "pdf_paths": {},
+      "referee_reports": {}
+    }
+  ],
+  "statistics": {
+    "total_referees": 44,
+    "manuscripts_with_reports": 0,
+    "pdfs_found": 0,
+    "pdfs_downloaded": 0
+  }
+}

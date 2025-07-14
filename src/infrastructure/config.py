@@ -144,14 +144,27 @@ class Settings(BaseSettings):
     export_dir: Path = Field(default=Path("data/exports"), env="EXPORT_DIR")
     
     # Database settings directly included
+    database_url: Optional[str] = Field(default=None, env="DATABASE_URL")
     db_host: str = Field(default="localhost", env="DB_HOST")
     db_port: int = Field(default=5432, env="DB_PORT")
     db_name: str = Field(default="editorial_scripts", env="DB_NAME")
     db_user: str = Field(default="editorial", env="DB_USER")
     db_password: str = Field(default="", env="DB_PASSWORD")
+    db_pool_size: int = Field(default=20, env="DB_POOL_SIZE")
+    db_max_overflow: int = Field(default=10, env="DB_MAX_OVERFLOW")
+    
+    # Redis settings
+    redis_host: str = Field(default="localhost", env="REDIS_HOST")
+    redis_port: int = Field(default=6379, env="REDIS_PORT")
+    redis_password: Optional[str] = Field(default=None, env="REDIS_PASSWORD")
+    redis_db: int = Field(default=0, env="REDIS_DB")
+    cache_default_ttl: int = Field(default=3600, env="CACHE_DEFAULT_TTL")
     
     # AI settings
     openai_api_key: str = Field(default="", env="OPENAI_API_KEY")
+    openai_model: str = Field(default="gpt-4-turbo-preview", env="OPENAI_MODEL")
+    ai_max_tokens: int = Field(default=4000, env="AI_MAX_TOKENS")
+    ai_temperature: float = Field(default=0.7, env="AI_TEMPERATURE")
     
     # Browser settings
     browser_headless: bool = Field(default=True, env="BROWSER_HEADLESS")
@@ -162,9 +175,17 @@ class Settings(BaseSettings):
     browser_use_stealth: bool = Field(default=True, env="BROWSER_USE_STEALTH")
     browser_user_agent: Optional[str] = Field(default=None, env="BROWSER_USER_AGENT")
     
-    # Credentials
+    # OAuth/API Credentials
+    orcid_client_id: Optional[str] = Field(default=None, env="ORCID_CLIENT_ID")
+    orcid_client_secret: Optional[str] = Field(default=None, env="ORCID_CLIENT_SECRET")
+    google_client_id: Optional[str] = Field(default=None, env="GOOGLE_CLIENT_ID")
+    google_client_secret: Optional[str] = Field(default=None, env="GOOGLE_CLIENT_SECRET")
+    
+    # Login Credentials
     orcid_email: Optional[str] = Field(default=None, env="ORCID_EMAIL")
     orcid_password: Optional[str] = Field(default=None, env="ORCID_PASSWORD")
+    scholarone_email: Optional[str] = Field(default=None, env="SCHOLARONE_EMAIL")
+    scholarone_password: Optional[str] = Field(default=None, env="SCHOLARONE_PASSWORD")
     
     # MF Journal credentials
     mf_username: Optional[str] = Field(default=None, env="MF_USER")
@@ -191,8 +212,10 @@ class Settings(BaseSettings):
     naco_password: Optional[str] = Field(default=None, env="NACO_PASS")
     
     @property
-    def database_url(self) -> str:
-        """Get async database URL"""
+    def get_database_url(self) -> str:
+        """Get database URL (prefer explicit DATABASE_URL, fallback to constructed)"""
+        if self.database_url:
+            return self.database_url
         return f"postgresql+asyncpg://{self.db_user}:{self.db_password}@{self.db_host}:{self.db_port}/{self.db_name}"
     
     @validator("data_dir", "pdf_dir", "export_dir")
@@ -210,6 +233,7 @@ class Settings(BaseSettings):
         env_file = ".env"
         env_file_encoding = "utf-8"
         case_sensitive = False
+        extra = "allow"  # Allow extra environment variables
 
 
 @lru_cache()
@@ -219,3 +243,4 @@ def get_settings() -> Settings:
 
 
 # Convenience exports (remove global instantiation)
+settings = get_settings()

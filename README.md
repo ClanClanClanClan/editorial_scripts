@@ -1,203 +1,145 @@
-# Editorial Assistant 📚
+# Editorial Scripts - Complete Journal Extraction System
 
-A professional-grade system for extracting and managing referee data from academic journal submission systems.
+A comprehensive, organized system for extracting manuscript and referee data from academic journal management systems.
 
-## Features ✨
+## 🚀 Quick Start
 
-- **Multi-Journal Support**: Extract data from 8 major academic journals (MF, MOR, JFE, MS, RFS, RAPS, JF, JFI)
-- **Robust Extraction**: Comprehensive error handling with retry mechanisms and checkpoint recovery
-- **PDF Management**: Automatic download and organization of manuscript and referee report PDFs
-- **Data Analysis**: Built-in conflict of interest detection and statistical analysis
-- **Professional CLI**: Beautiful command-line interface with progress tracking
-- **Extensible Architecture**: Easy to add support for new journals and platforms
+1. **Setup environment**:
+   ```bash
+   python3 -m venv venv_fresh
+   source venv_fresh/bin/activate
+   pip install -r requirements.txt
+   ```
 
-## Quick Start 🚀
+2. **Configure credentials**:
+   ```bash
+   export EDITORIAL_MASTER_PASSWORD='your_password'
+   python3 secure_credential_manager.py setup
+   ```
 
-### Installation
+3. **Run extractions**:
+   ```bash
+   # Any supported journal
+   python3 run_all_journals.py --journal SICON
+   python3 run_all_journals.py --journal MF
+   python3 run_all_journals.py --journal JOTA
+   ```
+
+## 📂 Organized Project Structure
+
+```
+src/
+├── infrastructure/
+│   ├── scrapers/
+│   │   ├── siam/                    # SIAM journals
+│   │   │   ├── sicon_scraper.py     # SICON (working)
+│   │   │   └── sifin_scraper.py     # SIFIN (needs fixes)
+│   │   ├── scholarone/              # ScholarOne platform
+│   │   │   ├── mf_scraper.py        # Mathematical Finance
+│   │   │   └── mor_scraper.py       # Math Operations Research
+│   │   ├── email_based/             # Email-based journals
+│   │   │   ├── fs_scraper.py        # Finance & Stochastics
+│   │   │   └── jota_scraper.py      # JOTA
+│   │   ├── other/                   # Other journals
+│   │   │   ├── mafe_scraper.py      # MAFE
+│   │   │   └── naco_scraper.py      # NACO
+│   │   ├── base_scraper.py          # Base scraper class
+│   │   ├── enhanced_referee_extractor.py
+│   │   ├── siam_orchestrator.py     # SIAM coordination
+│   │   └── stealth_manager.py       # Anti-detection
+│   ├── database/                    # Database models
+│   ├── repositories/                # Data access layer
+│   └── services/                    # External services
+├── api/                            # FastAPI web interface
+├── core/                           # Domain logic
+└── ai/                             # AI analysis
+```
+
+## 🎯 Supported Journals
+
+| Journal | Status | Platform | Notes |
+|---------|--------|----------|-------|
+| **SICON** | ✅ Working | SIAM | Advanced features, caching, email crosscheck |
+| **SIFIN** | ⚠️ Needs fixes | SIAM | Basic extraction working |
+| **MF** | 🔧 Ready to test | ScholarOne | Mathematical Finance |
+| **MOR** | 🔧 Ready to test | ScholarOne | Math Operations Research |
+| **FS** | 🔧 Ready to test | Email-based | Finance & Stochastics |
+| **JOTA** | 🔧 Ready to test | Email-based | Journal of Theoretical Probability |
+
+## 🔧 System Features
+
+### Core Capabilities
+- **Multi-platform support**: SIAM, ScholarOne, Email-based systems
+- **Comprehensive data extraction**: Manuscripts, referees, PDFs, timelines
+- **Smart caching**: Content-based change detection
+- **Email integration**: Gmail API for communication timeline analysis
+- **AI analysis**: Manuscript and referee insights
+- **Secure credential management**: Encrypted storage with master password
+
+### Advanced Features
+- **Anti-detection**: Stealth browsing with randomized patterns
+- **Parallel processing**: Concurrent manuscript processing
+- **Document management**: PDF download, text extraction, metadata
+- **Analytics**: Referee performance, timeline analysis, behavioral patterns
+- **API interface**: REST API for programmatic access
+
+## 🧹 Recent Cleanup (2025-07-14)
+
+### What Was Cleaned Up
+- **Consolidated 3 competing systems** into single organized structure
+- **Removed duplicate implementations** (50+ redundant files)
+- **Organized scrapers** by platform (SIAM, ScholarOne, Email-based)
+- **Archived legacy code** while preserving working implementations
+- **Created unified runner** supporting all journals
+
+### What Was Archived
+- `archive/legacy_implementations_20250714/` - Old competing systems
+- `archive/legacy_journals/` - Legacy standalone implementations  
+- `archive/old_test_files/` - Debug and test files
+- `archive/screenshots/` - Debug screenshots
+
+## 📊 Data Quality Standards
+
+Each journal extractor provides:
+- **Complete referee information**: Names, emails, institutions, statuses
+- **Timeline data**: Invitation dates, response times, report submissions
+- **Communication metrics**: Email counts, reminder frequencies, response quality
+- **Document collection**: Manuscripts, reports, cover letters, supplements
+- **Smart deduplication**: Unique referees per manuscript
+
+## 🔍 Testing & Verification
 
 ```bash
-# Clone the repository
-git clone https://github.com/yourusername/editorial-assistant.git
-cd editorial-assistant
+# Test specific journal
+python3 run_all_journals.py --journal SICON --verbose
 
-# Install the package
-pip install -e .
+# Check extraction results
+ls -la output/sicon/
+
+# Run integration tests
+python3 -m pytest tests/integration/
 ```
 
-### Configuration
+## 🛠️ Development
 
-1. Initialize configuration files:
-```bash
-editorial-assistant init
-```
+### Adding New Journals
+1. Create scraper in appropriate subfolder (`src/infrastructure/scrapers/`)
+2. Inherit from `BaseScraper`
+3. Implement required methods
+4. Add to `run_all_journals.py`
+5. Add tests
 
-2. Edit `config/credentials.yaml` with your journal credentials:
-```yaml
-journals:
-  MF:
-    username: "your.email@example.com"
-    password: "your_password"
-  MOR:
-    username: "your.email@example.com"
-    password: "your_password"
-```
+### Architecture Principles
+- **Single responsibility**: One scraper per journal
+- **Consistent interfaces**: All scrapers use same API
+- **Proper error handling**: Graceful failures with detailed logging
+- **Async throughout**: Non-blocking operations
+- **Secure by default**: No credentials in code, encrypted storage
 
-3. Verify configuration:
-```bash
-editorial-assistant config
-```
+## 📞 Support
 
-### Basic Usage
+- **Issues**: Report at project repository
+- **Documentation**: See `docs/` folder for detailed guides
+- **Configuration**: Check `config/` for settings and examples
 
-Extract data from a single journal:
-```bash
-editorial-assistant extract MF
-```
-
-Extract from all configured journals:
-```bash
-editorial-assistant extract --all
-```
-
-Generate a report:
-```bash
-editorial-assistant report MF --format md
-```
-
-## Architecture 🏗️
-
-```
-editorial_assistant/
-├── core/               # Core functionality (browser, PDF, data models)
-├── extractors/         # Platform-specific extractors
-├── parsers/           # Data parsing utilities
-├── handlers/          # External integrations (email, storage)
-├── analytics/         # Analysis and reporting tools
-├── utils/             # Utility functions
-└── cli/               # Command-line interface
-```
-
-## Supported Journals 📖
-
-| Journal | Code | Platform | Status |
-|---------|------|----------|---------|
-| Mathematical Finance | MF | ScholarOne | ✅ Fully Supported |
-| Mathematics of Operations Research | MOR | ScholarOne | ✅ Fully Supported |
-| Journal of Financial Economics | JFE | Editorial Manager | 🚧 In Development |
-| Management Science | MS | ScholarOne | 🚧 In Development |
-| Review of Financial Studies | RFS | ScholarOne | 🚧 In Development |
-| Review of Asset Pricing Studies | RAPS | ScholarOne | 🚧 In Development |
-| Journal of Finance | JF | Editorial Manager | 🚧 In Development |
-| Journal of Financial Intermediation | JFI | Editorial Manager | 🚧 In Development |
-
-## Advanced Features 🔧
-
-### Headless Mode
-Run extractions without displaying the browser:
-```bash
-editorial-assistant extract MF --headless
-```
-
-### Checkpoint Recovery
-The system automatically saves checkpoints during extraction. If interrupted, it will resume from the last checkpoint:
-```bash
-editorial-assistant extract MOR --checkpoint-dir ./checkpoints
-```
-
-### Parallel Extraction
-Extract multiple journals simultaneously:
-```bash
-editorial-assistant extract --all --parallel
-```
-
-### Data Analysis
-Analyze extracted data for conflicts of interest:
-```bash
-editorial-assistant analyze results.json --conflicts
-```
-
-## Data Output 📊
-
-Extracted data is saved in structured JSON format:
-```json
-{
-  "journal": {
-    "code": "MF",
-    "name": "Mathematical Finance"
-  },
-  "manuscripts": [
-    {
-      "manuscript_id": "MAFI-2024-0167",
-      "title": "Competitive optimal portfolio selection",
-      "referees": [
-        {
-          "name": "Smith, John",
-          "institution": "Harvard University",
-          "status": "agreed",
-          "dates": {
-            "invited": "2025-05-01",
-            "agreed": "2025-05-03",
-            "due": "2025-07-30"
-          }
-        }
-      ]
-    }
-  ]
-}
-```
-
-## Development 💻
-
-### Running Tests
-```bash
-pytest tests/
-```
-
-### Code Style
-```bash
-black editorial_assistant/
-flake8 editorial_assistant/
-```
-
-### Adding a New Journal
-
-1. Add journal configuration to `config/journals.yaml`
-2. Create extractor in `editorial_assistant/extractors/implementations/`
-3. Update CLI to recognize the new journal
-
-## Troubleshooting 🔍
-
-### Chrome Driver Issues
-If you encounter Chrome driver problems:
-1. Ensure Chrome is installed and up to date
-2. The system will automatically download compatible drivers
-3. Use `--visible` flag to debug browser interactions
-
-### 2FA Authentication
-The system integrates with Gmail API for automatic 2FA code retrieval:
-1. Set up Gmail API credentials
-2. Configure in `config/credentials.yaml`
-3. The system will automatically handle verification codes
-
-## Contributing 🤝
-
-Contributions are welcome! Please:
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Submit a pull request
-
-## License 📄
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## Support 💬
-
-For issues, questions, or contributions:
-- Open an issue on GitHub
-- Contact the maintainers
-- Check the documentation
-
----
-
-Built with ❤️ for the academic community
+*Last updated: 2025-07-14 - Major cleanup and reorganization complete*

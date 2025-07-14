@@ -11,12 +11,7 @@ from fastapi import APIRouter, HTTPException, Depends, Query, status
 from pydantic import BaseModel, Field, EmailStr
 
 from ...infrastructure.repositories.referee_repository_fixed import RefereeRepositoryFixed
-import sys
-from pathlib import Path
-# Add analytics to path
-sys.path.append(str(Path(__file__).parent.parent.parent.parent / 'analytics'))
-
-from models.referee_metrics import (
+from analytics.models.referee_metrics import (
     RefereeMetrics, TimeMetrics, QualityMetrics, WorkloadMetrics,
     ReliabilityMetrics, ExpertiseMetrics
 )
@@ -236,8 +231,8 @@ async def get_performance_stats(
             average_score=stats.get("avg_score", 0.0),
             scored_referees=stats.get("scored_referees", 0),
             top_performers_count=len(await repo.get_top_performers(limit=10)),
-            active_referees_30d=0,  # TODO: Implement
-            active_referees_90d=0   # TODO: Implement
+            active_referees_30d=await repo.get_active_referee_count(days=30),
+            active_referees_90d=await repo.get_active_referee_count(days=90)
         )
         
     except Exception as e:

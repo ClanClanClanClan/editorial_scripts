@@ -1,0 +1,187 @@
+{
+  "demo_session_id": "20250713_173652",
+  "demo_timestamp": "2025-07-13T17:36:57.461319",
+  "lifecycle_simulation": {
+    "initial_manuscripts": 4,
+    "removed_manuscripts": [
+      "M175988",
+      "M176140"
+    ],
+    "remaining_manuscripts": [
+      "M174160",
+      "M174727"
+    ],
+    "new_manuscripts": [
+      "M999001",
+      "M999002"
+    ],
+    "final_active_count": 4,
+    "lifecycle_updates": [
+      {
+        "archived_count": 2,
+        "new_count": 0,
+        "archived_manuscripts": [
+          {
+            "manuscript_id": "M175988",
+            "archived_date": "2025-07-13T17:36:57.456077",
+            "reason": "removed_from_website"
+          },
+          {
+            "manuscript_id": "M176140",
+            "archived_date": "2025-07-13T17:36:57.456723",
+            "reason": "removed_from_website"
+          }
+        ],
+        "new_manuscripts": [],
+        "total_active": 2,
+        "total_cached": 4
+      },
+      {
+        "archived_count": 0,
+        "new_count": 0,
+        "archived_manuscripts": [],
+        "new_manuscripts": [],
+        "total_active": 4,
+        "total_cached": 4
+      }
+    ]
+  },
+  "referee_analytics_summary": {
+    "total_referees": 9,
+    "total_reviews": 10,
+    "active_journals": [
+      "SIFIN"
+    ],
+    "referee_details": [
+      {
+        "email": "referee2b@institute.org",
+        "review_count": 1,
+        "journals": [
+          "SIFIN"
+        ],
+        "last_activity": "2025-07-13T17:36:55.241460",
+        "career_span": {
+          "first_review_date": "2025-07-13T17:36:55.241437",
+          "most_recent_review": "2025-07-13T17:36:55.241437",
+          "review_frequency": 1
+        }
+      },
+      {
+        "email": "referee4b@institute.org",
+        "review_count": 1,
+        "journals": [
+          "SIFIN"
+        ],
+        "last_activity": "2025-07-13T17:36:57.453264",
+        "career_span": {
+          "first_review_date": "2025-07-13T17:36:57.453233",
+          "most_recent_review": "2025-07-13T17:36:57.453233",
+          "review_frequency": 1
+        }
+      },
+      {
+        "email": "referee3b@institute.org",
+        "review_count": 1,
+        "journals": [
+          "SIFIN"
+        ],
+        "last_activity": "2025-07-13T17:36:56.285469",
+        "career_span": {
+          "first_review_date": "2025-07-13T17:36:56.285425",
+          "most_recent_review": "2025-07-13T17:36:56.285425",
+          "review_frequency": 1
+        }
+      },
+      {
+        "email": "newreferee.alpha@university.edu",
+        "review_count": 1,
+        "journals": [
+          "SIFIN"
+        ],
+        "last_activity": "2025-07-13T17:36:57.457267",
+        "career_span": {
+          "first_review_date": "2025-07-13T17:36:57.457242",
+          "most_recent_review": "2025-07-13T17:36:57.457242",
+          "review_frequency": 1
+        }
+      },
+      {
+        "email": "referee4a@university.edu",
+        "review_count": 1,
+        "journals": [
+          "SIFIN"
+        ],
+        "last_activity": "2025-07-13T17:36:57.450831",
+        "career_span": {
+          "first_review_date": "2025-07-13T17:36:57.450792",
+          "most_recent_review": "2025-07-13T17:36:57.450792",
+          "review_frequency": 1
+        }
+      },
+      {
+        "email": "referee3a@university.edu",
+        "review_count": 1,
+        "journals": [
+          "SIFIN"
+        ],
+        "last_activity": "2025-07-13T17:36:56.284819",
+        "career_span": {
+          "first_review_date": "2025-07-13T17:36:56.284788",
+          "most_recent_review": "2025-07-13T17:36:56.284788",
+          "review_frequency": 1
+        }
+      },
+      {
+        "email": "referee2a@university.edu",
+        "review_count": 1,
+        "journals": [
+          "SIFIN"
+        ],
+        "last_activity": "2025-07-13T17:36:55.240983",
+        "career_span": {
+          "first_review_date": "2025-07-13T17:36:55.240954",
+          "most_recent_review": "2025-07-13T17:36:55.240954",
+          "review_frequency": 1
+        }
+      },
+      {
+        "email": "referee1b@institute.org",
+        "review_count": 1,
+        "journals": [
+          "SIFIN"
+        ],
+        "last_activity": "2025-07-13T17:36:54.268869",
+        "career_span": {
+          "first_review_date": "2025-07-13T17:36:54.268842",
+          "most_recent_review": "2025-07-13T17:36:54.268842",
+          "review_frequency": 1
+        }
+      },
+      {
+        "email": "referee1a@university.edu",
+        "review_count": 2,
+        "journals": [
+          "SIFIN"
+        ],
+        "last_activity": "2025-07-13T17:36:57.458232",
+        "career_span": {
+          "first_review_date": "2025-07-13T17:36:54.268013",
+          "most_recent_review": "2025-07-13T17:36:57.458178",
+          "review_frequency": 2
+        }
+      }
+    ]
+  },
+  "cache_directories": {
+    "manuscripts": "demo_persistent_cache/persistent_cache/manuscripts",
+    "referees": "demo_persistent_cache/persistent_cache/referees",
+    "analytics": "demo_persistent_cache/persistent_cache/analytics"
+  },
+  "key_features_demonstrated": [
+    "manuscript_persistent_caching",
+    "referee_analytics_preservation",
+    "manuscript_lifecycle_tracking",
+    "automatic_archiving",
+    "referee_career_analytics"
+  ]
+}

@@ -1,0 +1,48 @@
+{
+  "content_hash": "dcffbbf576090ca6abb278fe728e85c6",
+  "timestamp": "2025-07-14T11:47:36.450912",
+  "manuscript": {
+    "id": "M176733",
+    "title": "",
+    "authors": [],
+    "status": "Under Review",
+    "submission_date": null,
+    "journal": "SICON",
+    "corresponding_editor": null,
+    "associate_editor": null,
+    "referees": [
+      {
+        "name": "Samuel daudin",
+        "email": "",
+        "status": "Report submitted",
+        "institution": null,
+        "report_submitted": true,
+        "report_date": "2025-06-17",
+        "contact_date": null,
+        "due_date": null,
+        "declined": false,
+        "reminder_count": 0,
+        "days_since_invited": null
+      },
+      {
+        "name": "Ludovic Tangpi",
+        "email": "",
+        "status": "Accepted, awaiting report",
+        "institution": null,
+        "report_submitted": false,
+        "report_date": null,
+        "contact_date": null,
+        "due_date": "2025-08-13",
+        "declined": false,
+        "reminder_count": 0,
+        "days_since_invited": null
+      }
+    ],
+    "pdf_urls": {
+      "pdf__38kb_": "https://sicon.siam.org/sicon_files/2025/06/09/00150094/00/150094_0_auth_cover_letter_622995_sxktbj_sc.pdf",
+      "pdf__208kb_": "https://sicon.siam.org/sicon_files/2025/06/09/00150094/00/150094_0_art_file_622994_sxktb1_sc.pdf"
+    },
+    "pdf_paths": {},
+    "referee_reports": {}
+  }
+}

@@ -1,0 +1,327 @@
+{
+  "demo_session_id": "20250713_174133",
+  "demo_timestamp": "2025-07-13T17:41:33.492453",
+  "sample_reports_generated": 4,
+  "unique_referees": 3,
+  "analytics_report": {
+    "report_timestamp": "2025-07-13T17:41:33.490597",
+    "global_statistics": {
+      "total_referees": 3,
+      "total_reports": 4,
+      "total_words_written": 336,
+      "average_reports_per_referee": 1.3,
+      "average_words_per_referee": 112.0
+    },
+    "quality_analytics": {
+      "average_quality_score": 0,
+      "quality_distribution": {
+        "excellent": 0,
+        "good": 0,
+        "moderate": 0,
+        "poor": 0
+      }
+    },
+    "expertise_landscape": {},
+    "journal_activity": {
+      "SIFIN": 4
+    },
+    "performance_distributions": {
+      "productivity": {
+        "low": 3
+      },
+      "review_thoroughness": {
+        "low": 3
+      },
+      "quality_consistency": {
+        "low": 3
+      },
+      "technical_expertise": {
+        "null": 3
+      },
+      "review_tone": {
+        "null": 3
+      }
+    },
+    "top_performers": []
+  },
+  "referee_profiles": {
+    "dr.jones@institute.org": {
+      "reports": [
+        {
+          "manuscript_id": "M174160",
+          "journal": "SIFIN",
+          "report_file": "demo_enhanced_referee_analytics/enhanced_referee_analytics/reports/report_M174160_2e982571.json",
+          "submission_date": "2025-07-12T09:15:00",
+          "word_count": 87,
+          "recommendation": "major_revision",
+          "quality_score": null,
+          "technical_depth": null,
+          "constructiveness": null,
+          "key_topics": []
+        }
+      ],
+      "analytics_summary": {
+        "last_updated": "2025-07-13T17:41:33.488443",
+        "total_reports": 1,
+        "total_words_written": 87,
+        "average_words_per_review": 87.0,
+        "average_quality_score": 0,
+        "recommendation_patterns": {
+          "major_revision": 1
+        },
+        "technical_depth_distribution": {
+          "null": 1
+        },
+        "constructiveness_distribution": {
+          "null": 1
+        },
+        "topic_expertise": {},
+        "journal_activity": {
+          "SIFIN": 1
+        },
+        "career_timeline": {
+          "first_review": "2025-07-12T09:15:00",
+          "latest_review": "2025-07-12T09:15:00",
+          "active_period_days": 0
+        },
+        "performance_indicators": {
+          "productivity": "low",
+          "review_thoroughness": "low",
+          "quality_consistency": "low",
+          "technical_expertise": null,
+          "review_tone": null
+        },
+        "referee_profile": {
+          "specialization": "general",
+          "preferred_journals": [
+            "SIFIN"
+          ],
+          "review_style": null,
+          "expertise_level": null
+        }
+      },
+      "full_reports": [
+        {
+          "manuscript_id": "M174160",
+          "journal": "SIFIN",
+          "referee_email": "dr.jones@institute.org",
+          "report_text": "The paper tackles an important problem in financial mathematics. The theoretical framework appears correct, but the presentation needs significant improvement.\n\nMajor concerns:\n- The paper lacks clarity in several key sections\n- The experimental setup is not well described  \n- Figure 2 is difficult to interpret\n- The comparison with baseline methods is incomplete\n\nMinor issues:\n- Several typos throughout\n- Reference formatting is inconsistent\n- Some mathematical notation is non-standard\n\nI recommend major revision to address these issues before the paper can be considered for publication.",
+          "recommendation": "major_revision",
+          "review_date": "2025-07-12",
+          "submission_date": "2025-07-12T09:15:00",
+          "review_status": "submitted",
+          "word_count": 87,
+          "sentiment_score": null,
+          "key_topics": [],
+          "review_quality_score": null,
+          "technical_depth": null,
+          "constructiveness": null,
+          "review_type": null,
+          "extraction_timestamp": "2025-07-13T17:41:33.485090",
+          "extraction_method": "scraper",
+          "extraction_confidence": 1.0
+        }
+      ]
+    },
+    "researcher.wilson@lab.ac.uk": {
+      "reports": [
+        {
+          "manuscript_id": "M175988",
+          "journal": "SIFIN",
+          "report_file": "demo_enhanced_referee_analytics/enhanced_referee_analytics/reports/report_M175988_103757c3.json",
+          "submission_date": "2025-07-09T11:20:00",
+          "word_count": 77,
+          "recommendation": "major_revision",
+          "quality_score": null,
+          "technical_depth": null,
+          "constructiveness": null,
+          "key_topics": []
+        }
+      ],
+      "analytics_summary": {
+        "last_updated": "2025-07-13T17:41:33.489756",
+        "total_reports": 1,
+        "total_words_written": 77,
+        "average_words_per_review": 77.0,
+        "average_quality_score": 0,
+        "recommendation_patterns": {
+          "major_revision": 1
+        },
+        "technical_depth_distribution": {
+          "null": 1
+        },
+        "constructiveness_distribution": {
+          "null": 1
+        },
+        "topic_expertise": {},
+        "journal_activity": {
+          "SIFIN": 1
+        },
+        "career_timeline": {
+          "first_review": "2025-07-09T11:20:00",
+          "latest_review": "2025-07-09T11:20:00",
+          "active_period_days": 0
+        },
+        "performance_indicators": {
+          "productivity": "low",
+          "review_thoroughness": "low",
+          "quality_consistency": "low",
+          "technical_expertise": null,
+          "review_tone": null
+        },
+        "referee_profile": {
+          "specialization": "general",
+          "preferred_journals": [
+            "SIFIN"
+          ],
+          "review_style": null,
+          "expertise_level": null
+        }
+      },
+      "full_reports": [
+        {
+          "manuscript_id": "M175988",
+          "journal": "SIFIN",
+          "referee_email": "researcher.wilson@lab.ac.uk",
+          "report_text": "The paper addresses particle systems in mathematical finance. While the topic is relevant, the execution is problematic.\n\nCritical issues:\n- The main theorem proof contains errors in steps 3-4\n- The numerical method convergence is not established\n- Related work section misses key references\n- Experimental results are not reproducible\n\nThis work requires substantial revision before it can be considered suitable for publication. The authors need to fix the theoretical issues and provide more rigorous empirical validation.",
+          "recommendation": "major_revision",
+          "review_date": "2025-07-09",
+          "submission_date": "2025-07-09T11:20:00",
+          "review_status": "submitted",
+          "word_count": 77,
+          "sentiment_score": null,
+          "key_topics": [],
+          "review_quality_score": null,
+          "technical_depth": null,
+          "constructiveness": null,
+          "review_type": null,
+          "extraction_timestamp": "2025-07-13T17:41:33.485100",
+          "extraction_method": "scraper",
+          "extraction_confidence": 1.0
+        }
+      ]
+    },
+    "prof.smith@university.edu": {
+      "reports": [
+        {
+          "manuscript_id": "M174160",
+          "journal": "SIFIN",
+          "report_file": "demo_enhanced_referee_analytics/enhanced_referee_analytics/reports/report_M174160_66c7300b.json",
+          "submission_date": "2025-07-10T14:30:00",
+          "word_count": 105,
+          "recommendation": "minor_revision",
+          "quality_score": null,
+          "technical_depth": null,
+          "constructiveness": null,
+          "key_topics": []
+        },
+        {
+          "manuscript_id": "M174727",
+          "journal": "SIFIN",
+          "report_file": "demo_enhanced_referee_analytics/enhanced_referee_analytics/reports/report_M174727_66c7300b.json",
+          "submission_date": "2025-07-11T16:45:00",
+          "word_count": 67,
+          "recommendation": "accept",
+          "quality_score": null,
+          "technical_depth": null,
+          "constructiveness": null,
+          "key_topics": []
+        }
+      ],
+      "analytics_summary": {
+        "last_updated": "2025-07-13T17:41:33.489219",
+        "total_reports": 2,
+        "total_words_written": 172,
+        "average_words_per_review": 86.0,
+        "average_quality_score": 0,
+        "recommendation_patterns": {
+          "minor_revision": 1,
+          "accept": 1
+        },
+        "technical_depth_distribution": {
+          "null": 2
+        },
+        "constructiveness_distribution": {
+          "null": 2
+        },
+        "topic_expertise": {},
+        "journal_activity": {
+          "SIFIN": 2
+        },
+        "career_timeline": {
+          "first_review": "2025-07-10T14:30:00",
+          "latest_review": "2025-07-11T16:45:00",
+          "active_period_days": 1
+        },
+        "performance_indicators": {
+          "productivity": "low",
+          "review_thoroughness": "low",
+          "quality_consistency": "low",
+          "technical_expertise": null,
+          "review_tone": null
+        },
+        "referee_profile": {
+          "specialization": "general",
+          "preferred_journals": [
+            "SIFIN"
+          ],
+          "review_style": null,
+          "expertise_level": null
+        }
+      },
+      "full_reports": [
+        {
+          "manuscript_id": "M174160",
+          "journal": "SIFIN",
+          "referee_email": "prof.smith@university.edu",
+          "report_text": "This paper presents a novel approach to stochastic control theory with interesting applications. \n\nThe methodology is sound and the mathematical framework is well-developed. The authors have provided rigorous proofs for the main theorems and the experimental validation supports their theoretical claims.\n\nHowever, I have several suggestions for improvement:\n1. The literature review could be more comprehensive, particularly regarding recent work by Johnson et al. (2024)\n2. The computational complexity analysis needs more detail\n3. Some notation could be clarified in Section 3.2\n\nOverall, this is solid work that makes meaningful contributions to the field. I recommend acceptance with minor revisions to address the points above.",
+          "recommendation": "minor_revision",
+          "review_date": "2025-07-10",
+          "submission_date": "2025-07-10T14:30:00",
+          "review_status": "submitted",
+          "word_count": 105,
+          "sentiment_score": null,
+          "key_topics": [],
+          "review_quality_score": null,
+          "technical_depth": null,
+          "constructiveness": null,
+          "review_type": null,
+          "extraction_timestamp": "2025-07-13T17:41:33.485079",
+          "extraction_method": "scraper",
+          "extraction_confidence": 1.0
+        },
+        {
+          "manuscript_id": "M174727",
+          "journal": "SIFIN",
+          "referee_email": "prof.smith@university.edu",
+          "report_text": "This manuscript presents interesting results on mean-variance optimization. The mathematical approach is sophisticated and the results appear novel.\n\nStrengths:\n- Strong theoretical foundation\n- Novel algorithmic approach\n- Comprehensive empirical evaluation\n- Well-written and clear presentation\n\nThe work represents a solid contribution to the portfolio optimization literature. The authors have addressed an important gap and provided both theoretical insights and practical algorithms.\n\nI recommend acceptance without revision.",
+          "recommendation": "accept",
+          "review_date": "2025-07-11",
+          "submission_date": "2025-07-11T16:45:00",
+          "review_status": "submitted",
+          "word_count": 67,
+          "sentiment_score": null,
+          "key_topics": [],
+          "review_quality_score": null,
+          "technical_depth": null,
+          "constructiveness": null,
+          "review_type": null,
+          "extraction_timestamp": "2025-07-13T17:41:33.485096",
+          "extraction_method": "scraper",
+          "extraction_confidence": 1.0
+        }
+      ]
+    }
+  },
+  "features_demonstrated": [
+    "report_text_preservation",
+    "quality_scoring",
+    "recommendation_extraction",
+    "technical_depth_analysis",
+    "constructiveness_assessment",
+    "topic_expertise_tracking",
+    "career_analytics",
+    "performance_indicators",
+    "cross_manuscript_analytics"
+  ]
+}

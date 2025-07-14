@@ -16,7 +16,7 @@ from ..infrastructure.database.engine import init_db, close_db
 from ..infrastructure.browser_pool import get_browser_pool, shutdown_browser_pool
 from ..infrastructure.cache.redis_cache import get_cache, close_cache
 
-from .routers import manuscripts, referees, extractions, analytics
+from .routers import manuscripts, referees, extractions, analytics, ai_analysis
 
 logger = logging.getLogger(__name__)
 settings = get_settings()
@@ -87,6 +87,12 @@ app.include_router(
     analytics.router,
     prefix=f"{settings.api_prefix}/analytics",
     tags=["analytics"]
+)
+
+app.include_router(
+    ai_analysis.router,
+    prefix=f"{settings.api_prefix}",
+    tags=["ai-analysis"]
 )
 
 

@@ -1,0 +1,22 @@
+{
+  "id": "M999001",
+  "manuscript_id": "M999001",
+  "title": "New Advanced Research Paper Alpha",
+  "journal": "SIFIN",
+  "referees": [
+    {
+      "name": "NewRef_A",
+      "full_name": "Dr. New Referee Alpha",
+      "email": "newreferee.alpha@university.edu",
+      "status": "Active",
+      "extraction_success": true
+    }
+  ],
+  "cache_metadata": {
+    "last_updated": "2025-07-13T17:36:57.456781",
+    "journal": "SIFIN",
+    "manuscript_id": "M999001",
+    "status": "active",
+    "cache_version": "1.0"
+  }
+}

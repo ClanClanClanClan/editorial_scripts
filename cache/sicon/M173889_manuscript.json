@@ -1,0 +1,48 @@
+{
+  "content_hash": "02ec4b5abc31325b4b4326e7feb99044",
+  "timestamp": "2025-07-14T11:47:32.661279",
+  "manuscript": {
+    "id": "M173889",
+    "title": "",
+    "authors": [],
+    "status": "Under Review",
+    "submission_date": null,
+    "journal": "SICON",
+    "corresponding_editor": null,
+    "associate_editor": null,
+    "referees": [
+      {
+        "name": "Ibrahim Ekren",
+        "email": "",
+        "status": "Report submitted",
+        "institution": null,
+        "report_submitted": true,
+        "report_date": "2025-07-03",
+        "contact_date": null,
+        "due_date": null,
+        "declined": false,
+        "reminder_count": 0,
+        "days_since_invited": null
+      },
+      {
+        "name": "Zhenjie Ren",
+        "email": "",
+        "status": "Accepted, awaiting report",
+        "institution": null,
+        "report_submitted": false,
+        "report_date": null,
+        "contact_date": null,
+        "due_date": "2025-05-04",
+        "declined": false,
+        "reminder_count": 0,
+        "days_since_invited": null
+      }
+    ],
+    "pdf_urls": {
+      "pdf__34kb_": "https://sicon.siam.org/sicon_files/2025/03/04/00146919/00/146919_0_auth_cover_letter_609642_ssll4h_sc.pdf",
+      "pdf__517kb_": "https://sicon.siam.org/sicon_files/2025/03/04/00146919/00/146919_0_art_file_609638_ssll25_sc.pdf"
+    },
+    "pdf_paths": {},
+    "referee_reports": {}
+  }
+}

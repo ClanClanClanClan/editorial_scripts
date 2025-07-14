@@ -1,0 +1,37 @@
+{
+  "id": "M176140",
+  "title": "# M176140 - Under Review  - Optimal Investment and Consumption Strat...  32 days",
+  "status": "extracted",
+  "referees": [
+    {
+      "name": "Referee_4_A",
+      "full_name": "Dr. Referee 4 Alpha",
+      "email": "referee4a@university.edu",
+      "status": "Active",
+      "extraction_success": true
+    },
+    {
+      "name": "Referee_4_B",
+      "full_name": "Prof. Referee 4 Beta",
+      "email": "referee4b@institute.org",
+      "status": "Active",
+      "extraction_success": true
+    }
+  ],
+  "journal": "SIFIN",
+  "extraction_timestamp": "2025-07-13T17:36:52.963529",
+  "email_enhancement": {
+    "related_emails_count": 3,
+    "emails_searched": true,
+    "search_timestamp": "2025-07-13T17:36:57.445607"
+  },
+  "cache_metadata": {
+    "last_updated": "2025-07-13T17:36:57.445724",
+    "journal": "SIFIN",
+    "manuscript_id": "M176140",
+    "status": "archived",
+    "cache_version": "1.0",
+    "archived_date": "2025-07-13T17:36:57.456320",
+    "archive_reason": "removed_from_website"
+  }
+}

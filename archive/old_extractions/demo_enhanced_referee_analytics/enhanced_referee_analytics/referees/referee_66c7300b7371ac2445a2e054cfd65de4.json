@@ -1,0 +1,69 @@
+{
+  "reports": [
+    {
+      "manuscript_id": "M174160",
+      "journal": "SIFIN",
+      "report_file": "demo_enhanced_referee_analytics/enhanced_referee_analytics/reports/report_M174160_66c7300b.json",
+      "submission_date": "2025-07-10T14:30:00",
+      "word_count": 105,
+      "recommendation": "minor_revision",
+      "quality_score": null,
+      "technical_depth": null,
+      "constructiveness": null,
+      "key_topics": []
+    },
+    {
+      "manuscript_id": "M174727",
+      "journal": "SIFIN",
+      "report_file": "demo_enhanced_referee_analytics/enhanced_referee_analytics/reports/report_M174727_66c7300b.json",
+      "submission_date": "2025-07-11T16:45:00",
+      "word_count": 67,
+      "recommendation": "accept",
+      "quality_score": null,
+      "technical_depth": null,
+      "constructiveness": null,
+      "key_topics": []
+    }
+  ],
+  "analytics_summary": {
+    "last_updated": "2025-07-13T17:43:38.857393",
+    "total_reports": 2,
+    "total_words_written": 172,
+    "average_words_per_review": 86.0,
+    "average_quality_score": 0,
+    "recommendation_patterns": {
+      "minor_revision": 1,
+      "accept": 1
+    },
+    "technical_depth_distribution": {
+      "null": 2
+    },
+    "constructiveness_distribution": {
+      "null": 2
+    },
+    "topic_expertise": {},
+    "journal_activity": {
+      "SIFIN": 2
+    },
+    "career_timeline": {
+      "first_review": "2025-07-10T14:30:00",
+      "latest_review": "2025-07-11T16:45:00",
+      "active_period_days": 1
+    },
+    "performance_indicators": {
+      "productivity": "low",
+      "review_thoroughness": "low",
+      "quality_consistency": "low",
+      "technical_expertise": null,
+      "review_tone": null
+    },
+    "referee_profile": {
+      "specialization": "general",
+      "preferred_journals": [
+        "SIFIN"
+      ],
+      "review_style": null,
+      "expertise_level": null
+    }
+  }
+}

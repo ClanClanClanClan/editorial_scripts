@@ -1,0 +1,22 @@
+{
+  "id": "M999002",
+  "manuscript_id": "M999002",
+  "title": "New Advanced Research Paper Beta",
+  "journal": "SIFIN",
+  "referees": [
+    {
+      "name": "NewRef_B",
+      "full_name": "Prof. New Referee Beta",
+      "email": "referee1a@university.edu",
+      "status": "Active",
+      "extraction_success": true
+    }
+  ],
+  "cache_metadata": {
+    "last_updated": "2025-07-13T17:36:57.457615",
+    "journal": "SIFIN",
+    "manuscript_id": "M999002",
+    "status": "active",
+    "cache_version": "1.0"
+  }
+}

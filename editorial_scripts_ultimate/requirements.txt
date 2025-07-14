@@ -1,0 +1,30 @@
+# Editorial Scripts Ultimate - Production Requirements
+# Minimal, optimized dependencies for production deployment
+
+# Core browser automation
+playwright==1.40.0
+beautifulsoup4==4.12.2
+
+# Async HTTP and utilities
+aiohttp==3.9.1
+aiofiles==23.2.1
+
+# Data validation and parsing
+email-validator==2.1.0
+pydantic==2.5.2
+
+# Retry and reliability
+tenacity==8.2.3
+
+# Environment and configuration
+python-dotenv==1.0.0
+
+# Optional but recommended for production
+redis==5.0.1
+sqlalchemy==2.0.23
+alembic==1.13.1
+
+# Development and testing (install separately if needed)
+# pytest==7.4.3
+# pytest-asyncio==0.21.1
+# pytest-mock==3.12.0

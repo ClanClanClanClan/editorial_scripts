@@ -141,7 +141,7 @@ data/referees.db
 *_report_*.md
 digests/
 drafts/
-reports/
+# reports/ - Allow documentation reports in docs/reports/
 *.html
 screenshots/
 *.png

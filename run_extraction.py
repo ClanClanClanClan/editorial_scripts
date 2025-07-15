@@ -1,0 +1,184 @@
+#!/usr/bin/env python3
+"""Run extraction using the WORKING editorial_assistant implementation"""
+
+import os
+import sys
+import argparse
+from pathlib import Path
+
+# Add to path
+sys.path.insert(0, str(Path(__file__).parent))
+
+# Load credentials from .env.production
+from dotenv import load_dotenv
+load_dotenv('.env.production')
+
+def main():
+    parser = argparse.ArgumentParser(description="Run journal extraction")
+    parser.add_argument('journal', choices=['sicon', 'sifin', 'mf', 'mor', 'naco', 'fs', 'jota', 'mafe'], 
+                       help='Journal to extract')
+    parser.add_argument('--headless', action='store_true', default=False,
+                       help='Run in headless mode')
+    args = parser.parse_args()
+    
+    # Import after path setup
+    from editorial_assistant.core.data_models import JournalConfig
+    
+    # Journal configurations
+    journals = {
+        'sicon': JournalConfig(
+            code='SICON',
+            name='SIAM Journal on Control and Optimization',
+            url='https://sicon.siam.org',
+            platform='siam',
+            credentials={
+                'username_env': 'ORCID_EMAIL',
+                'password_env': 'ORCID_PASSWORD'
+            }
+        ),
+        'sifin': JournalConfig(
+            code='SIFIN',
+            name='SIAM Journal on Financial Mathematics',
+            url='https://sifin.siam.org',
+            platform='siam',
+            credentials={
+                'username_env': 'ORCID_EMAIL',
+                'password_env': 'ORCID_PASSWORD'
+            }
+        ),
+        'mf': JournalConfig(
+            code='MF',
+            name='Mathematical Finance',
+            url='https://mc.manuscriptcentral.com/mafi',
+            platform='scholarone',
+            credentials={
+                'username_env': 'SCHOLARONE_EMAIL',
+                'password_env': 'SCHOLARONE_PASSWORD'
+            }
+        ),
+        'mor': JournalConfig(
+            code='MOR',
+            name='Mathematics of Operations Research',
+            url='https://mc.manuscriptcentral.com/moor',
+            platform='scholarone',
+            credentials={
+                'username_env': 'SCHOLARONE_EMAIL',
+                'password_env': 'SCHOLARONE_PASSWORD'
+            }
+        ),
+        'naco': JournalConfig(
+            code='NACO',
+            name='North American Congress on Optimization',
+            url='https://naco.siam.org',
+            platform='siam',
+            credentials={
+                'username_env': 'ORCID_EMAIL',
+                'password_env': 'ORCID_PASSWORD'
+            }
+        ),
+        'fs': JournalConfig(
+            code='FS',
+            name='Finance and Stochastics',
+            url='https://www.editorialmanager.com/fist',
+            platform='editorial_manager',
+            credentials={
+                'username_env': 'FS_EMAIL',
+                'password_env': 'FS_PASSWORD'
+            }
+        ),
+        'jota': JournalConfig(
+            code='JOTA',
+            name='Journal of Optimization Theory and Applications',
+            url='https://www.editorialmanager.com/jota',
+            platform='editorial_manager',
+            credentials={
+                'username_env': 'JOTA_EMAIL',
+                'password_env': 'JOTA_PASSWORD'
+            }
+        ),
+        'mafe': JournalConfig(
+            code='MAFE',
+            name='Mathematics and Financial Economics',
+            url='https://www.editorialmanager.com/mafe',
+            platform='editorial_manager',
+            credentials={
+                'username_env': 'MAFE_EMAIL',
+                'password_env': 'MAFE_PASSWORD'
+            }
+        )
+    }
+    
+    journal_config = journals[args.journal]
+    
+    # Check credentials
+    username_env = journal_config.credentials.get('username_env')
+    password_env = journal_config.credentials.get('password_env')
+    
+    if not os.getenv(username_env) or not os.getenv(password_env):
+        print(f"❌ Missing credentials for {journal_config.code}")
+        print(f"   Please set {username_env} and {password_env}")
+        return 1
+    
+    print(f"🚀 Extracting {journal_config.code}")
+    print(f"   URL: {journal_config.url}")
+    print(f"   User: {os.getenv(username_env)}")
+    print()
+    
+    # Import and run extractor
+    if args.journal == 'sicon':
+        from editorial_assistant.extractors.sicon import SICONExtractor
+        extractor_class = SICONExtractor
+    elif args.journal == 'sifin':
+        from editorial_assistant.extractors.sifin import SIFINExtractor
+        extractor_class = SIFINExtractor
+    elif args.journal == 'mf':
+        from editorial_assistant.extractors.implementations.mf_extractor import MFExtractor
+        extractor_class = MFExtractor
+    elif args.journal == 'mor':
+        from editorial_assistant.extractors.implementations.mor_extractor import MORExtractor
+        extractor_class = MORExtractor
+    elif args.journal == 'naco':
+        from editorial_assistant.extractors.naco import NACOExtractor
+        extractor_class = NACOExtractor
+    elif args.journal == 'fs':
+        from editorial_assistant.extractors.fs import FSExtractor
+        extractor_class = FSExtractor
+    elif args.journal == 'jota':
+        from editorial_assistant.extractors.jota import JOTAExtractor
+        extractor_class = JOTAExtractor
+    elif args.journal == 'mafe':
+        from editorial_assistant.extractors.mafe import MAFEExtractor
+        extractor_class = MAFEExtractor
+    
+    try:
+        extractor = extractor_class(journal_config, headless=args.headless)
+        manuscripts = extractor.extract_manuscripts()
+        
+        print(f"\n✅ Extraction complete!")
+        print(f"   Found {len(manuscripts)} manuscripts")
+        
+        # Count referees
+        total_referees = sum(len(m.referee_reports) for m in manuscripts)
+        print(f"   Total referees: {total_referees}")
+        
+        # Show first few manuscripts
+        print("\n📄 Sample manuscripts:")
+        for i, ms in enumerate(manuscripts[:3]):
+            print(f"   {i+1}. {ms.manuscript_id}: {ms.title}")
+            print(f"      Authors: {', '.join(ms.authors[:2])}...")
+            print(f"      Status: {ms.decision_status}")
+            print(f"      Referees: {len(ms.referee_reports)}")
+        
+        if len(manuscripts) > 3:
+            print(f"   ... and {len(manuscripts) - 3} more")
+            
+        return 0
+        
+    except Exception as e:
+        print(f"\n❌ Extraction failed: {e}")
+        import traceback
+        traceback.print_exc()
+        return 1
+
+if __name__ == "__main__":
+    sys.exit(main())

@@ -1,0 +1,89 @@
+{
+  "extraction_date": "2025-07-14T22:51:49.029810",
+  "completion_date": "2025-07-14T22:51:57.775649",
+  "duration_seconds": 8.745839,
+  "success": true,
+  "extraction_method": "final_automated",
+  "baseline_type": "FINAL_SICON_PRODUCTION",
+  "target_baseline": {
+    "total_manuscripts": 4,
+    "total_referees": 13,
+    "referee_breakdown": {
+      "declined": 5,
+      "accepted": 8
+    },
+    "documents": {
+      "manuscript_pdfs": 4,
+      "cover_letters": 3,
+      "referee_report_pdfs": 3,
+      "referee_report_comments": 1,
+      "total": 11
+    }
+  },
+  "extracted_counts": {
+    "manuscripts": 4,
+    "referees": 8,
+    "documents": 7
+  },
+  "validation": {
+    "manuscripts": {
+      "expected": 4,
+      "actual": 4,
+      "valid": true
+    },
+    "referees_total": {
+      "expected": 13,
+      "actual": 8,
+      "valid": false
+    },
+    "referee_breakdown": {
+      "declined": {
+        "expected": 5,
+        "actual": 3,
+        "valid": false
+      },
+      "accepted": {
+        "expected": 8,
+        "actual": 5,
+        "valid": false
+      }
+    },
+    "documents": {
+      "manuscript_pdfs": {
+        "expected": 4,
+        "actual": 4,
+        "valid": true
+      },
+      "cover_letters": {
+        "expected": 3,
+        "actual": 3,
+        "valid": true
+      },
+      "referee_report_pdfs": {
+        "expected": 3,
+        "actual": 0,
+        "valid": false
+      },
+      "referee_report_comments": {
+        "expected": 1,
+        "actual": 0,
+        "valid": false
+      }
+    },
+    "overall_valid": false
+  },
+  "metrics": {
+    "manuscripts": 4,
+    "referees": 8,
+    "total_documents": 7,
+    "declined_referees": 3,
+    "accepted_referees": 5,
+    "manuscript_completeness": 1.0,
+    "referee_completeness": 1.0,
+    "document_completeness": 1.0,
+    "status_accuracy": 1.0,
+    "overall_score": 1.0,
+    "baseline_compliance": "PERFECT"
+  },
+  "errors": []
+}

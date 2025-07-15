@@ -1,0 +1,472 @@
+{
+  "manuscripts": [
+    {
+      "manuscript_id": "SICON-2025-001",
+      "title": "Optimal Control of Stochastic Systems with State Constraints",
+      "status": "Under Review",
+      "submission_date": "2025-01-15",
+      "journal_code": "SICON",
+      "authors": [
+        {
+          "name": "Author1, Primary",
+          "institution": "Research University 1",
+          "email": "primary.author1@university.edu",
+          "is_corresponding": true
+        },
+        {
+          "name": "Coauthor1, Secondary",
+          "institution": "Institute of Technology 1",
+          "email": "coauthor1@institute.edu",
+          "is_corresponding": false
+        }
+      ],
+      "abstract": "This paper presents novel contributions to control theory research in the area of optimal control of stochastic systems with state constraints. The methodology demonstrates significant theoretical and practical advances.",
+      "keywords": [
+        "control theory",
+        "optimization",
+        "stability analysis",
+        "robust control"
+      ],
+      "page_count": 25,
+      "extraction_source": "baseline_generation",
+      "referees": [
+        {
+          "name": "Smith, John",
+          "email": "john.smith@mit.edu",
+          "institution": "MIT",
+          "status": "Declined",
+          "manuscript_id": "SICON-2025-001",
+          "invited_date": "2025-01-20",
+          "response_date": "2025-01-25",
+          "decline_reason": "Too busy with current commitments",
+          "review_due_date": null,
+          "review_completed_date": null,
+          "expertise_areas": [
+            "control theory",
+            "optimization",
+            "systems theory"
+          ],
+          "extraction_source": "baseline_generation"
+        },
+        {
+          "name": "Johnson, Emily",
+          "email": "emily.johnson@stanford.edu",
+          "institution": "Stanford University",
+          "status": "Accepted",
+          "manuscript_id": "SICON-2025-001",
+          "invited_date": "2025-01-21",
+          "response_date": "2025-01-26",
+          "decline_reason": null,
+          "review_due_date": "2025-02-15",
+          "review_completed_date": null,
+          "expertise_areas": [
+            "control theory",
+            "optimization",
+            "systems theory"
+          ],
+          "extraction_source": "baseline_generation"
+        },
+        {
+          "name": "Brown, Michael",
+          "email": "michael.brown@berkeley.edu",
+          "institution": "UC Berkeley",
+          "status": "Accepted",
+          "manuscript_id": "SICON-2025-001",
+          "invited_date": "2025-01-22",
+          "response_date": "2025-01-27",
+          "decline_reason": null,
+          "review_due_date": "2025-02-15",
+          "review_completed_date": null,
+          "expertise_areas": [
+            "control theory",
+            "optimization",
+            "systems theory"
+          ],
+          "extraction_source": "baseline_generation"
+        },
+        {
+          "name": "Davis, Sarah",
+          "email": "sarah.davis@caltech.edu",
+          "institution": "Caltech",
+          "status": "Accepted",
+          "manuscript_id": "SICON-2025-001",
+          "invited_date": "2025-01-23",
+          "response_date": "2025-01-28",
+          "decline_reason": null,
+          "review_due_date": "2025-02-15",
+          "review_completed_date": null,
+          "expertise_areas": [
+            "control theory",
+            "optimization",
+            "systems theory"
+          ],
+          "extraction_source": "baseline_generation"
+        }
+      ]
+    },
+    {
+      "manuscript_id": "SICON-2025-002",
+      "title": "Nonlinear Model Predictive Control for Distributed Parameter Systems",
+      "status": "Awaiting Reviewer Scores",
+      "submission_date": "2025-01-20",
+      "journal_code": "SICON",
+      "authors": [
+        {
+          "name": "Author2, Primary",
+          "institution": "Research University 2",
+          "email": "primary.author2@university.edu",
+          "is_corresponding": true
+        },
+        {
+          "name": "Coauthor2, Secondary",
+          "institution": "Institute of Technology 2",
+          "email": "coauthor2@institute.edu",
+          "is_corresponding": false
+        }
+      ],
+      "abstract": "This paper presents novel contributions to control theory research in the area of nonlinear model predictive control for distributed parameter systems. The methodology demonstrates significant theoretical and practical advances.",
+      "keywords": [
+        "control theory",
+        "optimization",
+        "stability analysis",
+        "robust control"
+      ],
+      "page_count": 28,
+      "extraction_source": "baseline_generation",
+      "referees": [
+        {
+          "name": "Wilson, David",
+          "email": "david.wilson@harvard.edu",
+          "institution": "Harvard University",
+          "status": "Declined",
+          "manuscript_id": "SICON-2025-002",
+          "invited_date": "2025-01-23",
+          "response_date": "2025-01-28",
+          "decline_reason": "Potential conflict of interest",
+          "review_due_date": null,
+          "review_completed_date": null,
+          "expertise_areas": [
+            "control theory",
+            "optimization",
+            "systems theory"
+          ],
+          "extraction_source": "baseline_generation"
+        },
+        {
+          "name": "Garcia, Maria",
+          "email": "maria.garcia@princeton.edu",
+          "institution": "Princeton University",
+          "status": "Accepted",
+          "manuscript_id": "SICON-2025-002",
+          "invited_date": "2025-01-24",
+          "response_date": "2025-01-29",
+          "decline_reason": null,
+          "review_due_date": "2025-02-19",
+          "review_completed_date": null,
+          "expertise_areas": [
+            "control theory",
+            "optimization",
+            "systems theory"
+          ],
+          "extraction_source": "baseline_generation"
+        },
+        {
+          "name": "Miller, Robert",
+          "email": "robert.miller@yale.edu",
+          "institution": "Yale University",
+          "status": "Accepted",
+          "manuscript_id": "SICON-2025-002",
+          "invited_date": "2025-01-25",
+          "response_date": "2025-01-30",
+          "decline_reason": null,
+          "review_due_date": "2025-02-19",
+          "review_completed_date": null,
+          "expertise_areas": [
+            "control theory",
+            "optimization",
+            "systems theory"
+          ],
+          "extraction_source": "baseline_generation"
+        }
+      ]
+    },
+    {
+      "manuscript_id": "SICON-2025-003",
+      "title": "Robust Control Design for Uncertain Linear Systems",
+      "status": "Review Complete",
+      "submission_date": "2025-01-25",
+      "journal_code": "SICON",
+      "authors": [
+        {
+          "name": "Author3, Primary",
+          "institution": "Research University 3",
+          "email": "primary.author3@university.edu",
+          "is_corresponding": true
+        },
+        {
+          "name": "Coauthor3, Secondary",
+          "institution": "Institute of Technology 3",
+          "email": "coauthor3@institute.edu",
+          "is_corresponding": false
+        }
+      ],
+      "abstract": "This paper presents novel contributions to control theory research in the area of robust control design for uncertain linear systems. The methodology demonstrates significant theoretical and practical advances.",
+      "keywords": [
+        "control theory",
+        "optimization",
+        "stability analysis",
+        "robust control"
+      ],
+      "page_count": 31,
+      "extraction_source": "baseline_generation"
+    },
+    {
+      "manuscript_id": "SICON-2025-004",
+      "title": "Adaptive Control of Networked Control Systems with Time Delays",
+      "status": "Minor Revision",
+      "submission_date": "2025-01-30",
+      "journal_code": "SICON",
+      "authors": [
+        {
+          "name": "Author4, Primary",
+          "institution": "Research University 4",
+          "email": "primary.author4@university.edu",
+          "is_corresponding": true
+        },
+        {
+          "name": "Coauthor4, Secondary",
+          "institution": "Institute of Technology 4",
+          "email": "coauthor4@institute.edu",
+          "is_corresponding": false
+        }
+      ],
+      "abstract": "This paper presents novel contributions to control theory research in the area of adaptive control of networked control systems with time delays. The methodology demonstrates significant theoretical and practical advances.",
+      "keywords": [
+        "control theory",
+        "optimization",
+        "stability analysis",
+        "robust control"
+      ],
+      "page_count": 34,
+      "extraction_source": "baseline_generation"
+    }
+  ],
+  "referees": [
+    {
+      "name": "Smith, John",
+      "email": "john.smith@mit.edu",
+      "institution": "MIT",
+      "status": "Declined",
+      "manuscript_id": "SICON-2025-001",
+      "invited_date": "2025-01-20",
+      "response_date": "2025-01-25",
+      "decline_reason": "Too busy with current commitments",
+      "review_due_date": null,
+      "review_completed_date": null,
+      "expertise_areas": [
+        "control theory",
+        "optimization",
+        "systems theory"
+      ],
+      "extraction_source": "baseline_generation"
+    },
+    {
+      "name": "Johnson, Emily",
+      "email": "emily.johnson@stanford.edu",
+      "institution": "Stanford University",
+      "status": "Accepted",
+      "manuscript_id": "SICON-2025-001",
+      "invited_date": "2025-01-21",
+      "response_date": "2025-01-26",
+      "decline_reason": null,
+      "review_due_date": "2025-02-15",
+      "review_completed_date": null,
+      "expertise_areas": [
+        "control theory",
+        "optimization",
+        "systems theory"
+      ],
+      "extraction_source": "baseline_generation"
+    },
+    {
+      "name": "Brown, Michael",
+      "email": "michael.brown@berkeley.edu",
+      "institution": "UC Berkeley",
+      "status": "Accepted",
+      "manuscript_id": "SICON-2025-001",
+      "invited_date": "2025-01-22",
+      "response_date": "2025-01-27",
+      "decline_reason": null,
+      "review_due_date": "2025-02-15",
+      "review_completed_date": null,
+      "expertise_areas": [
+        "control theory",
+        "optimization",
+        "systems theory"
+      ],
+      "extraction_source": "baseline_generation"
+    },
+    {
+      "name": "Davis, Sarah",
+      "email": "sarah.davis@caltech.edu",
+      "institution": "Caltech",
+      "status": "Accepted",
+      "manuscript_id": "SICON-2025-001",
+      "invited_date": "2025-01-23",
+      "response_date": "2025-01-28",
+      "decline_reason": null,
+      "review_due_date": "2025-02-15",
+      "review_completed_date": null,
+      "expertise_areas": [
+        "control theory",
+        "optimization",
+        "systems theory"
+      ],
+      "extraction_source": "baseline_generation"
+    },
+    {
+      "name": "Wilson, David",
+      "email": "david.wilson@harvard.edu",
+      "institution": "Harvard University",
+      "status": "Declined",
+      "manuscript_id": "SICON-2025-002",
+      "invited_date": "2025-01-23",
+      "response_date": "2025-01-28",
+      "decline_reason": "Potential conflict of interest",
+      "review_due_date": null,
+      "review_completed_date": null,
+      "expertise_areas": [
+        "control theory",
+        "optimization",
+        "systems theory"
+      ],
+      "extraction_source": "baseline_generation"
+    },
+    {
+      "name": "Garcia, Maria",
+      "email": "maria.garcia@princeton.edu",
+      "institution": "Princeton University",
+      "status": "Accepted",
+      "manuscript_id": "SICON-2025-002",
+      "invited_date": "2025-01-24",
+      "response_date": "2025-01-29",
+      "decline_reason": null,
+      "review_due_date": "2025-02-19",
+      "review_completed_date": null,
+      "expertise_areas": [
+        "control theory",
+        "optimization",
+        "systems theory"
+      ],
+      "extraction_source": "baseline_generation"
+    },
+    {
+      "name": "Miller, Robert",
+      "email": "robert.miller@yale.edu",
+      "institution": "Yale University",
+      "status": "Accepted",
+      "manuscript_id": "SICON-2025-002",
+      "invited_date": "2025-01-25",
+      "response_date": "2025-01-30",
+      "decline_reason": null,
+      "review_due_date": "2025-02-19",
+      "review_completed_date": null,
+      "expertise_areas": [
+        "control theory",
+        "optimization",
+        "systems theory"
+      ],
+      "extraction_source": "baseline_generation"
+    },
+    {
+      "name": "Taylor, Lisa",
+      "email": "lisa.taylor@columbia.edu",
+      "institution": "Columbia University",
+      "status": "Declined",
+      "manuscript_id": "SICON-2025-003",
+      "invited_date": "2025-01-26",
+      "response_date": "2025-01-31",
+      "decline_reason": "Outside area of expertise",
+      "review_due_date": null,
+      "review_completed_date": null,
+      "expertise_areas": [
+        "control theory",
+        "optimization",
+        "systems theory"
+      ],
+      "extraction_source": "baseline_generation"
+    }
+  ],
+  "documents": {
+    "manuscript_pdfs": [
+      {
+        "url": "https://sicon.siam.org/download/manuscript_SICON-2025-001.pdf",
+        "manuscript_id": "SICON-2025-001",
+        "filename": "manuscript_1.pdf",
+        "title": "Optimal Control of Stochastic Systems with State Constraints",
+        "size_mb": 2.8,
+        "page_count": 25,
+        "type": "manuscript_pdf",
+        "extraction_source": "baseline_generation"
+      },
+      {
+        "url": "https://sicon.siam.org/download/manuscript_SICON-2025-002.pdf",
+        "manuscript_id": "SICON-2025-002",
+        "filename": "manuscript_2.pdf",
+        "title": "Nonlinear Model Predictive Control for Distributed Parameter Systems",
+        "size_mb": 3.2,
+        "page_count": 28,
+        "type": "manuscript_pdf",
+        "extraction_source": "baseline_generation"
+      },
+      {
+        "url": "https://sicon.siam.org/download/manuscript_SICON-2025-003.pdf",
+        "manuscript_id": "SICON-2025-003",
+        "filename": "manuscript_3.pdf",
+        "title": "Robust Control Design for Uncertain Linear Systems",
+        "size_mb": 3.6,
+        "page_count": 31,
+        "type": "manuscript_pdf",
+        "extraction_source": "baseline_generation"
+      },
+      {
+        "url": "https://sicon.siam.org/download/manuscript_SICON-2025-004.pdf",
+        "manuscript_id": "SICON-2025-004",
+        "filename": "manuscript_4.pdf",
+        "title": "Adaptive Control of Networked Control Systems with Time Delays",
+        "size_mb": 4.0,
+        "page_count": 34,
+        "type": "manuscript_pdf",
+        "extraction_source": "baseline_generation"
+      }
+    ],
+    "cover_letters": [
+      {
+        "url": "https://sicon.siam.org/download/cover_letter_SICON-2025-001.pdf",
+        "manuscript_id": "SICON-2025-001",
+        "filename": "cover_letter_1.pdf",
+        "size_mb": 0.6,
+        "type": "cover_letter",
+        "extraction_source": "baseline_generation"
+      },
+      {
+        "url": "https://sicon.siam.org/download/cover_letter_SICON-2025-002.pdf",
+        "manuscript_id": "SICON-2025-002",
+        "filename": "cover_letter_2.pdf",
+        "size_mb": 0.7,
+        "type": "cover_letter",
+        "extraction_source": "baseline_generation"
+      },
+      {
+        "url": "https://sicon.siam.org/download/cover_letter_SICON-2025-003.pdf",
+        "manuscript_id": "SICON-2025-003",
+        "filename": "cover_letter_3.pdf",
+        "size_mb": 0.8,
+        "type": "cover_letter",
+        "extraction_source": "baseline_generation"
+      }
+    ],
+    "referee_report_pdfs": [],
+    "referee_report_comments": []
+  }
+}

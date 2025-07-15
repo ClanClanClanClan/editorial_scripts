@@ -51,11 +51,15 @@ coverage.xml
 
 # Environments
 .env
+.env.*
+!.env.example
 .env.local
 .env.*.local
 .venv
-env/
 venv/
+venv_*/
+.venv*/
+env/
 ENV/
 env.bak/
 venv.bak/

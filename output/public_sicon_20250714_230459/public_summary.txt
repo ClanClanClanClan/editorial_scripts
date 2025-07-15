@@ -1,0 +1,23 @@
+SICON Public Data Extraction Summary
+========================================
+
+Extraction Date: 2025-07-14 23:04:59
+Success: True
+Duration: 19.4 seconds
+Pages Analyzed: 4
+
+JOURNAL INFORMATION:
+• Name: SIAM Journal on Control and Optimization
+• Publisher: Society for Industrial and Applied Mathematics
+• ISSN: 
+• Scope: 3 topics
+
+SUBMISSION GUIDELINES:
+• Manuscript Types: 2
+• Formatting Requirements: 3
+
+EDITORIAL BOARD: 20 members found
+
+REVIEW PROCESS:
+• Peer Review: True
+• Review Stages: 1

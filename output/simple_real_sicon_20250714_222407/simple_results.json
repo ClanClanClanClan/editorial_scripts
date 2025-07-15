@@ -1,0 +1,13 @@
+{
+  "started_at": "2025-07-14T22:24:07.772394",
+  "completed_at": "2025-07-14T22:24:45.973020",
+  "duration_seconds": 38.200626,
+  "success": false,
+  "manuscripts_count": 0,
+  "referees_count": 0,
+  "documents_count": 0,
+  "metrics": {},
+  "errors": [
+    "Authentication failed"
+  ]
+}

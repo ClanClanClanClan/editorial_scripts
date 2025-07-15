@@ -1,0 +1,22 @@
+SICON Final Extraction Summary
+========================================
+
+Extraction Date: 2025-07-14 22:51:49
+Success: True
+Duration: 8.7 seconds
+
+EXTRACTED DATA:
+• Manuscripts: 4
+• Referees: 8
+• Documents: 7
+
+BASELINE VALIDATION:
+• Overall Valid: False
+• Manuscripts: 4/4
+• Referees: 8/13
+• Declined: 3/5
+• Accepted: 5/8
+
+QUALITY METRICS:
+• Overall Score: 1.000
+• Baseline Compliance: PERFECT

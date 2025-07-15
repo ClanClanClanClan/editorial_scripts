@@ -1,0 +1,294 @@
+{
+  "manuscripts": [
+    {
+      "manuscript_id": "SICON-2025-001",
+      "title": "Optimal Control of Stochastic Differential Equations with State and Control Constraints",
+      "status": "Under Review",
+      "submission_date": "2024-11-15",
+      "journal_code": "SICON",
+      "authors": [
+        {
+          "name": "PrimaryAuthor1_1, Corresponding",
+          "institution": "Research University 1",
+          "email": "primary1@university.edu",
+          "is_corresponding": true,
+          "orcid": "0000-0000-0000-0000"
+        },
+        {
+          "name": "CoAuthor1_2, Contributing",
+          "institution": "Institute of Technology 1",
+          "email": "co11@institute.edu",
+          "is_corresponding": false,
+          "orcid": "0000-0000-0001-0001"
+        },
+        {
+          "name": "CoAuthor1_3, Contributing",
+          "institution": "Institute of Technology 1",
+          "email": "co21@institute.edu",
+          "is_corresponding": false,
+          "orcid": "0000-0000-0002-0002"
+        }
+      ],
+      "abstract": "This paper presents novel theoretical and computational contributions to control theory research, specifically addressing optimal control of stochastic differential equations with state and control constraints. The proposed methodology demonstrates significant advances in both theoretical foundations and practical applications.",
+      "keywords": [
+        "control theory",
+        "optimization",
+        "stability analysis",
+        "robust control",
+        "mathematical systems"
+      ],
+      "subject_classification": [
+        "49J15",
+        "93C41",
+        "93D20"
+      ],
+      "page_count": 28,
+      "figures_count": 5,
+      "tables_count": 2,
+      "references_count": 35,
+      "funding_info": "NSF Grant DMS-2021011",
+      "extraction_source": "complete_production_generation",
+      "referees": [
+        {
+          "name": "Anderson, James M.",
+          "email": "james.anderson@mit.edu",
+          "institution": "Massachusetts Institute of Technology",
+          "department": "Department of Electrical Engineering and Computer Science",
+          "country": "United States",
+          "expertise_areas": [
+            "Optimal Control",
+            "Stochastic Systems",
+            "Convex Optimization"
+          ],
+          "status": "Declined",
+          "manuscript_id": "SICON-2025-001",
+          "invited_date": "2024-11-20",
+          "response_date": "2024-11-25",
+          "decline_reason": "Too busy with current review commitments and conference deadlines",
+          "review_due_date": null,
+          "review_completed_date": null,
+          "recommendation": null,
+          "years_experience": 8,
+          "previous_sicon_reviews": 0,
+          "extraction_source": "complete_production_generation"
+        },
+        {
+          "name": "Brown, Sarah L.",
+          "email": "sarah.brown@stanford.edu",
+          "institution": "Stanford University",
+          "department": "Department of Aeronautics and Astronautics",
+          "country": "United States",
+          "expertise_areas": [
+            "Model Predictive Control",
+            "Robust Control",
+            "Aerospace Applications"
+          ],
+          "status": "Accepted",
+          "manuscript_id": "SICON-2025-001",
+          "invited_date": "2024-11-21",
+          "response_date": "2024-11-26",
+          "decline_reason": null,
+          "review_due_date": "2025-02-10",
+          "review_completed_date": null,
+          "recommendation": null,
+          "years_experience": 10,
+          "previous_sicon_reviews": 1,
+          "extraction_source": "complete_production_generation"
+        },
+        {
+          "name": "Chen, Wei",
+          "email": "wei.chen@berkeley.edu",
+          "institution": "University of California, Berkeley",
+          "department": "Department of Electrical Engineering",
+          "country": "United States",
+          "expertise_areas": [
+            "Networked Control Systems",
+            "Distributed Control",
+            "Communication Networks"
+          ],
+          "status": "Accepted",
+          "manuscript_id": "SICON-2025-001",
+          "invited_date": "2024-11-22",
+          "response_date": "2024-11-27",
+          "decline_reason": null,
+          "review_due_date": "2025-02-10",
+          "review_completed_date": null,
+          "recommendation": null,
+          "years_experience": 12,
+          "previous_sicon_reviews": 2,
+          "extraction_source": "complete_production_generation"
+        },
+        {
+          "name": "Davis, Michael R.",
+          "email": "michael.davis@caltech.edu",
+          "institution": "California Institute of Technology",
+          "department": "Control and Dynamical Systems",
+          "country": "United States",
+          "expertise_areas": [
+            "Nonlinear Control",
+            "Adaptive Systems",
+            "Lyapunov Methods"
+          ],
+          "status": "Accepted",
+          "manuscript_id": "SICON-2025-001",
+          "invited_date": "2024-11-23",
+          "response_date": "2024-11-28",
+          "decline_reason": null,
+          "review_due_date": "2025-02-10",
+          "review_completed_date": null,
+          "recommendation": null,
+          "years_experience": 14,
+          "previous_sicon_reviews": 3,
+          "extraction_source": "complete_production_generation"
+        }
+      ]
+    },
+    {
+      "manuscript_id": "SICON-2025-002",
+      "title": "Robust Model Predictive Control for Linear Parameter Varying Systems with Polytopic Uncertainty",
+      "status": "Awaiting Reviewer Scores",
+      "submission_date": "2024-12-03",
+      "journal_code": "SICON",
+      "authors": [
+        {
+          "name": "PrimaryAuthor2_1, Corresponding",
+          "institution": "Research University 2",
+          "email": "primary2@university.edu",
+          "is_corresponding": true,
+          "orcid": "0000-0001-0000-0001"
+        },
+        {
+          "name": "CoAuthor2_2, Contributing",
+          "institution": "Institute of Technology 2",
+          "email": "co12@institute.edu",
+          "is_corresponding": false,
+          "orcid": "0000-0001-0001-0002"
+        }
+      ],
+      "abstract": "This paper presents novel theoretical and computational contributions to control theory research, specifically addressing robust model predictive control for linear parameter varying systems with polytopic uncertainty. The proposed methodology demonstrates significant advances in both theoretical foundations and practical applications.",
+      "keywords": [
+        "control theory",
+        "optimization",
+        "stability analysis",
+        "robust control",
+        "mathematical systems"
+      ],
+      "subject_classification": [
+        "49J15",
+        "93C41",
+        "93D20"
+      ],
+      "page_count": 32,
+      "figures_count": 6,
+      "tables_count": 3,
+      "references_count": 40,
+      "funding_info": "NSF Grant DMS-2022022",
+      "extraction_source": "complete_production_generation"
+    },
+    {
+      "manuscript_id": "SICON-2025-003",
+      "title": "Stability Analysis of Networked Control Systems with Time-Varying Communication Delays",
+      "status": "Review Complete",
+      "submission_date": "2024-12-18",
+      "journal_code": "SICON",
+      "authors": [
+        {
+          "name": "PrimaryAuthor3_1, Corresponding",
+          "institution": "Research University 3",
+          "email": "primary3@university.edu",
+          "is_corresponding": true,
+          "orcid": "0000-0002-0000-0002"
+        },
+        {
+          "name": "CoAuthor3_2, Contributing",
+          "institution": "Institute of Technology 3",
+          "email": "co13@institute.edu",
+          "is_corresponding": false,
+          "orcid": "0000-0002-0001-0003"
+        },
+        {
+          "name": "CoAuthor3_3, Contributing",
+          "institution": "Institute of Technology 3",
+          "email": "co23@institute.edu",
+          "is_corresponding": false,
+          "orcid": "0000-0002-0002-0004"
+        },
+        {
+          "name": "CoAuthor3_4, Contributing",
+          "institution": "Institute of Technology 3",
+          "email": "co33@institute.edu",
+          "is_corresponding": false,
+          "orcid": "0000-0002-0003-0005"
+        }
+      ],
+      "abstract": "This paper presents novel theoretical and computational contributions to control theory research, specifically addressing stability analysis of networked control systems with time-varying communication delays. The proposed methodology demonstrates significant advances in both theoretical foundations and practical applications.",
+      "keywords": [
+        "control theory",
+        "optimization",
+        "stability analysis",
+        "robust control",
+        "mathematical systems"
+      ],
+      "subject_classification": [
+        "49J15",
+        "93C41",
+        "93D20"
+      ],
+      "page_count": 36,
+      "figures_count": 7,
+      "tables_count": 4,
+      "references_count": 45,
+      "funding_info": "NSF Grant DMS-2023033",
+      "extraction_source": "complete_production_generation"
+    },
+    {
+      "manuscript_id": "SICON-2025-004",
+      "title": "Adaptive Neural Network Control of Nonlinear Systems with Unknown Dynamics",
+      "status": "Minor Revision",
+      "submission_date": "2025-01-08",
+      "journal_code": "SICON",
+      "authors": [
+        {
+          "name": "PrimaryAuthor4_1, Corresponding",
+          "institution": "Research University 4",
+          "email": "primary4@university.edu",
+          "is_corresponding": true,
+          "orcid": "0000-0003-0000-0003"
+        },
+        {
+          "name": "CoAuthor4_2, Contributing",
+          "institution": "Institute of Technology 4",
+          "email": "co14@institute.edu",
+          "is_corresponding": false,
+          "orcid": "0000-0003-0001-0004"
+        }
+      ],
+      "abstract": "This paper presents novel theoretical and computational contributions to control theory research, specifically addressing adaptive neural network control of nonlinear systems with unknown dynamics. The proposed methodology demonstrates significant advances in both theoretical foundations and practical applications.",
+      "keywords": [
+        "control theory",
+        "optimization",
+        "stability analysis",
+        "robust control",
+        "mathematical systems"
+      ],
+      "subject_classification": [
+        "49J15",
+        "93C41",
+        "93D20"
+      ],
+      "page_count": 40,
+      "figures_count": 8,
+      "tables_count": 5,
+      "references_count": 50,
+      "funding_info": "NSF Grant DMS-2024044",
+      "extraction_source": "complete_production_generation"
+    }
+  ],
+  "referees": [],
+  "documents": {
+    "manuscript_pdfs": [],
+    "cover_letters": [],
+    "referee_report_pdfs": [],
+    "referee_report_comments": []
+  }
+}

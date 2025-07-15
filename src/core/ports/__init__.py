@@ -1,1 +1,0 @@
-# Ports and interfaces for clean architecture

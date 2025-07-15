@@ -1,5 +1,0 @@
-2025-07-14 21:08:28,710 - __main__ - INFO - 🔐 Checking credentials...
-2025-07-14 21:08:28,710 - __main__ - ERROR - ❌ No credentials found
-2025-07-14 21:08:28,710 - __main__ - ERROR - Please set environment variables:
-2025-07-14 21:08:28,710 - __main__ - ERROR -   - ORCID_EMAIL and ORCID_PASSWORD for SICON/SIFIN
-2025-07-14 21:08:28,710 - __main__ - ERROR -   - SCHOLARONE_EMAIL and SCHOLARONE_PASSWORD for MF/MOR

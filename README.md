@@ -1,145 +1,140 @@
-# Editorial Scripts - Complete Journal Extraction System
+# Editorial Scripts
 
-A comprehensive, organized system for extracting manuscript and referee data from academic journal management systems.
+A unified system for extracting manuscript and referee data from editorial systems.
 
 ## 🚀 Quick Start
 
-1. **Setup environment**:
-   ```bash
-   python3 -m venv venv_fresh
-   source venv_fresh/bin/activate
-   pip install -r requirements.txt
-   ```
+### 1. Setup Environment
+```bash
+python3 -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+pip install -r requirements.txt
+```
 
-2. **Configure credentials**:
-   ```bash
-   export EDITORIAL_MASTER_PASSWORD='your_password'
-   python3 secure_credential_manager.py setup
-   ```
+### 2. Configure Credentials
+```bash
+python scripts/setup/secure_credential_manager.py --setup
+```
 
-3. **Run extractions**:
-   ```bash
-   # Any supported journal
-   python3 run_all_journals.py --journal SICON
-   python3 run_all_journals.py --journal MF
-   python3 run_all_journals.py --journal JOTA
-   ```
+### 3. Run Extraction
+```bash
+python run_extraction.py sicon --headless
+```
 
-## 📂 Organized Project Structure
+## 📁 Directory Structure
 
 ```
-src/
-├── infrastructure/
-│   ├── scrapers/
-│   │   ├── siam/                    # SIAM journals
-│   │   │   ├── sicon_scraper.py     # SICON (working)
-│   │   │   └── sifin_scraper.py     # SIFIN (needs fixes)
-│   │   ├── scholarone/              # ScholarOne platform
-│   │   │   ├── mf_scraper.py        # Mathematical Finance
-│   │   │   └── mor_scraper.py       # Math Operations Research
-│   │   ├── email_based/             # Email-based journals
-│   │   │   ├── fs_scraper.py        # Finance & Stochastics
-│   │   │   └── jota_scraper.py      # JOTA
-│   │   ├── other/                   # Other journals
-│   │   │   ├── mafe_scraper.py      # MAFE
-│   │   │   └── naco_scraper.py      # NACO
-│   │   ├── base_scraper.py          # Base scraper class
-│   │   ├── enhanced_referee_extractor.py
-│   │   ├── siam_orchestrator.py     # SIAM coordination
-│   │   └── stealth_manager.py       # Anti-detection
-│   ├── database/                    # Database models
-│   ├── repositories/                # Data access layer
-│   └── services/                    # External services
-├── api/                            # FastAPI web interface
-├── core/                           # Domain logic
-└── ai/                             # AI analysis
+editorial_scripts/
+├── editorial_assistant/          # Main implementation
+│   ├── core/                    # Core models and utilities
+│   ├── extractors/              # Journal-specific extractors
+│   ├── cli/                     # Command-line interface
+│   └── utils/                   # Utilities and helpers
+├── run_extraction.py            # Primary entry point
+├── scripts/                      # Utility scripts
+│   ├── setup/                   # Setup and configuration
+│   ├── utilities/               # Helper scripts
+│   └── testing/                 # Debug and test scripts
+├── docs/                         # Documentation
+│   ├── archives/                # Historical documentation
+│   ├── reports/                 # System reports
+│   └── specifications/          # Technical specifications
+├── data/                         # Data outputs (gitignored)
+│   ├── extractions/             # Extraction results
+│   ├── exports/                 # Exported data
+│   ├── pdfs/                    # Downloaded PDFs
+│   └── logs/                    # System logs
+├── config/                       # Configuration files
+├── tests/                        # Test suite
+├── database/                     # Database setup
+└── venv/                         # Virtual environment (gitignored)
 ```
 
 ## 🎯 Supported Journals
 
-| Journal | Status | Platform | Notes |
-|---------|--------|----------|-------|
-| **SICON** | ✅ Working | SIAM | Advanced features, caching, email crosscheck |
-| **SIFIN** | ⚠️ Needs fixes | SIAM | Basic extraction working |
-| **MF** | 🔧 Ready to test | ScholarOne | Mathematical Finance |
-| **MOR** | 🔧 Ready to test | ScholarOne | Math Operations Research |
-| **FS** | 🔧 Ready to test | Email-based | Finance & Stochastics |
-| **JOTA** | 🔧 Ready to test | Email-based | Journal of Theoretical Probability |
+- **SICON** - SIAM Journal on Control and Optimization
+- **SIFIN** - SIAM Journal on Financial Mathematics
+- **MF** - Mathematical Finance (ScholarOne)
+- **MOR** - Mathematics of Operations Research (ScholarOne)
 
-## 🔧 System Features
+## 📊 Features
 
-### Core Capabilities
-- **Multi-platform support**: SIAM, ScholarOne, Email-based systems
-- **Comprehensive data extraction**: Manuscripts, referees, PDFs, timelines
-- **Smart caching**: Content-based change detection
-- **Email integration**: Gmail API for communication timeline analysis
-- **AI analysis**: Manuscript and referee insights
-- **Secure credential management**: Encrypted storage with master password
+- ✅ Automated manuscript extraction
+- ✅ Referee data collection with email addresses
+- ✅ PDF download of manuscripts and reports
+- ✅ Browser pooling for concurrent processing
+- ✅ Intelligent caching with change detection
+- ✅ Comprehensive error handling and retry logic
+- ✅ Performance monitoring and baseline testing
 
-### Advanced Features
-- **Anti-detection**: Stealth browsing with randomized patterns
-- **Parallel processing**: Concurrent manuscript processing
-- **Document management**: PDF download, text extraction, metadata
-- **Analytics**: Referee performance, timeline analysis, behavioral patterns
-- **API interface**: REST API for programmatic access
+## 🔧 Configuration
 
-## 🧹 Recent Cleanup (2025-07-14)
-
-### What Was Cleaned Up
-- **Consolidated 3 competing systems** into single organized structure
-- **Removed duplicate implementations** (50+ redundant files)
-- **Organized scrapers** by platform (SIAM, ScholarOne, Email-based)
-- **Archived legacy code** while preserving working implementations
-- **Created unified runner** supporting all journals
-
-### What Was Archived
-- `archive/legacy_implementations_20250714/` - Old competing systems
-- `archive/legacy_journals/` - Legacy standalone implementations  
-- `archive/old_test_files/` - Debug and test files
-- `archive/screenshots/` - Debug screenshots
-
-## 📊 Data Quality Standards
-
-Each journal extractor provides:
-- **Complete referee information**: Names, emails, institutions, statuses
-- **Timeline data**: Invitation dates, response times, report submissions
-- **Communication metrics**: Email counts, reminder frequencies, response quality
-- **Document collection**: Manuscripts, reports, cover letters, supplements
-- **Smart deduplication**: Unique referees per manuscript
-
-## 🔍 Testing & Verification
-
+### Environment Variables
+Set your credentials using environment variables or the secure credential manager:
 ```bash
-# Test specific journal
-python3 run_all_journals.py --journal SICON --verbose
-
-# Check extraction results
-ls -la output/sicon/
-
-# Run integration tests
-python3 -m pytest tests/integration/
+export ORCID_EMAIL="your.email@example.com"
+export ORCID_PASSWORD="your_password"
 ```
+
+### Configuration Files
+- `config/credentials.yaml.example` - Example credential structure
+- `.env.example` - Example environment configuration
+
+## 🧪 Testing
+
+Run the test suite:
+```bash
+pytest tests/
+```
+
+Test a specific journal:
+```bash
+python run_extraction.py sicon --headless
+```
+
+## 📚 Documentation
+
+- [Installation Guide](docs/installation.md)
+- [Usage Guide](docs/usage.md)
+- [API Documentation](docs/api.md)
+- [Development Guide](docs/development.md)
 
 ## 🛠️ Development
 
-### Adding New Journals
-1. Create scraper in appropriate subfolder (`src/infrastructure/scrapers/`)
-2. Inherit from `BaseScraper`
-3. Implement required methods
-4. Add to `run_all_journals.py`
-5. Add tests
+1. **Clone the repository**
+2. **Create a virtual environment**
+3. **Install dependencies**: `pip install -r requirements-dev.txt`
+4. **Run tests**: `pytest`
+5. **Check code quality**: `make lint`
 
-### Architecture Principles
-- **Single responsibility**: One scraper per journal
-- **Consistent interfaces**: All scrapers use same API
-- **Proper error handling**: Graceful failures with detailed logging
-- **Async throughout**: Non-blocking operations
-- **Secure by default**: No credentials in code, encrypted storage
+## 📈 Performance
 
-## 📞 Support
+Expected baseline performance (July 11, 2025):
+- Manuscripts: 4+
+- Referees: 13+
+- PDFs: 4+
+- Success Rate: 95%+
 
-- **Issues**: Report at project repository
-- **Documentation**: See `docs/` folder for detailed guides
-- **Configuration**: Check `config/` for settings and examples
+## 🤝 Contributing
 
-*Last updated: 2025-07-14 - Major cleanup and reorganization complete*
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## 📄 License
+
+This project is proprietary software. All rights reserved.
+
+## 🆘 Support
+
+For issues or questions:
+- Check the [troubleshooting guide](docs/troubleshooting.md)
+- Review [known issues](docs/known-issues.md)
+- Contact the development team
+
+---
+
+**Current Version**: 2.0.0 (Ultimate System)  
+**Last Updated**: July 15, 2025

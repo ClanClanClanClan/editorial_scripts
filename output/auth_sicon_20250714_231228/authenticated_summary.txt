@@ -1,0 +1,20 @@
+SICON Authenticated Data Extraction Summary
+==================================================
+
+Extraction Date: 2025-07-14 23:12:28
+Authentication Success: False
+Extraction Success: False
+Duration: 48.2 seconds
+
+BASELINE COMPLIANCE:
+• Overall Compliance: False
+• Manuscripts: 0/4 (❌)
+• Referees: 0/13 (❌)
+  - Declined: 0/5
+  - Accepted: 0/8
+• Documents: 0/11 (❌)
+
+REFEREE METADATA EXTRACTED:
+
+ERRORS: 1
+  • Authentication failed

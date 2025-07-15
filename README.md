@@ -52,10 +52,17 @@ editorial_scripts/
 
 ## 🎯 Supported Journals
 
+### Active Journals (with current manuscripts)
 - **SICON** - SIAM Journal on Control and Optimization
-- **SIFIN** - SIAM Journal on Financial Mathematics
+- **SIFIN** - SIAM Journal on Financial Mathematics  
 - **MF** - Mathematical Finance (ScholarOne)
 - **MOR** - Mathematics of Operations Research (ScholarOne)
+- **FS** - Finance and Stochastics (Editorial Manager)
+
+### Additional Journals (configured but no current manuscripts)
+- **JOTA** - Journal of Optimization Theory and Applications
+- **MAFE** - Mathematics and Financial Economics
+- **NACO** - North American Congress on Optimization
 
 ## 📊 Features
 
@@ -107,13 +114,26 @@ python run_extraction.py sicon --headless
 4. **Run tests**: `pytest`
 5. **Check code quality**: `make lint`
 
-## 📈 Performance
+## 📈 Current Baseline Performance (July 15, 2025)
 
-Expected baseline performance (July 11, 2025):
-- Manuscripts: 4+
-- Referees: 13+
-- PDFs: 4+
-- Success Rate: 95%+
+### Active Journals
+- **SICON**: 13 referees (8 accepted, 5 declined), 4 manuscripts, 3 cover letters, 4 referee reports (3 PDFs, 1 written)
+- **SIFIN**: 14 referees (8 accepted, 6 declined), 4 manuscripts, 3 cover letters, 2 referee reports (1 PDF, 1 written)  
+- **MF**: 6 referees (4 accepted, 2 declined), 2 manuscripts
+- **MOR**: 7 referees (6 accepted, 1 declined), 3 manuscripts, 1 referee report
+- **FS**: 6 referees (all accepted), 3 manuscripts, 1 PDF referee report
+
+### Inactive Journals (no current manuscripts)
+- **JOTA**: 0 manuscripts
+- **MAFE**: 0 manuscripts  
+- **NACO**: 0 manuscripts
+
+### Overall Targets
+- **Total Referees**: 46 (35 accepted, 11 declined)
+- **Total Manuscripts**: 16
+- **Total Cover Letters**: 6
+- **Total Referee Reports**: 8 (5 PDFs, 3 written)
+- **Success Rate**: 95%+ expected
 
 ## 🤝 Contributing
 

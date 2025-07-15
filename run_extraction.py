@@ -4,6 +4,7 @@
 import os
 import sys
 import argparse
+import yaml
 from pathlib import Path
 
 # Add to path
@@ -12,6 +13,67 @@ sys.path.insert(0, str(Path(__file__).parent))
 # Load credentials from .env.production
 from dotenv import load_dotenv
 load_dotenv('.env.production')
+
+# Load baseline targets
+def _load_baseline_targets():
+    """Load current baseline targets from config"""
+    baseline_file = Path(__file__).parent / "config" / "baseline_targets_july_15_2025.yaml"
+    try:
+        with open(baseline_file, 'r') as f:
+            return yaml.safe_load(f)
+    except FileNotFoundError:
+        print(f"⚠️  Baseline file not found: {baseline_file}")
+        return None
+
+def _validate_against_baseline(journal_code, manuscripts):
+    """Validate extraction results against baseline targets"""
+    baselines = _load_baseline_targets()
+    if not baselines:
+        return
+        
+    journal_upper = journal_code.upper()
+    
+    # Check if journal is in active list
+    if journal_upper in baselines['journals']['active']:
+        expected = baselines['journals']['active'][journal_upper]
+        
+        # Count actual results
+        actual_manuscripts = len(manuscripts)
+        actual_referees = sum(len(m.referee_reports) for m in manuscripts)
+        
+        print(f"\n📊 Baseline Validation for {journal_upper}:")
+        print(f"   Expected manuscripts: {expected['manuscripts']}")
+        print(f"   Actual manuscripts: {actual_manuscripts}")
+        
+        if 'referees' in expected:
+            print(f"   Expected referees: {expected['referees']['total']}")
+            print(f"   Actual referees: {actual_referees}")
+            
+            # Calculate success rates
+            manuscript_rate = actual_manuscripts / expected['manuscripts'] if expected['manuscripts'] > 0 else 0
+            referee_rate = actual_referees / expected['referees']['total'] if expected['referees']['total'] > 0 else 0
+            
+            validation_thresholds = baselines['validation']
+            manuscript_pass = manuscript_rate >= validation_thresholds['manuscripts']
+            referee_pass = referee_rate >= validation_thresholds['referees']
+            
+            print(f"   Manuscript success: {manuscript_rate:.1%} {'✅' if manuscript_pass else '❌'}")
+            print(f"   Referee success: {referee_rate:.1%} {'✅' if referee_pass else '❌'}")
+            
+            if manuscript_pass and referee_pass:
+                print(f"   🎉 {journal_upper} extraction meets baseline criteria!")
+            else:
+                print(f"   ⚠️  {journal_upper} extraction below baseline thresholds")
+    
+    elif journal_upper in baselines['journals']['inactive']:
+        print(f"\n📊 {journal_upper} Validation:")
+        print(f"   Status: Inactive journal (0 manuscripts expected)")
+        if len(manuscripts) == 0:
+            print(f"   ✅ Correctly shows no manuscripts")
+        else:
+            print(f"   🎉 Found {len(manuscripts)} manuscripts (more than expected!)")
+    else:
+        print(f"\n📊 {journal_upper}: No baseline data available")
 
 def main():
     parser = argparse.ArgumentParser(description="Run journal extraction")
@@ -160,6 +222,9 @@ def main():
         # Count referees
         total_referees = sum(len(m.referee_reports) for m in manuscripts)
         print(f"   Total referees: {total_referees}")
+        
+        # Validate against baseline targets
+        _validate_against_baseline(args.journal, manuscripts)
         
         # Show first few manuscripts
         print("\n📄 Sample manuscripts:")

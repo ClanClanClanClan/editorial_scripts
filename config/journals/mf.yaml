@@ -1,0 +1,36 @@
+journal:
+  code: MF
+  name: Mathematical Finance
+  url: https://mc.manuscriptcentral.com/mafi
+
+categories:
+  - Awaiting Reviewer Selection
+  - Awaiting Reviewer Invitation
+  - Awaiting Reviewer Assignment
+  - Awaiting Reviewer Scores
+  - Overdue Reviewer Scores
+  - Awaiting AE Recommendation
+
+timings:
+  login_wait: 3
+  page_navigation: 5
+  popup_wait: 6
+  2fa_wait: 15
+  after_take_action: 5
+  download_popup_wait: 5
+  cookie_reject: 1
+
+exclusions:
+  known_staff:
+    - 'Possamai, Dylan'
+    - 'Dylan Possamai'
+    - 'Cont, Rama'
+    - 'Rama Cont'
+    - 'K J, Chandni'
+    - 'Chandni K J'
+    - 'Zhang, Panpan'
+    - 'Panpan Zhang'
+
+cache:
+  email_ttl: 86400
+  extraction_ttl: 21600

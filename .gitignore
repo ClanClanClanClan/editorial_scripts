@@ -98,7 +98,18 @@ token.pickle
 *.pem
 *.key
 
-# Data and results
+# Development environment - ISOLATED & IGNORED
+dev/*/outputs/
+dev/*/logs/  
+dev/*/debug/
+dev/*/tests/test_*.py
+dev/*/temp/
+
+# Production outputs - ALLOWED
+production/outputs/
+production/logs/
+
+# Data and results (legacy)
 data/
 !data/.gitkeep
 logs/
@@ -108,6 +119,9 @@ checkpoints/
 *.pdf
 *.xlsx
 *.csv
+*.json
+!config/*.json
+!config/**/*.json
 
 # Chrome profiles
 my_jota_profile/

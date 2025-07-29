@@ -1,0 +1,105 @@
+PROPRIETARY SOFTWARE LICENSE
+
+Editorial Scripts V3 - Academic Journal Management Platform
+Copyright (C) 2025 Dylan Possamai. All rights reserved.
+
+NOTICE: This software is proprietary and confidential.
+
+LICENSE TERMS AND CONDITIONS
+
+1. GRANT OF LICENSE
+   Subject to the terms and conditions of this License, the copyright holder 
+   hereby grants you a limited, non-exclusive, non-transferable license to 
+   use this software solely for the purposes explicitly authorized in writing 
+   by the copyright holder.
+
+2. RESTRICTIONS
+   You may not:
+   a) Copy, modify, or distribute the software or any portion thereof
+   b) Reverse engineer, decompile, or disassemble the software
+   c) Create derivative works based on the software
+   d) Remove or alter any copyright notices or proprietary legends
+   e) Use the software for any commercial purposes without explicit permission
+   f) Share access credentials or provide access to unauthorized users
+   g) Use the software in violation of any applicable laws or regulations
+
+3. ACADEMIC USE
+   This software is designed for academic and research purposes in the field
+   of scholarly publishing and journal management. Any use must comply with:
+   a) Applicable academic integrity standards
+   b) Data protection and privacy regulations (including GDPR)
+   c) Ethical guidelines for AI systems in academic contexts
+   d) Confidentiality requirements for peer review processes
+
+4. DATA AND PRIVACY
+   Users of this software acknowledge that:
+   a) The software may process sensitive academic and personal data
+   b) All data processing must comply with applicable privacy laws
+   c) Users are responsible for obtaining necessary permissions for data use
+   d) The software includes security measures but users must implement 
+      appropriate safeguards in their deployment
+
+5. NO WARRANTY
+   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS 
+   OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL 
+   THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
+   LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING 
+   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
+   DEALINGS IN THE SOFTWARE.
+
+6. LIMITATION OF LIABILITY
+   TO THE MAXIMUM EXTENT PERMITTED BY LAW, IN NO EVENT SHALL THE COPYRIGHT 
+   HOLDER BE LIABLE FOR ANY SPECIAL, INCIDENTAL, INDIRECT, OR CONSEQUENTIAL 
+   DAMAGES WHATSOEVER (INCLUDING, WITHOUT LIMITATION, DAMAGES FOR LOSS OF 
+   BUSINESS PROFITS, BUSINESS INTERRUPTION, LOSS OF BUSINESS INFORMATION, 
+   OR ANY OTHER PECUNIARY LOSS) ARISING OUT OF THE USE OF OR INABILITY TO 
+   USE THE SOFTWARE.
+
+7. TERMINATION
+   This license is effective until terminated. Your rights under this license 
+   will terminate automatically without notice if you fail to comply with any 
+   term(s) of this license. Upon termination, you must cease all use of the 
+   software and destroy all copies in your possession.
+
+8. COMPLIANCE
+   Use of this software constitutes acceptance of responsibility for compliance 
+   with all applicable laws, regulations, and ethical guidelines including but 
+   not limited to:
+   a) EU General Data Protection Regulation (GDPR)
+   b) EU Artificial Intelligence Act
+   c) Academic research ethics standards
+   d) Institutional review board requirements where applicable
+
+9. EXPORT CONTROL
+   This software may be subject to export control laws and regulations. 
+   You agree to comply with all applicable export control laws and regulations.
+
+10. GOVERNING LAW
+    This License shall be governed by and construed in accordance with the 
+    laws of [Jurisdiction], without regard to its conflict of law provisions.
+
+11. CONTACT INFORMATION
+    For licensing inquiries, permissions, or other questions regarding this 
+    software, please contact:
+    
+    Dylan Possamai
+    [Contact information to be provided]
+    
+    For security vulnerabilities, please refer to the SECURITY.md file.
+
+12. ENTIRE AGREEMENT
+    This License constitutes the entire agreement between the parties with 
+    respect to the software and supersedes all prior or contemporaneous 
+    understandings regarding such subject matter.
+
+BY USING THIS SOFTWARE, YOU ACKNOWLEDGE THAT YOU HAVE READ THIS LICENSE, 
+UNDERSTAND IT, AND AGREE TO BE BOUND BY ITS TERMS AND CONDITIONS.
+
+---
+
+Copyright (C) 2025 Dylan Possamai. All rights reserved.
+Editorial Scripts V3 and all related trademarks are the property of Dylan Possamai.
+
+Version: 3.0.0
+Date: July 22, 2025

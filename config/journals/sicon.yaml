@@ -1,0 +1,60 @@
+journal:
+  code: SICON
+  name: SIAM Journal on Control and Optimization
+  platform: siam
+  url: https://sicon.siam.org/cgi-bin/main.plex
+
+authentication:
+  method: orcid
+  browser_preference: chrome  # Standard browser
+  workflow_steps: 8           # Exact 8-step workflow documented July 15, 2025
+  orcid_button_selector: "a[href*='sso_site_redirect'][href*='orcid']"
+  
+extraction:
+  manuscript_folders:
+    selector: "tbody[role='assoc_ed']"
+    target_folder: "All Pending Manuscripts"
+  manuscript_details:
+    table_id: "ms_details_expanded"
+    fields:
+      - manuscript_id
+      - title
+      - submission_date
+      - current_stage
+      - authors
+  referee_details:
+    profile_table_id: "profile_table"
+    history_table_id: "history_info"
+    
+timings:
+  initial_load: 3
+  orcid_click: 2
+  popup_wait: 1
+  redirect_timeout: 30
+  page_navigation: 5
+  manuscript_load: 3
+  
+features:
+  use_config_system: false      # Start disabled for safety
+  use_navigation_module: false  # Start disabled for safety  
+  use_smart_cache: false        # Start disabled for safety
+  use_8_step_workflow: true     # SICON requires exact workflow
+
+workflow:
+  steps:
+    - name: "Initial Navigation"
+      action: "navigate_to_root"
+    - name: "ORCID Button Click"
+      action: "click_orcid_authentication"
+    - name: "ORCID Authentication"
+      action: "complete_orcid_login"
+    - name: "AE Dashboard Navigation"
+      action: "navigate_to_ae_dashboard"
+    - name: "Manuscript ID Extraction"
+      action: "extract_manuscript_ids"
+    - name: "Manuscript Detail Extraction"
+      action: "extract_manuscript_details"
+    - name: "Referee Profile Details"
+      action: "extract_referee_profiles"
+    - name: "PDF and Comments Extraction"
+      action: "extract_pdfs_and_comments"

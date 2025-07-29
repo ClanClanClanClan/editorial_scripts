@@ -1,0 +1,507 @@
+🔧 TESTING FUNDAMENTAL REFEREE TABLE DETECTION FIX
+======================================================================
+⏰ Started at: 2025-07-26 00:11:43
+
+🎯 Primary Goal: Verify Zhang, Panpan is NOT extracted as referee
+📋 Secondary Goals:
+   • Robust referee table identification
+   • Proper author/referee separation
+   • Enhanced conflict detection
+======================================================================
+✅ Loaded credentials for: dylan.possamai@math.ethz.ch
+✅ Credentials loaded from secure storage
+🔐 Login attempt 1/3...
+   📱 2FA required...
+   ⏰ Login timestamp: 00:11:53
+   📧 Waiting for verification email to arrive...
+   🔍 Fetching RECENT verification code from Gmail...
+✅ Found verification code: 716878
+   ✅ Found fresh verification code: 716***
+   🔑 Entering verification code...
+   ✅ 2FA successful - moved past verification page
+
+✅ Login successful!
+🚀 COMPREHENSIVE MF EXTRACTION
+============================================================
+🔐 Login attempt 1/3...
+   📱 2FA required...
+   ⏰ Login timestamp: 00:12:27
+   📧 Waiting for verification email to arrive...
+   🔍 Fetching RECENT verification code from Gmail...
+✅ Found verification code: 638861
+   ✅ Found fresh verification code: 638***
+   🔑 Entering verification code...
+   ✅ 2FA successful - moved past verification page
+
+📋 Navigating to Associate Editor Center...
+   ✅ Successfully logged in: https://mc.manuscriptcentral.com/mafi
+   Attempt 1...
+   📊 Found 40 links on page
+   Available links: ['ScholarOne Manuscripts™', 'Dylan Possamai', 'Instructions & Forms', 'Help', 'Log Out', 'Home', 'Author', 'Review', 'Associate Editor Center', 'FAQs & User Guides']
+   ✅ Found via exact text
+   ✅ Found Associate Editor Center
+
+📊 Finding manuscript categories...
+   📊 Debug: Found 28 text links on page
+   📝 Manuscript-related links found: ['ScholarOne Manuscripts™', 'Review', 'Awaiting Reviewer Scores', 'Manuscript Status and Summary Reports', 'Peer Review Details Reports']
+   ✓ Awaiting Reviewer Scores: 2 manuscripts
+
+📂 Processing category: Awaiting Reviewer Scores (2 manuscripts)
+   Found 2 Take Action links
+   📋 Clicking first Take Action link...
+   🔍 Extracting basic manuscript info...
+      Looking for manuscript IDs...
+      Found first manuscript: MAFI-2025-0166
+      Looking for Next Document button (attempt 1)...
+      Found manuscript 2: MAFI-2024-0167
+      Looking for Next Document button (attempt 2)...
+      Cycled back to MAFI-2024-0167 - all manuscripts found
+      Navigating back to first manuscript...
+      ✅ Found 2 manuscripts: ['MAFI-2025-0166', 'MAFI-2024-0167']
+
+🔄 Starting 3-pass extraction for 2 manuscripts...
+   📋 Manuscript order: ['MAFI-2025-0166', 'MAFI-2024-0167']
+
+📄 PASS 1: Main pages forward (1 → 2) - Extract referees
+   🚀 PASS 1: Extracting from 2 manuscripts...
+
+   📄 Processing manuscript 1/2: MAFI-2025-0166
+      🔍 Extracting referees for MAFI-2025-0166...
+   👥 Extracting referee details...
+      Extracting referees for: MAFI-2025-0166
+      🎯 Looking for the correct 'Reviewer List' table...
+      🔍 Analyzing 104 tables to find the referee table...
+      ✅ TABLE 6 contains 'Reviewer List' with 9 reviewers
+      Preview:   The tabs below organize all of the details of the selected manuscript. Click on each tab and scroll to the bottom of each screen to see the various ...
+         Referee 1: Matoussi, Anis
+         Referee 2: Possamai, Dylan
+         Referee 3: Cont, Rama
+         Referee 4: Cont, Rama
+         Referee 5: K J, Chandni
+         Referee 6: Liang, Gechun
+         Referee 7: Mrad, Mohamed
+         Referee 8: Dos Reis, Goncalo
+         Referee 9: Strub, Moris
+      Found 5 total rows with mailpopup links
+      🚫 Excluding row that appears to be author info:   MAFI-2025-0166 (REX-PROD-1-957B102A-FAD0-49EC-97...
+      ✅ 4 validated referee rows (excluded 1 author-like rows)
+         Processing referee 1: Liang, Gechun
+         📊 Status: Agreed
+         Clicking referee name link...
+         ✅ Email: g.liang@warwick.ac.uk
+         📅 invited: 22-Jun-2025
+         📅 agreed: 22-Jun-2025
+         📅 due_date: 20-Sep-2025
+         📅 review_time: 33
+         🔍 Looking for detailed data tables for Liang, Gechun...
+         📊 Searching for detailed tables for Liang, Gechun...
+         🎯 Found specific table for Liang, Gechun (Table 28)
+         Preview: Liang, Gechun
+
+University of Warwick, Department of Statistics
+
+
+  https://orcid.org/0000-0003-0752-...
+         ✅ This is the affiliation table
+         📊 Extracting affiliation for Liang, Gechun...
+         ✅ Found affiliation: University of Warwick, Department of Statistics
+         ✅ Found ORCID: 0000-0003-0752-0773
+         🌍 Performing deep country search...
+         Processing referee 2: Mrad, Mohamed
+         📊 Status: Declined
+         Clicking referee name link...
+         ✅ Email: mohamed.kamel.mrad@gmail.com
+         📅 invited: 22-Jun-2025
+         📅 declined: 01-Jul-2025
+         🔍 Looking for detailed data tables for Mrad, Mohamed...
+         📊 Searching for detailed tables for Mrad, Mohamed...
+         🎯 Found specific table for Mrad, Mohamed (Table 31)
+         Preview: Mrad, Mohamed
+
+Université Sorbonne Paris Nord, LAGA...
+         ✅ This is the affiliation table
+         📊 Extracting affiliation for Mrad, Mohamed...
+         ✅ Found affiliation: Université Sorbonne Paris Nord, LAGA
+         ✅ Inferred country: France
+         Processing referee 3: Dos Reis, Goncalo
+         📊 Status: Unavailable
+         Clicking referee name link...
+         ✅ Email: g.dosreis@ed.ac.uk, gnreis@gmail.com
+         📅 invited: 01-Jul-2025
+         📅 unavailable: 01-Jul-2025
+         🔍 Looking for detailed data tables for Dos Reis, Goncalo...
+         📊 Searching for detailed tables for Dos Reis, Goncalo...
+         🎯 Found specific table for Dos Reis, Goncalo (Table 34)
+         Preview: Dos Reis, Goncalo
+
+University of Edinburgh, School of Mathematics
+
+
+  https://orcid.org/0000-0002-49...
+         ✅ This is the affiliation table
+         📊 Extracting affiliation for Dos Reis, Goncalo...
+         ✅ Found affiliation: University of Edinburgh, School of Mathematics
+         ✅ Inferred country: United Kingdom
+         ✅ Found ORCID: 0000-0002-4993-2672
+         Processing referee 4: Strub, Moris
+         📊 Status: Agreed
+         Clicking referee name link...
+         ✅ Email: moris.strub@wbs.ac.uk
+         📅 invited: 01-Jul-2025
+         📅 agreed: 01-Jul-2025
+         📅 due_date: 29-Sep-2025
+         📅 review_time: 24
+         🔍 Looking for detailed data tables for Strub, Moris...
+         📊 Searching for detailed tables for Strub, Moris...
+         🎯 Found specific table for Strub, Moris (Table 37)
+         Preview: Strub, Moris
+
+Warwick Business School, Information Systems Management & Analytics
+
+
+  https://orcid....
+         ✅ This is the affiliation table
+         📊 Extracting affiliation for Strub, Moris...
+         ✅ Found affiliation: Warwick Business School, Information Systems Management & Analytics
+         ✅ Found ORCID: 0000-0002-6303-6700
+         🌍 Performing deep country search...
+      ✅ Total referees extracted: 4
+      ✅ Referees: 0 → 4
+   📝 Extracting abstract...
+      ✅ Abstract extracted (914 chars)
+      💾 Abstract saved to: downloads/abstracts/MAFI-2025-0166_abstract.txt
+   📄 Downloading PDF for MAFI-2025-0166...
+      📄 Clicked PDF link, waiting for window to open...
+      📄 Switched to PDF window, waiting for PDF to load...
+      ✅ PDF saved to /Users/dylanpossamai/Library/CloudStorage/Dropbox/Work/editorial_scripts/production/src/downloads/manuscripts/MAFI-2025-0166.pdf
+   📋 Downloading cover letter for MAFI-2025-0166...
+      ✅ Cover letter already exists: MAFI-2025-0166_cover_letter.pdf
+      ➡️ Moving to next manuscript...
+      ✅ Clicked Next Document
+
+   📄 Processing manuscript 2/2: MAFI-2024-0167
+      🔍 Extracting referees for MAFI-2024-0167...
+   👥 Extracting referee details...
+      Extracting referees for: MAFI-2024-0167
+      🎯 Looking for the correct 'Reviewer List' table...
+      🔍 Analyzing 98 tables to find the referee table...
+      ✅ TABLE 6 contains 'Reviewer List' with 7 reviewers
+      Preview:   The tabs below organize all of the details of the selected manuscript. Click on each tab and scroll to the bottom of each screen to see the various ...
+         Referee 1: Zhang, Panpan
+         Referee 2: Possamai, Dylan
+         Referee 3: Cont, Rama
+         Referee 4: Cont, Rama
+         Referee 5: K J, Chandni
+         Referee 6: Mastrolia, Thibaut
+         Referee 7: Hamadene, Said
+      Found 3 total rows with mailpopup links
+      🚫 Excluding row that appears to be author info:   MAFI-2024-0167 (REX-PROD-1-476BE50B-AB64-4991-B6...
+      ✅ 2 validated referee rows (excluded 1 author-like rows)
+         Processing referee 1: Mastrolia, Thibaut
+         📊 Status: Agreed
+         Clicking referee name link...
+         ✅ Email: mastrolia@berkeley.edu
+         📅 invited: 01-May-2025
+         📅 agreed: 01-May-2025
+         📅 due_date: 30-Jul-2025
+         📅 review_time: 85
+         🔍 Looking for detailed data tables for Mastrolia, Thibaut...
+         📊 Searching for detailed tables for Mastrolia, Thibaut...
+         🎯 Found specific table for Mastrolia, Thibaut (Table 28)
+         Preview: Mastrolia, Thibaut
+
+UC Berkeley, IEOR
+
+
+  https://orcid.org/0000-0003-0578-0168...
+         ✅ This is the affiliation table
+         📊 Extracting affiliation for Mastrolia, Thibaut...
+         ✅ Found affiliation (longest line): UC Berkeley, IEOR
+         ✅ Found ORCID: 0000-0003-0578-0168
+         🌍 Performing deep country search...
+         Processing referee 2: Hamadene, Said
+         📊 Status: Agreed
+         Clicking referee name link...
+         ✅ Email: hamadene@univ-lemans.fr
+         📅 invited: 01-May-2025
+         📅 agreed: 03-May-2025
+         📅 due_date: 01-Aug-2025
+         📅 review_time: 83
+         🔍 Looking for detailed data tables for Hamadene, Said...
+         📊 Searching for detailed tables for Hamadene, Said...
+         🔍 No affiliation found, trying email inference...
+         🎓 Inferred from email domain: University of Le Mans
+         🌍 Performing deep country search...
+         ✅ Country found: France
+      ✅ Total referees extracted: 2
+      ✅ Referees: 0 → 2
+   📝 Extracting abstract...
+      ✅ Abstract extracted (1536 chars)
+      💾 Abstract saved to: downloads/abstracts/MAFI-2024-0167_abstract.txt
+   📄 Downloading PDF for MAFI-2024-0167...
+      📄 Clicked PDF link, waiting for window to open...
+      📄 Switched to PDF window, waiting for PDF to load...
+      ✅ PDF saved to /Users/dylanpossamai/Library/CloudStorage/Dropbox/Work/editorial_scripts/production/src/downloads/manuscripts/MAFI-2024-0167.pdf
+   📋 Downloading cover letter for MAFI-2024-0167...
+      ✅ Cover letter already exists: MAFI-2024-0167_cover_letter.docx
+
+📋 PASS 2: Manuscript Info backward (2 → 1) - Extract authors
+      🧭 Navigating to manuscript info tab for MAFI-2024-0167...
+      ✅ Clicked Manuscript Information tab
+      🔍 Page verification:
+         Expected: MAFI-2024-0167 on manuscript_info
+         Actual: MAFI-2024-0167 on manuscript_info
+      ✅ Page state verified
+   📋 Processing manuscript info 2/2: MAFI-2024-0167
+      🔍 Page verification:
+         Expected: MAFI-2024-0167 on manuscript_info
+         Actual: MAFI-2024-0167 on manuscript_info
+      ✅ Page state verified
+      🔍 Looking for complete author table with all details...
+      ⚠️ Potential author has suspicious email: 15253166207@163.com - Email appears to be a phone number
+      ⚠️ Potential author has suspicious email: 15253166207@163.com - Email appears to be a phone number
+      📧 Found 3 unique potential author emails: ['15253166207@163.com', 'maxu@polyu.edu.hk', 'wguanchen@sdu.edu.cn']
+      📧 Processing author with email: 15253166207@163.com
+         Row text (110 chars): The Hong Kong Polytechnic University Department of Applied Mathematics
+Hong Kong
+Hong Kong
+152531662...
+      ✅ Author 1: 
+         📧 Email: 15253166207@163.com
+         🏛️ Institution: The Hong Kong Polytechnic University Department of Applied Mathematics
+         🌍 Country: Hong Kong
+         📝 Corresponding: False
+      📧 Processing author with email: maxu@polyu.edu.hk
+         Row text (161 chars): Xu, Zuo Quan
+https://orcid.org/0000-0001-6824-1634
+  The Hong Kong Polytechnic University Department...
+      ✅ Author 2: Zuo Quan Xu
+         📧 Email: maxu@polyu.edu.hk
+         🏛️ Institution: The Hong Kong Polytechnic University Department of Applied Mathematics
+         🌍 Country: Hong Kong
+         📝 Corresponding: False
+         🆔 ORCID: https://orcid.org/0000-0001-6824-1634
+      📧 Processing author with email: wguanchen@sdu.edu.cn
+         Row text (119 chars): Wang, Guangchen
+  Shandong University School of Control Science and Engineering
+Jinan 250061
+China
+w...
+      ✅ Author 3: Guangchen Wang
+         📧 Email: wguanchen@sdu.edu.cn
+         🏛️ Institution: Shandong University School of Control Science and Engineering
+         🌍 Country: China
+         📝 Corresponding: False
+      ✅ Successfully extracted 3 authors with complete details
+      🔍 Looking for Keywords section...
+      📝 Found keywords text: Relative performance , random coefficients , backward stochastic differential equation , Nash equili...
+      ✅ Extracted keywords: Relative performance, random coefficients, backward stochastic differential equation...
+      📊 Total keywords: 4
+      📊 Extracting comprehensive manuscript metadata...
+      ✅ Funding Information: CAS AMSS-PolyU Joint Laboratory of Applied Mathema...
+      ✅ Data Availability (fallback): Data sharing is not applicable to this article as ...
+      ✅ Conflict of Interest (found): No conflict of interest
+      ✅ Submission Requirements: Acknowledged
+      ✅ Files: 3 files found
+         File 1: MF_2025.01.15.tex (Main Document - LaTeX)
+         File 2: MF_2025.01.15.pdf (Main Document - LaTeX PDF)
+         File 3: MF cover letter.docx (Cover letter / Comments)
+      📝 Found content areas with 562 characters total
+      ✅ Word Count: 6231
+      ✅ Figure Count: 0
+      ✅ Table Count: 0
+      ✅ data_availability: Files
+MF_2025.01.15.tex - Main Document - LaTeX (M...
+      ✅ Clicked Previous Document
+   📋 Processing manuscript info 1/2: MAFI-2025-0166
+      🔍 Page verification:
+         Expected: MAFI-2025-0166 on manuscript_info
+         Actual: MAFI-2025-0166 on manuscript_info
+      ✅ Page state verified
+      🔍 Looking for complete author table with all details...
+      📧 Found 3 unique potential author emails: ['zccr333@gmail.com', 'anis.matoussi@univ-lemans.fr', 'guillaume.broux97@gmail.com']
+      📧 Processing author with email: zccr333@gmail.com
+         Row text (116 chars): Zhou, Chao
+  National University of Singapore Risk Management Institute
+Singapore 119613
+Singapore
+z...
+      ✅ Author 1: Chao Zhou
+         📧 Email: zccr333@gmail.com
+         🏛️ Institution: National University of Singapore Risk Management Institute
+         🌍 Country: Singapore
+         📝 Corresponding: False
+      📧 Processing author with email: anis.matoussi@univ-lemans.fr
+         Row text (177 chars): Matoussi, Anis
+Corresponding Author
+https://orcid.org/0000-0002-8814-9402
+  Federation Recherche Mat...
+         🎓 Inferred from email domain: University of Le Mans
+         🎓 Inferred institution from email: University of Le Mans
+      ✅ Author 2: Anis Matoussi
+         📧 Email: anis.matoussi@univ-lemans.fr
+         🏛️ Institution: University of Le Mans
+         🌍 Country: France
+         📝 Corresponding: True
+         🆔 ORCID: https://orcid.org/0000-0002-8814-9402
+      📧 Processing author with email: guillaume.broux97@gmail.com
+         Row text (129 chars): Broux-Quemerais, Guillaume
+  Federation Recherche Mathematiques des Pays de Loire
+Nantes 44322
+Franc...
+      ✅ Author 3: Guillaume Broux-Quemerais
+         📧 Email: guillaume.broux97@gmail.com
+         🏛️ Institution: 
+         🌍 Country: France
+         📝 Corresponding: False
+      ✅ Successfully extracted 3 authors with complete details
+      🔍 Looking for Keywords section...
+      📝 Found keywords text: Forward utility , relative performance , Mean Field Game , n-player game , Itô-diffusion , investmen...
+      ✅ Extracted keywords: Forward utility, relative performance, Mean Field Game...
+      📊 Total keywords: 7
+      📊 Extracting comprehensive manuscript metadata...
+      ✅ Funding Information: There are no funders to report for this submission...
+      ✅ Data Availability (fallback): Data sharing not applicable to this article as no ...
+      ✅ Conflict of Interest (found): No conflict of interest
+      ✅ Submission Requirements: Acknowledged
+      ✅ Files: 3 files found
+         File 1: BMZ (Forward-MF-compet_MF.zip - Main Document - LaTeX)
+         File 2: BMZ (Forward-MF-Compet_MF_soumission.pdf - Main Document - LaTeX PDF)
+         File 3: Cover (letter.pdf - Cover letter / Comments)
+      📝 Found content areas with 601 characters total
+      ✅ Word Count: 9747
+      ✅ Figure Count: 7
+      ✅ Table Count: 0
+      ✅ data_availability: Files
+BMZ-Forward-MF-compet_MF.zip - Main Document...
+
+📊 PASS 3: Audit Trail forward (1 → 2) - Extract timeline
+      🧭 Navigating to audit trail tab for MAFI-2025-0166...
+      ✅ Clicked Audit Trail tab
+      🔍 Page verification:
+         Expected: MAFI-2025-0166 on audit_trail
+         Actual: MAFI-2025-0166 on audit_trail
+      ✅ Page state verified
+   📊 Processing audit trail 1/2: MAFI-2025-0166
+      🔍 Page verification:
+         Expected: MAFI-2025-0166 on audit_trail
+         Actual: MAFI-2025-0166 on audit_trail
+      ✅ Page state verified
+   📊 Extracting audit trail data...
+   🐛 DEBUG: Saved page source for audit trail debugging
+   🔍 Testing 7 selectors for audit trail tab...
+      Selector 1: Found 1 elements
+         Element: text='No text', href='javascript: setField('XIK_TAGACT','xik_57dydg2CUMg...', onclick='No onclick...'
+   ✅ Found audit trail link with selector 1
+   👆 Clicking audit trail link...
+   📄 Page loaded, checking for audit trail content...
+   🐛 DEBUG: Saved audit trail page source
+      📊 Found 32 total events across 4 pages
+      📄 Processing page 1/4...
+         Found 25 communication rows
+         ✅ Extracted 12 events from page 1
+      📄 Processing page 2/4...
+         Found 15 communication rows
+         ✅ Extracted 4 events from page 2
+      📄 Processing page 3/4...
+         Found 15 communication rows
+         ✅ Extracted 4 events from page 3
+      📄 Processing page 4/4...
+         Found 9 communication rows
+         ✅ Extracted 4 events from page 4
+   ✅ Extracted 24 communication events
+      ✅ Clicked Next Document
+   📊 Processing audit trail 2/2: MAFI-2024-0167
+      🔍 Page verification:
+         Expected: MAFI-2024-0167 on audit_trail
+         Actual: MAFI-2024-0167 on audit_trail
+      ✅ Page state verified
+   📊 Extracting audit trail data...
+   🐛 DEBUG: Saved page source for audit trail debugging
+   🔍 Testing 7 selectors for audit trail tab...
+      Selector 1: Found 1 elements
+         Element: text='No text', href='javascript: setField('XIK_TAGACT','xik_57dydg2CUMg...', onclick='No onclick...'
+   ✅ Found audit trail link with selector 1
+   👆 Clicking audit trail link...
+   📄 Page loaded, checking for audit trail content...
+   🐛 DEBUG: Saved audit trail page source
+      📊 Found 45 total events across 5 pages
+      📄 Processing page 1/5...
+         Found 19 communication rows
+         ✅ Extracted 9 events from page 1
+      📄 Processing page 2/5...
+         Found 13 communication rows
+         ✅ Extracted 6 events from page 2
+      📄 Processing page 3/5...
+         Found 13 communication rows
+         ✅ Extracted 3 events from page 3
+      📄 Processing page 4/5...
+         Found 13 communication rows
+         ✅ Extracted 3 events from page 4
+      📄 Processing page 5/5...
+         Found 13 communication rows
+         ✅ Extracted 6 events from page 5
+   ✅ Extracted 27 communication events
+   ✅ Complete data merged for MAFI-2025-0166
+   ✅ Complete data merged for MAFI-2024-0167
+
+   Category complete: 2/2 manuscripts processed
+   ✅ Successfully navigated to AE Center
+
+================================================================================
+🔍 PRECISE RESULTS SUMMARY
+================================================================================
+
+📊 MANUSCRIPTS FOUND: 2
+
+📄 MANUSCRIPT 1/2: MAFI-2025-0166
+   Title: Optimal investment and consumption under forward utilities w...
+   Status: 
+   Category: Awaiting Reviewer Scores
+   👥 Authors (3): Chao Zhou, Anis Matoussi, Guillaume Broux-Quemerais
+   🔍 Referees (4):
+      • Liang, Gechun (Agreed) - g.liang@warwick.ac.uk
+      • Mrad, Mohamed (Declined) - mohamed.kamel.mrad@gmail.com
+      • Dos Reis, Goncalo (Unavailable) - g.dosreis@ed.ac.uk, gnreis@gmail.com
+      • Strub, Moris (Agreed) - moris.strub@wbs.ac.uk
+   📁 Documents:
+      ✅ PDF: /Users/dylanpossamai/Library/CloudStorage/Dropbox/Work/editorial_scripts/production/src/downloads/manuscripts/MAFI-2025-0166.pdf (PDF Proof:  1725 K)
+      📝 Cover Letter: downloads/MAFI-2025-0166_cover_letter.pdf
+
+📄 MANUSCRIPT 2/2: MAFI-2024-0167
+   Title: Competitive optimal portfolio selection in a non-Markovian f...
+   Status: 
+   Category: Awaiting Reviewer Scores
+   👥 Authors (3): , Zuo Quan Xu, Guangchen Wang
+   🔍 Referees (2):
+      • Mastrolia, Thibaut (Agreed) - mastrolia@berkeley.edu
+      • Hamadene, Said (Agreed) - hamadene@univ-lemans.fr
+   📁 Documents:
+      ✅ PDF: /Users/dylanpossamai/Library/CloudStorage/Dropbox/Work/editorial_scripts/production/src/downloads/manuscripts/MAFI-2024-0167.pdf (PDF Proof:  597 K)
+      📝 Cover Letter: downloads/MAFI-2024-0167_cover_letter.docx
+
+📂 FILE SYSTEM VERIFICATION:
+   📄 Manuscript PDFs: 0 files
+   📝 Cover Letters: 0 files
+
+📈 FINAL COUNTS:
+   📄 Manuscripts Processed: 2
+   🔍 Total Referees: 6
+   📁 PDF Downloads: 0
+   📝 Cover Letters: 0
+
+✅ SUCCESS/FAILURE ANALYSIS:
+   Manuscripts Found: 2
+   Total Referees: 6
+   PDFs Downloaded: 0
+   Cover Letters: 0
+   Success Rate: 100.0% (referees + PDFs + authors)
+   Quality: 2/2 have referees, 2/2 have PDFs, 2/2 have authors
+   🎉 HIGH QUALITY EXTRACTION - Most data extracted successfully!
+================================================================================
+
+💾 Full data saved to: mf_comprehensive_20250726_001547.json
+
+❌ No manuscripts extracted!
+
+⏰ Finished at: 2025-07-26 00:15:47

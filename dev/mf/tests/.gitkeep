@@ -1,0 +1,11 @@
+# MF Development Tests Directory
+# 
+# All MF test files go here during development.
+# This keeps the main codebase clean.
+#
+# Usage:
+# - Create test_*.py files here
+# - Run: python3 test_something.py
+# - All outputs go to ../outputs/
+# - All logs go to ../logs/
+# - All debug files go to ../debug/

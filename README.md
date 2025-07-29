@@ -1,160 +1,169 @@
 # Editorial Scripts
 
-A unified system for extracting manuscript and referee data from editorial systems.
+A comprehensive system for extracting manuscript and referee data from 8 academic journal editorial platforms.
+
+## ⚠️ IMPORTANT: Credentials Already Stored!
+**All journal credentials are permanently stored in macOS Keychain. Never ask for them again.**
 
 ## 🚀 Quick Start
 
-### 1. Setup Environment
+### Prerequisites
+- Python 3.8+
+- Chrome/Chromium browser
+- macOS (for keychain storage)
+
+### Installation
 ```bash
+# Clone and setup
+git clone <repository>
+cd editorial_scripts
+
+# Create virtual environment
 python3 -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+source venv/bin/activate
+
+# Install dependencies
 pip install -r requirements.txt
 ```
 
-### 2. Configure Credentials
+### Running Extractors
 ```bash
-python scripts/setup/secure_credential_manager.py --setup
+# Production extractor (works perfectly)
+python3 production/src/extractors/mf_extractor.py
+
+# New architecture (in progress)
+python3 test_mf_with_env.py
+
+# Legacy extractors
+python3 editorial_assistant/extractors/sicon.py
 ```
 
-### 3. Run Extraction
+### Verify Credentials
 ```bash
-python run_extraction.py sicon --headless
+# Check all credentials are properly stored
+python3 verify_all_credentials.py
+
+# Load credentials manually if needed
+source ~/.editorial_scripts/load_all_credentials.sh
 ```
 
-## 📁 Directory Structure
+## 📁 Project Structure
 
 ```
 editorial_scripts/
-├── editorial_assistant/          # Main implementation
-│   ├── core/                    # Core models and utilities
-│   ├── extractors/              # Journal-specific extractors
-│   ├── cli/                     # Command-line interface
-│   └── utils/                   # Utilities and helpers
-├── run_extraction.py            # Primary entry point
-├── scripts/                      # Utility scripts
-│   ├── setup/                   # Setup and configuration
-│   ├── utilities/               # Helper scripts
-│   └── testing/                 # Debug and test scripts
-├── docs/                         # Documentation
-│   ├── archives/                # Historical documentation
-│   ├── reports/                 # System reports
-│   └── specifications/          # Technical specifications
-├── data/                         # Data outputs (gitignored)
-│   ├── extractions/             # Extraction results
-│   ├── exports/                 # Exported data
-│   ├── pdfs/                    # Downloaded PDFs
-│   └── logs/                    # System logs
-├── config/                       # Configuration files
-├── tests/                        # Test suite
-├── database/                     # Database setup
-└── venv/                         # Virtual environment (gitignored)
+├── production/                   # WORKING extractors (messy but functional)
+│   └── src/
+│       └── extractors/
+│           └── mf_extractor.py  # 3,698 lines, DO NOT BREAK
+│
+├── src/                         # NEW clean architecture (IN PROGRESS)
+│   ├── core/                    # Base components
+│   │   ├── base_extractor.py    # Abstract base
+│   │   ├── browser_manager.py   # Selenium management
+│   │   ├── credential_manager.py # Credential handling
+│   │   ├── data_models.py       # Type-safe models
+│   │   └── gmail_manager.py     # 2FA support
+│   ├── platforms/               # Platform base classes
+│   │   └── scholarone.py        # Base for MF, MOR
+│   └── extractors/              # Journal implementations
+│       └── mf.py                # Clean MF (418 lines!)
+│
+├── editorial_assistant/         # Legacy implementations
+├── config/                      # Configuration files
+├── scripts/                     # Utility scripts
+├── tests/                       # Test suite
+└── docs/                        # Documentation
 ```
 
-## 🎯 Supported Journals
+## 🔑 Supported Journals
 
-### Active Journals (with current manuscripts)
-- **SICON** - SIAM Journal on Control and Optimization
-- **SIFIN** - SIAM Journal on Financial Mathematics  
-- **MF** - Mathematical Finance (ScholarOne)
-- **MOR** - Mathematics of Operations Research (ScholarOne)
-- **FS** - Finance and Stochastics (Editorial Manager)
+| Journal | Platform | Authentication | Status |
+|---------|----------|----------------|--------|
+| MF | ScholarOne | Email + 2FA | ✅ Production + New |
+| MOR | ScholarOne | Email + 2FA | ✅ Production |
+| SICON | SIAM | ORCID OAuth | ✅ Legacy |
+| SIFIN | SIAM | ORCID OAuth | ✅ Legacy |
+| NACO | SIAM | ORCID OAuth | ⚠️ Partial |
+| JOTA | Editorial Manager | Username/Pass | ✅ Legacy |
+| MAFE | Editorial Manager | Username/Pass | ✅ Legacy |
+| FS | Email-based | Gmail API | ⚠️ Manual |
 
-### Additional Journals (configured but no current manuscripts)
-- **JOTA** - Journal of Optimization Theory and Applications
-- **MAFE** - Mathematics and Financial Economics
-- **NACO** - North American Congress on Optimization
+## 🏗️ Architecture
 
-## 📊 Features
+### Current State (Jan 2025)
+- **Production**: Working but monolithic (3,698 lines per extractor)
+- **New Architecture**: Clean, modular, 53% less code
+- **Migration**: MF complete, others in progress
 
-- ✅ Automated manuscript extraction
-- ✅ Referee data collection with email addresses
-- ✅ PDF download of manuscripts and reports
-- ✅ Browser pooling for concurrent processing
-- ✅ Intelligent caching with change detection
-- ✅ Comprehensive error handling and retry logic
-- ✅ Performance monitoring and baseline testing
-
-## 🔧 Configuration
-
-### Environment Variables
-Set your credentials using environment variables or the secure credential manager:
-```bash
-export ORCID_EMAIL="your.email@example.com"
-export ORCID_PASSWORD="your_password"
+### Design Principles
+```
+BaseExtractor (abstract)
+├── Platform Base (shared logic)
+│   └── Journal Extractor (specific logic)
+│
+├── BrowserManager (Selenium handling)
+├── CredentialManager (auth management)
+└── GmailManager (2FA codes)
 ```
 
-### Configuration Files
-- `config/credentials.yaml.example` - Example credential structure
-- `.env.example` - Example environment configuration
+## 📊 Key Features
+
+- **3-Pass Extraction**: Forward → Backward → Forward navigation
+- **Popup Email Extraction**: Referee emails from popup windows
+- **2FA Support**: Automatic Gmail verification codes
+- **Document Downloads**: PDFs, cover letters, reports
+- **Audit Trail**: Complete timeline extraction
+- **Type Safety**: Dataclasses with enums
+- **Error Recovery**: Automatic retry mechanisms
+
+## 🛡️ Security
+
+- ✅ Credentials stored in macOS Keychain (encrypted)
+- ✅ No plaintext passwords in code or files
+- ✅ Automatic loading from secure storage
+- ✅ Git-ignored sensitive directories
+- ✅ Masked password output in logs
+
+## 📖 Documentation
+
+- `CLAUDE.md` - AI assistant guide
+- `CREDENTIALS_STORED.md` - Credential documentation
+- `.credentials_permanent_storage_record.md` - Storage record
+- `docs/` - Technical specifications
 
 ## 🧪 Testing
 
-Run the test suite:
 ```bash
-pytest tests/
+# Verify setup
+python3 verify_all_credentials.py
+
+# Compare implementations
+python3 compare_implementations.py
+
+# Test specific journal
+python3 production/src/extractors/mf_extractor.py
 ```
-
-Test a specific journal:
-```bash
-python run_extraction.py sicon --headless
-```
-
-## 📚 Documentation
-
-- [Installation Guide](docs/installation.md)
-- [Usage Guide](docs/usage.md)
-- [API Documentation](docs/api.md)
-- [Development Guide](docs/development.md)
-
-## 🛠️ Development
-
-1. **Clone the repository**
-2. **Create a virtual environment**
-3. **Install dependencies**: `pip install -r requirements-dev.txt`
-4. **Run tests**: `pytest`
-5. **Check code quality**: `make lint`
-
-## 📈 Current Baseline Performance (July 15, 2025)
-
-### Active Journals
-- **SICON**: 13 referees (8 accepted, 5 declined), 4 manuscripts, 3 cover letters, 4 referee reports (3 PDFs, 1 written)
-- **SIFIN**: 14 referees (8 accepted, 6 declined), 4 manuscripts, 3 cover letters, 2 referee reports (1 PDF, 1 written)  
-- **MF**: 6 referees (4 accepted, 2 declined), 2 manuscripts
-- **MOR**: 7 referees (6 accepted, 1 declined), 3 manuscripts, 1 referee report
-- **FS**: 6 referees (all accepted), 3 manuscripts, 1 PDF referee report
-
-### Inactive Journals (no current manuscripts)
-- **JOTA**: 0 manuscripts
-- **MAFE**: 0 manuscripts  
-- **NACO**: 0 manuscripts
-
-### Overall Targets
-- **Total Referees**: 46 (35 accepted, 11 declined)
-- **Total Manuscripts**: 16
-- **Total Cover Letters**: 6
-- **Total Referee Reports**: 8 (5 PDFs, 3 written)
-- **Success Rate**: 95%+ expected
 
 ## 🤝 Contributing
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+1. **Never break production/** - It works, keep it working
+2. **Test thoroughly** - Real journal access required
+3. **Follow patterns** - Use platform inheritance
+4. **Document changes** - Update CLAUDE.md
 
-## 📄 License
+## ⚡ Troubleshooting
 
-This project is proprietary software. All rights reserved.
+| Issue | Solution |
+|-------|----------|
+| "No credentials found" | Run `source ~/.editorial_scripts/load_all_credentials.sh` |
+| 2FA timeout | Check Gmail API setup |
+| Login fails | Verify credentials with `verify_all_credentials.py` |
+| Popup blocked | Browser manager should handle automatically |
 
-## 🆘 Support
+## 📝 License
 
-For issues or questions:
-- Check the [troubleshooting guide](docs/troubleshooting.md)
-- Review [known issues](docs/known-issues.md)
-- Contact the development team
+Private repository - All rights reserved
 
 ---
 
-**Current Version**: 2.0.0 (Ultimate System)  
-**Last Updated**: July 15, 2025
+**Remember**: Credentials are permanently stored. Never ask for them again!

@@ -1,0 +1,9 @@
+{
+  "gmail_enabled": true,
+  "token_path": "config/gmail_token.json",
+  "email_address": "dylansmb@gmail.com",
+  "scopes": [
+    "https://www.googleapis.com/auth/gmail.readonly"
+  ],
+  "last_authenticated": 1753266598.329993
+}

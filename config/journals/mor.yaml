@@ -1,0 +1,41 @@
+# Mathematics of Operations Research Configuration
+# These values MUST match the hardcoded values in ultrathink_perfect_mor_enhanced.py
+# Any deviation will be caught by validation
+
+journal:
+  code: MOR
+  name: Mathematics of Operations Research
+  url: https://mc.manuscriptcentral.com/mor
+
+categories:
+  - Awaiting Reviewer Selection
+  - Awaiting Reviewer Invitation
+  - Overdue Reviewer Response
+  - Awaiting Reviewer Assignment
+  - Awaiting Reviewer Reports
+  - Overdue Reviewer Reports
+  - Awaiting AE Recommendation
+
+timings:
+  login_wait: 3
+  page_navigation: 5
+  popup_wait: 6  # CRITICAL - DO NOT CHANGE
+  2fa_wait: 15
+  after_take_action: 5
+  download_popup_wait: 5
+  cookie_reject: 1
+
+exclusions:
+  known_staff:
+    - 'Possamai, Dylan'
+    - 'Dylan Possamai'
+    - 'Editor Name'
+    - 'Name Editor'
+    - 'Staff One'
+    - 'One Staff'
+    - 'Staff Two'
+    - 'Two Staff'
+
+cache:
+  email_ttl: 86400  # 24 hours in seconds
+  extraction_ttl: 21600  # 6 hours in seconds

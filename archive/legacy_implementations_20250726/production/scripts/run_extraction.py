@@ -39,7 +39,21 @@ def _validate_against_baseline(journal_code, manuscripts):
         
         # Count actual results
         actual_manuscripts = len(manuscripts)
-        actual_referees = sum(len(m.referee_reports) for m in manuscripts)
+        actual_referees = 0
+        for m in manuscripts:
+            if hasattr(m, 'referees'):
+                # Manuscript object format
+                actual_referees += len(m.referees)
+            elif isinstance(m, dict):
+                # Dictionary format - handle different structures
+                if 'declined_referees' in m or 'accepted_referees' in m:
+                    # SICON format
+                    declined = len(m.get('declined_referees', []))
+                    accepted = len(m.get('accepted_referees', []))
+                    actual_referees += declined + accepted
+                elif 'Referees' in m:
+                    # SIFIN format
+                    actual_referees += len(m.get('Referees', []))
         
         print(f"\n📊 Baseline Validation for {journal_upper}:")
         print(f"   Expected manuscripts: {expected['manuscripts']}")
@@ -114,18 +128,18 @@ def main():
             url='https://mc.manuscriptcentral.com/mafi',
             platform='scholarone',
             credentials={
-                'username_env': 'SCHOLARONE_EMAIL',
-                'password_env': 'SCHOLARONE_PASSWORD'
+                'username_env': 'MF_EMAIL',
+                'password_env': 'MF_PASSWORD'
             }
         ),
         'mor': JournalConfig(
             code='MOR',
             name='Mathematics of Operations Research',
-            url='https://mc.manuscriptcentral.com/moor',
+            url='https://mc.manuscriptcentral.com/mathor',
             platform='scholarone',
             credentials={
-                'username_env': 'SCHOLARONE_EMAIL',
-                'password_env': 'SCHOLARONE_PASSWORD'
+                'username_env': 'MOR_EMAIL',
+                'password_env': 'MOR_PASSWORD'
             }
         ),
         'naco': JournalConfig(
@@ -194,13 +208,11 @@ def main():
         from editorial_assistant.extractors.sifin import SIFINExtractor
         extractor_class = SIFINExtractor
     elif args.journal == 'mf':
-        # MF uses a different production extractor with different interface
-        print("⚠️  MF extraction should use production/run_mf.py directly")
-        print("   Run: python3 production/run_mf.py")
-        return 1
+        from editorial_assistant.extractors.scholarone import ScholarOneExtractor
+        extractor_class = ScholarOneExtractor
     elif args.journal == 'mor':
-        from editorial_assistant.extractors.implementations.mor_extractor import MORExtractor
-        extractor_class = MORExtractor
+        from editorial_assistant.extractors.scholarone import ScholarOneExtractor
+        extractor_class = ScholarOneExtractor
     elif args.journal == 'naco':
         from editorial_assistant.extractors.naco import NACOExtractor
         extractor_class = NACOExtractor
@@ -215,14 +227,37 @@ def main():
         extractor_class = MAFEExtractor
     
     try:
-        extractor = extractor_class(journal_config, headless=args.headless)
-        manuscripts = extractor.extract_manuscripts()
+        # Handle different extractor types
+        if args.journal in ['mf', 'mor']:
+            # ScholarOne extractors take journal_code string
+            extractor = extractor_class(journal_config.code, headless=args.headless)
+            result = extractor.extract()
+            manuscripts = result.manuscripts
+        else:
+            # Other extractors take journal_config object
+            extractor = extractor_class(journal_config)
+            manuscripts = extractor.extract_manuscripts()
         
         print(f"\n✅ Extraction complete!")
         print(f"   Found {len(manuscripts)} manuscripts")
         
-        # Count referees
-        total_referees = sum(len(m.referee_reports) for m in manuscripts)
+        # Count referees - handle both dict and object formats
+        total_referees = 0
+        for m in manuscripts:
+            if hasattr(m, 'referees'):
+                # Manuscript object format
+                total_referees += len(m.referees)
+            elif isinstance(m, dict):
+                # Dictionary format - handle different structures
+                if 'declined_referees' in m or 'accepted_referees' in m:
+                    # SICON format
+                    declined = len(m.get('declined_referees', []))
+                    accepted = len(m.get('accepted_referees', []))
+                    total_referees += declined + accepted
+                elif 'Referees' in m:
+                    # SIFIN format
+                    total_referees += len(m.get('Referees', []))
+        
         print(f"   Total referees: {total_referees}")
         
         # Validate against baseline targets
@@ -231,10 +266,40 @@ def main():
         # Show first few manuscripts
         print("\n📄 Sample manuscripts:")
         for i, ms in enumerate(manuscripts[:3]):
-            print(f"   {i+1}. {ms.manuscript_id}: {ms.title}")
-            print(f"      Authors: {', '.join(ms.authors[:2])}...")
-            print(f"      Status: {ms.decision_status}")
-            print(f"      Referees: {len(ms.referee_reports)}")
+            if hasattr(ms, 'manuscript_id'):
+                # Manuscript object format
+                print(f"   {i+1}. {ms.manuscript_id}: {ms.title}")
+                author_names = [author.name if hasattr(author, 'name') else str(author) for author in ms.authors[:2]]
+                print(f"      Authors: {', '.join(author_names)}...")
+                print(f"      Status: {ms.status}")
+                print(f"      Referees: {len(ms.referees)}")
+            elif isinstance(ms, dict):
+                # Dictionary format - handle different structures
+                ms_id = ms.get('id', ms.get('Manuscript #', ms.get('manuscript_id', 'Unknown')))
+                title = ms.get('title', ms.get('Title', 'No title'))
+                
+                # Handle authors field variations
+                authors_field = ms.get('contributing_authors') or ms.get('Contributing Authors', '')
+                authors = authors_field.split(',') if authors_field else []
+                
+                status = ms.get('current_stage', ms.get('Current Stage', ms.get('status', 'Unknown')))
+                
+                # Count referees based on structure
+                if 'declined_referees' in ms or 'accepted_referees' in ms:
+                    # SICON format
+                    declined = len(ms.get('declined_referees', []))
+                    accepted = len(ms.get('accepted_referees', []))
+                    referee_count = declined + accepted
+                elif 'Referees' in ms:
+                    # SIFIN format
+                    referee_count = len(ms.get('Referees', []))
+                else:
+                    referee_count = 0
+                
+                print(f"   {i+1}. {ms_id}: {title}")
+                print(f"      Authors: {', '.join(authors[:2])}{'...' if len(authors) > 2 else ''}")
+                print(f"      Status: {status}")
+                print(f"      Referees: {referee_count}")
         
         if len(manuscripts) > 3:
             print(f"   ... and {len(manuscripts) - 3} more")

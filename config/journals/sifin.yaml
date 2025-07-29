@@ -1,0 +1,48 @@
+journal:
+  code: SIFIN
+  name: SIAM Journal on Financial Mathematics
+  platform: siam
+  url: http://sifin.siam.org/
+
+authentication:
+  method: orcid
+  browser_preference: firefox  # Required for Cloudflare bypass
+  orcid_selectors:
+    - "a[href*='sso_site_redirect'][href*='orcid']"
+    - "img[src*='orcid']"
+    - "img[title='ORCID']"
+    - "a img[src*='orcid_32x32.png']"
+    - "a[href*='orcid']"
+
+extraction:
+  dashboard_indicators:
+    - "//tbody[@role='assoc_ed']"
+    - "//tr[@class='ndt_task']"
+    - "//a[@class='ndt_task_link']"
+  referee_extraction:
+    method: email_timeline
+    email_patterns:
+      - "referee invitation"
+      - "review request"
+      - "manuscript review"
+
+timings:
+  initial_load: 2
+  login_wait: 3
+  popup_dismiss: 1
+  redirect_timeout: 30
+  page_navigation: 5
+  action_delay: 2
+
+features:
+  use_config_system: false      # Start disabled for safety
+  use_navigation_module: false  # Start disabled for safety
+  use_smart_cache: false        # Start disabled for safety
+  use_firefox_browser: true     # SIFIN requires Firefox
+
+browser:
+  user_agent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"
+  disable_blink_features: "AutomationControlled"
+  excludeSwitches:
+    - "enable-automation"
+    - "enable-logging"

@@ -1,0 +1,1046 @@
+WARNING:root:Gmail utilities import error: No module named 'gmail_verification_wrapper'
+🚀 Running PRODUCTION MF Extractor
+============================================================
+This is the PROVEN WORKING extractor - NO MODIFICATIONS
+
+🚀 COMPREHENSIVE MF EXTRACTION
+============================================================
+🔐 Logging in...
+   📱 2FA required...
+   ⏰ Login timestamp: 22:10:01
+   📧 Waiting for verification email to arrive...
+   🔍 Fetching RECENT verification code from Gmail...
+✅ Found verification code: 210677
+   ✅ Found fresh verification code: 210***
+   🔑 Entering verification code...
+   ✅ 2FA successful - moved past verification page
+
+📋 Navigating to Associate Editor Center...
+   ✅ Successfully logged in: https://mc.manuscriptcentral.com/mafi
+   Attempt 1...
+   ✅ Found Associate Editor Center
+
+📊 Finding manuscript categories...
+   ❌ Error finding Awaiting Reviewer Selection: Message: no such element: Unable to locate element: {"method":"xpath","selector":"//a[contains(text(), 'Awaiting Reviewer Selection')]"}
+  (Session info: chrome=138.0.7204.159); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#nosuchelementexception
+Stacktrace:
+0   chromedriver                        0x0000000102aaf55c cxxbridge1$str$ptr + 2731064
+1   chromedriver                        0x0000000102aa7454 cxxbridge1$str$ptr + 2698032
+2   chromedriver                        0x00000001025f63f8 cxxbridge1$string$len + 90664
+3   chromedriver                        0x000000010263d71c cxxbridge1$string$len + 382284
+4   chromedriver                        0x000000010267eb1c cxxbridge1$string$len + 649548
+5   chromedriver                        0x0000000102631a0c cxxbridge1$string$len + 333884
+6   chromedriver                        0x0000000102a725e0 cxxbridge1$str$ptr + 2481340
+7   chromedriver                        0x0000000102a75848 cxxbridge1$str$ptr + 2494244
+8   chromedriver                        0x0000000102a53234 cxxbridge1$str$ptr + 2353424
+9   chromedriver                        0x0000000102a76104 cxxbridge1$str$ptr + 2496480
+10  chromedriver                        0x0000000102a442e4 cxxbridge1$str$ptr + 2292160
+11  chromedriver                        0x0000000102a95ff8 cxxbridge1$str$ptr + 2627284
+12  chromedriver                        0x0000000102a96184 cxxbridge1$str$ptr + 2627680
+13  chromedriver                        0x0000000102aa7090 cxxbridge1$str$ptr + 2697068
+14  libsystem_pthread.dylib             0x000000019690ec0c _pthread_start + 136
+15  libsystem_pthread.dylib             0x0000000196909b80 thread_start + 8
+
+   ❌ Error finding Awaiting Reviewer Invitation: Message: no such element: Unable to locate element: {"method":"xpath","selector":"//a[contains(text(), 'Awaiting Reviewer Invitation')]"}
+  (Session info: chrome=138.0.7204.159); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#nosuchelementexception
+Stacktrace:
+0   chromedriver                        0x0000000102aaf55c cxxbridge1$str$ptr + 2731064
+1   chromedriver                        0x0000000102aa7454 cxxbridge1$str$ptr + 2698032
+2   chromedriver                        0x00000001025f63f8 cxxbridge1$string$len + 90664
+3   chromedriver                        0x000000010263d71c cxxbridge1$string$len + 382284
+4   chromedriver                        0x000000010267eb1c cxxbridge1$string$len + 649548
+5   chromedriver                        0x0000000102631a0c cxxbridge1$string$len + 333884
+6   chromedriver                        0x0000000102a725e0 cxxbridge1$str$ptr + 2481340
+7   chromedriver                        0x0000000102a75848 cxxbridge1$str$ptr + 2494244
+8   chromedriver                        0x0000000102a53234 cxxbridge1$str$ptr + 2353424
+9   chromedriver                        0x0000000102a76104 cxxbridge1$str$ptr + 2496480
+10  chromedriver                        0x0000000102a442e4 cxxbridge1$str$ptr + 2292160
+11  chromedriver                        0x0000000102a95ff8 cxxbridge1$str$ptr + 2627284
+12  chromedriver                        0x0000000102a96184 cxxbridge1$str$ptr + 2627680
+13  chromedriver                        0x0000000102aa7090 cxxbridge1$str$ptr + 2697068
+14  libsystem_pthread.dylib             0x000000019690ec0c _pthread_start + 136
+15  libsystem_pthread.dylib             0x0000000196909b80 thread_start + 8
+
+   ❌ Error finding Awaiting Reviewer Assignment: Message: no such element: Unable to locate element: {"method":"xpath","selector":"//a[contains(text(), 'Awaiting Reviewer Assignment')]"}
+  (Session info: chrome=138.0.7204.159); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#nosuchelementexception
+Stacktrace:
+0   chromedriver                        0x0000000102aaf55c cxxbridge1$str$ptr + 2731064
+1   chromedriver                        0x0000000102aa7454 cxxbridge1$str$ptr + 2698032
+2   chromedriver                        0x00000001025f63f8 cxxbridge1$string$len + 90664
+3   chromedriver                        0x000000010263d71c cxxbridge1$string$len + 382284
+4   chromedriver                        0x000000010267eb1c cxxbridge1$string$len + 649548
+5   chromedriver                        0x0000000102631a0c cxxbridge1$string$len + 333884
+6   chromedriver                        0x0000000102a725e0 cxxbridge1$str$ptr + 2481340
+7   chromedriver                        0x0000000102a75848 cxxbridge1$str$ptr + 2494244
+8   chromedriver                        0x0000000102a53234 cxxbridge1$str$ptr + 2353424
+9   chromedriver                        0x0000000102a76104 cxxbridge1$str$ptr + 2496480
+10  chromedriver                        0x0000000102a442e4 cxxbridge1$str$ptr + 2292160
+11  chromedriver                        0x0000000102a95ff8 cxxbridge1$str$ptr + 2627284
+12  chromedriver                        0x0000000102a96184 cxxbridge1$str$ptr + 2627680
+13  chromedriver                        0x0000000102aa7090 cxxbridge1$str$ptr + 2697068
+14  libsystem_pthread.dylib             0x000000019690ec0c _pthread_start + 136
+15  libsystem_pthread.dylib             0x0000000196909b80 thread_start + 8
+
+   ✓ Awaiting Reviewer Scores: 2 manuscripts
+   ❌ Error finding Overdue Reviewer Scores: Message: no such element: Unable to locate element: {"method":"xpath","selector":"//a[contains(text(), 'Overdue Reviewer Scores')]"}
+  (Session info: chrome=138.0.7204.159); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#nosuchelementexception
+Stacktrace:
+0   chromedriver                        0x0000000102aaf55c cxxbridge1$str$ptr + 2731064
+1   chromedriver                        0x0000000102aa7454 cxxbridge1$str$ptr + 2698032
+2   chromedriver                        0x00000001025f63f8 cxxbridge1$string$len + 90664
+3   chromedriver                        0x000000010263d71c cxxbridge1$string$len + 382284
+4   chromedriver                        0x000000010267eb1c cxxbridge1$string$len + 649548
+5   chromedriver                        0x0000000102631a0c cxxbridge1$string$len + 333884
+6   chromedriver                        0x0000000102a725e0 cxxbridge1$str$ptr + 2481340
+7   chromedriver                        0x0000000102a75848 cxxbridge1$str$ptr + 2494244
+8   chromedriver                        0x0000000102a53234 cxxbridge1$str$ptr + 2353424
+9   chromedriver                        0x0000000102a76104 cxxbridge1$str$ptr + 2496480
+10  chromedriver                        0x0000000102a442e4 cxxbridge1$str$ptr + 2292160
+11  chromedriver                        0x0000000102a95ff8 cxxbridge1$str$ptr + 2627284
+12  chromedriver                        0x0000000102a96184 cxxbridge1$str$ptr + 2627680
+13  chromedriver                        0x0000000102aa7090 cxxbridge1$str$ptr + 2697068
+14  libsystem_pthread.dylib             0x000000019690ec0c _pthread_start + 136
+15  libsystem_pthread.dylib             0x0000000196909b80 thread_start + 8
+
+   ❌ Error finding Awaiting AE Recommendation: Message: no such element: Unable to locate element: {"method":"xpath","selector":"//a[contains(text(), 'Awaiting AE Recommendation')]"}
+  (Session info: chrome=138.0.7204.159); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#nosuchelementexception
+Stacktrace:
+0   chromedriver                        0x0000000102aaf55c cxxbridge1$str$ptr + 2731064
+1   chromedriver                        0x0000000102aa7454 cxxbridge1$str$ptr + 2698032
+2   chromedriver                        0x00000001025f63f8 cxxbridge1$string$len + 90664
+3   chromedriver                        0x000000010263d71c cxxbridge1$string$len + 382284
+4   chromedriver                        0x000000010267eb1c cxxbridge1$string$len + 649548
+5   chromedriver                        0x0000000102631a0c cxxbridge1$string$len + 333884
+6   chromedriver                        0x0000000102a725e0 cxxbridge1$str$ptr + 2481340
+7   chromedriver                        0x0000000102a75848 cxxbridge1$str$ptr + 2494244
+8   chromedriver                        0x0000000102a53234 cxxbridge1$str$ptr + 2353424
+9   chromedriver                        0x0000000102a76104 cxxbridge1$str$ptr + 2496480
+10  chromedriver                        0x0000000102a442e4 cxxbridge1$str$ptr + 2292160
+11  chromedriver                        0x0000000102a95ff8 cxxbridge1$str$ptr + 2627284
+12  chromedriver                        0x0000000102a96184 cxxbridge1$str$ptr + 2627680
+13  chromedriver                        0x0000000102aa7090 cxxbridge1$str$ptr + 2697068
+14  libsystem_pthread.dylib             0x000000019690ec0c _pthread_start + 136
+15  libsystem_pthread.dylib             0x0000000196909b80 thread_start + 8
+
+
+📂 Processing category: Awaiting Reviewer Scores (2 manuscripts)
+   Found 2 Take Action links
+
+   Processing manuscript 1/2...
+   Current manuscript: MAFI-2025-0166
+
+📄 Extracting details for MAFI-2025-0166...
+   👥 Extracting referee details...
+      Found 22 referee rows in referee table
+         Getting email for Gechun Liang...
+         ✅ Found email: g.liang@warwick.ac.uk
+         Found 2 pagecontents spans for Gechun Liang
+         Span 0: 'Liang, Gechun' (has_links: True)
+         Span 1: 'University of Warwick, Department of Statistics' (has_links: False)
+         📍 Affiliation (ROBUST method): University of Warwick, Department of Statistics
+         🔧 Parsing affiliation: 'University of Warwick, Department of Statistics'
+         🏛️ Institution: University of Warwick
+         🏢 Department: Department of Statistics
+         🌍 Country hints: ['United Kingdom']
+         ✅ Gechun Liang (Agreed) - University of Warwick, Department of Statistics
+         Getting email for Mohamed Mrad...
+         ✅ Found email: mohamed.kamel.mrad@gmail.com
+         Found 2 pagecontents spans for Mohamed Mrad
+         Span 0: 'Mrad, Mohamed' (has_links: True)
+         Span 1: 'Université Sorbonne Paris Nord, LAGA' (has_links: False)
+         📍 Affiliation (ROBUST method): Université Sorbonne Paris Nord, LAGA
+         🔧 Parsing affiliation: 'Université Sorbonne Paris Nord, LAGA'
+         🏛️ Institution: Université Sorbonne Paris Nord
+         🌍 Country hints: ['France']
+         ✅ Mohamed Mrad (Declined
+invite again) - Université Sorbonne Paris Nord, LAGA
+         Getting email for Goncalo Dos Reis...
+         ✅ Found email: g.dosreis@ed.ac.uk, gnreis@gmail.com
+         Found 2 pagecontents spans for Goncalo Dos Reis
+         Span 0: 'Dos Reis, Goncalo' (has_links: True)
+         Span 1: 'University of Edinburgh, School of Mathematics' (has_links: False)
+         📍 Affiliation (ROBUST method): University of Edinburgh, School of Mathematics
+         🔧 Parsing affiliation: 'University of Edinburgh, School of Mathematics'
+         🏛️ Institution: University of Edinburgh
+         🌍 Country hints: ['United Kingdom']
+         ✅ Goncalo Dos Reis (Unavailable
+invite again) - University of Edinburgh, School of Mathematics
+         Getting email for Moris Strub...
+         ✅ Found email: moris.strub@wbs.ac.uk
+         Found 2 pagecontents spans for Moris Strub
+         Span 0: 'Strub, Moris' (has_links: True)
+         Span 1: 'Warwick Business School, Information Systems Management & Analytics' (has_links: False)
+         📍 Affiliation (ROBUST method): Warwick Business School, Information Systems Management & Analytics
+         🔧 Parsing affiliation: 'Warwick Business School, Information Systems Management & Analytics'
+         🏛️ Institution: Warwick Business School
+         🌍 Country hints: ['United Kingdom']
+         ✅ Moris Strub (Agreed) - Warwick Business School, Information Systems Management & Analytics
+         ❌ Error extracting name: Message: no such element: Unable to locate element: {"method":"xpath","selector":".//a[contains(@href,'mailpopup')]"}
+  (Session info: chrome=138.0.7204.159); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#nosuchelementexception
+Stacktrace:
+0   chromedriver                        0x0000000102aaf55c cxxbridge1$str$ptr + 2731064
+1   chromedriver                        0x0000000102aa7454 cxxbridge1$str$ptr + 2698032
+2   chromedriver                        0x00000001025f63f8 cxxbridge1$string$len + 90664
+3   chromedriver                        0x000000010263d71c cxxbridge1$string$len + 382284
+4   chromedriver                        0x0000000102632fbc cxxbridge1$string$len + 339436
+5   chromedriver                        0x000000010267eb1c cxxbridge1$string$len + 649548
+6   chromedriver                        0x0000000102631a0c cxxbridge1$string$len + 333884
+7   chromedriver                        0x0000000102a725e0 cxxbridge1$str$ptr + 2481340
+8   chromedriver                        0x0000000102a75848 cxxbridge1$str$ptr + 2494244
+9   chromedriver                        0x0000000102a53234 cxxbridge1$str$ptr + 2353424
+10  chromedriver                        0x0000000102a76104 cxxbridge1$str$ptr + 2496480
+11  chromedriver                        0x0000000102a442e4 cxxbridge1$str$ptr + 2292160
+12  chromedriver                        0x0000000102a95ff8 cxxbridge1$str$ptr + 2627284
+13  chromedriver                        0x0000000102a96184 cxxbridge1$str$ptr + 2627680
+14  chromedriver                        0x0000000102aa7090 cxxbridge1$str$ptr + 2697068
+15  libsystem_pthread.dylib             0x000000019690ec0c _pthread_start + 136
+16  libsystem_pthread.dylib             0x0000000196909b80 thread_start + 8
+
+         ❌ Error extracting name: Message: no such element: Unable to locate element: {"method":"xpath","selector":".//a[contains(@href,'mailpopup')]"}
+  (Session info: chrome=138.0.7204.159); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#nosuchelementexception
+Stacktrace:
+0   chromedriver                        0x0000000102aaf55c cxxbridge1$str$ptr + 2731064
+1   chromedriver                        0x0000000102aa7454 cxxbridge1$str$ptr + 2698032
+2   chromedriver                        0x00000001025f63f8 cxxbridge1$string$len + 90664
+3   chromedriver                        0x000000010263d71c cxxbridge1$string$len + 382284
+4   chromedriver                        0x0000000102632fbc cxxbridge1$string$len + 339436
+5   chromedriver                        0x000000010267eb1c cxxbridge1$string$len + 649548
+6   chromedriver                        0x0000000102631a0c cxxbridge1$string$len + 333884
+7   chromedriver                        0x0000000102a725e0 cxxbridge1$str$ptr + 2481340
+8   chromedriver                        0x0000000102a75848 cxxbridge1$str$ptr + 2494244
+9   chromedriver                        0x0000000102a53234 cxxbridge1$str$ptr + 2353424
+10  chromedriver                        0x0000000102a76104 cxxbridge1$str$ptr + 2496480
+11  chromedriver                        0x0000000102a442e4 cxxbridge1$str$ptr + 2292160
+12  chromedriver                        0x0000000102a95ff8 cxxbridge1$str$ptr + 2627284
+13  chromedriver                        0x0000000102a96184 cxxbridge1$str$ptr + 2627680
+14  chromedriver                        0x0000000102aa7090 cxxbridge1$str$ptr + 2697068
+15  libsystem_pthread.dylib             0x000000019690ec0c _pthread_start + 136
+16  libsystem_pthread.dylib             0x0000000196909b80 thread_start + 8
+
+         ❌ Error extracting name: Message: no such element: Unable to locate element: {"method":"xpath","selector":".//a[contains(@href,'mailpopup')]"}
+  (Session info: chrome=138.0.7204.159); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#nosuchelementexception
+Stacktrace:
+0   chromedriver                        0x0000000102aaf55c cxxbridge1$str$ptr + 2731064
+1   chromedriver                        0x0000000102aa7454 cxxbridge1$str$ptr + 2698032
+2   chromedriver                        0x00000001025f63f8 cxxbridge1$string$len + 90664
+3   chromedriver                        0x000000010263d71c cxxbridge1$string$len + 382284
+4   chromedriver                        0x0000000102632fbc cxxbridge1$string$len + 339436
+5   chromedriver                        0x000000010267eb1c cxxbridge1$string$len + 649548
+6   chromedriver                        0x0000000102631a0c cxxbridge1$string$len + 333884
+7   chromedriver                        0x0000000102a725e0 cxxbridge1$str$ptr + 2481340
+8   chromedriver                        0x0000000102a75848 cxxbridge1$str$ptr + 2494244
+9   chromedriver                        0x0000000102a53234 cxxbridge1$str$ptr + 2353424
+10  chromedriver                        0x0000000102a76104 cxxbridge1$str$ptr + 2496480
+11  chromedriver                        0x0000000102a442e4 cxxbridge1$str$ptr + 2292160
+12  chromedriver                        0x0000000102a95ff8 cxxbridge1$str$ptr + 2627284
+13  chromedriver                        0x0000000102a96184 cxxbridge1$str$ptr + 2627680
+14  chromedriver                        0x0000000102aa7090 cxxbridge1$str$ptr + 2697068
+15  libsystem_pthread.dylib             0x000000019690ec0c _pthread_start + 136
+16  libsystem_pthread.dylib             0x0000000196909b80 thread_start + 8
+
+         ❌ Error extracting name: Message: no such element: Unable to locate element: {"method":"xpath","selector":".//a[contains(@href,'mailpopup')]"}
+  (Session info: chrome=138.0.7204.159); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#nosuchelementexception
+Stacktrace:
+0   chromedriver                        0x0000000102aaf55c cxxbridge1$str$ptr + 2731064
+1   chromedriver                        0x0000000102aa7454 cxxbridge1$str$ptr + 2698032
+2   chromedriver                        0x00000001025f63f8 cxxbridge1$string$len + 90664
+3   chromedriver                        0x000000010263d71c cxxbridge1$string$len + 382284
+4   chromedriver                        0x0000000102632fbc cxxbridge1$string$len + 339436
+5   chromedriver                        0x000000010267eb1c cxxbridge1$string$len + 649548
+6   chromedriver                        0x0000000102631a0c cxxbridge1$string$len + 333884
+7   chromedriver                        0x0000000102a725e0 cxxbridge1$str$ptr + 2481340
+8   chromedriver                        0x0000000102a75848 cxxbridge1$str$ptr + 2494244
+9   chromedriver                        0x0000000102a53234 cxxbridge1$str$ptr + 2353424
+10  chromedriver                        0x0000000102a76104 cxxbridge1$str$ptr + 2496480
+11  chromedriver                        0x0000000102a442e4 cxxbridge1$str$ptr + 2292160
+12  chromedriver                        0x0000000102a95ff8 cxxbridge1$str$ptr + 2627284
+13  chromedriver                        0x0000000102a96184 cxxbridge1$str$ptr + 2627680
+14  chromedriver                        0x0000000102aa7090 cxxbridge1$str$ptr + 2697068
+15  libsystem_pthread.dylib             0x000000019690ec0c _pthread_start + 136
+16  libsystem_pthread.dylib             0x0000000196909b80 thread_start + 8
+
+         ❌ Error extracting name: Message: no such element: Unable to locate element: {"method":"xpath","selector":".//a[contains(@href,'mailpopup')]"}
+  (Session info: chrome=138.0.7204.159); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#nosuchelementexception
+Stacktrace:
+0   chromedriver                        0x0000000102aaf55c cxxbridge1$str$ptr + 2731064
+1   chromedriver                        0x0000000102aa7454 cxxbridge1$str$ptr + 2698032
+2   chromedriver                        0x00000001025f63f8 cxxbridge1$string$len + 90664
+3   chromedriver                        0x000000010263d71c cxxbridge1$string$len + 382284
+4   chromedriver                        0x0000000102632fbc cxxbridge1$string$len + 339436
+5   chromedriver                        0x000000010267eb1c cxxbridge1$string$len + 649548
+6   chromedriver                        0x0000000102631a0c cxxbridge1$string$len + 333884
+7   chromedriver                        0x0000000102a725e0 cxxbridge1$str$ptr + 2481340
+8   chromedriver                        0x0000000102a75848 cxxbridge1$str$ptr + 2494244
+9   chromedriver                        0x0000000102a53234 cxxbridge1$str$ptr + 2353424
+10  chromedriver                        0x0000000102a76104 cxxbridge1$str$ptr + 2496480
+11  chromedriver                        0x0000000102a442e4 cxxbridge1$str$ptr + 2292160
+12  chromedriver                        0x0000000102a95ff8 cxxbridge1$str$ptr + 2627284
+13  chromedriver                        0x0000000102a96184 cxxbridge1$str$ptr + 2627680
+14  chromedriver                        0x0000000102aa7090 cxxbridge1$str$ptr + 2697068
+15  libsystem_pthread.dylib             0x000000019690ec0c _pthread_start + 136
+16  libsystem_pthread.dylib             0x0000000196909b80 thread_start + 8
+
+         ❌ Error extracting name: Message: no such element: Unable to locate element: {"method":"xpath","selector":".//a[contains(@href,'mailpopup')]"}
+  (Session info: chrome=138.0.7204.159); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#nosuchelementexception
+Stacktrace:
+0   chromedriver                        0x0000000102aaf55c cxxbridge1$str$ptr + 2731064
+1   chromedriver                        0x0000000102aa7454 cxxbridge1$str$ptr + 2698032
+2   chromedriver                        0x00000001025f63f8 cxxbridge1$string$len + 90664
+3   chromedriver                        0x000000010263d71c cxxbridge1$string$len + 382284
+4   chromedriver                        0x0000000102632fbc cxxbridge1$string$len + 339436
+5   chromedriver                        0x000000010267eb1c cxxbridge1$string$len + 649548
+6   chromedriver                        0x0000000102631a0c cxxbridge1$string$len + 333884
+7   chromedriver                        0x0000000102a725e0 cxxbridge1$str$ptr + 2481340
+8   chromedriver                        0x0000000102a75848 cxxbridge1$str$ptr + 2494244
+9   chromedriver                        0x0000000102a53234 cxxbridge1$str$ptr + 2353424
+10  chromedriver                        0x0000000102a76104 cxxbridge1$str$ptr + 2496480
+11  chromedriver                        0x0000000102a442e4 cxxbridge1$str$ptr + 2292160
+12  chromedriver                        0x0000000102a95ff8 cxxbridge1$str$ptr + 2627284
+13  chromedriver                        0x0000000102a96184 cxxbridge1$str$ptr + 2627680
+14  chromedriver                        0x0000000102aa7090 cxxbridge1$str$ptr + 2697068
+15  libsystem_pthread.dylib             0x000000019690ec0c _pthread_start + 136
+16  libsystem_pthread.dylib             0x0000000196909b80 thread_start + 8
+
+         ❌ Error extracting name: Message: no such element: Unable to locate element: {"method":"xpath","selector":".//a[contains(@href,'mailpopup')]"}
+  (Session info: chrome=138.0.7204.159); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#nosuchelementexception
+Stacktrace:
+0   chromedriver                        0x0000000102aaf55c cxxbridge1$str$ptr + 2731064
+1   chromedriver                        0x0000000102aa7454 cxxbridge1$str$ptr + 2698032
+2   chromedriver                        0x00000001025f63f8 cxxbridge1$string$len + 90664
+3   chromedriver                        0x000000010263d71c cxxbridge1$string$len + 382284
+4   chromedriver                        0x0000000102632fbc cxxbridge1$string$len + 339436
+5   chromedriver                        0x000000010267eb1c cxxbridge1$string$len + 649548
+6   chromedriver                        0x0000000102631a0c cxxbridge1$string$len + 333884
+7   chromedriver                        0x0000000102a725e0 cxxbridge1$str$ptr + 2481340
+8   chromedriver                        0x0000000102a75848 cxxbridge1$str$ptr + 2494244
+9   chromedriver                        0x0000000102a53234 cxxbridge1$str$ptr + 2353424
+10  chromedriver                        0x0000000102a76104 cxxbridge1$str$ptr + 2496480
+11  chromedriver                        0x0000000102a442e4 cxxbridge1$str$ptr + 2292160
+12  chromedriver                        0x0000000102a95ff8 cxxbridge1$str$ptr + 2627284
+13  chromedriver                        0x0000000102a96184 cxxbridge1$str$ptr + 2627680
+14  chromedriver                        0x0000000102aa7090 cxxbridge1$str$ptr + 2697068
+15  libsystem_pthread.dylib             0x000000019690ec0c _pthread_start + 136
+16  libsystem_pthread.dylib             0x0000000196909b80 thread_start + 8
+
+         ❌ Error extracting name: Message: no such element: Unable to locate element: {"method":"xpath","selector":".//a[contains(@href,'mailpopup')]"}
+  (Session info: chrome=138.0.7204.159); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#nosuchelementexception
+Stacktrace:
+0   chromedriver                        0x0000000102aaf55c cxxbridge1$str$ptr + 2731064
+1   chromedriver                        0x0000000102aa7454 cxxbridge1$str$ptr + 2698032
+2   chromedriver                        0x00000001025f63f8 cxxbridge1$string$len + 90664
+3   chromedriver                        0x000000010263d71c cxxbridge1$string$len + 382284
+4   chromedriver                        0x0000000102632fbc cxxbridge1$string$len + 339436
+5   chromedriver                        0x000000010267eb1c cxxbridge1$string$len + 649548
+6   chromedriver                        0x0000000102631a0c cxxbridge1$string$len + 333884
+7   chromedriver                        0x0000000102a725e0 cxxbridge1$str$ptr + 2481340
+8   chromedriver                        0x0000000102a75848 cxxbridge1$str$ptr + 2494244
+9   chromedriver                        0x0000000102a53234 cxxbridge1$str$ptr + 2353424
+10  chromedriver                        0x0000000102a76104 cxxbridge1$str$ptr + 2496480
+11  chromedriver                        0x0000000102a442e4 cxxbridge1$str$ptr + 2292160
+12  chromedriver                        0x0000000102a95ff8 cxxbridge1$str$ptr + 2627284
+13  chromedriver                        0x0000000102a96184 cxxbridge1$str$ptr + 2627680
+14  chromedriver                        0x0000000102aa7090 cxxbridge1$str$ptr + 2697068
+15  libsystem_pthread.dylib             0x000000019690ec0c _pthread_start + 136
+16  libsystem_pthread.dylib             0x0000000196909b80 thread_start + 8
+
+         ❌ Error extracting name: Message: no such element: Unable to locate element: {"method":"xpath","selector":".//a[contains(@href,'mailpopup')]"}
+  (Session info: chrome=138.0.7204.159); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#nosuchelementexception
+Stacktrace:
+0   chromedriver                        0x0000000102aaf55c cxxbridge1$str$ptr + 2731064
+1   chromedriver                        0x0000000102aa7454 cxxbridge1$str$ptr + 2698032
+2   chromedriver                        0x00000001025f63f8 cxxbridge1$string$len + 90664
+3   chromedriver                        0x000000010263d71c cxxbridge1$string$len + 382284
+4   chromedriver                        0x0000000102632fbc cxxbridge1$string$len + 339436
+5   chromedriver                        0x000000010267eb1c cxxbridge1$string$len + 649548
+6   chromedriver                        0x0000000102631a0c cxxbridge1$string$len + 333884
+7   chromedriver                        0x0000000102a725e0 cxxbridge1$str$ptr + 2481340
+8   chromedriver                        0x0000000102a75848 cxxbridge1$str$ptr + 2494244
+9   chromedriver                        0x0000000102a53234 cxxbridge1$str$ptr + 2353424
+10  chromedriver                        0x0000000102a76104 cxxbridge1$str$ptr + 2496480
+11  chromedriver                        0x0000000102a442e4 cxxbridge1$str$ptr + 2292160
+12  chromedriver                        0x0000000102a95ff8 cxxbridge1$str$ptr + 2627284
+13  chromedriver                        0x0000000102a96184 cxxbridge1$str$ptr + 2627680
+14  chromedriver                        0x0000000102aa7090 cxxbridge1$str$ptr + 2697068
+15  libsystem_pthread.dylib             0x000000019690ec0c _pthread_start + 136
+16  libsystem_pthread.dylib             0x0000000196909b80 thread_start + 8
+
+         ❌ Error extracting name: Message: no such element: Unable to locate element: {"method":"xpath","selector":".//a[contains(@href,'mailpopup')]"}
+  (Session info: chrome=138.0.7204.159); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#nosuchelementexception
+Stacktrace:
+0   chromedriver                        0x0000000102aaf55c cxxbridge1$str$ptr + 2731064
+1   chromedriver                        0x0000000102aa7454 cxxbridge1$str$ptr + 2698032
+2   chromedriver                        0x00000001025f63f8 cxxbridge1$string$len + 90664
+3   chromedriver                        0x000000010263d71c cxxbridge1$string$len + 382284
+4   chromedriver                        0x0000000102632fbc cxxbridge1$string$len + 339436
+5   chromedriver                        0x000000010267eb1c cxxbridge1$string$len + 649548
+6   chromedriver                        0x0000000102631a0c cxxbridge1$string$len + 333884
+7   chromedriver                        0x0000000102a725e0 cxxbridge1$str$ptr + 2481340
+8   chromedriver                        0x0000000102a75848 cxxbridge1$str$ptr + 2494244
+9   chromedriver                        0x0000000102a53234 cxxbridge1$str$ptr + 2353424
+10  chromedriver                        0x0000000102a76104 cxxbridge1$str$ptr + 2496480
+11  chromedriver                        0x0000000102a442e4 cxxbridge1$str$ptr + 2292160
+12  chromedriver                        0x0000000102a95ff8 cxxbridge1$str$ptr + 2627284
+13  chromedriver                        0x0000000102a96184 cxxbridge1$str$ptr + 2627680
+14  chromedriver                        0x0000000102aa7090 cxxbridge1$str$ptr + 2697068
+15  libsystem_pthread.dylib             0x000000019690ec0c _pthread_start + 136
+16  libsystem_pthread.dylib             0x0000000196909b80 thread_start + 8
+
+         ❌ Error extracting name: Message: no such element: Unable to locate element: {"method":"xpath","selector":".//a[contains(@href,'mailpopup')]"}
+  (Session info: chrome=138.0.7204.159); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#nosuchelementexception
+Stacktrace:
+0   chromedriver                        0x0000000102aaf55c cxxbridge1$str$ptr + 2731064
+1   chromedriver                        0x0000000102aa7454 cxxbridge1$str$ptr + 2698032
+2   chromedriver                        0x00000001025f63f8 cxxbridge1$string$len + 90664
+3   chromedriver                        0x000000010263d71c cxxbridge1$string$len + 382284
+4   chromedriver                        0x0000000102632fbc cxxbridge1$string$len + 339436
+5   chromedriver                        0x000000010267eb1c cxxbridge1$string$len + 649548
+6   chromedriver                        0x0000000102631a0c cxxbridge1$string$len + 333884
+7   chromedriver                        0x0000000102a725e0 cxxbridge1$str$ptr + 2481340
+8   chromedriver                        0x0000000102a75848 cxxbridge1$str$ptr + 2494244
+9   chromedriver                        0x0000000102a53234 cxxbridge1$str$ptr + 2353424
+10  chromedriver                        0x0000000102a76104 cxxbridge1$str$ptr + 2496480
+11  chromedriver                        0x0000000102a442e4 cxxbridge1$str$ptr + 2292160
+12  chromedriver                        0x0000000102a95ff8 cxxbridge1$str$ptr + 2627284
+13  chromedriver                        0x0000000102a96184 cxxbridge1$str$ptr + 2627680
+14  chromedriver                        0x0000000102aa7090 cxxbridge1$str$ptr + 2697068
+15  libsystem_pthread.dylib             0x000000019690ec0c _pthread_start + 136
+16  libsystem_pthread.dylib             0x0000000196909b80 thread_start + 8
+
+         ❌ Error extracting name: Message: no such element: Unable to locate element: {"method":"xpath","selector":".//a[contains(@href,'mailpopup')]"}
+  (Session info: chrome=138.0.7204.159); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#nosuchelementexception
+Stacktrace:
+0   chromedriver                        0x0000000102aaf55c cxxbridge1$str$ptr + 2731064
+1   chromedriver                        0x0000000102aa7454 cxxbridge1$str$ptr + 2698032
+2   chromedriver                        0x00000001025f63f8 cxxbridge1$string$len + 90664
+3   chromedriver                        0x000000010263d71c cxxbridge1$string$len + 382284
+4   chromedriver                        0x0000000102632fbc cxxbridge1$string$len + 339436
+5   chromedriver                        0x000000010267eb1c cxxbridge1$string$len + 649548
+6   chromedriver                        0x0000000102631a0c cxxbridge1$string$len + 333884
+7   chromedriver                        0x0000000102a725e0 cxxbridge1$str$ptr + 2481340
+8   chromedriver                        0x0000000102a75848 cxxbridge1$str$ptr + 2494244
+9   chromedriver                        0x0000000102a53234 cxxbridge1$str$ptr + 2353424
+10  chromedriver                        0x0000000102a76104 cxxbridge1$str$ptr + 2496480
+11  chromedriver                        0x0000000102a442e4 cxxbridge1$str$ptr + 2292160
+12  chromedriver                        0x0000000102a95ff8 cxxbridge1$str$ptr + 2627284
+13  chromedriver                        0x0000000102a96184 cxxbridge1$str$ptr + 2627680
+14  chromedriver                        0x0000000102aa7090 cxxbridge1$str$ptr + 2697068
+15  libsystem_pthread.dylib             0x000000019690ec0c _pthread_start + 136
+16  libsystem_pthread.dylib             0x0000000196909b80 thread_start + 8
+
+         ❌ Error extracting name: Message: no such element: Unable to locate element: {"method":"xpath","selector":".//a[contains(@href,'mailpopup')]"}
+  (Session info: chrome=138.0.7204.159); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#nosuchelementexception
+Stacktrace:
+0   chromedriver                        0x0000000102aaf55c cxxbridge1$str$ptr + 2731064
+1   chromedriver                        0x0000000102aa7454 cxxbridge1$str$ptr + 2698032
+2   chromedriver                        0x00000001025f63f8 cxxbridge1$string$len + 90664
+3   chromedriver                        0x000000010263d71c cxxbridge1$string$len + 382284
+4   chromedriver                        0x0000000102632fbc cxxbridge1$string$len + 339436
+5   chromedriver                        0x000000010267eb1c cxxbridge1$string$len + 649548
+6   chromedriver                        0x0000000102631a0c cxxbridge1$string$len + 333884
+7   chromedriver                        0x0000000102a725e0 cxxbridge1$str$ptr + 2481340
+8   chromedriver                        0x0000000102a75848 cxxbridge1$str$ptr + 2494244
+9   chromedriver                        0x0000000102a53234 cxxbridge1$str$ptr + 2353424
+10  chromedriver                        0x0000000102a76104 cxxbridge1$str$ptr + 2496480
+11  chromedriver                        0x0000000102a442e4 cxxbridge1$str$ptr + 2292160
+12  chromedriver                        0x0000000102a95ff8 cxxbridge1$str$ptr + 2627284
+13  chromedriver                        0x0000000102a96184 cxxbridge1$str$ptr + 2627680
+14  chromedriver                        0x0000000102aa7090 cxxbridge1$str$ptr + 2697068
+15  libsystem_pthread.dylib             0x000000019690ec0c _pthread_start + 136
+16  libsystem_pthread.dylib             0x0000000196909b80 thread_start + 8
+
+         ❌ Error extracting name: Message: no such element: Unable to locate element: {"method":"xpath","selector":".//a[contains(@href,'mailpopup')]"}
+  (Session info: chrome=138.0.7204.159); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#nosuchelementexception
+Stacktrace:
+0   chromedriver                        0x0000000102aaf55c cxxbridge1$str$ptr + 2731064
+1   chromedriver                        0x0000000102aa7454 cxxbridge1$str$ptr + 2698032
+2   chromedriver                        0x00000001025f63f8 cxxbridge1$string$len + 90664
+3   chromedriver                        0x000000010263d71c cxxbridge1$string$len + 382284
+4   chromedriver                        0x0000000102632fbc cxxbridge1$string$len + 339436
+5   chromedriver                        0x000000010267eb1c cxxbridge1$string$len + 649548
+6   chromedriver                        0x0000000102631a0c cxxbridge1$string$len + 333884
+7   chromedriver                        0x0000000102a725e0 cxxbridge1$str$ptr + 2481340
+8   chromedriver                        0x0000000102a75848 cxxbridge1$str$ptr + 2494244
+9   chromedriver                        0x0000000102a53234 cxxbridge1$str$ptr + 2353424
+10  chromedriver                        0x0000000102a76104 cxxbridge1$str$ptr + 2496480
+11  chromedriver                        0x0000000102a442e4 cxxbridge1$str$ptr + 2292160
+12  chromedriver                        0x0000000102a95ff8 cxxbridge1$str$ptr + 2627284
+13  chromedriver                        0x0000000102a96184 cxxbridge1$str$ptr + 2627680
+14  chromedriver                        0x0000000102aa7090 cxxbridge1$str$ptr + 2697068
+15  libsystem_pthread.dylib             0x000000019690ec0c _pthread_start + 136
+16  libsystem_pthread.dylib             0x0000000196909b80 thread_start + 8
+
+         ❌ Error extracting name: Message: no such element: Unable to locate element: {"method":"xpath","selector":".//a[contains(@href,'mailpopup')]"}
+  (Session info: chrome=138.0.7204.159); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#nosuchelementexception
+Stacktrace:
+0   chromedriver                        0x0000000102aaf55c cxxbridge1$str$ptr + 2731064
+1   chromedriver                        0x0000000102aa7454 cxxbridge1$str$ptr + 2698032
+2   chromedriver                        0x00000001025f63f8 cxxbridge1$string$len + 90664
+3   chromedriver                        0x000000010263d71c cxxbridge1$string$len + 382284
+4   chromedriver                        0x0000000102632fbc cxxbridge1$string$len + 339436
+5   chromedriver                        0x000000010267eb1c cxxbridge1$string$len + 649548
+6   chromedriver                        0x0000000102631a0c cxxbridge1$string$len + 333884
+7   chromedriver                        0x0000000102a725e0 cxxbridge1$str$ptr + 2481340
+8   chromedriver                        0x0000000102a75848 cxxbridge1$str$ptr + 2494244
+9   chromedriver                        0x0000000102a53234 cxxbridge1$str$ptr + 2353424
+10  chromedriver                        0x0000000102a76104 cxxbridge1$str$ptr + 2496480
+11  chromedriver                        0x0000000102a442e4 cxxbridge1$str$ptr + 2292160
+12  chromedriver                        0x0000000102a95ff8 cxxbridge1$str$ptr + 2627284
+13  chromedriver                        0x0000000102a96184 cxxbridge1$str$ptr + 2627680
+14  chromedriver                        0x0000000102aa7090 cxxbridge1$str$ptr + 2697068
+15  libsystem_pthread.dylib             0x000000019690ec0c _pthread_start + 136
+16  libsystem_pthread.dylib             0x0000000196909b80 thread_start + 8
+
+         ❌ Error extracting name: Message: no such element: Unable to locate element: {"method":"xpath","selector":".//a[contains(@href,'mailpopup')]"}
+  (Session info: chrome=138.0.7204.159); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#nosuchelementexception
+Stacktrace:
+0   chromedriver                        0x0000000102aaf55c cxxbridge1$str$ptr + 2731064
+1   chromedriver                        0x0000000102aa7454 cxxbridge1$str$ptr + 2698032
+2   chromedriver                        0x00000001025f63f8 cxxbridge1$string$len + 90664
+3   chromedriver                        0x000000010263d71c cxxbridge1$string$len + 382284
+4   chromedriver                        0x0000000102632fbc cxxbridge1$string$len + 339436
+5   chromedriver                        0x000000010267eb1c cxxbridge1$string$len + 649548
+6   chromedriver                        0x0000000102631a0c cxxbridge1$string$len + 333884
+7   chromedriver                        0x0000000102a725e0 cxxbridge1$str$ptr + 2481340
+8   chromedriver                        0x0000000102a75848 cxxbridge1$str$ptr + 2494244
+9   chromedriver                        0x0000000102a53234 cxxbridge1$str$ptr + 2353424
+10  chromedriver                        0x0000000102a76104 cxxbridge1$str$ptr + 2496480
+11  chromedriver                        0x0000000102a442e4 cxxbridge1$str$ptr + 2292160
+12  chromedriver                        0x0000000102a95ff8 cxxbridge1$str$ptr + 2627284
+13  chromedriver                        0x0000000102a96184 cxxbridge1$str$ptr + 2627680
+14  chromedriver                        0x0000000102aa7090 cxxbridge1$str$ptr + 2697068
+15  libsystem_pthread.dylib             0x000000019690ec0c _pthread_start + 136
+16  libsystem_pthread.dylib             0x0000000196909b80 thread_start + 8
+
+         ❌ Error extracting name: Message: no such element: Unable to locate element: {"method":"xpath","selector":".//a[contains(@href,'mailpopup')]"}
+  (Session info: chrome=138.0.7204.159); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#nosuchelementexception
+Stacktrace:
+0   chromedriver                        0x0000000102aaf55c cxxbridge1$str$ptr + 2731064
+1   chromedriver                        0x0000000102aa7454 cxxbridge1$str$ptr + 2698032
+2   chromedriver                        0x00000001025f63f8 cxxbridge1$string$len + 90664
+3   chromedriver                        0x000000010263d71c cxxbridge1$string$len + 382284
+4   chromedriver                        0x0000000102632fbc cxxbridge1$string$len + 339436
+5   chromedriver                        0x000000010267eb1c cxxbridge1$string$len + 649548
+6   chromedriver                        0x0000000102631a0c cxxbridge1$string$len + 333884
+7   chromedriver                        0x0000000102a725e0 cxxbridge1$str$ptr + 2481340
+8   chromedriver                        0x0000000102a75848 cxxbridge1$str$ptr + 2494244
+9   chromedriver                        0x0000000102a53234 cxxbridge1$str$ptr + 2353424
+10  chromedriver                        0x0000000102a76104 cxxbridge1$str$ptr + 2496480
+11  chromedriver                        0x0000000102a442e4 cxxbridge1$str$ptr + 2292160
+12  chromedriver                        0x0000000102a95ff8 cxxbridge1$str$ptr + 2627284
+13  chromedriver                        0x0000000102a96184 cxxbridge1$str$ptr + 2627680
+14  chromedriver                        0x0000000102aa7090 cxxbridge1$str$ptr + 2697068
+15  libsystem_pthread.dylib             0x000000019690ec0c _pthread_start + 136
+16  libsystem_pthread.dylib             0x0000000196909b80 thread_start + 8
+
+         ❌ Error extracting name: Message: no such element: Unable to locate element: {"method":"xpath","selector":".//a[contains(@href,'mailpopup')]"}
+  (Session info: chrome=138.0.7204.159); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#nosuchelementexception
+Stacktrace:
+0   chromedriver                        0x0000000102aaf55c cxxbridge1$str$ptr + 2731064
+1   chromedriver                        0x0000000102aa7454 cxxbridge1$str$ptr + 2698032
+2   chromedriver                        0x00000001025f63f8 cxxbridge1$string$len + 90664
+3   chromedriver                        0x000000010263d71c cxxbridge1$string$len + 382284
+4   chromedriver                        0x0000000102632fbc cxxbridge1$string$len + 339436
+5   chromedriver                        0x000000010267eb1c cxxbridge1$string$len + 649548
+6   chromedriver                        0x0000000102631a0c cxxbridge1$string$len + 333884
+7   chromedriver                        0x0000000102a725e0 cxxbridge1$str$ptr + 2481340
+8   chromedriver                        0x0000000102a75848 cxxbridge1$str$ptr + 2494244
+9   chromedriver                        0x0000000102a53234 cxxbridge1$str$ptr + 2353424
+10  chromedriver                        0x0000000102a76104 cxxbridge1$str$ptr + 2496480
+11  chromedriver                        0x0000000102a442e4 cxxbridge1$str$ptr + 2292160
+12  chromedriver                        0x0000000102a95ff8 cxxbridge1$str$ptr + 2627284
+13  chromedriver                        0x0000000102a96184 cxxbridge1$str$ptr + 2627680
+14  chromedriver                        0x0000000102aa7090 cxxbridge1$str$ptr + 2697068
+15  libsystem_pthread.dylib             0x000000019690ec0c _pthread_start + 136
+16  libsystem_pthread.dylib             0x0000000196909b80 thread_start + 8
+
+      Total referees extracted: 4
+   📄 Downloading PDF for MAFI-2025-0166...
+      ✅ PDF saved to downloads/manuscripts/MAFI-2025-0166.pdf
+   📋 Downloading cover letter for MAFI-2025-0166...
+      🔗 Clicking on cover letter link...
+      📄 Switched to cover letter popup
+      ❌ No downloadable file found in popup
+      📝 Found text content using selector: //div[contains(@class, 'content')]
+   ✅ Processed MAFI-2025-0166
+   🔄 Looking for Next Document button...
+     Found Next Document with selector: //a[contains(@href,'XIK_NEXT_PREV_DOCUMENT_ID')]/img[@alt='Next Document']/..
+     ✅ Clicked Next Document
+
+   Processing manuscript 2/2...
+   Current manuscript: MAFI-2024-0167
+
+📄 Extracting details for MAFI-2024-0167...
+   👥 Extracting referee details...
+      Found 20 referee rows in referee table
+         Getting email for Thibaut Mastrolia...
+         ✅ Found email: mastrolia@berkeley.edu
+         Found 2 pagecontents spans for Thibaut Mastrolia
+         Span 0: 'Mastrolia, Thibaut' (has_links: True)
+         Span 1: 'UC Berkeley, IEOR' (has_links: False)
+         📍 Affiliation (ROBUST method): UC Berkeley, IEOR
+         🔧 Parsing affiliation: 'UC Berkeley, IEOR'
+         🏛️ Institution: UC Berkeley
+         🌍 Country hints: ['United States']
+         ✅ Thibaut Mastrolia (Agreed) - UC Berkeley, IEOR
+         Getting email for Said Hamadene...
+         ✅ Found email: hamadene@univ-lemans.fr
+         Found 1 pagecontents spans for Said Hamadene
+         Span 0: 'Hamadene, Said' (has_links: True)
+         ❌ Only 1 spans found, need at least 2
+         📍 Affiliation (method 2): Hamadene, Said
+         🔧 Parsing affiliation: 'Hamadene, Said'
+         🏛️ Institution: Hamadene
+         🌐 Email domain inference: univ-lemans.fr → France
+         ✅ Said Hamadene (Agreed) - Hamadene, Said
+         ❌ Error extracting name: Message: no such element: Unable to locate element: {"method":"xpath","selector":".//a[contains(@href,'mailpopup')]"}
+  (Session info: chrome=138.0.7204.159); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#nosuchelementexception
+Stacktrace:
+0   chromedriver                        0x0000000102aaf55c cxxbridge1$str$ptr + 2731064
+1   chromedriver                        0x0000000102aa7454 cxxbridge1$str$ptr + 2698032
+2   chromedriver                        0x00000001025f63f8 cxxbridge1$string$len + 90664
+3   chromedriver                        0x000000010263d71c cxxbridge1$string$len + 382284
+4   chromedriver                        0x0000000102632fbc cxxbridge1$string$len + 339436
+5   chromedriver                        0x000000010267eb1c cxxbridge1$string$len + 649548
+6   chromedriver                        0x0000000102631a0c cxxbridge1$string$len + 333884
+7   chromedriver                        0x0000000102a725e0 cxxbridge1$str$ptr + 2481340
+8   chromedriver                        0x0000000102a75848 cxxbridge1$str$ptr + 2494244
+9   chromedriver                        0x0000000102a53234 cxxbridge1$str$ptr + 2353424
+10  chromedriver                        0x0000000102a76104 cxxbridge1$str$ptr + 2496480
+11  chromedriver                        0x0000000102a442e4 cxxbridge1$str$ptr + 2292160
+12  chromedriver                        0x0000000102a95ff8 cxxbridge1$str$ptr + 2627284
+13  chromedriver                        0x0000000102a96184 cxxbridge1$str$ptr + 2627680
+14  chromedriver                        0x0000000102aa7090 cxxbridge1$str$ptr + 2697068
+15  libsystem_pthread.dylib             0x000000019690ec0c _pthread_start + 136
+16  libsystem_pthread.dylib             0x0000000196909b80 thread_start + 8
+
+         ❌ Error extracting name: Message: no such element: Unable to locate element: {"method":"xpath","selector":".//a[contains(@href,'mailpopup')]"}
+  (Session info: chrome=138.0.7204.159); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#nosuchelementexception
+Stacktrace:
+0   chromedriver                        0x0000000102aaf55c cxxbridge1$str$ptr + 2731064
+1   chromedriver                        0x0000000102aa7454 cxxbridge1$str$ptr + 2698032
+2   chromedriver                        0x00000001025f63f8 cxxbridge1$string$len + 90664
+3   chromedriver                        0x000000010263d71c cxxbridge1$string$len + 382284
+4   chromedriver                        0x0000000102632fbc cxxbridge1$string$len + 339436
+5   chromedriver                        0x000000010267eb1c cxxbridge1$string$len + 649548
+6   chromedriver                        0x0000000102631a0c cxxbridge1$string$len + 333884
+7   chromedriver                        0x0000000102a725e0 cxxbridge1$str$ptr + 2481340
+8   chromedriver                        0x0000000102a75848 cxxbridge1$str$ptr + 2494244
+9   chromedriver                        0x0000000102a53234 cxxbridge1$str$ptr + 2353424
+10  chromedriver                        0x0000000102a76104 cxxbridge1$str$ptr + 2496480
+11  chromedriver                        0x0000000102a442e4 cxxbridge1$str$ptr + 2292160
+12  chromedriver                        0x0000000102a95ff8 cxxbridge1$str$ptr + 2627284
+13  chromedriver                        0x0000000102a96184 cxxbridge1$str$ptr + 2627680
+14  chromedriver                        0x0000000102aa7090 cxxbridge1$str$ptr + 2697068
+15  libsystem_pthread.dylib             0x000000019690ec0c _pthread_start + 136
+16  libsystem_pthread.dylib             0x0000000196909b80 thread_start + 8
+
+         ❌ Error extracting name: Message: no such element: Unable to locate element: {"method":"xpath","selector":".//a[contains(@href,'mailpopup')]"}
+  (Session info: chrome=138.0.7204.159); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#nosuchelementexception
+Stacktrace:
+0   chromedriver                        0x0000000102aaf55c cxxbridge1$str$ptr + 2731064
+1   chromedriver                        0x0000000102aa7454 cxxbridge1$str$ptr + 2698032
+2   chromedriver                        0x00000001025f63f8 cxxbridge1$string$len + 90664
+3   chromedriver                        0x000000010263d71c cxxbridge1$string$len + 382284
+4   chromedriver                        0x0000000102632fbc cxxbridge1$string$len + 339436
+5   chromedriver                        0x000000010267eb1c cxxbridge1$string$len + 649548
+6   chromedriver                        0x0000000102631a0c cxxbridge1$string$len + 333884
+7   chromedriver                        0x0000000102a725e0 cxxbridge1$str$ptr + 2481340
+8   chromedriver                        0x0000000102a75848 cxxbridge1$str$ptr + 2494244
+9   chromedriver                        0x0000000102a53234 cxxbridge1$str$ptr + 2353424
+10  chromedriver                        0x0000000102a76104 cxxbridge1$str$ptr + 2496480
+11  chromedriver                        0x0000000102a442e4 cxxbridge1$str$ptr + 2292160
+12  chromedriver                        0x0000000102a95ff8 cxxbridge1$str$ptr + 2627284
+13  chromedriver                        0x0000000102a96184 cxxbridge1$str$ptr + 2627680
+14  chromedriver                        0x0000000102aa7090 cxxbridge1$str$ptr + 2697068
+15  libsystem_pthread.dylib             0x000000019690ec0c _pthread_start + 136
+16  libsystem_pthread.dylib             0x0000000196909b80 thread_start + 8
+
+         ❌ Error extracting name: Message: no such element: Unable to locate element: {"method":"xpath","selector":".//a[contains(@href,'mailpopup')]"}
+  (Session info: chrome=138.0.7204.159); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#nosuchelementexception
+Stacktrace:
+0   chromedriver                        0x0000000102aaf55c cxxbridge1$str$ptr + 2731064
+1   chromedriver                        0x0000000102aa7454 cxxbridge1$str$ptr + 2698032
+2   chromedriver                        0x00000001025f63f8 cxxbridge1$string$len + 90664
+3   chromedriver                        0x000000010263d71c cxxbridge1$string$len + 382284
+4   chromedriver                        0x0000000102632fbc cxxbridge1$string$len + 339436
+5   chromedriver                        0x000000010267eb1c cxxbridge1$string$len + 649548
+6   chromedriver                        0x0000000102631a0c cxxbridge1$string$len + 333884
+7   chromedriver                        0x0000000102a725e0 cxxbridge1$str$ptr + 2481340
+8   chromedriver                        0x0000000102a75848 cxxbridge1$str$ptr + 2494244
+9   chromedriver                        0x0000000102a53234 cxxbridge1$str$ptr + 2353424
+10  chromedriver                        0x0000000102a76104 cxxbridge1$str$ptr + 2496480
+11  chromedriver                        0x0000000102a442e4 cxxbridge1$str$ptr + 2292160
+12  chromedriver                        0x0000000102a95ff8 cxxbridge1$str$ptr + 2627284
+13  chromedriver                        0x0000000102a96184 cxxbridge1$str$ptr + 2627680
+14  chromedriver                        0x0000000102aa7090 cxxbridge1$str$ptr + 2697068
+15  libsystem_pthread.dylib             0x000000019690ec0c _pthread_start + 136
+16  libsystem_pthread.dylib             0x0000000196909b80 thread_start + 8
+
+         ❌ Error extracting name: Message: no such element: Unable to locate element: {"method":"xpath","selector":".//a[contains(@href,'mailpopup')]"}
+  (Session info: chrome=138.0.7204.159); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#nosuchelementexception
+Stacktrace:
+0   chromedriver                        0x0000000102aaf55c cxxbridge1$str$ptr + 2731064
+1   chromedriver                        0x0000000102aa7454 cxxbridge1$str$ptr + 2698032
+2   chromedriver                        0x00000001025f63f8 cxxbridge1$string$len + 90664
+3   chromedriver                        0x000000010263d71c cxxbridge1$string$len + 382284
+4   chromedriver                        0x0000000102632fbc cxxbridge1$string$len + 339436
+5   chromedriver                        0x000000010267eb1c cxxbridge1$string$len + 649548
+6   chromedriver                        0x0000000102631a0c cxxbridge1$string$len + 333884
+7   chromedriver                        0x0000000102a725e0 cxxbridge1$str$ptr + 2481340
+8   chromedriver                        0x0000000102a75848 cxxbridge1$str$ptr + 2494244
+9   chromedriver                        0x0000000102a53234 cxxbridge1$str$ptr + 2353424
+10  chromedriver                        0x0000000102a76104 cxxbridge1$str$ptr + 2496480
+11  chromedriver                        0x0000000102a442e4 cxxbridge1$str$ptr + 2292160
+12  chromedriver                        0x0000000102a95ff8 cxxbridge1$str$ptr + 2627284
+13  chromedriver                        0x0000000102a96184 cxxbridge1$str$ptr + 2627680
+14  chromedriver                        0x0000000102aa7090 cxxbridge1$str$ptr + 2697068
+15  libsystem_pthread.dylib             0x000000019690ec0c _pthread_start + 136
+16  libsystem_pthread.dylib             0x0000000196909b80 thread_start + 8
+
+         ❌ Error extracting name: Message: no such element: Unable to locate element: {"method":"xpath","selector":".//a[contains(@href,'mailpopup')]"}
+  (Session info: chrome=138.0.7204.159); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#nosuchelementexception
+Stacktrace:
+0   chromedriver                        0x0000000102aaf55c cxxbridge1$str$ptr + 2731064
+1   chromedriver                        0x0000000102aa7454 cxxbridge1$str$ptr + 2698032
+2   chromedriver                        0x00000001025f63f8 cxxbridge1$string$len + 90664
+3   chromedriver                        0x000000010263d71c cxxbridge1$string$len + 382284
+4   chromedriver                        0x0000000102632fbc cxxbridge1$string$len + 339436
+5   chromedriver                        0x000000010267eb1c cxxbridge1$string$len + 649548
+6   chromedriver                        0x0000000102631a0c cxxbridge1$string$len + 333884
+7   chromedriver                        0x0000000102a725e0 cxxbridge1$str$ptr + 2481340
+8   chromedriver                        0x0000000102a75848 cxxbridge1$str$ptr + 2494244
+9   chromedriver                        0x0000000102a53234 cxxbridge1$str$ptr + 2353424
+10  chromedriver                        0x0000000102a76104 cxxbridge1$str$ptr + 2496480
+11  chromedriver                        0x0000000102a442e4 cxxbridge1$str$ptr + 2292160
+12  chromedriver                        0x0000000102a95ff8 cxxbridge1$str$ptr + 2627284
+13  chromedriver                        0x0000000102a96184 cxxbridge1$str$ptr + 2627680
+14  chromedriver                        0x0000000102aa7090 cxxbridge1$str$ptr + 2697068
+15  libsystem_pthread.dylib             0x000000019690ec0c _pthread_start + 136
+16  libsystem_pthread.dylib             0x0000000196909b80 thread_start + 8
+
+         ❌ Error extracting name: Message: no such element: Unable to locate element: {"method":"xpath","selector":".//a[contains(@href,'mailpopup')]"}
+  (Session info: chrome=138.0.7204.159); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#nosuchelementexception
+Stacktrace:
+0   chromedriver                        0x0000000102aaf55c cxxbridge1$str$ptr + 2731064
+1   chromedriver                        0x0000000102aa7454 cxxbridge1$str$ptr + 2698032
+2   chromedriver                        0x00000001025f63f8 cxxbridge1$string$len + 90664
+3   chromedriver                        0x000000010263d71c cxxbridge1$string$len + 382284
+4   chromedriver                        0x0000000102632fbc cxxbridge1$string$len + 339436
+5   chromedriver                        0x000000010267eb1c cxxbridge1$string$len + 649548
+6   chromedriver                        0x0000000102631a0c cxxbridge1$string$len + 333884
+7   chromedriver                        0x0000000102a725e0 cxxbridge1$str$ptr + 2481340
+8   chromedriver                        0x0000000102a75848 cxxbridge1$str$ptr + 2494244
+9   chromedriver                        0x0000000102a53234 cxxbridge1$str$ptr + 2353424
+10  chromedriver                        0x0000000102a76104 cxxbridge1$str$ptr + 2496480
+11  chromedriver                        0x0000000102a442e4 cxxbridge1$str$ptr + 2292160
+12  chromedriver                        0x0000000102a95ff8 cxxbridge1$str$ptr + 2627284
+13  chromedriver                        0x0000000102a96184 cxxbridge1$str$ptr + 2627680
+14  chromedriver                        0x0000000102aa7090 cxxbridge1$str$ptr + 2697068
+15  libsystem_pthread.dylib             0x000000019690ec0c _pthread_start + 136
+16  libsystem_pthread.dylib             0x0000000196909b80 thread_start + 8
+
+         ❌ Error extracting name: Message: no such element: Unable to locate element: {"method":"xpath","selector":".//a[contains(@href,'mailpopup')]"}
+  (Session info: chrome=138.0.7204.159); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#nosuchelementexception
+Stacktrace:
+0   chromedriver                        0x0000000102aaf55c cxxbridge1$str$ptr + 2731064
+1   chromedriver                        0x0000000102aa7454 cxxbridge1$str$ptr + 2698032
+2   chromedriver                        0x00000001025f63f8 cxxbridge1$string$len + 90664
+3   chromedriver                        0x000000010263d71c cxxbridge1$string$len + 382284
+4   chromedriver                        0x0000000102632fbc cxxbridge1$string$len + 339436
+5   chromedriver                        0x000000010267eb1c cxxbridge1$string$len + 649548
+6   chromedriver                        0x0000000102631a0c cxxbridge1$string$len + 333884
+7   chromedriver                        0x0000000102a725e0 cxxbridge1$str$ptr + 2481340
+8   chromedriver                        0x0000000102a75848 cxxbridge1$str$ptr + 2494244
+9   chromedriver                        0x0000000102a53234 cxxbridge1$str$ptr + 2353424
+10  chromedriver                        0x0000000102a76104 cxxbridge1$str$ptr + 2496480
+11  chromedriver                        0x0000000102a442e4 cxxbridge1$str$ptr + 2292160
+12  chromedriver                        0x0000000102a95ff8 cxxbridge1$str$ptr + 2627284
+13  chromedriver                        0x0000000102a96184 cxxbridge1$str$ptr + 2627680
+14  chromedriver                        0x0000000102aa7090 cxxbridge1$str$ptr + 2697068
+15  libsystem_pthread.dylib             0x000000019690ec0c _pthread_start + 136
+16  libsystem_pthread.dylib             0x0000000196909b80 thread_start + 8
+
+         ❌ Error extracting name: Message: no such element: Unable to locate element: {"method":"xpath","selector":".//a[contains(@href,'mailpopup')]"}
+  (Session info: chrome=138.0.7204.159); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#nosuchelementexception
+Stacktrace:
+0   chromedriver                        0x0000000102aaf55c cxxbridge1$str$ptr + 2731064
+1   chromedriver                        0x0000000102aa7454 cxxbridge1$str$ptr + 2698032
+2   chromedriver                        0x00000001025f63f8 cxxbridge1$string$len + 90664
+3   chromedriver                        0x000000010263d71c cxxbridge1$string$len + 382284
+4   chromedriver                        0x0000000102632fbc cxxbridge1$string$len + 339436
+5   chromedriver                        0x000000010267eb1c cxxbridge1$string$len + 649548
+6   chromedriver                        0x0000000102631a0c cxxbridge1$string$len + 333884
+7   chromedriver                        0x0000000102a725e0 cxxbridge1$str$ptr + 2481340
+8   chromedriver                        0x0000000102a75848 cxxbridge1$str$ptr + 2494244
+9   chromedriver                        0x0000000102a53234 cxxbridge1$str$ptr + 2353424
+10  chromedriver                        0x0000000102a76104 cxxbridge1$str$ptr + 2496480
+11  chromedriver                        0x0000000102a442e4 cxxbridge1$str$ptr + 2292160
+12  chromedriver                        0x0000000102a95ff8 cxxbridge1$str$ptr + 2627284
+13  chromedriver                        0x0000000102a96184 cxxbridge1$str$ptr + 2627680
+14  chromedriver                        0x0000000102aa7090 cxxbridge1$str$ptr + 2697068
+15  libsystem_pthread.dylib             0x000000019690ec0c _pthread_start + 136
+16  libsystem_pthread.dylib             0x0000000196909b80 thread_start + 8
+
+         ❌ Error extracting name: Message: no such element: Unable to locate element: {"method":"xpath","selector":".//a[contains(@href,'mailpopup')]"}
+  (Session info: chrome=138.0.7204.159); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#nosuchelementexception
+Stacktrace:
+0   chromedriver                        0x0000000102aaf55c cxxbridge1$str$ptr + 2731064
+1   chromedriver                        0x0000000102aa7454 cxxbridge1$str$ptr + 2698032
+2   chromedriver                        0x00000001025f63f8 cxxbridge1$string$len + 90664
+3   chromedriver                        0x000000010263d71c cxxbridge1$string$len + 382284
+4   chromedriver                        0x0000000102632fbc cxxbridge1$string$len + 339436
+5   chromedriver                        0x000000010267eb1c cxxbridge1$string$len + 649548
+6   chromedriver                        0x0000000102631a0c cxxbridge1$string$len + 333884
+7   chromedriver                        0x0000000102a725e0 cxxbridge1$str$ptr + 2481340
+8   chromedriver                        0x0000000102a75848 cxxbridge1$str$ptr + 2494244
+9   chromedriver                        0x0000000102a53234 cxxbridge1$str$ptr + 2353424
+10  chromedriver                        0x0000000102a76104 cxxbridge1$str$ptr + 2496480
+11  chromedriver                        0x0000000102a442e4 cxxbridge1$str$ptr + 2292160
+12  chromedriver                        0x0000000102a95ff8 cxxbridge1$str$ptr + 2627284
+13  chromedriver                        0x0000000102a96184 cxxbridge1$str$ptr + 2627680
+14  chromedriver                        0x0000000102aa7090 cxxbridge1$str$ptr + 2697068
+15  libsystem_pthread.dylib             0x000000019690ec0c _pthread_start + 136
+16  libsystem_pthread.dylib             0x0000000196909b80 thread_start + 8
+
+         ❌ Error extracting name: Message: no such element: Unable to locate element: {"method":"xpath","selector":".//a[contains(@href,'mailpopup')]"}
+  (Session info: chrome=138.0.7204.159); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#nosuchelementexception
+Stacktrace:
+0   chromedriver                        0x0000000102aaf55c cxxbridge1$str$ptr + 2731064
+1   chromedriver                        0x0000000102aa7454 cxxbridge1$str$ptr + 2698032
+2   chromedriver                        0x00000001025f63f8 cxxbridge1$string$len + 90664
+3   chromedriver                        0x000000010263d71c cxxbridge1$string$len + 382284
+4   chromedriver                        0x0000000102632fbc cxxbridge1$string$len + 339436
+5   chromedriver                        0x000000010267eb1c cxxbridge1$string$len + 649548
+6   chromedriver                        0x0000000102631a0c cxxbridge1$string$len + 333884
+7   chromedriver                        0x0000000102a725e0 cxxbridge1$str$ptr + 2481340
+8   chromedriver                        0x0000000102a75848 cxxbridge1$str$ptr + 2494244
+9   chromedriver                        0x0000000102a53234 cxxbridge1$str$ptr + 2353424
+10  chromedriver                        0x0000000102a76104 cxxbridge1$str$ptr + 2496480
+11  chromedriver                        0x0000000102a442e4 cxxbridge1$str$ptr + 2292160
+12  chromedriver                        0x0000000102a95ff8 cxxbridge1$str$ptr + 2627284
+13  chromedriver                        0x0000000102a96184 cxxbridge1$str$ptr + 2627680
+14  chromedriver                        0x0000000102aa7090 cxxbridge1$str$ptr + 2697068
+15  libsystem_pthread.dylib             0x000000019690ec0c _pthread_start + 136
+16  libsystem_pthread.dylib             0x0000000196909b80 thread_start + 8
+
+         ❌ Error extracting name: Message: no such element: Unable to locate element: {"method":"xpath","selector":".//a[contains(@href,'mailpopup')]"}
+  (Session info: chrome=138.0.7204.159); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#nosuchelementexception
+Stacktrace:
+0   chromedriver                        0x0000000102aaf55c cxxbridge1$str$ptr + 2731064
+1   chromedriver                        0x0000000102aa7454 cxxbridge1$str$ptr + 2698032
+2   chromedriver                        0x00000001025f63f8 cxxbridge1$string$len + 90664
+3   chromedriver                        0x000000010263d71c cxxbridge1$string$len + 382284
+4   chromedriver                        0x0000000102632fbc cxxbridge1$string$len + 339436
+5   chromedriver                        0x000000010267eb1c cxxbridge1$string$len + 649548
+6   chromedriver                        0x0000000102631a0c cxxbridge1$string$len + 333884
+7   chromedriver                        0x0000000102a725e0 cxxbridge1$str$ptr + 2481340
+8   chromedriver                        0x0000000102a75848 cxxbridge1$str$ptr + 2494244
+9   chromedriver                        0x0000000102a53234 cxxbridge1$str$ptr + 2353424
+10  chromedriver                        0x0000000102a76104 cxxbridge1$str$ptr + 2496480
+11  chromedriver                        0x0000000102a442e4 cxxbridge1$str$ptr + 2292160
+12  chromedriver                        0x0000000102a95ff8 cxxbridge1$str$ptr + 2627284
+13  chromedriver                        0x0000000102a96184 cxxbridge1$str$ptr + 2627680
+14  chromedriver                        0x0000000102aa7090 cxxbridge1$str$ptr + 2697068
+15  libsystem_pthread.dylib             0x000000019690ec0c _pthread_start + 136
+16  libsystem_pthread.dylib             0x0000000196909b80 thread_start + 8
+
+         ❌ Error extracting name: Message: no such element: Unable to locate element: {"method":"xpath","selector":".//a[contains(@href,'mailpopup')]"}
+  (Session info: chrome=138.0.7204.159); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#nosuchelementexception
+Stacktrace:
+0   chromedriver                        0x0000000102aaf55c cxxbridge1$str$ptr + 2731064
+1   chromedriver                        0x0000000102aa7454 cxxbridge1$str$ptr + 2698032
+2   chromedriver                        0x00000001025f63f8 cxxbridge1$string$len + 90664
+3   chromedriver                        0x000000010263d71c cxxbridge1$string$len + 382284
+4   chromedriver                        0x0000000102632fbc cxxbridge1$string$len + 339436
+5   chromedriver                        0x000000010267eb1c cxxbridge1$string$len + 649548
+6   chromedriver                        0x0000000102631a0c cxxbridge1$string$len + 333884
+7   chromedriver                        0x0000000102a725e0 cxxbridge1$str$ptr + 2481340
+8   chromedriver                        0x0000000102a75848 cxxbridge1$str$ptr + 2494244
+9   chromedriver                        0x0000000102a53234 cxxbridge1$str$ptr + 2353424
+10  chromedriver                        0x0000000102a76104 cxxbridge1$str$ptr + 2496480
+11  chromedriver                        0x0000000102a442e4 cxxbridge1$str$ptr + 2292160
+12  chromedriver                        0x0000000102a95ff8 cxxbridge1$str$ptr + 2627284
+13  chromedriver                        0x0000000102a96184 cxxbridge1$str$ptr + 2627680
+14  chromedriver                        0x0000000102aa7090 cxxbridge1$str$ptr + 2697068
+15  libsystem_pthread.dylib             0x000000019690ec0c _pthread_start + 136
+16  libsystem_pthread.dylib             0x0000000196909b80 thread_start + 8
+
+         ❌ Error extracting name: Message: no such element: Unable to locate element: {"method":"xpath","selector":".//a[contains(@href,'mailpopup')]"}
+  (Session info: chrome=138.0.7204.159); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#nosuchelementexception
+Stacktrace:
+0   chromedriver                        0x0000000102aaf55c cxxbridge1$str$ptr + 2731064
+1   chromedriver                        0x0000000102aa7454 cxxbridge1$str$ptr + 2698032
+2   chromedriver                        0x00000001025f63f8 cxxbridge1$string$len + 90664
+3   chromedriver                        0x000000010263d71c cxxbridge1$string$len + 382284
+4   chromedriver                        0x0000000102632fbc cxxbridge1$string$len + 339436
+5   chromedriver                        0x000000010267eb1c cxxbridge1$string$len + 649548
+6   chromedriver                        0x0000000102631a0c cxxbridge1$string$len + 333884
+7   chromedriver                        0x0000000102a725e0 cxxbridge1$str$ptr + 2481340
+8   chromedriver                        0x0000000102a75848 cxxbridge1$str$ptr + 2494244
+9   chromedriver                        0x0000000102a53234 cxxbridge1$str$ptr + 2353424
+10  chromedriver                        0x0000000102a76104 cxxbridge1$str$ptr + 2496480
+11  chromedriver                        0x0000000102a442e4 cxxbridge1$str$ptr + 2292160
+12  chromedriver                        0x0000000102a95ff8 cxxbridge1$str$ptr + 2627284
+13  chromedriver                        0x0000000102a96184 cxxbridge1$str$ptr + 2627680
+14  chromedriver                        0x0000000102aa7090 cxxbridge1$str$ptr + 2697068
+15  libsystem_pthread.dylib             0x000000019690ec0c _pthread_start + 136
+16  libsystem_pthread.dylib             0x0000000196909b80 thread_start + 8
+
+         ❌ Error extracting name: Message: no such element: Unable to locate element: {"method":"xpath","selector":".//a[contains(@href,'mailpopup')]"}
+  (Session info: chrome=138.0.7204.159); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#nosuchelementexception
+Stacktrace:
+0   chromedriver                        0x0000000102aaf55c cxxbridge1$str$ptr + 2731064
+1   chromedriver                        0x0000000102aa7454 cxxbridge1$str$ptr + 2698032
+2   chromedriver                        0x00000001025f63f8 cxxbridge1$string$len + 90664
+3   chromedriver                        0x000000010263d71c cxxbridge1$string$len + 382284
+4   chromedriver                        0x0000000102632fbc cxxbridge1$string$len + 339436
+5   chromedriver                        0x000000010267eb1c cxxbridge1$string$len + 649548
+6   chromedriver                        0x0000000102631a0c cxxbridge1$string$len + 333884
+7   chromedriver                        0x0000000102a725e0 cxxbridge1$str$ptr + 2481340
+8   chromedriver                        0x0000000102a75848 cxxbridge1$str$ptr + 2494244
+9   chromedriver                        0x0000000102a53234 cxxbridge1$str$ptr + 2353424
+10  chromedriver                        0x0000000102a76104 cxxbridge1$str$ptr + 2496480
+11  chromedriver                        0x0000000102a442e4 cxxbridge1$str$ptr + 2292160
+12  chromedriver                        0x0000000102a95ff8 cxxbridge1$str$ptr + 2627284
+13  chromedriver                        0x0000000102a96184 cxxbridge1$str$ptr + 2627680
+14  chromedriver                        0x0000000102aa7090 cxxbridge1$str$ptr + 2697068
+15  libsystem_pthread.dylib             0x000000019690ec0c _pthread_start + 136
+16  libsystem_pthread.dylib             0x0000000196909b80 thread_start + 8
+
+         ❌ Error extracting name: Message: no such element: Unable to locate element: {"method":"xpath","selector":".//a[contains(@href,'mailpopup')]"}
+  (Session info: chrome=138.0.7204.159); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#nosuchelementexception
+Stacktrace:
+0   chromedriver                        0x0000000102aaf55c cxxbridge1$str$ptr + 2731064
+1   chromedriver                        0x0000000102aa7454 cxxbridge1$str$ptr + 2698032
+2   chromedriver                        0x00000001025f63f8 cxxbridge1$string$len + 90664
+3   chromedriver                        0x000000010263d71c cxxbridge1$string$len + 382284
+4   chromedriver                        0x0000000102632fbc cxxbridge1$string$len + 339436
+5   chromedriver                        0x000000010267eb1c cxxbridge1$string$len + 649548
+6   chromedriver                        0x0000000102631a0c cxxbridge1$string$len + 333884
+7   chromedriver                        0x0000000102a725e0 cxxbridge1$str$ptr + 2481340
+8   chromedriver                        0x0000000102a75848 cxxbridge1$str$ptr + 2494244
+9   chromedriver                        0x0000000102a53234 cxxbridge1$str$ptr + 2353424
+10  chromedriver                        0x0000000102a76104 cxxbridge1$str$ptr + 2496480
+11  chromedriver                        0x0000000102a442e4 cxxbridge1$str$ptr + 2292160
+12  chromedriver                        0x0000000102a95ff8 cxxbridge1$str$ptr + 2627284
+13  chromedriver                        0x0000000102a96184 cxxbridge1$str$ptr + 2627680
+14  chromedriver                        0x0000000102aa7090 cxxbridge1$str$ptr + 2697068
+15  libsystem_pthread.dylib             0x000000019690ec0c _pthread_start + 136
+16  libsystem_pthread.dylib             0x0000000196909b80 thread_start + 8
+
+         ❌ Error extracting name: Message: no such element: Unable to locate element: {"method":"xpath","selector":".//a[contains(@href,'mailpopup')]"}
+  (Session info: chrome=138.0.7204.159); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#nosuchelementexception
+Stacktrace:
+0   chromedriver                        0x0000000102aaf55c cxxbridge1$str$ptr + 2731064
+1   chromedriver                        0x0000000102aa7454 cxxbridge1$str$ptr + 2698032
+2   chromedriver                        0x00000001025f63f8 cxxbridge1$string$len + 90664
+3   chromedriver                        0x000000010263d71c cxxbridge1$string$len + 382284
+4   chromedriver                        0x0000000102632fbc cxxbridge1$string$len + 339436
+5   chromedriver                        0x000000010267eb1c cxxbridge1$string$len + 649548
+6   chromedriver                        0x0000000102631a0c cxxbridge1$string$len + 333884
+7   chromedriver                        0x0000000102a725e0 cxxbridge1$str$ptr + 2481340
+8   chromedriver                        0x0000000102a75848 cxxbridge1$str$ptr + 2494244
+9   chromedriver                        0x0000000102a53234 cxxbridge1$str$ptr + 2353424
+10  chromedriver                        0x0000000102a76104 cxxbridge1$str$ptr + 2496480
+11  chromedriver                        0x0000000102a442e4 cxxbridge1$str$ptr + 2292160
+12  chromedriver                        0x0000000102a95ff8 cxxbridge1$str$ptr + 2627284
+13  chromedriver                        0x0000000102a96184 cxxbridge1$str$ptr + 2627680
+14  chromedriver                        0x0000000102aa7090 cxxbridge1$str$ptr + 2697068
+15  libsystem_pthread.dylib             0x000000019690ec0c _pthread_start + 136
+16  libsystem_pthread.dylib             0x0000000196909b80 thread_start + 8
+
+         ❌ Error extracting name: Message: no such element: Unable to locate element: {"method":"xpath","selector":".//a[contains(@href,'mailpopup')]"}
+  (Session info: chrome=138.0.7204.159); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#nosuchelementexception
+Stacktrace:
+0   chromedriver                        0x0000000102aaf55c cxxbridge1$str$ptr + 2731064
+1   chromedriver                        0x0000000102aa7454 cxxbridge1$str$ptr + 2698032
+2   chromedriver                        0x00000001025f63f8 cxxbridge1$string$len + 90664
+3   chromedriver                        0x000000010263d71c cxxbridge1$string$len + 382284
+4   chromedriver                        0x0000000102632fbc cxxbridge1$string$len + 339436
+5   chromedriver                        0x000000010267eb1c cxxbridge1$string$len + 649548
+6   chromedriver                        0x0000000102631a0c cxxbridge1$string$len + 333884
+7   chromedriver                        0x0000000102a725e0 cxxbridge1$str$ptr + 2481340
+8   chromedriver                        0x0000000102a75848 cxxbridge1$str$ptr + 2494244
+9   chromedriver                        0x0000000102a53234 cxxbridge1$str$ptr + 2353424
+10  chromedriver                        0x0000000102a76104 cxxbridge1$str$ptr + 2496480
+11  chromedriver                        0x0000000102a442e4 cxxbridge1$str$ptr + 2292160
+12  chromedriver                        0x0000000102a95ff8 cxxbridge1$str$ptr + 2627284
+13  chromedriver                        0x0000000102a96184 cxxbridge1$str$ptr + 2627680
+14  chromedriver                        0x0000000102aa7090 cxxbridge1$str$ptr + 2697068
+15  libsystem_pthread.dylib             0x000000019690ec0c _pthread_start + 136
+16  libsystem_pthread.dylib             0x0000000196909b80 thread_start + 8
+
+      Total referees extracted: 2
+   📄 Downloading PDF for MAFI-2024-0167...
+      ✅ PDF saved to downloads/manuscripts/MAFI-2024-0167.pdf
+   📋 Downloading cover letter for MAFI-2024-0167...
+      🔗 Clicking on cover letter link...
+      📄 Switched to cover letter popup
+      ❌ No downloadable file found in popup
+      📝 Found text content using selector: //div[contains(@class, 'content')]
+   ✅ Processed MAFI-2024-0167
+   ✅ Processed all manuscripts in category
+
+   Category complete: 2/2 manuscripts processed
+
+================================================================================
+🔍 PRECISE RESULTS SUMMARY
+================================================================================
+
+📊 MANUSCRIPTS FOUND: 2
+
+📄 MANUSCRIPT 1/2: MAFI-2025-0166
+   Title: Optimal investment and consumption under forward utilities w...
+   Status: Awaiting Reviewer Scores
+   Category: Awaiting Reviewer Scores
+   👥 Authors (3): Anis Matoussi, Guillaume Broux-Quemerais, Chao Zhou
+   🔍 Referees (4):
+      • Gechun Liang (Agreed) - g.liang@warwick.ac.uk
+      • Mohamed Mrad (Declined
+invite again) - mohamed.kamel.mrad@gmail.com
+      • Goncalo Dos Reis (Unavailable
+invite again) - g.dosreis@ed.ac.uk, gnreis@gmail.com
+      • Moris Strub (Agreed) - moris.strub@wbs.ac.uk
+   📁 Documents:
+      ✅ PDF: downloads/manuscripts/MAFI-2025-0166.pdf (PDF Proof:  1725 K)
+      📝 Cover Letter: downloads/cover_letters/MAFI-2025-0166_cover_letter.txt
+
+📄 MANUSCRIPT 2/2: MAFI-2024-0167
+   Title: Competitive optimal portfolio selection in a non-Markovian f...
+   Status: Awaiting Reviewer Scores
+   Category: Awaiting Reviewer Scores
+   👥 Authors (3): Panpan Zhang, Guangchen Wang, Zuo Quan Xu
+   🔍 Referees (2):
+      • Thibaut Mastrolia (Agreed) - mastrolia@berkeley.edu
+      • Said Hamadene (Agreed) - hamadene@univ-lemans.fr
+   📁 Documents:
+      ✅ PDF: downloads/manuscripts/MAFI-2024-0167.pdf (PDF Proof:  597 K)
+      📝 Cover Letter: downloads/cover_letters/MAFI-2024-0167_cover_letter.txt
+
+📂 FILE SYSTEM VERIFICATION:
+   📄 Manuscript PDFs: 2 files
+      ✅ MAFI-2025-0166.pdf (1.7 MB)
+      ✅ MAFI-2024-0167.pdf (0.6 MB)
+   📝 Cover Letters: 2 files
+      📝 MAFI-2024-0167_cover_letter.txt (TEXT, 15.2 KB)
+      📝 MAFI-2025-0166_cover_letter.txt (TEXT, 17.5 KB)
+
+📈 FINAL COUNTS:
+   📄 Manuscripts Processed: 2
+   🔍 Total Referees: 6
+   📁 PDF Downloads: 2
+   📝 Cover Letters: 2
+
+✅ SUCCESS/FAILURE ANALYSIS:
+   Expected Manuscripts: 2
+   Actual Manuscripts: 2
+   Expected Total Referees: 6
+   Actual Total Referees: 6
+   Expected PDFs: 2
+   Actual PDFs: 2
+   🎉 PERFECT SUCCESS - All data extracted correctly!
+================================================================================
+
+💾 Full data saved to: mf_comprehensive_20250723_221143.json
+
+❌ Extraction failed

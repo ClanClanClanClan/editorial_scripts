@@ -243,24 +243,29 @@ class ComprehensiveMORExtractor(CachedExtractorMixin):
             for pattern in patterns:
                 matches = re.findall(pattern, page_text)
                 if matches:
-                    # Return the first match that looks like a manuscript ID
-                    manuscript_id = matches[0]
-                    print(f"   ✅ Found manuscript ID: {manuscript_id}")
-                    return manuscript_id
+                    # Return the first VALID match
+                    for match in matches:
+                        if self.is_valid_manuscript_id(match):
+                            print(f"   ✅ Found manuscript ID: {match}")
+                            return match
+                        else:
+                            print(f"   ❌ Rejected invalid ID: {match}")
             
-            # Fallback: Look for any year-number combination near manuscript-related text
-            fallback_patterns = [
-                r'(?i)manuscript\s*[:\s]*([A-Z0-9-]{8,20})',
-                r'(?i)submission\s*[:\s]*([A-Z0-9-]{8,20})',
-                r'(?i)paper\s*[:\s]*([A-Z0-9-]{8,20})'
+            # STRICTER Fallback: Only look for proper manuscript ID formats
+            stricter_fallback_patterns = [
+                r'(?i)manuscript\s*[:\s]*([A-Z]{2,6}-\d{4}-\d{3,5}(?:\.R\d+)?)',
+                r'(?i)submission\s*[:\s]*([A-Z]{2,6}-\d{4}-\d{3,5}(?:\.R\d+)?)',
+                r'(?i)paper\s*[:\s]*([A-Z]{2,6}-\d{4}-\d{3,5}(?:\.R\d+)?)'
             ]
             
-            for pattern in fallback_patterns:
+            for pattern in stricter_fallback_patterns:
                 match = re.search(pattern, page_text)
                 if match:
                     manuscript_id = match.group(1)
-                    print(f"   ✅ Found manuscript ID (fallback): {manuscript_id}")
-                    return manuscript_id
+                    # VALIDATE: Must be proper manuscript ID format, not hash
+                    if self.is_valid_manuscript_id(manuscript_id):
+                        print(f"   ✅ Found manuscript ID (fallback): {manuscript_id}")
+                        return manuscript_id
                     
             print("   ⚠️ No manuscript ID found on current page")
             return "UNKNOWN"
@@ -268,6 +273,53 @@ class ComprehensiveMORExtractor(CachedExtractorMixin):
         except Exception as e:
             print(f"   ❌ Error extracting manuscript ID: {e}")
             return "UNKNOWN"
+    
+    def is_valid_manuscript_id(self, manuscript_id):
+        """Validate that this is a proper manuscript ID, not a hash or garbage."""
+        if not manuscript_id or manuscript_id == "UNKNOWN":
+            return False
+        
+        # Must be proper journal-year-number format
+        valid_patterns = [
+            r'^[A-Z]{2,6}-\d{4}-\d{3,5}(?:\.R\d+)?$',  # MOR-2025-1136 or MOR-2025-1136.R1
+            r'^[A-Z]{2,6}-\d{2}-\d{4}(?:\.R\d+)?$',    # MAFI-24-1234.R1 format
+            r'^[A-Z]{2,6}\.\d{4}\.\d{4}(?:\.R\d+)?$',  # MAFI.2024.1234.R1 format
+        ]
+        
+        for pattern in valid_patterns:
+            if re.match(pattern, manuscript_id):
+                return True
+        
+        # Reject anything that looks like a hash (all lowercase hex, long random strings, etc.)
+        if re.match(r'^[a-f0-9]{16,}$', manuscript_id):  # Hex hash
+            print(f"   ❌ Rejecting hash-like ID: {manuscript_id}")
+            return False
+        
+        if len(manuscript_id) > 20 and not re.match(r'[A-Z]+-\d+-\d+', manuscript_id):  # Long non-standard
+            print(f"   ❌ Rejecting non-standard ID: {manuscript_id}")
+            return False
+            
+        return False
+    
+    def is_valid_referee_email(self, email):
+        """Check if email looks like a valid referee email."""
+        if not email or '@' not in email:
+            return False
+        
+        email = email.lower()
+        
+        # Filter out system emails
+        system_domains = [
+            'manuscriptcentral.com', 'scholarone.com', 'clarivate.com',
+            'noreply', 'system', 'admin', 'support'
+        ]
+        
+        for domain in system_domains:
+            if domain in email:
+                return False
+        
+        # Must be reasonable academic/professional email
+        return True
 
     def is_same_person_name(self, name1, name2):
         """Check if two names refer to the same person, handling different formats."""
@@ -1585,11 +1637,39 @@ class ComprehensiveMORExtractor(CachedExtractorMixin):
                     referee['name'] = self.normalize_name(name_link.text.strip())
                     print(f"         Processing referee {name_row_index + 1}: {referee['name']}")
                     
-                    # Get email from popup
+                    # ENHANCED EMAIL EXTRACTION: Multiple strategies
+                    import re
+                    email = ""
+                    
+                    # Strategy 1: Look for email in nearby text
                     try:
-                        referee['email'] = self.get_email_from_popup(name_link, referee['name'])
+                        # Get the parent row and check for emails
+                        parent_row = name_link.find_element(By.XPATH, "./ancestor::tr[1]")
+                        row_text = parent_row.text
+                        email_pattern = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
+                        found_emails = re.findall(email_pattern, row_text)
+                        
+                        for found_email in found_emails:
+                            if self.is_valid_referee_email(found_email):
+                                email = found_email
+                                print(f"         ✅ Found email in row: {email}")
+                                break
                     except Exception as e:
-                        print(f"         ⚠️ Could not get email for {referee['name']}: {str(e)[:100]}")
+                        print(f"         ⚠️ Row email search failed: {e}")
+                    
+                    # Strategy 2: Try popup only if other methods failed and not in headless mode
+                    if not email and not self.headless:
+                        try:
+                            popup_email = self.get_email_from_popup(name_link, referee['name'])
+                            if popup_email and self.is_valid_referee_email(popup_email):
+                                email = popup_email
+                                print(f"         ✅ Found email via popup: {email}")
+                        except Exception as e:
+                            print(f"         ⚠️ Popup email failed: {str(e)[:100]}")
+                    
+                    referee['email'] = email if email else ""
+                    if not email:
+                        print(f"         ❌ No email found for {referee['name']}")
                     
                     # Find all rows for this referee's section (from name to next name or end)
                     try:
@@ -1745,12 +1825,54 @@ class ComprehensiveMORExtractor(CachedExtractorMixin):
                     
                     print(f"         Processing referee {processed_referees + 1}: {referee['name']}")
                     
-                    # Get email from popup with timeout protection
+                    # ENHANCED EMAIL EXTRACTION: Multiple strategies
+                    import re
+                    email = ""
+                    
+                    # Strategy 1: Look for email directly in the current row
                     try:
-                        referee['email'] = self.get_email_from_popup(name_link, referee['name'])
+                        row_text = row.text
+                        email_pattern = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
+                        found_emails = re.findall(email_pattern, row_text)
+                        
+                        for found_email in found_emails:
+                            if self.is_valid_referee_email(found_email):
+                                email = found_email
+                                print(f"         ✅ Found email in row text: {email}")
+                                break
                     except Exception as e:
-                        print(f"         ⚠️ Could not get email for {referee['name']}: {str(e)[:100]}")
-                        # Continue processing this referee without email
+                        print(f"         ⚠️ Row email search failed: {e}")
+                    
+                    # Strategy 2: Check adjacent table cells
+                    if not email:
+                        try:
+                            cells = row.find_elements(By.TAG_NAME, "td")
+                            for cell in cells:
+                                cell_text = cell.text
+                                found_emails = re.findall(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b', cell_text)
+                                for found_email in found_emails:
+                                    if self.is_valid_referee_email(found_email):
+                                        email = found_email
+                                        print(f"         ✅ Found email in cell: {email}")
+                                        break
+                                if email:
+                                    break
+                        except Exception as e:
+                            print(f"         ⚠️ Cell email search failed: {e}")
+                    
+                    # Strategy 3: Try popup only if headless mode is off
+                    if not email and not self.headless:
+                        try:
+                            popup_email = self.get_email_from_popup(name_link, referee['name'])
+                            if popup_email and self.is_valid_referee_email(popup_email):
+                                email = popup_email
+                                print(f"         ✅ Found email via popup: {email}")
+                        except Exception as e:
+                            print(f"         ⚠️ Popup email failed: {str(e)[:100]}")
+                    
+                    referee['email'] = email if email else ""
+                    if not email:
+                        print(f"         ❌ No email found for {referee['name']}")
                     
                     # ===== ENHANCED AFFILIATION EXTRACTION =====
                     # Multiple strategies to capture referee affiliations that are "clearly visible" on MF website
@@ -6974,6 +7096,11 @@ class ComprehensiveMORExtractor(CachedExtractorMixin):
                 manuscript_ids.append(manuscript_id)
                 print(f"   📄 Manuscript {i+1}: {manuscript_id}")
                 
+                # DEDUPLICATION CHECK: Skip if already processed
+                if manuscript_id in self.processed_manuscript_ids:
+                    print(f"   ⏭️ SKIPPING {manuscript_id} - already processed in previous category")
+                    continue
+                
                 # Create manuscript object
                 manuscript = {
                     'id': manuscript_id,
@@ -7025,9 +7152,13 @@ class ComprehensiveMORExtractor(CachedExtractorMixin):
                 print(f"   📁 Extracting documents...")
                 self.extract_document_links(manuscript)
                 
-                # Add to manuscripts list
-                self.manuscripts.append(manuscript)
-                self.processed_manuscript_ids.add(manuscript_id)
+                # Add to manuscripts list - ONLY if valid manuscript ID
+                if self.is_valid_manuscript_id(manuscript_id):
+                    self.manuscripts.append(manuscript)
+                    self.processed_manuscript_ids.add(manuscript_id)
+                    print(f"   ✅ Added manuscript {manuscript_id} to results")
+                else:
+                    print(f"   ❌ REJECTED manuscript with invalid ID: {manuscript_id}")
                 
                 print(f"   ✅ Pass 1 complete for {manuscript_id}")
                 

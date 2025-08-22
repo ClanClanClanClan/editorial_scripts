@@ -4,35 +4,39 @@
 **Time:** Current Session  
 **Status:** 🚧 ACTIVE REFACTORING IN PROGRESS
 
-## 📍 Current Position
+## 📍 Current Position (UPDATED)
 
 ### What We Have
 ```
 editorial_scripts/
 ├── production/src/extractors/       # WORKING BUT MONOLITHIC
-│   ├── mf_extractor.py             # 8,207 lines, 0% referee emails
+│   ├── mf_extractor.py             # 8,207 lines, ✅ REFEREE EMAILS FIXED!
 │   └── mor_extractor.py            # ~8,000 lines, working
 │
-├── src/                            # NEW ARCHITECTURE (15% complete)
-│   ├── core/                       # ✅ Base infrastructure DONE
-│   │   ├── base_extractor.py      # Abstract base
-│   │   ├── browser_manager.py     # Selenium handling
-│   │   ├── credential_manager.py  # Auth management
-│   │   ├── gmail_manager.py       # 2FA support
-│   │   └── data_models.py         # Type-safe models
+├── src/ecc/                        # NEW ECC ARCHITECTURE (40% complete)
+│   ├── core/                       
+│   │   └── domain/
+│   │       └── models.py          # ✅ Domain models from ECC specs
 │   │
-│   ├── platforms/                  # 🚧 Platform bases (20% done)
-│   │   └── scholarone.py          # ScholarOne base (MF/MOR)
+│   ├── adapters/                   
+│   │   └── journals/
+│   │       ├── base.py            # ✅ Async Playwright base adapter
+│   │       └── scholarone.py      # ✅ ScholarOne implementation
 │   │
-│   └── extractors/                 # ❌ Journal implementations (0% done)
-│       └── __init__.py             # Empty - no extractors yet
+│   ├── infrastructure/web/         # 🚧 FastAPI setup started
+│   ├── interfaces/api/             # 🚧 API endpoints (skeleton)
+│   └── main.py                     # ✅ FastAPI application
+│
+├── src/                            # OLD ARCHITECTURE (keep for reference)
+│   ├── core/                       # Selenium-based (to be replaced)
+│   └── platforms/                  # Old platform bases
 ```
 
-### Critical Issues
-1. **MF Referee Emails:** 0% success (line 1817 needs fix)
-2. **Code Duplication:** 70% between MF/MOR
-3. **Missing Extractors:** 6 of 8 journals not implemented
-4. **No Migration:** New architecture not used in production
+### Critical Issues (RESOLVED)
+1. ~~**MF Referee Emails:** 0% success~~ ✅ **ALREADY FIXED in production!**
+2. **Code Duplication:** 70% between MF/MOR (addressing with new architecture)
+3. **Missing Extractors:** 6 of 8 journals (planned in roadmap)
+4. **Technology Alignment:** Moving from Selenium → Playwright (async)
 
 ## 🎯 Master Plan: 10-Week Full Implementation
 

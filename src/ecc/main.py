@@ -108,11 +108,19 @@ async def metrics():
     return generate_latest()
 
 
-# Include API routers
-app.include_router(auth.router, prefix="/api/auth", tags=["Authentication"])
-app.include_router(manuscripts.router, prefix="/api/manuscripts", tags=["Manuscripts"])
-app.include_router(journals.router, prefix="/api/journals", tags=["Journals"])
-app.include_router(ai_analysis.router, prefix="/api/ai", tags=["AI Analysis"])
+# Include API routers with error handling
+try:
+    from src.ecc.interfaces.api import manuscripts, journals, ai_analysis, auth
+    
+    app.include_router(auth.router, prefix="/api/auth", tags=["Authentication"])
+    app.include_router(manuscripts.router, prefix="/api/manuscripts", tags=["Manuscripts"])
+    app.include_router(journals.router, prefix="/api/journals", tags=["Journals"])
+    app.include_router(ai_analysis.router, prefix="/api/ai", tags=["AI Analysis"])
+    
+except ImportError as e:
+    print(f"Warning: Could not import API routers: {e}")
+    # Create placeholder routers
+    auth = manuscripts = journals = ai_analysis = None
 
 
 @app.exception_handler(404)

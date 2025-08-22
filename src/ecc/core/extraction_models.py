@@ -196,6 +196,8 @@ class Documents:
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> 'Documents':
         """Create from dictionary."""
+        if not data:
+            return cls()
         return cls(
             pdf=data.get('pdf', False),
             pdf_size=data.get('pdf_size', ''),

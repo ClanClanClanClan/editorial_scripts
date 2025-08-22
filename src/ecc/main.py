@@ -11,11 +11,6 @@ from prometheus_client import Counter, Histogram, generate_latest
 from pydantic import BaseModel
 
 from src.ecc.interfaces.api import manuscripts, journals, ai_analysis, auth
-from src.ecc.infrastructure.web.middleware import (
-    ObservabilityMiddleware,
-    SecurityMiddleware,
-    RequestIDMiddleware,
-)
 
 
 # Metrics
@@ -74,9 +69,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.add_middleware(RequestIDMiddleware)
-app.add_middleware(SecurityMiddleware)
-app.add_middleware(ObservabilityMiddleware)
+# Additional middleware will be added later
+# app.add_middleware(RequestIDMiddleware)
+# app.add_middleware(SecurityMiddleware)
+# app.add_middleware(ObservabilityMiddleware)
 
 
 @app.get("/health", response_model=HealthResponse)

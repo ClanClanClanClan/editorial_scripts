@@ -77,7 +77,7 @@ class ManuscriptModel(Base):
     editor_assigned: Mapped[Optional[str]] = mapped_column(String(200))
     
     # Metadata
-    metadata: Mapped[dict] = mapped_column(JSON, default=dict)
+    manuscript_metadata: Mapped[dict] = mapped_column(JSON, default=dict)
     
     # Timestamps
     created_at: Mapped[datetime] = mapped_column(

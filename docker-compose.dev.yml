@@ -1,0 +1,32 @@
+services:
+  # PostgreSQL Database for ECC
+  postgres:
+    image: postgres:15-alpine
+    container_name: ecc_postgres
+    environment:
+      POSTGRES_USER: ecc_user
+      POSTGRES_PASSWORD: ecc_password
+      POSTGRES_DB: ecc_db
+    ports:
+      - "5433:5432"  # Use different port to avoid conflicts
+    volumes:
+      - ecc_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ecc_user -d ecc_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis for caching
+  redis:
+    image: redis:7-alpine
+    container_name: ecc_redis
+    ports:
+      - "6380:6379"  # Use different port to avoid conflicts
+    command: redis-server --appendonly yes
+    volumes:
+      - ecc_redis_data:/data
+
+volumes:
+  ecc_postgres_data:
+  ecc_redis_data:

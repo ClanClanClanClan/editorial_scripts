@@ -11,6 +11,7 @@ from prometheus_client import Counter, Histogram, generate_latest
 from pydantic import BaseModel
 
 from src.ecc.interfaces.api import manuscripts, journals, ai_analysis, auth
+from src.ecc.infrastructure.database.connection import initialize_database, close_database
 
 
 # Metrics
@@ -39,13 +40,23 @@ async def lifespan(app: FastAPI):
     """Application lifespan events."""
     # Startup
     print("🚀 Starting Editorial Command Center API")
-    # TODO: Initialize database connection
+    
+    # Initialize database connection
+    database_url = "postgresql+asyncpg://ecc_user:ecc_password@localhost:5433/ecc_db"
+    await initialize_database(database_url, echo=False)
+    print("✅ Database initialized successfully")
+    
     # TODO: Initialize cache connection
     # TODO: Initialize journal adapters
     yield
+    
     # Shutdown
     print("🛑 Shutting down Editorial Command Center API")
-    # TODO: Close database connections
+    
+    # Close database connections
+    await close_database()
+    print("✅ Database connections closed")
+    
     # TODO: Close cache connections
     # TODO: Cleanup browser instances
 

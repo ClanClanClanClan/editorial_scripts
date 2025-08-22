@@ -2,7 +2,7 @@
 
 import json
 from pathlib import Path
-from src.ecc.models.extraction_models import (
+from src.ecc.core.extraction_models import (
     ExtractedManuscript,
     Referee,
     Author,
@@ -58,7 +58,7 @@ def test_parse_real_json():
                 print(f"     - {author.name}")
     
     print(f"\n✅ Successfully parsed {len(manuscripts)} manuscripts")
-    return manuscripts
+    assert len(manuscripts) > 0, "Should have parsed at least one manuscript"
 
 
 def test_round_trip():

@@ -1,0 +1,74 @@
+MF EXTRACTOR COMPREHENSIVE FIELD LIST (51 FIELDS - 100% MOR PARITY)
+===============================================================================
+
+BASIC MANUSCRIPT INFO (6 fields):
+1. id
+2. title  
+3. status
+4. status_details
+5. submission_date
+6. last_updated
+
+AUTHORS (7 fields):
+7. authors (with email extraction)
+8. is_corresponding
+9. institution
+10. department
+11. country
+12. orcid (MF UNIQUE enhancement)
+13. email (FIXED - now working)
+
+REFEREES (8 fields):
+14. referees (with name, affiliation, status, dates)
+15. referee email (FIXED - now working) 
+16. orcid (MF UNIQUE)
+17. mathscinet_id (MF UNIQUE)
+18. report.pdf_downloaded
+19. report.pdf_path
+20. report.recommendation
+21. report.confidence_score
+
+EDITORS (2 fields):
+22. editors (Editor-in-Chief, Associate Editor)
+23. editor emails
+
+DOCUMENTS (6 fields):
+24. documents.pdf
+25. documents.cover_letter
+26. documents.supplementary_files
+27. documents.pdf_path
+28. documents.cover_letter_path
+29. documents.abstract
+
+NEW MOR PARITY FIELDS (16 fields):
+30. funding_information ✅
+31. conflict_of_interest ✅
+32. data_availability ✅
+33. referee_recommendations ✅
+34. all_reviews_data ✅
+35. comprehensive_reviewer_comments ✅
+36. comprehensive_ae_comments ✅
+37. editorial_notes_metadata ✅
+38. msc_codes ✅
+39. topic_area ✅
+40. editor_recommendations ✅
+41. historical_referees ✅
+42. original_submission_referees ✅
+43. referee_reports_available ✅
+44. referee_report_links ✅
+45. extracted_reports ✅
+
+VERSION TRACKING (3 fields):
+46. version_history_documents ✅
+47. version_history_popups ✅
+48. versions ✅
+
+MF UNIQUE FIELDS (3 fields):
+49. communication_timeline (Gmail integration)
+50. audit_trail (Platform audit log)
+51. timeline_analytics (Response time analysis)
+
+===============================================================================
+TOTAL: 51 UNIQUE FIELDS (100% MOR PARITY ACHIEVED)
+REFEREE EMAIL EXTRACTION: FIXED ✅
+ALL MOR FIELDS: IMPLEMENTED ✅

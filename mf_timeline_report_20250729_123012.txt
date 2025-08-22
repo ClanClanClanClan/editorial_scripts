@@ -1,9 +1,0 @@
-MF MANUSCRIPT COMMUNICATION TIMELINE REPORT
-================================================================================
-Generated: 2025-07-29 12:30:12
-Total Manuscripts: 2
-
-
-📄 MANUSCRIPT: MAFI-2025-0166
-Title: Optimal investment and consumption under forward utilities with relative performance concerns
-------------------------------------------------------------

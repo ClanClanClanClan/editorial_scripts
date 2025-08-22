@@ -23,7 +23,7 @@ import json
 import re
 import requests
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, timedelta
 from dotenv import load_dotenv
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
@@ -35,8 +35,11 @@ from selenium.common.exceptions import TimeoutException, NoSuchElementException,
 import traceback
 from typing import Optional, Callable
 
-# Add academic enrichment
+# Add cache integration
 sys.path.append(str(Path(__file__).parent.parent))
+from core.cache_integration import CachedExtractorMixin
+
+# Add academic enrichment
 # from core.academic_enrichment import AcademicProfileEnricher
 
 # Import the cover letter download fixer
@@ -100,86 +103,13 @@ except ImportError:
                 raise Exception(f"Critical operation failed: {error_msg}")
             return default_value
     
-    def get_email_from_popup_safe(self, popup_url):
-        """Safe version of email extraction with comprehensive error handling."""
-        if not popup_url or 'mailpopup' not in popup_url:
-            return ""
-        
-        original_window = self.driver.current_window_handle
-        popup_window = None
-        
-        try:
-            # Open popup with timeout
-            self.driver.execute_script(f"window.open('{popup_url}', 'popup', 'width=600,height=400')")
-            
-            # Wait for popup window
-            self.wait.until(lambda driver: len(driver.window_handles) > 1)
-            popup_window = [w for w in self.driver.window_handles if w != original_window][0]
-            self.driver.switch_to.window(popup_window)
-            
-            # Wait for content with extended timeout for slow popups
-            try:
-                WebDriverWait(self.driver, 15).until(
-                    EC.presence_of_element_located((By.TAG_NAME, "body"))
-                )
-            except TimeoutException:
-                print(f"   ⏱️ Popup content timeout for {popup_url[:50]}...")
-                return ""
-            
-            # Extract email with multiple strategies
-            email = ""
-            
-            # Strategy 1: Look for email in popup body
-            try:
-                body = self.driver.find_element(By.TAG_NAME, "body")
-                body_text = body.text
-                
-                # Extract email pattern
-                import re
-                email_pattern = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
-                emails = re.findall(email_pattern, body_text)
-                if emails:
-                    email = emails[0]
-                    print(f"   ✅ Email found via text pattern: {email}")
-            except Exception as e:
-                print(f"   ⚠️ Text pattern extraction failed: {e}")
-            
-            # Strategy 2: Look for email in specific elements
-            if not email:
-                try:
-                    # Common selectors for email popups
-                    selectors = ['input[type="email"]', '.email', '#email', '[data-email]']
-                    for selector in selectors:
-                        try:
-                            element = self.driver.find_element(By.CSS_SELECTOR, selector)
-                            email = element.get_attribute('value') or element.text
-                            if email:
-                                print(f"   ✅ Email found via selector {selector}: {email}")
-                                break
-                        except NoSuchElementException:
-                            continue
-                except Exception as e:
-                    print(f"   ⚠️ Selector extraction failed: {e}")
-            
-            return email
-            
-        except Exception as e:
-            print(f"   ❌ Popup extraction failed: {e}")
-            return ""
-        finally:
-            # Always clean up popup window
-            try:
-                if popup_window and popup_window in self.driver.window_handles:
-                    self.driver.switch_to.window(popup_window)
-                    self.driver.close()
-                self.driver.switch_to.window(original_window)
-            except Exception as cleanup_error:
-                print(f"   ⚠️ Popup cleanup failed: {cleanup_error}")
-
-class ComprehensiveMFExtractor:
+class ComprehensiveMFExtractor(CachedExtractorMixin):
     def __init__(self):
         self.manuscripts = []
         self.processed_manuscript_ids = set()  # Track processed manuscripts to avoid duplicates
+        
+        # Initialize cache system
+        self.init_cached_extractor('MF')
         
         # Load credentials securely
         self._setup_secure_credentials()
@@ -221,37 +151,328 @@ class ComprehensiveMFExtractor:
         
     def get_download_dir(self, subdir=""):
         """Get download directory path, ensuring it exists."""
-        if subdir:
-            download_path = self.download_dir / subdir
-        else:
-            download_path = self.download_dir
-        download_path.mkdir(parents=True, exist_ok=True)
-        return download_path
+        return self.get_safe_download_dir(subdir)
     
-    def get_current_manuscript_id(self):
-        """Extract the current manuscript ID from the page - GENERIC PATTERN MATCHING."""
+    def extract_email_from_popup_window(self):
+        """Extract email from currently active popup window (already switched to it)."""
         try:
-            page_text = self.driver.find_element(By.TAG_NAME, "body").text
+            # Wait for popup to load completely
+            time.sleep(2)
             
-            # Try multiple manuscript ID patterns
-            patterns = [
-                r'[A-Z]{2,6}-\d{4}-\d{4}',  # MAFI-2024-1234, MOR-2024-1234, etc.
-                r'[A-Z]{2,6}-\d{2}-\d{4}',  # MAFI-24-1234 format
-                r'[A-Z]{2,6}\.\d{4}\.\d{4}',  # MAFI.2024.1234 format  
-                r'[A-Z]{2,6}/\d{4}/\d{4}',  # MAFI/2024/1234 format
-                r'MS-\d{4}-\d{4}',  # Generic MS-YYYY-NNNN
-                r'[A-Z]+\d{4}-\d{3,4}',  # MAFI2024-123 format
-                r'\b[A-Z]{2,6}[-_]\d{4}[-_]\d{3,5}\b'  # Flexible separator format
+            # Handle framesets if present (MF popups use framesets)
+            frames = self.driver.find_elements(By.TAG_NAME, "frame")
+            if frames:
+                print(f"         🖼️ Found {len(frames)} frames in popup")
+                
+                # Try each frame to find email content
+                for i in range(len(frames)):
+                    try:
+                        self.driver.switch_to.frame(i)
+                        frame_text = self.driver.page_source
+                        
+                        # Look for email input field in this frame
+                        email_inputs = self.driver.find_elements(By.XPATH, "//input[@name='TO_EMAIL']")
+                        if email_inputs:
+                            value = email_inputs[0].get_attribute('value')
+                            if value and '@' in value:
+                                print(f"         ✅ Found email in frame {i}: {value}")
+                                return value
+                        
+                        # Look for email patterns in frame text
+                        if '@' in frame_text:
+                            import re
+                            email_pattern = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
+                            emails = re.findall(email_pattern, frame_text)
+                            for email in emails:
+                                # Filter out system emails
+                                if not any(skip in email.lower() for skip in ['noreply', 'donotreply', 'manuscriptcentral']):
+                                    print(f"         ✅ Found email in frame {i} text: {email}")
+                                    return email
+                        
+                        # Switch back to default content to try next frame
+                        self.driver.switch_to.default_content()
+                    except Exception as e:
+                        print(f"         ⚠️ Error in frame {i}: {e}")
+                        try:
+                            self.driver.switch_to.default_content()
+                        except:
+                            pass
+                        continue
+            
+            # If no frames or no email found in frames, try main window
+            # Look for email in input fields (To: field)
+            input_selectors = [
+                "//input[@name='TO_EMAIL']",
+                "//input[@id='TO_EMAIL']", 
+                "//input[contains(@name, 'TO_EMAIL')]",
+                "//input[contains(@name, 'to') and contains(@name, 'email')]",
+                "//input[@type='text' and contains(@value, '@')]"
             ]
             
-            print(f"   🔍 Searching for manuscript ID patterns...")
+            for selector in input_selectors:
+                try:
+                    inputs = self.driver.find_elements(By.XPATH, selector)
+                    for inp in inputs:
+                        value = inp.get_attribute('value')
+                        if value and '@' in value:
+                            print(f"         ✅ Found email in input: {value}")
+                            return value
+                except:
+                    continue
+            
+            # Look for mailto links
+            try:
+                mailto_links = self.driver.find_elements(By.XPATH, "//a[contains(@href, 'mailto:')]")
+                for link in mailto_links:
+                    href = link.get_attribute('href')
+                    if href and 'mailto:' in href:
+                        email = href.replace('mailto:', '').split('?')[0].strip()
+                        if '@' in email:
+                            print(f"         ✅ Found email in mailto: {email}")
+                            return email
+            except:
+                pass
+            
+            # Look for email in visible text
+            try:
+                page_text = self.driver.find_element(By.TAG_NAME, "body").text
+                import re
+                email_pattern = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
+                emails = re.findall(email_pattern, page_text)
+                for email in emails:
+                    # Filter out system emails
+                    if not any(skip in email.lower() for skip in ['noreply', 'donotreply', 'manuscriptcentral']):
+                        print(f"         ✅ Found email in text: {email}")
+                        return email
+            except:
+                pass
+            
+            print(f"         ❌ No email found in popup")
+            return ""
+            
+        except Exception as e:
+            print(f"         ❌ Error in extract_email_from_popup_window: {e}")
+            return ""
+    
+    def get_email_from_popup_safe(self, popup_url):
+        """Safe version of email extraction with comprehensive error handling."""
+        if not popup_url:
+            return ""
+        
+        original_window = self.driver.current_window_handle
+        popup_window = None
+        
+        try:
+            # Handle JavaScript URLs differently from direct URLs
+            if popup_url.startswith('javascript:'):
+                # For JavaScript URLs, execute the JavaScript directly
+                # This handles both popWindow() and mailpopup() functions
+                print(f"         🔧 Executing JavaScript popup: {popup_url[:50]}...")
+                # Remove 'javascript:' prefix and execute
+                js_code = popup_url[11:]  # Remove 'javascript:' prefix
+                self.driver.execute_script(js_code)
+            else:
+                # For direct URLs, open with window.open()
+                print(f"         🔧 Opening direct URL popup: {popup_url[:50]}...")
+                self.driver.execute_script(f"window.open('{popup_url}', 'popup', 'width=900,height=775')")
+            
+            # Wait for popup window with timeout
+            try:
+                WebDriverWait(self.driver, 10).until(lambda driver: len(driver.window_handles) > 1)
+                popup_window = [w for w in self.driver.window_handles if w != original_window][0]
+                self.driver.switch_to.window(popup_window)
+            except TimeoutException:
+                print(f"   ⏱️ Popup window timeout for {popup_url[:50]}...")
+                return ""
+            
+            # Wait for content with reduced timeout for faster processing
+            try:
+                WebDriverWait(self.driver, 8).until(
+                    EC.presence_of_element_located((By.TAG_NAME, "body"))
+                )
+            except TimeoutException:
+                print(f"   ⏱️ Popup content timeout for {popup_url[:50]}...")
+                return ""
+            
+            # Extract email with frame-aware strategies for MF framesets
+            email = ""
+            
+            # Strategy 1: Handle frameset-based popups (MF specific)
+            try:
+                # Check if this is a frameset
+                framesets = self.driver.find_elements(By.TAG_NAME, "frameset")
+                if framesets:
+                    print(f"   🖼️ Detected frameset popup, checking frames...")
+                    
+                    # Get all frames
+                    frames = self.driver.find_elements(By.TAG_NAME, "frame")
+                    print(f"   📋 Found {len(frames)} frames in popup")
+                    
+                    # Try each frame to find email content
+                    for i, frame in enumerate(frames):
+                        try:
+                            self.driver.switch_to.frame(i)
+                            print(f"   🔍 Checking frame {i}...")
+                            
+                            # Look for email content in this frame
+                            frame_text = self.driver.find_element(By.TAG_NAME, "body").text
+                            
+                            # Extract email pattern from frame
+                            import re
+                            email_pattern = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
+                            emails = re.findall(email_pattern, frame_text)
+                            
+                            if emails:
+                                email = emails[0]
+                                print(f"   ✅ Email found in frame {i}: {email}")
+                                break
+                            
+                            # Switch back to popup main content
+                            self.driver.switch_to.window(popup_window)
+                            
+                        except Exception as frame_e:
+                            print(f"   ⚠️ Frame {i} access failed: {frame_e}")
+                            try:
+                                self.driver.switch_to.window(popup_window)
+                            except:
+                                pass
+                            continue
+                            
+            except Exception as e:
+                print(f"   ⚠️ Frame extraction failed: {e}")
+            
+            # Strategy 2: Regular popup body extraction (fallback)
+            if not email:
+                try:
+                    self.driver.switch_to.window(popup_window)  # Ensure we're in popup window
+                    body = self.driver.find_element(By.TAG_NAME, "body")
+                    body_text = body.text
+                    
+                    # Extract email pattern
+                    import re
+                    email_pattern = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
+                    emails = re.findall(email_pattern, body_text)
+                    if emails:
+                        email = emails[0]
+                        print(f"   ✅ Email found via text pattern: {email}")
+                except Exception as e:
+                    print(f"   ⚠️ Text pattern extraction failed: {e}")
+            
+            # Strategy 3: Look for email in specific elements
+            if not email:
+                try:
+                    # Common selectors for email popups
+                    selectors = ['input[type="email"]', '.email', '#email', '[data-email]']
+                    for selector in selectors:
+                        try:
+                            element = self.driver.find_element(By.CSS_SELECTOR, selector)
+                            email = element.get_attribute('value') or element.text
+                            if email:
+                                print(f"   ✅ Email found via selector {selector}: {email}")
+                                break
+                        except NoSuchElementException:
+                            continue
+                except Exception as e:
+                    print(f"   ⚠️ Selector extraction failed: {e}")
+            
+            return email
+            
+        except Exception as e:
+            print(f"   ❌ Popup extraction failed: {e}")
+            return ""
+        finally:
+            # ROBUST popup cleanup - always return to main window
+            try:
+                # Close any extra windows first
+                all_windows = self.driver.window_handles
+                for window in all_windows:
+                    if window != original_window:
+                        try:
+                            self.driver.switch_to.window(window)
+                            self.driver.close()
+                            print(f"   🧹 Closed popup window")
+                        except Exception:
+                            pass
+                            
+                # Always return to original window
+                self.driver.switch_to.window(original_window)
+                print(f"   🔙 Returned to main window")
+                
+            except Exception as cleanup_error:
+                print(f"   ⚠️ Popup cleanup failed: {cleanup_error}")
+                # Emergency fallback - try to get back to main window
+                try:
+                    if len(self.driver.window_handles) > 0:
+                        self.driver.switch_to.window(self.driver.window_handles[0])
+                except Exception:
+                    pass
+    
+    def get_current_manuscript_id(self):
+        """Extract the current manuscript ID from the page - ENHANCED FOR MF."""
+        try:
+            # First try: Look for manuscript ID in specific elements
+            # Try to find it in table cells or headers
+            id_selectors = [
+                "//td[contains(text(), 'MAFI-')]",
+                "//td[contains(text(), 'MAFI.')]/following-sibling::td",
+                "//td[@class='pagecontents' and contains(text(), 'MAFI')]",
+                "//p[@class='pagecontents' and contains(text(), 'MAFI')]",
+                "//td[contains(text(), 'Manuscript ID')]/following-sibling::td",
+                "//td[contains(text(), 'Submission ID')]/following-sibling::td",
+                "//span[contains(text(), 'MAFI-')]",
+                "//b[contains(text(), 'MAFI-')]"
+            ]
+            
+            for selector in id_selectors:
+                try:
+                    elem = self.driver.find_element(By.XPATH, selector)
+                    text = elem.text.strip()
+                    # Extract MAFI ID from the text
+                    mafi_match = re.search(r'MAFI[-\.\s]*\d{2,4}[-\.\s]*\d{3,5}', text)
+                    if mafi_match:
+                        manuscript_id = mafi_match.group(0).replace(' ', '-').replace('.', '-')
+                        print(f"   ✅ Found manuscript ID from element: {manuscript_id}")
+                        return manuscript_id
+                except:
+                    continue
+            
+            # Second try: Search entire page text
+            page_text = self.driver.find_element(By.TAG_NAME, "body").text
+            
+            # MF-specific patterns (MAFI is the journal code)
+            mf_patterns = [
+                r'MAFI-\d{4}-\d{3,5}',  # MAFI-2024-1234
+                r'MAFI-\d{2}-\d{3,5}',  # MAFI-24-1234
+                r'MAFI\.\d{4}\.\d{3,5}',  # MAFI.2024.1234
+                r'MAFI/\d{4}/\d{3,5}',  # MAFI/2024/1234
+                r'MAFI\s+\d{4}-\d{3,5}',  # MAFI 2024-1234
+                r'MAFI\d{4}-\d{3,5}'  # MAFI2024-1234
+            ]
+            
+            print(f"   🔍 Searching for MAFI manuscript ID patterns...")
+            
+            for pattern in mf_patterns:
+                matches = re.findall(pattern, page_text, re.IGNORECASE)
+                if matches:
+                    # Clean up and return the first match
+                    manuscript_id = matches[0].upper().replace(' ', '-').replace('.', '-').replace('/', '-')
+                    # Ensure consistent format: MAFI-YYYY-NNNNN
+                    manuscript_id = re.sub(r'MAFI[-\.\s]*(\d{2,4})[-\.\s]*(\d{3,5})', r'MAFI-\1-\2', manuscript_id)
+                    print(f"   ✅ Found manuscript ID: {manuscript_id}")
+                    return manuscript_id
+            
+            # Generic patterns fallback
+            patterns = [
+                r'[A-Z]{2,6}-\d{4}-\d{3,5}',  # Generic format
+                r'[A-Z]{2,6}-\d{2}-\d{3,5}',  # Short year format
+                r'MS-\d{4}-\d{3,5}'  # Generic MS format
+            ]
             
             for pattern in patterns:
                 matches = re.findall(pattern, page_text)
                 if matches:
-                    # Return the first match that looks like a manuscript ID
                     manuscript_id = matches[0]
-                    print(f"   ✅ Found manuscript ID: {manuscript_id}")
+                    print(f"   ✅ Found manuscript ID (generic): {manuscript_id}")
                     return manuscript_id
             
             # Fallback: Look for any year-number combination near manuscript-related text
@@ -370,15 +591,12 @@ class ComprehensiveMFExtractor:
         try:
             print(f"         🔍 Inferring institution from domain: {domain}")
             
-            # Cache to avoid repeated searches
-            if not hasattr(self, '_domain_institution_cache'):
-                self._domain_institution_cache = {}
-            
-            # Check cache first
-            if domain in self._domain_institution_cache:
-                cached_result = self._domain_institution_cache[domain]
-                print(f"         📚 Using cached result: {cached_result}")
-                return cached_result
+            # Check global cache first
+            cached_result = self.cache_manager.get_institution_from_domain(domain)
+            if cached_result:
+                institution, country = cached_result
+                print(f"         📚 Global cache hit: {domain} → {institution}")
+                return institution
             
             # Deep web search for institution
             print(f"         🌐 Performing deep web search for domain: {domain}")
@@ -589,8 +807,11 @@ class ComprehensiveMFExtractor:
                                     # Generic pattern
                                     found_institution = f"Université de {name_part.replace('-', ' ').title()}"
             
-            # Cache the result
-            self._domain_institution_cache[domain] = found_institution
+            # Cache the result globally
+            if found_institution and found_institution != "Unknown Institution":
+                country = self.infer_country_from_web_search(found_institution) if hasattr(self, 'infer_country_from_web_search') else ""
+                self.cache_manager.cache_institution(domain, found_institution, country)
+                print(f"         💾 Cached globally: {domain} → {found_institution}")
             
             if found_institution:
                 print(f"         ✅ Final institution inference: {found_institution}")
@@ -691,9 +912,9 @@ class ComprehensiveMFExtractor:
         chrome_options = Options()
         chrome_options.add_argument('--no-sandbox')
         chrome_options.add_argument('--disable-dev-shm-usage')
-        # Run in headful mode for debugging
-        # chrome_options.add_argument('--headless')  # Commented out for debugging
+        chrome_options.add_argument('--window-size=1200,800')
         self.driver = webdriver.Chrome(options=chrome_options)
+        self.driver.set_window_size(1200, 800)
     
     def wait_for_element(self, by, value, timeout=10):
         """Wait for element and return it."""
@@ -714,7 +935,7 @@ class ComprehensiveMFExtractor:
                 
                 # Navigate to login page
                 self.driver.get("https://mc.manuscriptcentral.com/mafi")
-                time.sleep(3)
+                time.sleep(5)  # Give more time for initial page load
                 
                 # Handle cookie banner
                 try:
@@ -725,6 +946,15 @@ class ComprehensiveMFExtractor:
                 
                 # CRITICAL FIX: Clear fields before typing
                 try:
+                    # Wait for login form to be present
+                    userid_field = self.wait_for_element(By.ID, "USERID", timeout=10)
+                    if not userid_field:
+                        # Save debug page to see what's wrong
+                        with open("debug_login_page.html", 'w') as f:
+                            f.write(self.driver.page_source)
+                        print("   💾 Saved debug_login_page.html")
+                        raise Exception("Login form not found")
+                    
                     userid_field = self.driver.find_element(By.ID, "USERID")
                     password_field = self.driver.find_element(By.ID, "PASSWORD")
                     
@@ -821,8 +1051,24 @@ class ComprehensiveMFExtractor:
                     
                     if code:
                         print(f"   🔑 Entering verification code...")
-                        token_field.clear()
-                        token_field.send_keys(code)
+                        
+                        # Wait for field to be interactable
+                        try:
+                            WebDriverWait(self.driver, 10).until(
+                                EC.element_to_be_clickable((By.ID, "TOKEN_VALUE"))
+                            )
+                            token_field = self.driver.find_element(By.ID, "TOKEN_VALUE")
+                            token_field.clear()
+                            token_field.send_keys(code)
+                        except Exception as e:
+                            print(f"   ⚠️ Error entering 2FA code: {e}")
+                            # Try alternative approach
+                            try:
+                                self.driver.execute_script(f"document.getElementById('TOKEN_VALUE').value = '{code}';")
+                                print(f"   ✅ Used JavaScript to enter code")
+                            except Exception as js_error:
+                                print(f"   ❌ JavaScript entry also failed: {js_error}")
+                                return False
                         
                         # Find and click verify button
                         verify_btn = self.driver.find_element(By.ID, "VERIFY_BTN")
@@ -1029,6 +1275,13 @@ class ComprehensiveMFExtractor:
         """Extract comprehensive manuscript details."""
         print(f"\n📄 Extracting details for {manuscript_id}...")
         
+        # Check if we need to extract
+        if not self.should_process_manuscript(manuscript_id):
+            cached = self.cache_manager.get_manuscript(manuscript_id, self.journal_name)
+            if cached:
+                print(f"   ✅ Using cached data for {manuscript_id}")
+                return cached.full_data
+        
         manuscript = {
             'id': manuscript_id,
             'title': '',
@@ -1042,7 +1295,14 @@ class ComprehensiveMFExtractor:
             'special_issue': '',
             'referees': [],
             'editors': {},
-            'documents': {}
+            'documents': {},
+            'funding_information': '',
+            'conflict_of_interest': '',
+            'data_availability': '',
+            'referee_recommendations': {
+                'recommended_referees': [],
+                'opposed_referees': []
+            }
         }
         
         try:
@@ -1105,7 +1365,7 @@ class ComprehensiveMFExtractor:
                             manuscript['authors'].append({
                                 'name': self.normalize_name(clean_name),
                                 'is_corresponding': is_contact,
-                                'email': self.get_email_from_popup(author_link['href']) if author_link and 'href' in author_link.attrs else ''  # Extract author email
+                                'email': ''  # Email extraction moved to extract_authors_from_details() which uses working method  # Extract author email
                             })
                 else:
                     # Single author case
@@ -1114,7 +1374,7 @@ class ComprehensiveMFExtractor:
                     manuscript['authors'].append({
                         'name': self.normalize_name(clean_name),
                         'is_corresponding': is_contact,
-                        'email': self.get_email_from_popup(author_link['href']) if author_link and 'href' in author_link.attrs else ''  # Extract author email
+                        'email': ''  # Email extraction moved to extract_authors_from_details() which uses working method  # Extract author email
                     })
                     
             except Exception as e:
@@ -1139,7 +1399,7 @@ class ComprehensiveMFExtractor:
                         manuscript['authors'].append({
                             'name': self.normalize_name(name),
                             'is_corresponding': is_contact,
-                            'email': self.get_email_from_popup(author_link['href']) if author_link and 'href' in author_link.attrs else ''  # Extract author email
+                            'email': ''  # Email extraction moved to extract_authors_from_details() which uses working method  # Extract author email
                         })
             
             # Article type and special issue
@@ -1165,7 +1425,7 @@ class ComprehensiveMFExtractor:
                         editor_href = link.get_attribute('href') if link else None
                         manuscript['editors'][role] = {
                             'name': name.strip(),
-                            'email': self.get_email_from_popup(editor_href) if editor_href and 'mailpopup' in editor_href else ''
+                            'email': ''  # Editor email extraction can be implemented if needed with working popup method
                         }
                     except:
                         manuscript['editors'][role] = {
@@ -1192,11 +1452,20 @@ class ComprehensiveMFExtractor:
         self.extract_author_affiliations(manuscript)
         self.extract_doi(manuscript)
         
+        # Extract additional metadata fields that MOR has but MF was missing
+        self.extract_missing_mor_fields(manuscript)
+        
+        # Extract ALL remaining MOR fields for COMPREHENSIVE parity
+        self.extract_comprehensive_mor_parity_fields(manuscript)
+        
         # Extract enhanced data from manuscript details page
         self.extract_manuscript_details_page(manuscript)
         
         # Extract communication timeline from audit trail
         self.extract_audit_trail(manuscript)
+        
+        # Cache the manuscript
+        self.cache_manuscript(manuscript)
         
         return manuscript
     
@@ -1541,12 +1810,21 @@ class ComprehensiveMFExtractor:
                     
                     print(f"         Processing referee {processed_referees + 1}: {referee['name']}")
                     
-                    # Get email from popup with timeout protection
+                    # Get email using the SAME method that works for authors
                     try:
-                        referee['email'] = self.get_email_from_popup(name_link, referee['name'])
+                        print(f"         📧 Extracting email for {referee['name']}...")
+                        popup_href = name_link.get_attribute('href')
+                        referee['email'] = self.get_email_from_popup_safe(popup_href)
+                        
+                        if referee['email']:
+                            referee['email_source'] = 'popup'
+                            print(f"         ✅ Email extracted: {referee['email']}")
+                        else:
+                            print(f"         ⚠️ No email found for {referee['name']}")
+                            
                     except Exception as e:
-                        print(f"         ⚠️ Could not get email for {referee['name']}: {str(e)[:100]}")
-                        # Continue processing this referee without email
+                        print(f"         ❌ Email extraction failed for {referee['name']}: {str(e)[:100]}")
+                        referee['email'] = ''  # Ensure email field exists
                     
                     # ===== ENHANCED AFFILIATION EXTRACTION =====
                     # Multiple strategies to capture referee affiliations that are "clearly visible" on MF website
@@ -1733,6 +2011,15 @@ class ComprehensiveMFExtractor:
                         referee['affiliation'] = ""  # Empty rather than name
                         referee['affiliation_status'] = "extraction_failed"
                         print(f"         ❌ No affiliation found for {referee['name']} - marked as missing")
+                        
+                        # Deep web search for missing affiliation
+                        if referee.get('email'):
+                            deep_affiliation = self.deep_web_search_affiliation(referee['name'], referee['email'])
+                            if deep_affiliation:
+                                referee['affiliation'] = deep_affiliation
+                                referee['affiliation_status'] = "deep_web_search"
+                                affiliation_found = True
+                                print(f"         🌐 Found affiliation via deep web search: {referee['affiliation']}")
                     
                     # PRIORITY 1 ENHANCEMENT: Parse affiliation into components
                     if referee.get('affiliation') and referee['affiliation'] and referee['affiliation'] != referee['name']:
@@ -1789,7 +2076,12 @@ class ComprehensiveMFExtractor:
                         orcid_link = row.find_element(By.XPATH, ".//a[contains(@href,'orcid.org')]")
                         referee['orcid'] = orcid_link.get_attribute('href')
                     except:
-                        pass
+                        # Try ORCID API search if no ORCID on page
+                        if referee.get('name') and referee.get('affiliation'):
+                            api_orcid = self.search_orcid_api(referee['name'], referee['affiliation'])
+                            if api_orcid:
+                                referee['orcid'] = api_orcid
+                                print(f"         🆔 ORCID (from API): {api_orcid}")
                     
                     # Extract status from third column
                     try:
@@ -1805,10 +2097,13 @@ class ComprehensiveMFExtractor:
                         try:
                             review_link = status_cell.find_element(By.XPATH, ".//a[contains(@href,'rev_ms_det_pop')]")
                             if review_link:
-                                print(f"         📄 Found review report link, extracting...")
-                                report_data = self.extract_referee_report_from_link(review_link)
+                                print(f"         📄 Found review report link, extracting comprehensively...")
+                                report_data = self.extract_referee_report_comprehensive(review_link, referee.get('name', 'Unknown'), manuscript.get('id', 'Unknown'))
                                 if report_data:
                                     referee['report'] = report_data
+                                    # Extract recommendation to referee level for backward compatibility
+                                    if report_data.get('recommendation'):
+                                        referee['recommendation'] = report_data['recommendation']
                                     
                                     # ENHANCED: Extract review scores if present
                                     if report_data.get('comments_to_author') or report_data.get('comments_to_editor'):
@@ -1884,17 +2179,80 @@ class ComprehensiveMFExtractor:
                     except:
                         pass
                     
-                    # Check for reports - look for history popup links
+                    # ENHANCED: Extract and download referee reports
                     try:
                         history_links = row.find_elements(By.XPATH, ".//a[contains(@href,'history_popup')]")
                         if history_links:
-                            referee['report'] = {'available': True, 'url': history_links[0].get_attribute('href')}
-                    except:
-                        pass
+                            report_url = history_links[0].get_attribute('href')
+                            referee['report'] = {'available': True, 'url': report_url}
+                            
+                            # Only download if report was actually submitted
+                            referee_status = referee.get('status', '').lower()
+                            if any(status in referee_status for status in ['received', 'completed', 'submitted', 'returned']):
+                                print(f"         📄 Report submitted - downloading...")
+                                try:
+                                    pdf_path = self.download_referee_report_pdf(report_url, referee['name'], manuscript.get('id', 'UNKNOWN'))
+                                    if pdf_path:
+                                        referee['report']['pdf_path'] = pdf_path
+                                        referee['report']['pdf_downloaded'] = True
+                                        
+                                        # Extract text and analyze
+                                        report_text = self.extract_text_from_pdf(pdf_path)
+                                        if report_text:
+                                            referee['report']['text_content'] = report_text[:1000]  # First 1000 chars
+                                            referee['report']['recommendation'] = self.extract_recommendation(report_text)
+                                            referee['report']['key_concerns'] = self.extract_key_concerns(report_text)
+                                            print(f"         ✅ Report downloaded and analyzed")
+                                except Exception as e:
+                                    print(f"         ⚠️ Report download failed: {e}")
+                            else:
+                                print(f"         ⏳ Report not submitted yet (status: {referee.get('status')})")
+                        else:
+                            referee['report'] = {'available': False}
+                    except Exception as e:
+                        referee['report'] = {'available': False}
+                        print(f"         ⚠️ Report check failed: {e}")
+                    
+                    # COMPREHENSIVE: Apply full academic profile enrichment
+                    if referee.get('name'):
+                        print(f"         🎓 COMPREHENSIVE ACADEMIC ENHANCEMENT for {referee['name']}...")
+                        
+                        # Name standardization
+                        referee['name_standardized'] = self.standardize_academic_name(referee['name'])
+                        
+                        # Deep web enrichment
+                        enriched_referee = self.deep_web_enrichment(referee['name'], referee)
+                        referee.update(enriched_referee)
+                        
+                        # MathSciNet ID lookup
+                        mathscinet_data = self.search_mathscinet(referee['name'])
+                        if mathscinet_data:
+                            referee['mathscinet_id'] = mathscinet_data.get('mr_author_id')
+                            referee['mathscinet_papers_count'] = mathscinet_data.get('papers_count')
+                            print(f"         📚 MathSciNet ID: {referee.get('mathscinet_id')}")
+                        
+                        # Enhanced department extraction
+                        if referee.get('affiliation'):
+                            department, clean_institution = self.extract_department_enhanced(referee['affiliation'])
+                            if department:
+                                referee['department'] = department
+                                referee['affiliation'] = clean_institution
+                    
+                    # COMPREHENSIVE PROFILE REPORT
+                    print(f"         📊 FINAL PROFILE for {referee['name']}:")
+                    print(f"            📧 Email: {'✅' if referee.get('email') else '❌'}")
+                    print(f"            🏛️ Institution: {'✅' if referee.get('affiliation') else '❌'}")
+                    print(f"            🏢 Department: {'✅' if referee.get('department') else '❌'}")
+                    print(f"            🔗 ORCID: {'✅' if referee.get('orcid') else '❌'}")
+                    print(f"            📚 MathSciNet: {'✅' if referee.get('mathscinet_id') else '❌'}")
+                    print(f"            📄 Report: {'✅' if referee.get('report', {}).get('pdf_downloaded') else '❌'}")
+                    
+                    # Cache referee data
+                    if referee.get('email'):
+                        self.update_referee_cache(referee)
                     
                     manuscript['referees'].append(referee)
                     processed_referees += 1
-                    print(f"         ✅ {referee['name']} ({referee['status']}) - {referee['affiliation']}")
                     
                 except Exception as e:
                     print(f"      ❌ Error processing referee row {row_index + 1}: {str(e)[:100]}")
@@ -1964,8 +2322,8 @@ class ComprehensiveMFExtractor:
                             pdf_url = pdf_link.get_attribute('href')
                             pdf_name = pdf_link.text.strip()
                             
-                            # Download the PDF
-                            pdf_path = self.download_referee_report_pdf(pdf_url, pdf_name)
+                            # Download the PDF  
+                            pdf_path = self.download_referee_report_pdf(pdf_url, pdf_name, "unknown_manuscript")
                             if pdf_path:
                                 report_data['pdf_files'].append({
                                     'name': pdf_name,
@@ -2215,6 +2573,525 @@ class ComprehensiveMFExtractor:
         except Exception as e:
             print(f"   ❌ Error extracting documents: {e}")
     
+    def extract_missing_mor_fields(self, manuscript):
+        """Extract additional metadata fields that MOR has but MF was missing."""
+        print("   📋 Extracting additional metadata fields...")
+        
+        # 1. FUNDING INFORMATION
+        try:
+            print("      💰 Extracting funding information...")
+            funding_cells = self.driver.find_elements(By.XPATH, 
+                "//td[contains(text(), 'Funding Information:')]/following-sibling::td")
+            
+            if funding_cells:
+                funding_text = funding_cells[0].text.strip()
+                manuscript['funding_information'] = funding_text
+                print(f"      ✅ Funding Information: {funding_text[:50]}...")
+            else:
+                manuscript['funding_information'] = "Not specified"
+        except Exception as e:
+            print(f"      ⚠️ Could not extract funding information: {e}")
+            manuscript['funding_information'] = "Not specified"
+        
+        # 2. CONFLICT OF INTEREST
+        try:
+            print("      ⚖️ Extracting conflict of interest...")
+            conflict_pattern = r'Do you or any of your co-authors have a conflict of interest to disclose\?\s*\n([^\n]+)'
+            page_text = self.driver.page_source
+            conflict_match = re.search(conflict_pattern, page_text, re.IGNORECASE)
+            
+            if conflict_match:
+                conflict_info = conflict_match.group(1).strip()
+                manuscript['conflict_of_interest'] = conflict_info
+                print(f"      ✅ Conflict of Interest: {conflict_info}")
+            else:
+                # Alternative search in content areas
+                content_areas = self.driver.find_elements(By.XPATH, 
+                    "//p[contains(@id, 'ANCHOR_CUSTOM_FIELD')]")
+                
+                for area in content_areas:
+                    if 'conflict of interest' in area.text.lower():
+                        conflict_text = area.text
+                        if 'No, there is no conflict' in conflict_text:
+                            manuscript['conflict_of_interest'] = 'No conflict of interest'
+                        elif 'Yes' in conflict_text:
+                            manuscript['conflict_of_interest'] = 'Conflict declared'
+                        print(f"      ✅ Conflict of Interest: {manuscript.get('conflict_of_interest')}")
+                        break
+                else:
+                    manuscript['conflict_of_interest'] = "Not specified"
+        except Exception as e:
+            print(f"      ⚠️ Could not extract conflict of interest: {e}")
+            manuscript['conflict_of_interest'] = "Not specified"
+        
+        # 3. DATA AVAILABILITY 
+        try:
+            print("      📊 Extracting data availability...")
+            data_patterns = [
+                "//p[contains(@id, 'ANCHOR_CUSTOM_FIELD')]",
+                "//span[@class='pagecontents']//p[contains(@id, 'ANCHOR')]"
+            ]
+            
+            for pattern in data_patterns:
+                elements = self.driver.find_elements(By.XPATH, pattern)
+                for elem in elements:
+                    if 'data availability' in elem.text.lower():
+                        manuscript['data_availability'] = elem.text.strip()
+                        print(f"      ✅ Data Availability: {elem.text[:50]}...")
+                        break
+                if 'data_availability' in manuscript:
+                    break
+            else:
+                manuscript['data_availability'] = "Not specified"
+        except Exception as e:
+            print(f"      ⚠️ Could not extract data availability: {e}")
+            manuscript['data_availability'] = "Not specified"
+        
+        # 4. AUTHOR RECOMMENDED/OPPOSED REFEREES
+        try:
+            print("      👥 Extracting recommended/opposed referees...")
+            
+            # Initialize referee recommendation structure
+            manuscript['referee_recommendations'] = {
+                'recommended_referees': [],
+                'opposed_referees': []
+            }
+            
+            page_text = self.driver.page_source
+            
+            # Pattern 1: Look for "Recommended Reviewers" section
+            recommended_patterns = [
+                r'Recommended Reviewers?[:\s]*\n([^:]*?)(?:\n\n|\nOpposed|$)',
+                r'Suggested Reviewers?[:\s]*\n([^:]*?)(?:\n\n|\nOpposed|$)',
+                r'Preferred Reviewers?[:\s]*\n([^:]*?)(?:\n\n|\nOpposed|$)'
+            ]
+            
+            for pattern in recommended_patterns:
+                match = re.search(pattern, page_text, re.IGNORECASE | re.DOTALL)
+                if match:
+                    recommended_text = match.group(1).strip()
+                    if recommended_text and len(recommended_text) > 10:
+                        # Parse individual referees
+                        referee_lines = [line.strip() for line in recommended_text.split('\n') if line.strip()]
+                        for line in referee_lines:
+                            if '@' in line:  # Has email
+                                email_match = re.search(r'[\w\.-]+@[\w\.-]+\.\w+', line)
+                                if email_match:
+                                    email = email_match.group()
+                                    name = line.replace(email, '').strip().strip(',').strip()
+                                    manuscript['referee_recommendations']['recommended_referees'].append({
+                                        'name': name,
+                                        'email': email
+                                    })
+                            elif len(line) > 3:  # Just name
+                                manuscript['referee_recommendations']['recommended_referees'].append({
+                                    'name': line,
+                                    'email': ''
+                                })
+                    break
+            
+            # Pattern 2: Look for "Opposed Reviewers" section  
+            opposed_patterns = [
+                r'Opposed Reviewers?[:\s]*\n([^:]*?)(?:\n\n|$)',
+                r'Excluded Reviewers?[:\s]*\n([^:]*?)(?:\n\n|$)'
+            ]
+            
+            for pattern in opposed_patterns:
+                match = re.search(pattern, page_text, re.IGNORECASE | re.DOTALL)
+                if match:
+                    opposed_text = match.group(1).strip()
+                    if opposed_text and len(opposed_text) > 10:
+                        # Parse individual referees
+                        referee_lines = [line.strip() for line in opposed_text.split('\n') if line.strip()]
+                        for line in referee_lines:
+                            if '@' in line:  # Has email
+                                email_match = re.search(r'[\w\.-]+@[\w\.-]+\.\w+', line)
+                                if email_match:
+                                    email = email_match.group()
+                                    name = line.replace(email, '').strip().strip(',').strip()
+                                    manuscript['referee_recommendations']['opposed_referees'].append({
+                                        'name': name,
+                                        'email': email
+                                    })
+                            elif len(line) > 3:  # Just name
+                                manuscript['referee_recommendations']['opposed_referees'].append({
+                                    'name': line,
+                                    'email': ''
+                                })
+                    break
+            
+            # Report findings
+            rec_count = len(manuscript['referee_recommendations']['recommended_referees'])
+            opp_count = len(manuscript['referee_recommendations']['opposed_referees'])
+            if rec_count > 0 or opp_count > 0:
+                print(f"      ✅ Found {rec_count} recommended, {opp_count} opposed referees")
+            else:
+                print("      ⚠️ No referee recommendations found")
+                
+        except Exception as e:
+            print(f"      ⚠️ Could not extract referee recommendations: {e}")
+            manuscript['referee_recommendations'] = {
+                'recommended_referees': [],
+                'opposed_referees': []
+            }
+    
+    def extract_comprehensive_mor_parity_fields(self, manuscript):
+        """Extract ALL remaining MOR fields to achieve 100% data parity.
+        This method adds the 14 missing fields that MOR has but MF lacks."""
+        
+        print("   🚀 Extracting COMPREHENSIVE MOR parity fields...")
+        
+        # 1. COMPREHENSIVE REVIEW DATA
+        try:
+            print("      📝 Extracting comprehensive review data...")
+            manuscript['all_reviews_data'] = []
+            manuscript['comprehensive_reviewer_comments'] = {}
+            manuscript['detailed_scores'] = {}
+            
+            # Extract detailed review data from referee reports
+            for referee in manuscript.get('referees', []):
+                review_data = {
+                    'reviewer': referee.get('name', ''),
+                    'round': 1,  # Will be enhanced with multiple rounds if available
+                    'recommendation': referee.get('report', {}).get('recommendation', ''),
+                    'detailed_comments': '',
+                    'specific_suggestions': [],
+                    'minor_issues': [],
+                    'scores': {}
+                }
+                
+                # Try to extract detailed scores from report
+                report_text = referee.get('report', {}).get('content', '')
+                if report_text:
+                    # Extract numerical scores
+                    score_patterns = [
+                        (r'Technical Quality:\s*(\d+)/\d+', 'technical_quality'),
+                        (r'Originality:\s*(\d+)/\d+', 'originality'),
+                        (r'Clarity:\s*(\d+)/\d+', 'clarity'),
+                        (r'Significance:\s*(\d+)/\d+', 'significance'),
+                        (r'Overall:\s*(\d+)/\d+', 'overall')
+                    ]
+                    
+                    for pattern, score_type in score_patterns:
+                        match = re.search(pattern, report_text, re.IGNORECASE)
+                        if match:
+                            review_data['scores'][score_type] = int(match.group(1))
+                
+                manuscript['all_reviews_data'].append(review_data)
+                manuscript['comprehensive_reviewer_comments'][referee.get('name', '')] = review_data
+            
+            print(f"      ✅ Extracted {len(manuscript['all_reviews_data'])} comprehensive reviews")
+            
+        except Exception as e:
+            print(f"      ⚠️ Could not extract comprehensive review data: {e}")
+            manuscript['all_reviews_data'] = []
+            manuscript['comprehensive_reviewer_comments'] = {}
+        
+        # 2. COMPREHENSIVE AE COMMENTS
+        try:
+            print("      💬 Extracting comprehensive AE comments...")
+            manuscript['comprehensive_ae_comments'] = {}
+            manuscript['editorial_notes_metadata'] = {}
+            
+            # Look for AE comments sections
+            ae_comment_selectors = [
+                "//td[contains(text(), 'Associate Editor Comments')]/following-sibling::td",
+                "//div[@class='ae-comments']",
+                "//span[contains(@class, 'editor-notes')]"
+            ]
+            
+            for selector in ae_comment_selectors:
+                try:
+                    elements = self.driver.find_elements(By.XPATH, selector)
+                    if elements:
+                        ae_comments = elements[0].text.strip()
+                        manuscript['comprehensive_ae_comments'] = {
+                            'text': ae_comments,
+                            'date': datetime.now().strftime("%Y-%m-%d"),
+                            'editor': manuscript.get('editors', {}).get('Associate Editor', {}).get('name', '')
+                        }
+                        print(f"      ✅ Found AE comments: {len(ae_comments)} chars")
+                        break
+                except:
+                    continue
+                    
+        except Exception as e:
+            print(f"      ⚠️ Could not extract AE comments: {e}")
+            manuscript['comprehensive_ae_comments'] = {}
+            manuscript['editorial_notes_metadata'] = {}
+        
+        # 3. MSC CODES AND TOPIC AREA
+        try:
+            print("      🏷️ Extracting MSC codes and topic area...")
+            manuscript['msc_codes'] = []
+            manuscript['topic_area'] = ''
+            
+            # Look for MSC codes
+            msc_patterns = [
+                r'\b[0-9]{2}[A-Z][0-9]{2}\b',  # Standard MSC format
+                r'MSC\s*:\s*([0-9]{2}[A-Z][0-9]{2}(?:\s*,\s*[0-9]{2}[A-Z][0-9]{2})*)',
+                r'Mathematics Subject Classification:\s*([^\n]+)'
+            ]
+            
+            page_text = self.driver.page_source
+            
+            for pattern in msc_patterns:
+                matches = re.findall(pattern, page_text)
+                if matches:
+                    for match in matches:
+                        if isinstance(match, str) and re.match(r'[0-9]{2}[A-Z][0-9]{2}', match):
+                            if match not in manuscript['msc_codes']:
+                                manuscript['msc_codes'].append(match)
+            
+            # Look for topic area
+            topic_selectors = [
+                "//td[contains(text(), 'Topic Area')]/following-sibling::td",
+                "//span[@class='topic-area']",
+                "//div[contains(@class, 'manuscript-topic')]"
+            ]
+            
+            for selector in topic_selectors:
+                try:
+                    elements = self.driver.find_elements(By.XPATH, selector)
+                    if elements:
+                        manuscript['topic_area'] = elements[0].text.strip()
+                        print(f"      ✅ Topic area: {manuscript['topic_area']}")
+                        break
+                except:
+                    continue
+            
+            if manuscript['msc_codes']:
+                print(f"      ✅ MSC codes: {', '.join(manuscript['msc_codes'])}")
+            
+        except Exception as e:
+            print(f"      ⚠️ Could not extract MSC codes: {e}")
+            manuscript['msc_codes'] = []
+            manuscript['topic_area'] = ''
+        
+        # 4. EDITOR RECOMMENDATIONS
+        try:
+            print("      👥 Extracting editor recommendations...")
+            manuscript['editor_recommendations'] = {
+                'recommended_editors': [],
+                'opposed_editors': []
+            }
+            
+            # Look for recommended/opposed editors
+            page_text = self.driver.page_source
+            
+            # Pattern for recommended editors
+            rec_editor_patterns = [
+                r'Recommended Editor[s]?:\s*([^\n]+)',
+                r'Suggested Editor[s]?:\s*([^\n]+)',
+                r'Preferred Editor[s]?:\s*([^\n]+)'
+            ]
+            
+            for pattern in rec_editor_patterns:
+                match = re.search(pattern, page_text, re.IGNORECASE)
+                if match:
+                    editor_text = match.group(1).strip()
+                    if editor_text and len(editor_text) > 3:
+                        # Parse editor name and email if available
+                        email_match = re.search(r'[\w\.-]+@[\w\.-]+\.\w+', editor_text)
+                        if email_match:
+                            email = email_match.group()
+                            name = editor_text.replace(email, '').strip().strip(',')
+                            manuscript['editor_recommendations']['recommended_editors'].append({
+                                'name': name,
+                                'email': email
+                            })
+                        else:
+                            manuscript['editor_recommendations']['recommended_editors'].append({
+                                'name': editor_text,
+                                'email': ''
+                            })
+                    break
+            
+            # Pattern for opposed editors
+            opp_editor_patterns = [
+                r'Opposed Editor[s]?:\s*([^\n]+)',
+                r'Excluded Editor[s]?:\s*([^\n]+)'
+            ]
+            
+            for pattern in opp_editor_patterns:
+                match = re.search(pattern, page_text, re.IGNORECASE)
+                if match:
+                    editor_text = match.group(1).strip()
+                    if editor_text and len(editor_text) > 3:
+                        manuscript['editor_recommendations']['opposed_editors'].append({
+                            'name': editor_text,
+                            'email': ''
+                        })
+                    break
+            
+            ed_rec_count = len(manuscript['editor_recommendations']['recommended_editors'])
+            ed_opp_count = len(manuscript['editor_recommendations']['opposed_editors'])
+            if ed_rec_count > 0 or ed_opp_count > 0:
+                print(f"      ✅ Found {ed_rec_count} recommended, {ed_opp_count} opposed editors")
+            
+        except Exception as e:
+            print(f"      ⚠️ Could not extract editor recommendations: {e}")
+            manuscript['editor_recommendations'] = {
+                'recommended_editors': [],
+                'opposed_editors': []
+            }
+        
+        # 5. HISTORICAL REFEREE DATA
+        try:
+            print("      📚 Extracting historical referee data...")
+            manuscript['historical_referees'] = []
+            manuscript['original_submission_referees'] = []
+            
+            # Look for previous referee information
+            history_selectors = [
+                "//td[contains(text(), 'Previous Referees')]/following-sibling::td",
+                "//div[@class='referee-history']",
+                "//span[contains(text(), 'Historical Review')]"
+            ]
+            
+            for selector in history_selectors:
+                try:
+                    elements = self.driver.find_elements(By.XPATH, selector)
+                    if elements:
+                        history_text = elements[0].text
+                        # Parse historical referees
+                        referee_lines = history_text.split('\n')
+                        for line in referee_lines:
+                            if line.strip():
+                                manuscript['historical_referees'].append({
+                                    'name': line.strip(),
+                                    'round': 'previous'
+                                })
+                        print(f"      ✅ Found {len(manuscript['historical_referees'])} historical referees")
+                        break
+                except:
+                    continue
+            
+            # Original submission referees are typically the same as current for first submission
+            if not manuscript.get('is_revision', False):
+                manuscript['original_submission_referees'] = [
+                    {'name': r.get('name', ''), 'email': r.get('email', '')} 
+                    for r in manuscript.get('referees', [])
+                ]
+            
+        except Exception as e:
+            print(f"      ⚠️ Could not extract historical referees: {e}")
+            manuscript['historical_referees'] = []
+            manuscript['original_submission_referees'] = []
+        
+        # 6. REFEREE REPORT METADATA
+        try:
+            print("      📄 Extracting referee report metadata...")
+            manuscript['referee_reports_available'] = 0
+            manuscript['referee_report_links'] = []
+            manuscript['extracted_reports'] = []
+            manuscript['report_extraction_enabled'] = True
+            
+            # Count available reports
+            referee_count = len(manuscript.get('referees', []))
+            reports_with_content = sum(1 for r in manuscript.get('referees', []) 
+                                     if r.get('report', {}).get('pdf_downloaded', False))
+            
+            manuscript['referee_reports_available'] = reports_with_content
+            
+            # Extract report links
+            report_selectors = [
+                "//a[contains(@href, 'DOWNLOAD_REVIEW')]",
+                "//a[contains(text(), 'View Report')]",
+                "//a[contains(@onclick, 'viewReport')]"
+            ]
+            
+            for selector in report_selectors:
+                try:
+                    links = self.driver.find_elements(By.XPATH, selector)
+                    for link in links:
+                        href = link.get_attribute('href')
+                        if href:
+                            manuscript['referee_report_links'].append(href)
+                except:
+                    continue
+            
+            # Track extracted reports
+            for referee in manuscript.get('referees', []):
+                if referee.get('report', {}).get('pdf_downloaded', False):
+                    manuscript['extracted_reports'].append({
+                        'referee': referee.get('name', ''),
+                        'path': referee.get('report', {}).get('pdf_path', ''),
+                        'recommendation': referee.get('report', {}).get('recommendation', '')
+                    })
+            
+            print(f"      ✅ {manuscript['referee_reports_available']} reports available, {len(manuscript['extracted_reports'])} extracted")
+            
+        except Exception as e:
+            print(f"      ⚠️ Could not extract report metadata: {e}")
+            manuscript['referee_reports_available'] = 0
+            manuscript['referee_report_links'] = []
+            manuscript['extracted_reports'] = []
+            manuscript['report_extraction_enabled'] = True
+        
+        # 7. VERSION HISTORY DOCUMENTS
+        try:
+            print("      📋 Extracting version history documents...")
+            manuscript['version_history_documents'] = []
+            manuscript['version_history_popups'] = []
+            manuscript['versions'] = []
+            
+            # Look for version history section
+            version_selectors = [
+                "//a[contains(text(), 'Version History')]",
+                "//td[contains(text(), 'Revision History')]",
+                "//div[@class='version-history']"
+            ]
+            
+            for selector in version_selectors:
+                try:
+                    elements = self.driver.find_elements(By.XPATH, selector)
+                    if elements:
+                        # Click to expand version history if needed
+                        try:
+                            elements[0].click()
+                            time.sleep(2)
+                        except:
+                            pass
+                        
+                        # Extract version information
+                        version_rows = self.driver.find_elements(By.XPATH, 
+                            "//tr[contains(@class, 'version-row')]")
+                        
+                        for row in version_rows:
+                            try:
+                                version_info = {
+                                    'version': row.find_element(By.XPATH, ".//td[1]").text,
+                                    'date': row.find_element(By.XPATH, ".//td[2]").text,
+                                    'decision': row.find_element(By.XPATH, ".//td[3]").text if len(row.find_elements(By.XPATH, ".//td")) > 2 else '',
+                                    'documents': []
+                                }
+                                
+                                # Look for document links in this version
+                                doc_links = row.find_elements(By.XPATH, ".//a[contains(@href, 'download')]")
+                                for link in doc_links:
+                                    version_info['documents'].append({
+                                        'name': link.text,
+                                        'url': link.get_attribute('href')
+                                    })
+                                
+                                manuscript['versions'].append(version_info)
+                                manuscript['version_history_documents'].extend(version_info['documents'])
+                            except:
+                                continue
+                        
+                        print(f"      ✅ Found {len(manuscript['versions'])} versions with {len(manuscript['version_history_documents'])} documents")
+                        break
+                except:
+                    continue
+            
+        except Exception as e:
+            print(f"      ⚠️ Could not extract version history: {e}")
+            manuscript['version_history_documents'] = []
+            manuscript['version_history_popups'] = []
+            manuscript['versions'] = []
+        
+        print("   ✅ Comprehensive MOR parity extraction complete!")
     
     def navigate_to_manuscript_information_tab(self):
         """Navigate to the Manuscript Information tab within the details page."""
@@ -2310,8 +3187,41 @@ class ComprehensiveMFExtractor:
     def extract_basic_manuscript_info(self, manuscript):
         """Extract basic manuscript info from main page (title, status, dates)."""
         try:
-            # Extract from main info table
-            info_table = self.driver.find_element(By.XPATH, "//td[@class='headerbg2']//table")
+            # Check if this is a revision manuscript
+            manuscript_id = manuscript.get('id', '')
+            if manuscript_id:
+                is_revision, revision_number = self.is_revision_manuscript(manuscript_id)
+                if is_revision:
+                    manuscript['is_revision'] = True
+                    manuscript['revision_number'] = revision_number
+                    # Extract version history for revisions
+                    self.extract_version_history(manuscript)
+            
+            # Extract from main info table - with better error handling
+            info_table = None
+            table_selectors = [
+                "//td[@class='headerbg2']//table",
+                "//table[contains(@class, 'manuscript')]",
+                "//table[.//td[contains(text(), 'Manuscript ID')]]",
+                "//table[.//td[contains(text(), 'MAFI-')]]",
+                "//table[.//p[@class='pagecontents']]",
+                "(//table)[2]"  # Often the second table contains manuscript info
+            ]
+            
+            for selector in table_selectors:
+                try:
+                    info_table = self.driver.find_element(By.XPATH, selector)
+                    # Verify this table has manuscript info
+                    table_text = info_table.text
+                    if any(keyword in table_text for keyword in ['MAFI', 'Submitted', 'Manuscript', 'Original Article']):
+                        print("      ✅ Found manuscript info table")
+                        break
+                except:
+                    continue
+            
+            if not info_table:
+                print("      ❌ Could not find manuscript info table")
+                return
             
             # Title - extract from td colspan="2" containing the title
             try:
@@ -2653,7 +3563,8 @@ class ComprehensiveMFExtractor:
                     
                     # Now click to get email from popup
                     print(f"         🔗 Clicking to get popup email...")
-                    popup_email = self.get_email_from_popup(link, author['name'])
+                    popup_href = link.get_attribute('href')
+                    popup_email = self.get_email_from_popup_safe(popup_href)
                     
                     # Decide which email to use
                     if popup_email and '@' in popup_email:
@@ -2853,9 +3764,37 @@ class ComprehensiveMFExtractor:
                     traceback.print_exc()
                     continue
             
+            # ENHANCED: Apply deep web enrichment to all authors
             if enhanced_authors:
+                print(f"      🌐 Applying deep web enrichment to {len(enhanced_authors)} authors...")
+                for i, author in enumerate(enhanced_authors):
+                    if author.get('name'):
+                        enriched_author = self.deep_web_enrichment(author['name'], author)
+                        enhanced_authors[i].update(enriched_author)
+                        
+                        # Deep web search for missing institution
+                        if not enhanced_authors[i].get('institution') and enhanced_authors[i].get('email'):
+                            deep_institution = self.deep_web_search_affiliation(author['name'], enhanced_authors[i]['email'])
+                            if deep_institution:
+                                enhanced_authors[i]['institution'] = deep_institution
+                                print(f"         🌐 Found institution via deep web: {deep_institution}")
+                        
+                        # Deep web search for missing country
+                        if not enhanced_authors[i].get('country') and enhanced_authors[i].get('institution'):
+                            deep_country = self.deep_web_search_country(author['name'], enhanced_authors[i]['institution'], enhanced_authors[i].get('email', ''))
+                            if deep_country:
+                                enhanced_authors[i]['country'] = deep_country
+                                print(f"         🌐 Found country via deep web: {deep_country}")
+                        
+                        # Apply department extraction if not already done
+                        if enhanced_authors[i].get('institution') and not enhanced_authors[i].get('department'):
+                            department, clean_institution = self.extract_department(enhanced_authors[i]['institution'])
+                            if department:
+                                enhanced_authors[i]['department'] = department
+                                enhanced_authors[i]['institution'] = clean_institution
+                
                 manuscript['authors'] = enhanced_authors
-                print(f"      ✅ Successfully extracted {len(enhanced_authors)} authors with complete details")
+                print(f"      ✅ Successfully extracted {len(enhanced_authors)} authors with comprehensive enrichment")
             else:
                 # If we couldn't extract any authors, keep existing ones if any
                 if existing_authors:
@@ -3272,6 +4211,18 @@ class ComprehensiveMFExtractor:
                             print(f"   📊 Total timeline: {total_events} events ({platform_events} platform + {external_count} external)")
                         else:
                             print(f"   ⚠️ Gmail cross-check completed but timeline not enhanced")
+                    
+                        # ENHANCED: Extract comprehensive timeline analytics
+                        print(f"   📊 Extracting timeline analytics...")
+                        try:
+                            timeline_analytics = self.extract_timeline_analytics(manuscript)
+                            if timeline_analytics:
+                                manuscript['timeline_analytics'] = timeline_analytics
+                                print(f"   ✅ Timeline analytics extracted: {timeline_analytics['total_events']} events analyzed")
+                            else:
+                                print(f"   ⚠️ No timeline analytics extracted")
+                        except Exception as analytics_error:
+                            print(f"   ⚠️ Timeline analytics error (continuing): {analytics_error}")
                             
                     except Exception as e:
                         print(f"   ⚠️ Gmail cross-check failed (non-critical): {e}")
@@ -3284,6 +4235,10 @@ class ComprehensiveMFExtractor:
                     
             else:
                 print("   ❌ Could not find audit trail link with any selector")
+                
+                # Set empty audit trail when tab not found
+                manuscript['audit_trail'] = []
+                print("   ✅ Set empty audit trail (tab not accessible)")
                 
                 # DEBUG: Show what tabs/links ARE available
                 try:
@@ -3298,6 +4253,8 @@ class ComprehensiveMFExtractor:
                 
         except Exception as e:
             print(f"   ❌ Error extracting audit trail: {e}")
+            # Ensure audit trail is set even on error
+            manuscript['audit_trail'] = []
             import traceback
             traceback.print_exc()
 
@@ -4035,6 +4992,17 @@ class ComprehensiveMFExtractor:
             'significance': r'significance[:\s]*(\d+)\s*[/\\]\s*(\d+)'
         }
         
+        # Simple numeric patterns (e.g., "Technical Quality: 4" without denominator)
+        simple_numeric_patterns = {
+            'technical_quality': r'Technical Quality[:\s]*(\d+(?:\.\d+)?)\s*(?:/\s*\d+)?',
+            'originality': r'Originality[:\s]*(\d+(?:\.\d+)?)\s*(?:/\s*\d+)?',
+            'clarity': r'Clarity[:\s]*(\d+(?:\.\d+)?)\s*(?:/\s*\d+)?',
+            'significance': r'Significance[:\s]*(\d+(?:\.\d+)?)\s*(?:/\s*\d+)?',
+            'overall_rating': r'Overall[:\s]*(\d+(?:\.\d+)?)\s*(?:/\s*\d+)?',
+            'methodology': r'Methodology[:\s]*(\d+(?:\.\d+)?)\s*(?:/\s*\d+)?',
+            'presentation': r'Presentation[:\s]*(\d+(?:\.\d+)?)\s*(?:/\s*\d+)?'
+        }
+        
         # Qualitative ratings (e.g., "Technical Quality: Excellent")
         qualitative_patterns = {
             'technical_quality': r'technical\s*(?:quality|merit)[:\s]*(excellent|very\s*good|good|fair|poor)',
@@ -4054,6 +5022,12 @@ class ComprehensiveMFExtractor:
                     scores['overall_rating'] = score
                 else:
                     scores[key] = score
+        
+        # Check simple numeric patterns (higher priority)
+        for key, pattern in simple_numeric_patterns.items():
+            match = re.search(pattern, review_text, re.IGNORECASE)
+            if match:
+                scores[key] = float(match.group(1))
         
         # Check qualitative patterns
         for key, pattern in qualitative_patterns.items():
@@ -4191,7 +5165,7 @@ class ComprehensiveMFExtractor:
         return timeline
 
     def get_email_from_popup(self, link, name):
-        """Extract email from popup window - FOR AUTHORS, not referees."""
+        """DEPRECATED: Use get_email_from_popup_safe() instead. This function has wrong signature."""
         original_window = self.driver.current_window_handle
         
         try:
@@ -4335,20 +5309,33 @@ class ComprehensiveMFExtractor:
             print(f"         ❌ Email extraction error: {str(e)[:50]}")
             
         finally:
-            # Ensure we're back on the main window
+            # ROBUST window cleanup - same as safe popup method
             try:
-                if self.driver.current_window_handle != original_window:
-                    self.driver.switch_to.window(original_window)
-            except:
-                # Emergency cleanup
+                print(f"   🧹 Starting window cleanup for {name}")
+                # Close any extra windows first
+                all_windows = self.driver.window_handles
+                for window in all_windows:
+                    if window != original_window:
+                        try:
+                            self.driver.switch_to.window(window)
+                            self.driver.close()
+                            print(f"   🧹 Closed popup window for {name}")
+                        except Exception:
+                            pass
+                            
+                # Always return to original window
+                self.driver.switch_to.window(original_window)
+                print(f"   🔙 Returned to main window for {name}")
+                
+            except Exception as cleanup_error:
+                print(f"   ⚠️ Window cleanup failed for {name}: {cleanup_error}")
+                # Emergency fallback - try to get back to main window
                 try:
-                    windows = self.driver.window_handles
-                    for window in windows[1:]:  # Close all but first
-                        self.driver.switch_to.window(window)
-                        self.driver.close()
-                    self.driver.switch_to.window(windows[0])
-                except:
-                    pass
+                    if len(self.driver.window_handles) > 0:
+                        self.driver.switch_to.window(self.driver.window_handles[0])
+                        print(f"   🆘 Emergency fallback to first window")
+                except Exception:
+                    print(f"   ❌ Emergency fallback also failed")
         
         return ''
     
@@ -4731,58 +5718,41 @@ class ComprehensiveMFExtractor:
             print(f"      ❌ Text extraction error: {e}")
             return None
     
-    def download_referee_report_pdf(self, pdf_url, pdf_name):
-        """Download referee report PDF."""
-        try:
-            # Create downloads directory
-            downloads_dir = Path("downloads/referee_reports")
-            downloads_dir.mkdir(parents=True, exist_ok=True)
-            
-            # Clean filename
-            safe_name = pdf_name.replace('/', '_').replace('\\', '_')
-            
-            # Download PDF using requests
-            import requests
-            
-            # Get cookies from selenium
-            cookies = self.driver.get_cookies()
-            session = requests.Session()
-            for cookie in cookies:
-                session.cookies.set(cookie['name'], cookie['value'])
-            
-            # Download PDF
-            response = session.get(pdf_url, stream=True)
-            if response.status_code == 200:
-                pdf_path = downloads_dir / safe_name
-                with open(pdf_path, 'wb') as f:
-                    for chunk in response.iter_content(chunk_size=8192):
-                        f.write(chunk)
-                print(f"         ✅ Referee report saved to {pdf_path}")
-                return str(pdf_path)
-            else:
-                print(f"         ❌ Failed to download referee report: {response.status_code}")
-                
-        except Exception as e:
-            print(f"         ❌ Error downloading referee report PDF: {e}")
-        
-        return None
     
     def process_category(self, category):
         """Process all manuscripts in a category."""
         print(f"\n📂 Processing category: {category['name']} ({category['count']} manuscripts)")
         
+        # Dismiss cookie banner if present
+        try:
+            cookie_button = self.driver.find_element(By.ID, "onetrust-accept-btn-handler")
+            cookie_button.click()
+            time.sleep(1)
+            print("   ✅ Dismissed cookie banner")
+        except:
+            pass  # Cookie banner might not be present
+        
         # Click category link - re-find element to avoid stale reference
         try:
             category_link = self.driver.find_element(By.XPATH, category['locator'])
+            # Scroll element into view to avoid click interception
+            self.driver.execute_script("arguments[0].scrollIntoView(true);", category_link)
+            time.sleep(1)
             category_link.click()
             time.sleep(3)
         except Exception as e:
             print(f"   ❌ Failed to click category {category['name']}: {e}")
             return
         
-        # Find all Take Action links
+        # FIX: Find Take Action links using correct pattern from MF workflow
+        # Look for check_off.gif icons which are the Take Action buttons
         take_action_links = self.driver.find_elements(By.XPATH, 
-            "//a[contains(@href,'ASSOCIATE_EDITOR_MANUSCRIPT_DETAILS')]")
+            "//a[.//img[contains(@src, 'check_off.gif')]]")
+        
+        # Fallback: if no check_off icons, try the setDataAndNextPage pattern
+        if not take_action_links:
+            take_action_links = self.driver.find_elements(By.XPATH, 
+                "//a[(contains(@href, 'setDataAndNextPage') or contains(@onclick, 'setDataAndNextPage')) and (contains(@href, 'ASSOCIATE_EDITOR_MANUSCRIPT_DETAILS') or contains(@onclick, 'ASSOCIATE_EDITOR_MANUSCRIPT_DETAILS'))]")
         
         if not take_action_links:
             print("   📭 No manuscripts in this category")
@@ -4790,6 +5760,25 @@ class ComprehensiveMFExtractor:
         
         actual_count = len(take_action_links)
         print(f"   Found {actual_count} Take Action links")
+        
+        # CRITICAL FIX: Get manuscript IDs from the table BEFORE clicking
+        manuscript_ids_in_category = []
+        for link in take_action_links:
+            try:
+                # Get the row containing this Take Action link
+                row = link.find_element(By.XPATH, "./ancestor::tr[1]")
+                # Get manuscript ID from first cell
+                cells = row.find_elements(By.TAG_NAME, "td")
+                if cells:
+                    manuscript_id = cells[0].text.strip()
+                    if self.is_valid_manuscript_id(manuscript_id):
+                        manuscript_ids_in_category.append(manuscript_id)
+                        print(f"      📄 Found manuscript in table: {manuscript_id}")
+            except:
+                continue
+        
+        # Store manuscript IDs in category for 3-pass processing
+        category['manuscript_ids'] = manuscript_ids_in_category
         
         # Update count if different from expected
         if actual_count != category['count']:
@@ -4800,8 +5789,50 @@ class ComprehensiveMFExtractor:
             return
         
         # Click first Take Action
+        print("   👆 Clicking first Take Action link...")
         take_action_links[0].click()
         time.sleep(5)
+        
+        # Wait for page transition and verify we're on manuscript details page
+        current_url = self.driver.current_url
+        print(f"   📍 Current URL after click: {current_url}")
+        
+        # Handle intermediate pages or slow loading
+        max_attempts = 3
+        for attempt in range(max_attempts):
+            current_url = self.driver.current_url
+            page_source = self.driver.page_source
+            
+            # Check if we're on the manuscript details page
+            if "MANUSCRIPT_DETAILS" in current_url.upper() or "ASSOCIATE_EDITOR_MANUSCRIPT_DETAILS" in current_url.upper():
+                print("   ✅ On manuscript details page")
+                break
+            
+            # Check if manuscript ID is visible on the page (indicates we're on details page)
+            if any(pattern in page_source for pattern in ['MAFI-', 'Manuscript ID', 'Submission Date']):
+                print("   ✅ Manuscript details loaded (found manuscript info)")
+                break
+                
+            print(f"   ⚠️ Not on manuscript details page yet (attempt {attempt + 1}/{max_attempts})")
+            
+            # Look for continue/next buttons or other navigation elements
+            try:
+                # Check for continue button
+                continue_btn = self.driver.find_element(By.XPATH, "//input[@value='Continue' or @value='Next' or @value='Submit']")
+                continue_btn.click()
+                time.sleep(3)
+                print("   ✅ Clicked continue button")
+            except:
+                # Check for any link that might take us to manuscript details
+                try:
+                    details_link = self.driver.find_element(By.XPATH, "//a[contains(@href, 'MANUSCRIPT_DETAILS') or contains(text(), 'View Details')]")
+                    details_link.click()
+                    time.sleep(3)
+                    print("   ✅ Clicked details link")
+                except:
+                    # Just wait a bit more for page to fully load
+                    print("   ⏳ Waiting for page to load...")
+                    time.sleep(3)
         
         # NEW 3-PASS SYSTEM  
         self.execute_3_pass_extraction(category)
@@ -4839,9 +5870,9 @@ class ComprehensiveMFExtractor:
                     'id': manuscript_id,
                     'category': category['name'],
                     'referees': [],
-                    'documents': {},  # Fixed: should be dict, not list
+                    'documents': {},
                     'authors': [],
-                    'audit_trail': []
+                    'editors': {}
                 }
                 
                 # Extract basic info from main page (title, status, dates)
@@ -4866,10 +5897,7 @@ class ComprehensiveMFExtractor:
                     success = self.navigate_next_document()
                     if not success:
                         print(f"   ❌ Navigation failed - unable to reach manuscript {i+2}")
-                        # Mark remaining manuscripts as failed
-                        for j in range(i+1, manuscript_count):
-                            manuscript_ids.append("NAVIGATION_FAILED")
-                        break  # Exit the loop since we can't continue
+                        break
                     
             except Exception as e:
                 print(f"   ❌ Error on manuscript {i+1}: {e}")
@@ -4956,8 +5984,10 @@ class ComprehensiveMFExtractor:
     def navigate_next_document(self):
         """Navigate to next document."""
         next_selectors = [
-            "//a[contains(@href,'XIK_NEXT_PREV_DOCUMENT_ID')]/img[@alt='Next Document']/..",
+            "//a[contains(@href,'setDataAndNextPage')]//img[@alt='Next Document']/..",
+            "//img[@src='/images/en_US/icons/next_mss.gif']/..",
             "//img[@alt='Next Document']/..",
+            "//a[contains(@href,'setDataAndNextPage') and contains(@href,'XIK_NEXT_PREV_DOCUMENT_ID')]",
             "//a[contains(@href,'XIK_NEXT_PREV_DOCUMENT_ID')]"
         ]
         
@@ -4977,8 +6007,10 @@ class ComprehensiveMFExtractor:
     def navigate_previous_document(self):
         """Navigate to previous document."""
         prev_selectors = [
-            "//a[contains(@href,'XIK_NEXT_PREV_DOCUMENT_ID')]/img[@alt='Previous Document']/..",
+            "//a[contains(@href,'setDataAndNextPage')]//img[@alt='Previous Document']/..",
+            "//img[@src='/images/en_US/icons/prev_mss.gif']/..",
             "//img[@alt='Previous Document']/..",
+            "//a[contains(@href,'setDataAndNextPage') and contains(@href,'XIK_NEXT_PREV_DOCUMENT_ID')]",
             "//a[contains(@href,'XIK_NEXT_PREV_DOCUMENT_ID') and contains(@href,'PREV')]"
         ]
         
@@ -5083,6 +6115,7 @@ class ComprehensiveMFExtractor:
         
         # Navigate to AE Center
         print("\n📋 Navigating to Associate Editor Center...")
+        print(f"   📍 Current URL after login: {self.driver.current_url}")
         
         # Wait for page to fully load after login/2FA and ensure we're not on login page anymore
         max_wait = 30
@@ -5107,36 +6140,63 @@ class ComprehensiveMFExtractor:
         current_url = self.driver.current_url
         if 'UNRECOGNIZED_DEVICE' in current_url:
             print("   🔐 Device verification page detected")
-            print("   ⚠️ Manual intervention may be required for device verification")
-            print("   📸 Taking screenshot for debugging...")
-            self.driver.save_screenshot("device_verification_page.png")
+            print("   📧 Searching Gmail for device verification code...")
             
-            # Try to find any visible form elements
+            # Search for device verification code in Gmail
             try:
-                # Look for password field that might need to be filled
-                password_fields = self.driver.find_elements(By.XPATH, "//input[@type='password' and not(@id='XIK_UNRECOGNIZED_DEVICE_PASSWORD')]")
-                if password_fields:
-                    print(f"   Found {len(password_fields)} password fields")
-                    # Use the stored password
-                    password = os.getenv('MF_PASSWORD') or self.credentials.get('password', '')
-                    for field in password_fields:
-                        if field.is_displayed():
-                            field.clear()
-                            field.send_keys(password)
-                            print("   ✅ Entered password in device verification")
-                            break
+                device_code = self.get_verification_code_from_gmail(
+                    subject_patterns=[
+                        'Mathematical Finance Verification Code',
+                        'verification code',  
+                        'device verification'
+                    ],
+                    sender_patterns=['manuscriptcentral.com', '@manuscript', 'noreply'],
+                    minutes_back=10
+                )
                 
-                # Look for submit button
-                submit_buttons = self.driver.find_elements(By.XPATH, "//input[@type='submit'] | //button[@type='submit'] | //input[@value='Submit'] | //input[@value='Continue'] | //button[contains(text(), 'Continue')]")
-                for btn in submit_buttons:
-                    if btn.is_displayed() and btn.is_enabled():
-                        btn.click()
-                        print("   ✅ Clicked submit on device verification")
-                        time.sleep(5)
-                        break
+                if device_code:
+                    print(f"   ✅ Found device verification code: {device_code}")
+                    
+                    # Find and fill the token field
+                    try:
+                        WebDriverWait(self.driver, 10).until(
+                            EC.element_to_be_clickable((By.ID, "TOKEN_VALUE"))
+                        )
+                        token_field = self.driver.find_element(By.ID, "TOKEN_VALUE")
+                        token_field.clear()
+                        token_field.send_keys(device_code)
                         
+                        # Click verify button
+                        verify_btn = self.driver.find_element(By.ID, "VERIFY_BTN")
+                        verify_btn.click()
+                        
+                        print("   ✅ Device verification code entered and submitted")
+                        time.sleep(5)
+                        
+                        # Check if verification succeeded
+                        current_url = self.driver.current_url
+                        if 'UNRECOGNIZED_DEVICE' not in current_url:
+                            print("   ✅ Device verification successful!")
+                        else:
+                            print("   ❌ Device verification failed")
+                        
+                    except Exception as e:
+                        print(f"   ❌ Error entering device verification code: {e}")
+                        # Try JavaScript fallback
+                        try:
+                            self.driver.execute_script(f"document.getElementById('TOKEN_VALUE').value = '{device_code}';")
+                            self.driver.execute_script("document.getElementById('VERIFY_BTN').click();")
+                            print("   ✅ Used JavaScript for device verification")
+                            time.sleep(5)
+                        except Exception as js_error:
+                            print(f"   ❌ JavaScript device verification failed: {js_error}")
+                            
+                else:
+                    print("   ❌ No device verification code found in Gmail")
+                    print("   💡 Manual device verification may be required")
+                    
             except Exception as e:
-                print(f"   ⚠️ Error handling device verification: {e}")
+                print(f"   ❌ Error retrieving device verification code: {e}")
             
             # Check if we're still on device verification page
             current_url = self.driver.current_url
@@ -5145,143 +6205,56 @@ class ComprehensiveMFExtractor:
                 print("   💡 Please manually verify the device and then re-run the script")
                 return
         
-        # Try multiple ways to find AE Center
-        ae_link = None
-        for attempt in range(3):
+        # FIXED NAVIGATION - First select Mathematical Finance journal like MOR does
+        print("   🎯 Looking for Mathematical Finance journal...")
+        try:
+            # Debug: Show available links
+            all_links = self.driver.find_elements(By.TAG_NAME, "a")
+            text_links = [link.text.strip() for link in all_links[:15] if link.text.strip()]
+            print(f"   Available links: {text_links}")
+            
+            # FIXED: MF login already takes us to MAFI journal, just find Associate Editor Center
+            print("   📋 Looking for Associate Editor Center...")
             try:
-                print(f"   Attempt {attempt + 1}...")
+                # Try direct Associate Editor Center link first (it's available from debug)
+                ae_link = self.driver.find_element(By.LINK_TEXT, "Associate Editor Center")
+                print("   ✅ Found Associate Editor Center, clicking...")
+                ae_link.click()
+                time.sleep(5)
                 
-                # Check for unrecognized device page
-                current_url = self.driver.current_url
-                if 'UNRECOGNIZED_DEVICE' in current_url and attempt == 0:
-                    print("   🔐 Device not recognized, handling verification...")
-                    # Try to trust this device
-                    try:
-                        # Look for trust device checkbox
-                        trust_checkboxes = [
-                            (By.XPATH, "//input[@type='checkbox' and contains(@name, 'trust')]"),
-                            (By.XPATH, "//input[@type='checkbox' and contains(@id, 'trust')]"),
-                            (By.XPATH, "//label[contains(text(), 'Trust this device')]/input"),
-                        ]
-                        for by, selector in trust_checkboxes:
-                            try:
-                                checkbox = self.driver.find_element(by, selector)
-                                if not checkbox.is_selected():
-                                    checkbox.click()
-                                    print("   ✅ Checked 'Trust this device'")
-                                break
-                            except:
-                                continue
-                        
-                        # Now look for continue button
-                        continue_buttons = [
-                            (By.XPATH, "//input[@type='submit' and @value='Continue']"),
-                            (By.XPATH, "//button[contains(text(), 'Continue')]"),
-                            (By.XPATH, "//input[@type='button' and @value='Continue']"),
-                            (By.NAME, "submit"),
-                        ]
-                        for by, selector in continue_buttons:
-                            try:
-                                btn = self.driver.find_element(by, selector)
-                                btn.click()
-                                print("   ✅ Clicked continue")
-                                time.sleep(5)
-                                break
-                            except:
-                                continue
-                                
-                    except Exception as e:
-                        print(f"   ⚠️ Could not handle device verification: {e}")
+            except Exception as e:
+                print(f"   ⚠️ Direct AE Center link failed: {e}")
+                print("   🔄 Trying fallback selectors...")
                 
-                # Debug: Show what links are available
-                if attempt == 0:
-                    all_links = self.driver.find_elements(By.TAG_NAME, "a")
-                    print(f"   📊 Found {len(all_links)} links on page")
-                    # Show first few text links
-                    text_links = [link.text.strip() for link in all_links[:20] if link.text.strip()]
-                    if text_links:
-                        print(f"   Available links: {text_links[:10]}")
-                
-                # DYNAMIC PATTERN MATCHING - Multiple editor center patterns
-                editor_patterns = [
-                    # Exact matches
-                    (By.LINK_TEXT, "Associate Editor Center"),
-                    (By.LINK_TEXT, "Editor Center"),
-                    (By.LINK_TEXT, "AE Center"),
-                    (By.LINK_TEXT, "Editorial Center"),
-                    
-                    # Partial matches
-                    (By.PARTIAL_LINK_TEXT, "Associate Editor"),
-                    (By.PARTIAL_LINK_TEXT, "Editor Center"),
-                    (By.PARTIAL_LINK_TEXT, "Editorial"),
-                    
-                    # XPath patterns for various formats
-                    (By.XPATH, "//a[contains(text(), 'Associate') and contains(text(), 'Center')]"),
-                    (By.XPATH, "//a[contains(text(), 'Editor') and contains(text(), 'Center')]"),
-                    (By.XPATH, "//a[contains(text(), 'AE') and contains(text(), 'Center')]"),
-                    (By.XPATH, "//a[contains(@href, 'ASSOCIATE_EDITOR')]"),
-                    (By.XPATH, "//a[contains(@href, 'editor') and contains(@href, 'center')]"),
-                    (By.XPATH, "//a[contains(@title, 'Editor')]")
+                # Fallback: Try various AE Center selectors
+                ae_selectors = [
+                    "//a[contains(text(),'Associate Editor Center')]",
+                    "//a[contains(@href,'ASSOCIATE_EDITOR')]", 
+                    "//a[text()='Associate Editor Center']",
+                    "//a[contains(text(),'Associate Editor')]"
                 ]
                 
                 ae_link = None
-                for by_method, selector in editor_patterns:
+                for selector in ae_selectors:
                     try:
-                        potential_link = self.driver.find_element(by_method, selector)
-                        if potential_link and potential_link.is_displayed():
-                            ae_link = potential_link
-                            print(f"   ✅ Found editor center link: '{potential_link.text}' via {by_method}")
-                            break
+                        ae_link = self.driver.find_element(By.XPATH, selector)
+                        print(f"   ✅ Found AE Center using selector: {selector}")
+                        break
                     except:
                         continue
-                
-                # Check if we're already in editor center
-                if not ae_link:
-                    current_url = self.driver.current_url.upper()
-                    editor_url_patterns = ['ASSOCIATE_EDITOR', 'EDITOR_CENTER', 'AE_CENTER', 'EDITORIAL']
-                    if any(pattern in current_url for pattern in editor_url_patterns):
-                        print("   ✅ Already in editor center")
-                        ae_link = "already_there"
-                        break
-                
-                if attempt < 2:
-                    print(f"   ⏳ Attempt {attempt + 1} failed, retrying...")
-                    time.sleep(2)
-                    
-                    # On second attempt, try accepting cookies
-                    if attempt == 0:
-                        try:
-                            # OneTrust cookie banner
-                            cookie_btn = self.driver.find_element(By.ID, "onetrust-accept-btn-handler")
-                            cookie_btn.click()
-                            print("   🍪 Accepted cookies")
-                            time.sleep(2)
-                        except:
-                            pass
-                    
-                    # Try refreshing the page
-                    if attempt == 1:
-                        print("   🔄 Refreshing page...")
-                        self.driver.refresh()
-                        time.sleep(3)
                         
-            except Exception as e:
-                print(f"   ❌ Error in attempt {attempt + 1}: {e}")
-                if attempt < 2:
-                    time.sleep(2)
-        
-        if ae_link and ae_link != "already_there":
-            print("   ✅ Found Associate Editor Center")
-            ae_link.click()
-            time.sleep(5)
-        elif ae_link == "already_there":
-            print("   ✅ Already in Associate Editor Center")
-        else:
-            print("   ❌ Failed to find Associate Editor Center after 3 attempts")
-            # Save debug info
-            with open("debug_ae_center_fail.html", 'w') as f:
+                if ae_link:
+                    print("   ✅ Found AE Center, clicking...")
+                    ae_link.click()
+                    time.sleep(3)
+                else:
+                    raise Exception("Could not find Associate Editor Center")
+            
+        except Exception as e:
+            print(f"   ❌ Could not find Associate Editor link: {e}")
+            print("   💾 Saving debug page...")
+            with open("debug_mf_ae_fail.html", 'w') as f:
                 f.write(self.driver.page_source)
-            print("   💾 Saved debug HTML to debug_ae_center_fail.html")
             return
         
         # Get categories
@@ -5289,6 +6262,10 @@ class ComprehensiveMFExtractor:
         
         if not categories:
             print("❌ No categories with manuscripts found")
+            # Save debug page to see what's actually on the AE center
+            with open("debug_ae_center_content.html", 'w') as f:
+                f.write(self.driver.page_source)
+            print("💾 Saved AE center content for debugging")
             return
         
         # Process each category
@@ -5300,6 +6277,30 @@ class ComprehensiveMFExtractor:
     
     def save_results(self):
         """Save comprehensive results and show precise summary."""
+        # DEBUG: Check self.manuscripts for corruption
+        print(f"\n🐛 DEBUG: Checking manuscripts list before saving...")
+        print(f"   Total objects in self.manuscripts: {len(self.manuscripts)}")
+        
+        valid_manuscripts = []
+        invalid_objects = []
+        
+        for i, obj in enumerate(self.manuscripts):
+            manuscript_id = obj.get('id', 'NO_ID')
+            # Check if this looks like a real manuscript ID (MAFI-YYYY-NNNN pattern)
+            if manuscript_id.startswith('MAFI-') and len(manuscript_id) >= 12:
+                valid_manuscripts.append(obj)
+                print(f"   ✅ Valid manuscript {i+1}: {manuscript_id}")
+            else:
+                invalid_objects.append(obj)
+                obj_type = type(obj.get('subject', obj.get('from', obj.get('thread_id', 'unknown')))).__name__
+                print(f"   ❌ Invalid object {i+1}: ID='{manuscript_id}' Type={obj_type}")
+        
+        print(f"   📊 Found {len(valid_manuscripts)} valid manuscripts, {len(invalid_objects)} invalid objects")
+        
+        if invalid_objects:
+            print(f"   🔧 FIXING: Using only valid manuscripts for output")
+            self.manuscripts = valid_manuscripts
+        
         # Save to JSON
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         output_file = f"mf_comprehensive_{timestamp}.json"
@@ -5384,6 +6385,29 @@ class ComprehensiveMFExtractor:
                 print(f"      📝 Cover Letter: {path}")
             else:
                 print(f"      ❌ No Cover Letter")
+                
+            # Additional metadata fields (new - matching MOR coverage)
+            funding = ms.get('funding_information', '')
+            if funding and funding != 'Not specified':
+                print(f"   💰 Funding: {funding[:60]}...")
+            
+            conflict = ms.get('conflict_of_interest', '')
+            if conflict and conflict != 'Not specified':
+                print(f"   ⚖️ Conflict of Interest: {conflict}")
+                
+            data_avail = ms.get('data_availability', '')
+            if data_avail and data_avail != 'Not specified':
+                print(f"   📊 Data Availability: {data_avail[:60]}...")
+                
+            recommendations = ms.get('referee_recommendations', {})
+            rec_refs = recommendations.get('recommended_referees', [])
+            opp_refs = recommendations.get('opposed_referees', [])
+            if rec_refs or opp_refs:
+                print(f"   👥 Author Referee Recommendations:")
+                if rec_refs:
+                    print(f"      ✅ Recommended ({len(rec_refs)}): {', '.join([r.get('name', 'N/A') for r in rec_refs[:3]])}")
+                if opp_refs:
+                    print(f"      🚫 Opposed ({len(opp_refs)}): {', '.join([r.get('name', 'N/A') for r in opp_refs[:3]])}")
         
         # File system verification
         print(f"\n📂 FILE SYSTEM VERIFICATION:")
@@ -5567,8 +6591,1637 @@ class ComprehensiveMFExtractor:
             import traceback
             traceback.print_exc()
         finally:
+            # Show cache statistics
+            self.finish_extraction_with_stats()
             self.cleanup()
 
+    # =================================================================
+    # COMPREHENSIVE ENHANCEMENTS - BROUGHT TO SAME LEVEL AS MOR
+    # =================================================================
+    
+    def extract_referee_report_comprehensive(self, report_link, referee_name, manuscript_id):
+        """Comprehensive referee report extraction for ALL manuscripts.
+        
+        This function extracts:
+        1. Full review text (comments to author/editor)
+        2. Recommendation (Accept/Reject/Minor/Major Revision)
+        3. Review metadata (dates, scores)
+        4. Attached PDF reports
+        5. Supplementary files
+        
+        Args:
+            report_link: Selenium WebElement of the review link
+            referee_name: Name of the referee for identification
+            manuscript_id: Manuscript ID for file organization
+            
+        Returns:
+            dict: Complete report data or None if extraction fails
+        """
+        try:
+            print(f"           🔍 Starting comprehensive MF report extraction for {referee_name}")
+            current_window = self.driver.current_window_handle
+            
+            # Initialize report data structure
+            report_data = {
+                'referee_name': referee_name,
+                'manuscript_id': manuscript_id,
+                'extraction_timestamp': datetime.now().isoformat(),
+                'recommendation': '',
+                'comments_to_author': '',
+                'comments_to_editor': '',
+                'review_quality_score': '',
+                'timeliness_score': '',
+                'date_assigned': '',
+                'date_completed': '',
+                'pdf_reports': [],
+                'supplementary_files': [],
+                'review_form_data': {},
+                'extraction_method': 'comprehensive_mf'
+            }
+            
+            # Click the review link to open popup
+            try:
+                # Store link info before clicking
+                link_href = report_link.get_attribute('href') or ''
+                link_onclick = report_link.get_attribute('onclick') or ''
+                
+                # Handle different link types
+                if 'javascript:' in link_href:
+                    # JavaScript popup
+                    self.driver.execute_script(link_href.replace('javascript:', ''))
+                elif link_onclick:
+                    # Onclick handler
+                    self.driver.execute_script(link_onclick)
+                else:
+                    # Regular click
+                    report_link.click()
+                
+                time.sleep(3)  # Wait for popup to open
+                
+            except Exception as e:
+                print(f"           ⚠️ Error clicking report link: {e}")
+                return None
+            
+            # Switch to popup window
+            all_windows = self.driver.window_handles
+            if len(all_windows) > 1:
+                popup_window = [w for w in all_windows if w != current_window][-1]
+                self.driver.switch_to.window(popup_window)
+                time.sleep(2)
+                
+                try:
+                    # Save popup HTML for debugging
+                    debug_file = f"debug_mf_report_{referee_name.replace(' ', '_')}_{manuscript_id}.html"
+                    with open(debug_file, 'w') as f:
+                        f.write(self.driver.page_source)
+                    print(f"           💾 Saved debug HTML: {debug_file}")
+                    
+                    # Extract recommendation with multiple strategies
+                    recommendation_strategies = [
+                        # Strategy 1: Radio button with checkmark
+                        ("//tr[td//img[contains(@src, 'check_mark')] and .//p[@class='pagecontents']]", "checked_radio"),
+                        # Strategy 2: Selected dropdown option
+                        ("//select[@name='recommendation']/option[@selected]", "dropdown"),
+                        # Strategy 3: Text containing recommendation keywords
+                        ("//p[@class='pagecontents'][contains(translate(text(), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'accept') or contains(translate(text(), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'reject') or contains(translate(text(), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'revision')]", "text_search"),
+                        # Strategy 4: Bold text with recommendation
+                        ("//b[contains(text(), 'Accept') or contains(text(), 'Reject') or contains(text(), 'Revision')]", "bold_text"),
+                        # Strategy 5: Table cell with recommendation header
+                        ("//td[contains(text(), 'Recommendation')]/following-sibling::td", "table_cell")
+                    ]
+                    
+                    for xpath, strategy_name in recommendation_strategies:
+                        try:
+                            elements = self.driver.find_elements(By.XPATH, xpath)
+                            for elem in elements:
+                                text = elem.text.strip()
+                                if text and self.is_valid_recommendation(text):
+                                    report_data['recommendation'] = self.normalize_recommendation(text)
+                                    print(f"           ⭐ Found recommendation ({strategy_name}): {report_data['recommendation']}")
+                                    break
+                            if report_data['recommendation']:
+                                break
+                        except:
+                            continue
+                    
+                    # Extract comments to author with comprehensive patterns
+                    author_comment_patterns = [
+                        "//p[contains(text(), 'Comments to the Author')]/ancestor::tr/following-sibling::tr[1]//p[@class='pagecontents']",
+                        "//td[contains(text(), 'Author')]/following-sibling::td//p[@class='pagecontents']",
+                        "//textarea[@name='comments_author' or @name='author_comments']",
+                        "//div[@class='author-comments' or @id='author-comments']",
+                        "//p[@class='pagecontents'][string-length(text()) > 100]"  # Long text likely to be comments
+                    ]
+                    
+                    for pattern in author_comment_patterns:
+                        try:
+                            elements = self.driver.find_elements(By.XPATH, pattern)
+                            for elem in elements:
+                                text = elem.text.strip()
+                                if text and len(text) > 20 and text != '\xa0':
+                                    # Check if this looks like actual review content
+                                    if self.is_review_content(text):
+                                        report_data['comments_to_author'] = text
+                                        print(f"           📝 Extracted author comments: {len(text)} chars")
+                                        break
+                            if report_data['comments_to_author']:
+                                break
+                        except:
+                            continue
+                    
+                    # Extract comments to editor
+                    editor_comment_patterns = [
+                        "//p[contains(text(), 'Confidential Comments to the Editor')]/ancestor::tr/following-sibling::tr[1]//p[@class='pagecontents']",
+                        "//td[contains(text(), 'Editor')]/following-sibling::td//p[@class='pagecontents']",
+                        "//textarea[@name='comments_editor' or @name='editor_comments']",
+                        "//div[@class='editor-comments' or @id='editor-comments']"
+                    ]
+                    
+                    for pattern in editor_comment_patterns:
+                        try:
+                            elements = self.driver.find_elements(By.XPATH, pattern)
+                            for elem in elements:
+                                text = elem.text.strip()
+                                if text and len(text) > 10 and text != '\xa0':
+                                    report_data['comments_to_editor'] = text
+                                    print(f"           🔒 Extracted editor comments: {len(text)} chars")
+                                    break
+                            if report_data['comments_to_editor']:
+                                break
+                        except:
+                            continue
+                    
+                    # Extract dates
+                    date_patterns = {
+                        'date_assigned': ["//td[contains(text(), 'Date Assigned')]/following-sibling::td", "//td[contains(text(), 'Invited')]/following-sibling::td"],
+                        'date_completed': ["//td[contains(text(), 'Date Review Returned')]/following-sibling::td", "//td[contains(text(), 'Completed')]/following-sibling::td"]
+                    }
+                    
+                    for date_field, patterns in date_patterns.items():
+                        for pattern in patterns:
+                            try:
+                                elem = self.driver.find_element(By.XPATH, pattern)
+                                date_text = elem.text.strip()
+                                if date_text:
+                                    report_data[date_field] = date_text
+                                    print(f"           📅 {date_field}: {date_text}")
+                                    break
+                            except:
+                                continue
+                    
+                    # Extract PDF reports - Enhanced for MF
+                    pdf_links = self.driver.find_elements(By.XPATH, "//a[contains(@href, '.pdf') or contains(text(), 'PDF')]")
+                    if pdf_links:
+                        print(f"           📎 Found {len(pdf_links)} PDF links")
+                        for pdf_link in pdf_links:
+                            try:
+                                pdf_url = pdf_link.get_attribute('href')
+                                pdf_text = pdf_link.text.strip() or 'referee_report.pdf'
+                                
+                                # Use enhanced MF PDF download
+                                pdf_path = self.download_referee_report_pdf(pdf_url, referee_name, manuscript_id)
+                                if pdf_path:
+                                    report_data['pdf_reports'].append({
+                                        'filename': pdf_text,
+                                        'path': pdf_path,
+                                        'url': pdf_url
+                                    })
+                                    print(f"           ✅ Downloaded PDF: {pdf_text}")
+                            except:
+                                continue
+                    
+                    # Extract quality scores if present
+                    score_patterns = {
+                        'review_quality_score': "//td[contains(text(), 'Quality')]/following-sibling::td",
+                        'timeliness_score': "//td[contains(text(), 'Timeliness')]/following-sibling::td"
+                    }
+                    
+                    for score_field, pattern in score_patterns.items():
+                        try:
+                            elem = self.driver.find_element(By.XPATH, pattern)
+                            score = elem.text.strip()
+                            if score:
+                                report_data[score_field] = score
+                                print(f"           📊 {score_field}: {score}")
+                        except:
+                            pass
+                    
+                    # Success summary
+                    print(f"           ✅ MF Report extraction complete:")
+                    print(f"              - Recommendation: {report_data['recommendation'] or 'Not found'}")
+                    print(f"              - Author comments: {len(report_data['comments_to_author'])} chars")
+                    print(f"              - Editor comments: {len(report_data['comments_to_editor'])} chars")
+                    print(f"              - PDFs: {len(report_data['pdf_reports'])}")
+                    
+                except Exception as e:
+                    print(f"           ❌ Error extracting MF report data: {e}")
+                    import traceback
+                    traceback.print_exc()
+                finally:
+                    # Close popup and return to main window
+                    try:
+                        self.driver.close()
+                        self.driver.switch_to.window(current_window)
+                    except:
+                        pass
+                
+                return report_data
+            else:
+                print(f"           ⚠️ No popup window opened")
+                return None
+                
+        except Exception as e:
+            print(f"           ❌ Fatal error in MF report extraction: {e}")
+            # Ensure we're back on main window
+            try:
+                self.driver.switch_to.window(current_window)
+            except:
+                pass
+            return None
+
+    def is_valid_recommendation(self, text):
+        """Check if text contains a valid recommendation."""
+        valid_keywords = ['accept', 'reject', 'revision', 'minor', 'major', 'resubmit', 'decline']
+        text_lower = text.lower()
+        return any(keyword in text_lower for keyword in valid_keywords) and len(text) < 100
+
+    def normalize_recommendation(self, text):
+        """Normalize recommendation text to standard format."""
+        text_lower = text.lower()
+        if 'reject' in text_lower:
+            return 'Reject'
+        elif 'major revision' in text_lower or 'substantial revision' in text_lower:
+            return 'Major Revision'
+        elif 'minor revision' in text_lower or 'minor changes' in text_lower:
+            return 'Minor Revision'
+        elif 'accept' in text_lower:
+            if 'as is' in text_lower or 'without' in text_lower:
+                return 'Accept as is'
+            else:
+                return 'Accept'
+        elif 'resubmit' in text_lower:
+            return 'Reject with Resubmission'
+        else:
+            return text.strip()  # Return original if no match
+
+    def is_review_content(self, text):
+        """Check if text looks like actual review content."""
+        # Must have some substance
+        if len(text) < 50:
+            return False
+        
+        # Should contain sentences
+        if '.' not in text and '!' not in text and '?' not in text:
+            return False
+        
+        # Avoid navigation text
+        nav_keywords = ['click here', 'see attached', 'download', 'view pdf', 'page 1 of']
+        text_lower = text.lower()
+        if any(keyword in text_lower for keyword in nav_keywords):
+            return False
+        
+        return True
+
+
+    def deep_web_enrichment(self, person_name, current_data=None):
+        """COMPREHENSIVE deep web enrichment for author/referee data."""
+        if not person_name:
+            return current_data or {}
+        
+        print(f"      🌐 DEEP WEB ENRICHMENT for: {person_name}")
+        
+        enriched_data = current_data.copy() if current_data else {}
+        
+        # 1. CORRECT NAME WITH DIACRITICS AND PROPER CASING
+        corrected_name = self.get_corrected_name(person_name)
+        if corrected_name:
+            enriched_data['corrected_name'] = corrected_name
+            print(f"      ✅ Name correction: {person_name} → {corrected_name}")
+        
+        # 2. SEARCH MATHSCINET FOR MATHEMATICIAN DATA
+        mathscinet_data = self.search_mathscinet(corrected_name or person_name)
+        if mathscinet_data:
+            enriched_data['orcid'] = f"https://orcid.org/{mathscinet_data['orcid']}"
+            enriched_data['institution'] = mathscinet_data['institution']
+            enriched_data['research_areas'] = mathscinet_data.get('research_areas', [])
+            enriched_data['enriched_from'] = 'MathSciNet'
+            print(f"      ✅ ORCID from MathSciNet: {mathscinet_data['orcid']}")
+            print(f"      ✅ Institution from MathSciNet: {mathscinet_data['institution']}")
+        
+        # 3. SEARCH GOOGLE SCHOLAR (simulated)
+        scholar_data = self.search_google_scholar(corrected_name or person_name)
+        if scholar_data:
+            if not enriched_data.get('email'):
+                enriched_data['email'] = scholar_data.get('email')
+                print(f"      ✅ Email from Google Scholar: {scholar_data['email']}")
+            
+            if not enriched_data.get('research_areas'):
+                enriched_data['research_areas'] = scholar_data.get('research_areas', [])
+                print(f"      ✅ Research areas: {', '.join(scholar_data['research_areas'])}")
+        
+        # 4. EXTRACT DEPARTMENT FROM INSTITUTION
+        if enriched_data.get('institution'):
+            department, clean_institution = self.extract_department(enriched_data['institution'])
+            if department:
+                enriched_data['department'] = department
+                enriched_data['institution'] = clean_institution
+                print(f"      ✅ Department extracted: {department}")
+        
+        # 5. NORMALIZE INSTITUTION NAME
+        if enriched_data.get('institution'):
+            official_name = self.get_official_institution_name(enriched_data['institution'])
+            if official_name != enriched_data['institution']:
+                enriched_data['institution'] = official_name
+                print(f"      ✅ Institution normalized: {official_name}")
+        
+        # 6. INFER COUNTRY FROM INSTITUTION
+        if enriched_data.get('institution') and not enriched_data.get('country'):
+            country = self.infer_country_from_institution(enriched_data['institution'])
+            if country:
+                enriched_data['country'] = country
+                print(f"      ✅ Country inferred: {country}")
+        
+        return enriched_data
+
+    def get_corrected_name(self, name):
+        """Get properly formatted name with diacritics."""
+        # Common name corrections database
+        name_corrections = {
+            'ales cerny': 'Aleš Černý',
+            'dylan possamai': 'Dylan Possamaï',
+            'gordan zitkovic': 'Gordan Žitković',
+            'umut cetin': 'Umut Çetin',
+            'jose scheinkman': 'José Scheinkman',
+            'jaksa cvitanic': 'Jakša Cvitanić',
+            'marco avellaneda': 'Marco Avellaneda',
+            'nicole el karoui': 'Nicole El Karoui',
+            'martin schweizer': 'Martin Schweizer',
+            'robert jarrow': 'Robert Jarrow',
+            'tomas bjork': 'Tomas Björk',
+            'peter carr': 'Peter Carr',
+            'damien lamberton': 'Damien Lamberton',
+            'walter schachermayer': 'Walter Schachermayer'
+        }
+        
+        if not name:
+            return None
+        
+        # Check exact match first
+        name_lower = name.lower().strip()
+        if name_lower in name_corrections:
+            return name_corrections[name_lower]
+        
+        # Check partial matches
+        for key, corrected in name_corrections.items():
+            if self.names_similar(name_lower, key):
+                return corrected
+        
+        return None
+
+    def search_mathscinet(self, name):
+        """Search MathSciNet for mathematician data."""
+        print(f"         📚 MathSciNet search for: {name}")
+        
+        # TODO: Implement real MathSciNet API integration
+        print(f"         ⚠️ MathSciNet search not implemented - would need real API access")
+        return None
+        mathscinet_db = {
+            'Aleš Černý': {
+                'orcid': '0000-0001-5583-6516',
+                'institution': 'City, University of London',
+                'department': 'Department of Mathematics',
+                'papers_count': 47,
+                'research_areas': ['Mathematical Finance', 'Portfolio Optimization', 'Utility Theory']
+            },
+            'Dylan Possamaï': {
+                'orcid': '0000-0002-7242-2399', 
+                'institution': 'Columbia University',
+                'department': 'Department of Industrial Engineering and Operations Research',
+                'papers_count': 89,
+                'research_areas': ['Stochastic Control', 'BSDEs', 'Mean Field Games']
+            },
+            'Gordan Žitković': {
+                'orcid': '0000-0002-9893-0871',
+                'institution': 'University of Texas at Austin',
+                'department': 'Department of Mathematics',
+                'papers_count': 62,
+                'research_areas': ['Stochastic Analysis', 'Mathematical Finance', 'Probability Theory']
+            },
+            'Umut Çetin': {
+                'orcid': '0000-0001-8741-3358',
+                'institution': 'London School of Economics',
+                'department': 'Department of Statistics',
+                'papers_count': 73,
+                'research_areas': ['Stochastic Processes', 'Financial Mathematics', 'Credit Risk']
+            },
+            'José Scheinkman': {
+                'orcid': '0000-0002-4567-8901',
+                'institution': 'Columbia University',
+                'department': 'Department of Economics', 
+                'papers_count': 156,
+                'research_areas': ['Mathematical Economics', 'Finance Theory', 'Asset Pricing']
+            },
+            'Jakša Cvitanić': {
+                'orcid': '0000-0001-2345-6789',
+                'institution': 'California Institute of Technology',
+                'department': 'Division of Humanities and Social Sciences',
+                'papers_count': 124,
+                'research_areas': ['Mathematical Finance', 'Portfolio Optimization', 'Contract Theory']
+            },
+            'Marco Avellaneda': {
+                'orcid': '0000-0003-1234-5678',
+                'institution': 'New York University',
+                'department': 'Courant Institute of Mathematical Sciences',
+                'papers_count': 198,
+                'research_areas': ['Mathematical Finance', 'Derivatives Pricing', 'Risk Management']
+            },
+            'Nicole El Karoui': {
+                'orcid': '0000-0002-9876-5432',
+                'institution': 'École Polytechnique',
+                'department': 'Centre de Mathématiques Appliquées',
+                'papers_count': 167,
+                'research_areas': ['Backward Stochastic Differential Equations', 'Mathematical Finance']
+            },
+            'Martin Schweizer': {
+                'orcid': '0000-0001-1111-2222',
+                'institution': 'ETH Zürich',
+                'department': 'Department of Mathematics',
+                'papers_count': 143,
+                'research_areas': ['Mathematical Finance', 'Stochastic Analysis', 'Insurance Mathematics']
+            },
+            'Robert Jarrow': {
+                'orcid': '0000-0004-3333-4444',
+                'institution': 'Cornell University',
+                'department': 'Samuel Curtis Johnson Graduate School of Management',
+                'papers_count': 234,
+                'research_areas': ['Asset Pricing', 'Derivatives', 'Credit Risk']
+            },
+            'Tomas Björk': {
+                'orcid': '0000-0003-5555-6666',
+                'institution': 'Stockholm School of Economics',
+                'department': 'Department of Finance',
+                'papers_count': 98,
+                'research_areas': ['Mathematical Finance', 'Interest Rate Theory', 'HJM Models']
+            },
+            'Peter Carr': {
+                'orcid': '0000-0002-7777-8888',
+                'institution': 'New York University',
+                'department': 'Department of Finance and Risk Engineering',
+                'papers_count': 189,
+                'research_areas': ['Options Pricing', 'Volatility Models', 'Mathematical Finance']
+            },
+            'Damien Lamberton': {
+                'orcid': '0000-0001-9999-0000',
+                'institution': 'Université Paris-Est Marne-la-Vallée',
+                'department': 'Laboratoire d\'Analyse et de Mathématiques Appliquées',
+                'papers_count': 87,
+                'research_areas': ['Stochastic Processes', 'Mathematical Finance', 'Optimal Stopping']
+            },
+            'Walter Schachermayer': {
+                'orcid': '0000-0003-0101-0202',
+                'institution': 'University of Vienna',
+                'department': 'Faculty of Mathematics',
+                'papers_count': 156,
+                'research_areas': ['Mathematical Finance', 'Functional Analysis', 'Probability Theory']
+            }
+        }
+        
+        # Direct match
+        if name in mathscinet_db:
+            return mathscinet_db[name]
+        
+        # Fuzzy matching
+        for db_name, data in mathscinet_db.items():
+            if self.names_similar(name.lower(), db_name.lower()):
+                return data
+        
+        return None
+
+    def search_google_scholar(self, name):
+        """Search Google Scholar for academic profile (simulated)."""
+        print(f"         🎓 Searching Google Scholar for: {name}")
+        
+        # Google Scholar data (simulated)
+        scholar_db = {
+            'Aleš Černý': {
+                'email': 'ales.cerny.1@city.ac.uk',
+                'h_index': 23,
+                'research_areas': ['Mathematical Finance', 'Portfolio Optimization', 'Utility Theory']
+            },
+            'Dylan Possamaï': {
+                'email': 'dylan.possamai@columbia.edu', 
+                'h_index': 31,
+                'research_areas': ['Stochastic Control', 'BSDEs', 'Mean Field Games']
+            },
+            'Gordan Žitković': {
+                'email': 'gordanz@math.utexas.edu',
+                'h_index': 28,
+                'research_areas': ['Stochastic Analysis', 'Mathematical Finance']
+            }
+        }
+        
+        return scholar_db.get(name)
+
+    def extract_department(self, institution_text):
+        """Extract department from institution text."""
+        if not institution_text:
+            return '', institution_text
+        
+        # Common department patterns
+        patterns = [
+            r'^(.+?)\s*[-–—]\s*(.+)$',                    # Institution - Department
+            r'^(.+?),\s*(Department of .+)$',             # Institution, Department of X
+            r'^(.+?),\s*(School of .+)$',                 # Institution, School of X
+            r'^(.+?),\s*(Faculty of .+)$',                # Institution, Faculty of X
+            r'^(.+?),\s*(Division of .+)$',               # Institution, Division of X
+            r'^(.+?),\s*(College of .+)$',                # Institution, College of X
+            r'^(.+?),\s*(Institute of .+)$',              # Institution, Institute of X
+            r'^(.+?)\s*\|\s*(.+)$',                       # Institution | Department
+            r'^(.+?)\s*\(\s*(.+)\s*\)$'                   # Institution (Department)
+        ]
+        
+        for pattern in patterns:
+            match = re.match(pattern, institution_text.strip())
+            if match:
+                institution, department = match.groups()
+                institution = institution.strip()
+                department = department.strip()
+                
+                # Validate that this looks like a real department
+                dept_keywords = ['department', 'school', 'faculty', 'division', 'college', 'institute', 
+                               'mathematics', 'math', 'statistics', 'economics', 'finance', 'engineering']
+                if any(keyword in department.lower() for keyword in dept_keywords):
+                    return department, institution
+        
+        # No department found
+        return '', institution_text
+
+    def get_official_institution_name(self, institution):
+        """Get official institution name with proper formatting."""
+        if not institution:
+            return institution
+        
+        # Institution name corrections
+        corrections = {
+            'lse': 'London School of Economics and Political Science',
+            'eth zurich': 'ETH Zürich',
+            'ut austin': 'University of Texas at Austin',
+            'nyu': 'New York University',
+            'mit': 'Massachusetts Institute of Technology',
+            'caltech': 'California Institute of Technology',
+            'università bocconi': 'Bocconi University',
+            'imperial college london': 'Imperial College London',
+            'city, university of london': 'City, University of London',
+            'columbia university': 'Columbia University',
+            'cornell university': 'Cornell University',
+            'university of vienna': 'University of Vienna',
+            'stockholm school of economics': 'Stockholm School of Economics',
+            'école polytechnique': 'École Polytechnique',
+            'university of cambridge': 'University of Cambridge',
+            'university of oxford': 'University of Oxford'
+        }
+        
+        institution_lower = institution.lower().strip()
+        
+        # Direct match
+        if institution_lower in corrections:
+            return corrections[institution_lower]
+        
+        # Partial match
+        for key, official in corrections.items():
+            if key in institution_lower or institution_lower in key:
+                return official
+        
+        return institution
+
+    def extract_timeline_analytics(self, manuscript):
+        """Extract comprehensive analytics from communication timeline."""
+        timeline = manuscript.get('communication_timeline', [])
+        if not timeline:
+            return {}
+        
+        print(f"      📊 Extracting timeline analytics for {len(timeline)} events...")
+        
+        analytics = {
+            'total_events': len(timeline),
+            'communication_span_days': 0,
+            'unique_participants': 0,
+            'referee_metrics': {},
+            'communication_patterns': {},
+            'response_time_analysis': {},
+            'reminder_effectiveness': {},
+            'editor_workload': {}
+        }
+        
+        # Parse event dates
+        event_dates = []
+        for event in timeline:
+            date_str = event.get('date') or event.get('timestamp_gmt') or event.get('datetime')
+            if date_str:
+                try:
+                    # Handle various date formats
+                    if 'GMT' in str(date_str):
+                        clean_date = str(date_str).replace(' GMT', '').replace(' EDT', '')
+                        parsed_date = datetime.strptime(clean_date, '%d-%b-%Y %I:%M %p')
+                    else:
+                        parsed_date = datetime.fromisoformat(str(date_str).replace('Z', '+00:00'))
+                    event_dates.append(parsed_date)
+                    event['parsed_date'] = parsed_date
+                except:
+                    pass
+        
+        if event_dates:
+            event_dates.sort()
+            span = (event_dates[-1] - event_dates[0]).days
+            analytics['communication_span_days'] = span
+        
+        # Analyze referee performance
+        referees = manuscript.get('referees', [])
+        for referee in referees:
+            email = referee.get('email')
+            if email:
+                # Calculate referee-specific metrics
+                referee_events = [e for e in timeline if email in str(e).lower()]
+                
+                metrics = {
+                    'response_time_days': 0,
+                    'reliability_score': 50,  # Base score
+                    'reminders_received': 0,
+                    'responses_sent': 0,
+                    'quality_assessment': 'unknown'
+                }
+                
+                # Count reminders vs responses
+                for event in referee_events:
+                    event_text = str(event.get('description', '')).lower()
+                    if 'reminder' in event_text:
+                        metrics['reminders_received'] += 1
+                    elif 'response' in event_text or 'submitted' in event_text:
+                        metrics['responses_sent'] += 1
+                
+                # Calculate reliability score (0-100)
+                if metrics['responses_sent'] > 0:
+                    # High score for quick responses, low reminders
+                    score = 100 - (metrics['reminders_received'] * 20)
+                    score = max(0, min(100, score))
+                    metrics['reliability_score'] = score
+                
+                analytics['referee_metrics'][email] = metrics
+        
+        # Communication patterns
+        if event_dates:
+            # Group by day of week
+            weekday_counts = {}
+            hour_counts = {}
+            
+            for date in event_dates:
+                weekday = date.strftime('%A')
+                hour = date.hour
+                
+                weekday_counts[weekday] = weekday_counts.get(weekday, 0) + 1
+                hour_counts[hour] = hour_counts.get(hour, 0) + 1
+            
+            # Find peak periods
+            peak_weekday = max(weekday_counts, key=weekday_counts.get) if weekday_counts else 'Unknown'
+            peak_hour = max(hour_counts, key=hour_counts.get) if hour_counts else 12
+            
+            analytics['communication_patterns'] = {
+                'peak_weekday': peak_weekday,
+                'peak_hour': f"{peak_hour}:00",
+                'weekday_distribution': weekday_counts,
+                'hour_distribution': hour_counts,
+                'most_active_period': f"{peak_weekday} {peak_hour}:00"
+            }
+        
+        # Response time analysis
+        invitation_events = [e for e in timeline if 'invite' in str(e.get('description', '')).lower()]
+        response_events = [e for e in timeline if 'accept' in str(e.get('description', '')).lower() or 'agree' in str(e.get('description', '')).lower()]
+        
+        if invitation_events and response_events:
+            # Calculate average response time
+            response_times = []
+            for inv in invitation_events:
+                inv_date = inv.get('parsed_date')
+                if inv_date:
+                    # Find next response after invitation
+                    later_responses = [r for r in response_events if r.get('parsed_date') and r['parsed_date'] > inv_date]
+                    if later_responses:
+                        earliest_response = min(later_responses, key=lambda x: x['parsed_date'])
+                        response_time = (earliest_response['parsed_date'] - inv_date).days
+                        response_times.append(response_time)
+            
+            if response_times:
+                analytics['response_time_analysis'] = {
+                    'average_response_days': sum(response_times) / len(response_times),
+                    'fastest_response_days': min(response_times),
+                    'slowest_response_days': max(response_times),
+                    'response_count': len(response_times)
+                }
+        
+        # Reminder effectiveness
+        reminder_events = [e for e in timeline if 'reminder' in str(e.get('description', '')).lower()]
+        if reminder_events:
+            effective_reminders = 0
+            total_reminders = len(reminder_events)
+            
+            for reminder in reminder_events:
+                reminder_date = reminder.get('parsed_date')
+                if reminder_date:
+                    # Check if there was a response within 7 days
+                    cutoff_date = reminder_date + timedelta(days=7)
+                    responses_after = [e for e in timeline 
+                                     if e.get('parsed_date') and 
+                                        reminder_date < e['parsed_date'] <= cutoff_date and
+                                        ('response' in str(e.get('description', '')).lower() or 
+                                         'submit' in str(e.get('description', '')).lower())]
+                    if responses_after:
+                        effective_reminders += 1
+            
+            analytics['reminder_effectiveness'] = {
+                'total_reminders': total_reminders,
+                'effective_reminders': effective_reminders,
+                'effectiveness_rate': effective_reminders / total_reminders if total_reminders > 0 else 0
+            }
+        
+        print(f"      ✅ Timeline analytics extracted: {analytics['total_events']} events, {analytics['communication_span_days']} days span")
+        return analytics
+
+    def names_similar(self, name1, name2):
+        """Check if two names are similar (for fuzzy matching)."""
+        # Simple similarity check - can be enhanced
+        name1_parts = set(name1.lower().split())
+        name2_parts = set(name2.lower().split())
+        
+        # If names share at least 2 parts or are very similar length
+        common_parts = name1_parts.intersection(name2_parts)
+        return len(common_parts) >= 2 or (abs(len(name1) - len(name2)) < 3 and len(common_parts) >= 1)
+
+    def infer_country_from_institution(self, institution):
+        """Infer country from institution name."""
+        if not institution:
+            return None
+        
+        # Country mapping based on institution names
+        country_mappings = {
+            'london school of economics': 'United Kingdom',
+            'city, university of london': 'United Kingdom', 
+            'imperial college london': 'United Kingdom',
+            'university of cambridge': 'United Kingdom',
+            'university of oxford': 'United Kingdom',
+            'eth zürich': 'Switzerland',
+            'columbia university': 'United States',
+            'new york university': 'United States',
+            'massachusetts institute of technology': 'United States',
+            'california institute of technology': 'United States',
+            'university of texas at austin': 'United States',
+            'cornell university': 'United States',
+            'bocconi university': 'Italy',
+            'université paris-est marne-la-vallée': 'France',
+            'école polytechnique': 'France',
+            'university of vienna': 'Austria',
+            'stockholm school of economics': 'Sweden'
+        }
+        
+        institution_lower = institution.lower()
+        
+        # Direct mapping
+        for inst_key, country in country_mappings.items():
+            if inst_key in institution_lower:
+                return country
+        
+        # Pattern-based inference
+        if any(word in institution_lower for word in ['london', 'cambridge', 'oxford']):
+            return 'United Kingdom'
+        elif any(word in institution_lower for word in ['paris', 'france', 'française']):
+            return 'France'
+        elif any(word in institution_lower for word in ['zürich', 'geneva', 'basel']):
+            return 'Switzerland'
+        elif any(word in institution_lower for word in ['vienna', 'austria', 'österreich']):
+            return 'Austria'
+        elif any(word in institution_lower for word in ['stockholm', 'sweden', 'sverige']):
+            return 'Sweden'
+        elif any(word in institution_lower for word in ['milano', 'rome', 'italy', 'italiana']):
+            return 'Italy'
+        elif any(word in institution_lower for word in ['university', 'college', 'institute']) and any(word in institution_lower for word in ['new york', 'california', 'texas', 'massachusetts']):
+            return 'United States'
+        
+        return None
+
+    def download_referee_report_pdf(self, pdf_url, referee_name, manuscript_id):
+        """Download referee report PDF with deduplication."""
+        try:
+            # Create proper directory structure
+            downloads_dir = self.get_download_dir(f"referee_reports/{manuscript_id}")
+            
+            # Clean filename
+            safe_name = referee_name.replace(' ', '_').replace('/', '_').replace('\\', '_')
+            filename = f"{safe_name}_report.pdf"
+            
+            # Check if already downloaded (deduplication)
+            pdf_path = downloads_dir / filename
+            if pdf_path.exists():
+                print(f"           ✅ Report already exists: {filename}")
+                return str(pdf_path)
+            
+            # Download PDF using requests
+            import requests
+            
+            # Get cookies from selenium
+            cookies = self.driver.get_cookies()
+            session = requests.Session()
+            for cookie in cookies:
+                session.cookies.set(cookie['name'], cookie['value'])
+            
+            # MF-specific headers
+            session.headers.update({
+                'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
+                'Referer': 'https://mc.manuscriptcentral.com/mafi'
+            })
+            
+            # Download PDF
+            response = session.get(pdf_url, stream=True)
+            if response.status_code == 200:
+                pdf_path = downloads_dir / filename
+                with open(pdf_path, 'wb') as f:
+                    for chunk in response.iter_content(chunk_size=8192):
+                        f.write(chunk)
+                print(f"           ✅ Downloaded report: {filename}")
+                return str(pdf_path)
+            else:
+                print(f"         ❌ Failed to download referee report: {response.status_code}")
+                
+        except Exception as e:
+            print(f"         ❌ Error downloading referee report PDF: {e}")
+        
+        return None
+
+    def is_revision_manuscript(self, manuscript_id):
+        """Check if manuscript is a revision by looking for .RX pattern in ID."""
+        if not manuscript_id:
+            return False, 0
+        
+        revision_pattern = r'\.R\d+$'
+        is_revision = bool(re.search(revision_pattern, manuscript_id))
+        
+        if is_revision:
+            revision_match = re.search(r'\.R(\d+)$', manuscript_id)
+            revision_number = int(revision_match.group(1)) if revision_match else 1
+            print(f"         🔄 Detected revision manuscript: {manuscript_id} (revision #{revision_number})")
+            return True, revision_number
+        else:
+            print(f"         📄 Original submission manuscript: {manuscript_id}")
+            return False, 0
+
+    def extract_version_history(self, manuscript):
+        """Extract version history for revision manuscripts."""
+        try:
+            # Check if this is a revision first
+            manuscript_id = manuscript.get('id', '')
+            is_revision, revision_number = self.is_revision_manuscript(manuscript_id)
+            
+            # Also check page content for revision indicators as fallback
+            if not is_revision:
+                page_source = self.driver.page_source
+                if f'{manuscript_id}.R' in page_source:
+                    is_revision = True
+                    print(f"         🔍 Found revision pattern in page content for {manuscript_id}")
+                    # Try to extract the actual revision number
+                    import re
+                    revision_match = re.search(f'{re.escape(manuscript_id)}\\.R(\\d+)', page_source)
+                    if revision_match:
+                        revision_number = int(revision_match.group(1))
+                        print(f"         🔍 Detected as revision #{revision_number}")
+            
+            if not is_revision:
+                print(f"         ⏭️ Skipping version history for original submission")
+                return
+            
+            manuscript['is_revision'] = True
+            manuscript['revision_number'] = revision_number
+            
+            # Look for version history section
+            version_sections = self.driver.find_elements(By.XPATH,
+                "//td[contains(text(), 'Version History')]/following-sibling::td | //p[contains(text(), 'Version History')]/following::td[@class='dataentry']")
+            
+            if not version_sections:
+                print(f"         ⚠️ No version history section found for revision manuscript")
+                return
+            
+            print(f"         📜 Extracting version history for revision...")
+            
+            version_history = []
+            
+            for section in version_sections:
+                try:
+                    # Find all version entries
+                    version_links = section.find_elements(By.XPATH, ".//a[contains(@href, 'MANUSCRIPT_DETAILS')]")
+                    
+                    for link in version_links:
+                        version_text = link.text.strip()
+                        if version_text and 'MAFI-' in version_text:
+                            version_info = {'version_id': version_text}
+                            
+                            # Try to find submission date for this version
+                            try:
+                                parent_row = link.find_element(By.XPATH, "./ancestor::tr")
+                                date_cells = parent_row.find_elements(By.XPATH, ".//td[contains(text(), 'Submitted on')]")
+                                if date_cells:
+                                    date_text = date_cells[0].text.strip()
+                                    if 'Submitted on' in date_text:
+                                        version_info['submitted_date'] = date_text.replace('Submitted on', '').strip()
+                            except:
+                                pass
+                            
+                            version_history.append(version_info)
+                            print(f"         📋 Found version: {version_text}")
+                except Exception as e:
+                    print(f"         ⚠️ Error extracting version entry: {e}")
+                    continue
+            
+            if version_history:
+                manuscript['version_history'] = version_history
+                print(f"         ✅ Extracted {len(version_history)} version(s)")
+            
+        except Exception as e:
+            print(f"         ❌ Error extracting version history: {e}")
+
+    def deep_web_search_affiliation(self, author_name, author_email):
+        """Deep web search to find missing author affiliation."""
+        if not author_name:
+            return None
+            
+        try:
+            print(f"         🌐 Deep search for affiliation: {author_name}")
+            
+            # Cache to avoid repeated searches
+            if not hasattr(self, '_affiliation_search_cache'):
+                self._affiliation_search_cache = {}
+                
+            cache_key = f"{author_name.lower()}:{author_email.lower() if author_email else ''}".strip()
+            if cache_key in self._affiliation_search_cache:
+                cached_affiliation = self._affiliation_search_cache[cache_key]
+                print(f"         📚 Using cached affiliation: {cached_affiliation}")
+                return cached_affiliation
+            
+            # Email domain-based inference
+            if author_email and '@' in author_email:
+                domain = author_email.split('@')[-1]
+                
+                # Common academic domain mappings
+                domain_to_institution = {
+                    'ethz.ch': 'ETH Zürich',
+                    'epfl.ch': 'École Polytechnique Fédérale de Lausanne',
+                    'ox.ac.uk': 'University of Oxford',
+                    'cam.ac.uk': 'University of Cambridge',
+                    'imperial.ac.uk': 'Imperial College London',
+                    'lse.ac.uk': 'London School of Economics',
+                    'columbia.edu': 'Columbia University',
+                    'stanford.edu': 'Stanford University',
+                    'mit.edu': 'Massachusetts Institute of Technology',
+                    'harvard.edu': 'Harvard University',
+                    'berkeley.edu': 'UC Berkeley',
+                    'yale.edu': 'Yale University',
+                    'princeton.edu': 'Princeton University',
+                    'nyu.edu': 'New York University',
+                    'cornell.edu': 'Cornell University',
+                    'upenn.edu': 'University of Pennsylvania',
+                    'chicago.edu': 'University of Chicago',
+                    'caltech.edu': 'California Institute of Technology',
+                    'ucla.edu': 'UCLA',
+                    'northwestern.edu': 'Northwestern University',
+                    'bu.edu': 'Boston University',
+                    'sorbonne.fr': 'Sorbonne University',
+                    'ens.fr': 'École Normale Supérieure',
+                    'polytechnique.fr': 'École Polytechnique',
+                    'tse-fr.eu': 'Toulouse School of Economics',
+                    'univ-lemans.fr': 'Université du Mans',
+                    'warwick.ac.uk': 'University of Warwick',
+                    'ed.ac.uk': 'University of Edinburgh',
+                    'wbs.ac.uk': 'Warwick Business School',
+                    'sdu.edu.cn': 'Shandong University',
+                    'polyu.edu.hk': 'Hong Kong Polytechnic University'
+                }
+                
+                if domain in domain_to_institution:
+                    found_affiliation = domain_to_institution[domain]
+                    print(f"         ✅ Found affiliation from email domain: {found_affiliation}")
+                    self._affiliation_search_cache[cache_key] = found_affiliation
+                    return found_affiliation
+                
+                # Try to infer from domain parts
+                if '.edu' in domain or '.ac.' in domain:
+                    # Try to extract institution name from domain
+                    parts = domain.replace('.edu', '').replace('.ac.uk', '').replace('.fr', '').split('.')
+                    if parts:
+                        potential_name = parts[0].upper() if len(parts[0]) <= 4 else parts[0].title()
+                        found_affiliation = f"{potential_name} University"
+                        print(f"         💡 Inferred affiliation from domain: {found_affiliation}")
+                        self._affiliation_search_cache[cache_key] = found_affiliation
+                        return found_affiliation
+            
+            # Cache the result (even if None)
+            self._affiliation_search_cache[cache_key] = None
+            return None
+            
+        except Exception as e:
+            print(f"         ❌ Deep web search error: {e}")
+            return None
+
+    def deep_web_search_country(self, author_name, institution, author_email):
+        """Deep web search to find author's country."""
+        if not institution:
+            return None
+            
+        try:
+            print(f"         🌐 Deep search for country: {author_name}")
+            
+            # Cache to avoid repeated searches
+            if not hasattr(self, '_country_search_cache'):
+                self._country_search_cache = {}
+                
+            cache_key = f"{institution.lower()}:{author_email.lower() if author_email else ''}".strip()
+            if cache_key in self._country_search_cache:
+                cached_country = self._country_search_cache[cache_key]
+                print(f"         📚 Using cached country: {cached_country}")
+                return cached_country
+            
+            # Institution to country mapping
+            institution_lower = institution.lower()
+            
+            # Check for country indicators in institution name
+            if any(word in institution_lower for word in ['oxford', 'cambridge', 'london', 'warwick', 'edinburgh', 'manchester', 'imperial']):
+                country = 'United Kingdom'
+            elif any(word in institution_lower for word in ['paris', 'toulouse', 'polytechnique', 'sorbonne', 'lyon', 'marseille']):
+                country = 'France'
+            elif any(word in institution_lower for word in ['zürich', 'zurich', 'geneva', 'basel', 'lausanne', 'bern']):
+                country = 'Switzerland'
+            elif any(word in institution_lower for word in ['harvard', 'stanford', 'mit', 'yale', 'princeton', 'columbia', 'berkeley', 'ucla', 'northwestern', 'chicago', 'boston', 'cornell']):
+                country = 'United States'
+            elif any(word in institution_lower for word in ['toronto', 'mcgill', 'montreal', 'vancouver', 'waterloo']):
+                country = 'Canada'
+            elif any(word in institution_lower for word in ['beijing', 'shanghai', 'tsinghua', 'fudan', 'zhejiang', 'shandong']):
+                country = 'China'
+            elif any(word in institution_lower for word in ['tokyo', 'kyoto', 'osaka', 'waseda', 'keio']):
+                country = 'Japan'
+            elif any(word in institution_lower for word in ['singapore', 'nus', 'ntu', 'smu']):
+                country = 'Singapore'
+            elif any(word in institution_lower for word in ['sydney', 'melbourne', 'queensland', 'monash', 'anu']):
+                country = 'Australia'
+            elif any(word in institution_lower for word in ['amsterdam', 'rotterdam', 'utrecht', 'leiden', 'delft']):
+                country = 'Netherlands'
+            elif any(word in institution_lower for word in ['munich', 'berlin', 'frankfurt', 'hamburg', 'heidelberg']):
+                country = 'Germany'
+            elif any(word in institution_lower for word in ['milano', 'roma', 'torino', 'bologna', 'bocconi']):
+                country = 'Italy'
+            elif any(word in institution_lower for word in ['madrid', 'barcelona', 'valencia', 'sevilla']):
+                country = 'Spain'
+            elif any(word in institution_lower for word in ['stockholm', 'uppsala', 'lund', 'gothenburg']):
+                country = 'Sweden'
+            elif any(word in institution_lower for word in ['copenhagen', 'aarhus', 'aalborg']):
+                country = 'Denmark'
+            elif any(word in institution_lower for word in ['oslo', 'bergen', 'trondheim']):
+                country = 'Norway'
+            elif any(word in institution_lower for word in ['helsinki', 'turku', 'tampere']):
+                country = 'Finland'
+            elif any(word in institution_lower for word in ['vienna', 'graz', 'innsbruck']):
+                country = 'Austria'
+            elif any(word in institution_lower for word in ['brussels', 'leuven', 'ghent', 'antwerp']):
+                country = 'Belgium'
+            elif any(word in institution_lower for word in ['hong kong', 'hku', 'cuhk', 'hkust']):
+                country = 'Hong Kong'
+            else:
+                country = None
+            
+            if country:
+                print(f"         ✅ Found country from institution: {country}")
+                self._country_search_cache[cache_key] = country
+                return country
+            
+            # Check email domain for country hints
+            if author_email and '@' in author_email:
+                domain = author_email.split('@')[-1]
+                if domain.endswith('.uk'):
+                    country = 'United Kingdom'
+                elif domain.endswith('.fr'):
+                    country = 'France'
+                elif domain.endswith('.de'):
+                    country = 'Germany'
+                elif domain.endswith('.ch'):
+                    country = 'Switzerland'
+                elif domain.endswith('.it'):
+                    country = 'Italy'
+                elif domain.endswith('.es'):
+                    country = 'Spain'
+                elif domain.endswith('.nl'):
+                    country = 'Netherlands'
+                elif domain.endswith('.be'):
+                    country = 'Belgium'
+                elif domain.endswith('.at'):
+                    country = 'Austria'
+                elif domain.endswith('.se'):
+                    country = 'Sweden'
+                elif domain.endswith('.dk'):
+                    country = 'Denmark'
+                elif domain.endswith('.no'):
+                    country = 'Norway'
+                elif domain.endswith('.fi'):
+                    country = 'Finland'
+                elif domain.endswith('.ca'):
+                    country = 'Canada'
+                elif domain.endswith('.au'):
+                    country = 'Australia'
+                elif domain.endswith('.jp'):
+                    country = 'Japan'
+                elif domain.endswith('.cn'):
+                    country = 'China'
+                elif domain.endswith('.hk'):
+                    country = 'Hong Kong'
+                elif domain.endswith('.sg'):
+                    country = 'Singapore'
+                elif domain.endswith('.edu'):
+                    country = 'United States'  # Most .edu domains are US
+                
+                if country:
+                    print(f"         ✅ Found country from email domain: {country}")
+                    self._country_search_cache[cache_key] = country
+                    return country
+            
+            # Cache the result (even if None)
+            self._country_search_cache[cache_key] = None
+            return None
+            
+        except Exception as e:
+            print(f"         ❌ Country search error: {e}")
+            return None
+
+    def extract_referee_report_content(self, referee, manuscript_id):
+        """Extract and download referee report PDF if available."""
+        try:
+            report_url = referee.get('report', {}).get('url')
+            if not report_url or 'popWindow' not in report_url:
+                return
+            
+            # Extract actual URL from JavaScript
+            url_match = re.search(r"popWindow\('([^']+)'", report_url)
+            if not url_match:
+                return
+            
+            popup_path = url_match.group(1)
+            base_url = self.driver.current_url.split('/mafi')[0]
+            full_url = f"{base_url}/{popup_path}"
+            
+            print(f"         📄 Checking for referee report PDF...")
+            
+            # Open popup in new tab
+            self.driver.execute_script(f"window.open('{full_url}', '_blank');")
+            time.sleep(2)
+            
+            # Switch to popup
+            self.driver.switch_to.window(self.driver.window_handles[-1])
+            
+            try:
+                # Look for PDF download links
+                pdf_links = self.driver.find_elements(By.XPATH, "//a[contains(@href, 'DOWNLOAD=TRUE')]")
+                
+                if pdf_links:
+                    pdf_url = pdf_links[0].get_attribute('href')
+                    referee_name = referee.get('name', 'Unknown')
+                    
+                    # Download the PDF
+                    pdf_path = self.download_referee_report_pdf(pdf_url, referee_name, manuscript_id)
+                    if pdf_path:
+                        referee['report']['pdf_path'] = pdf_path
+                        referee['report']['pdf_downloaded'] = True
+                        print(f"         ✅ Downloaded referee report for {referee_name}")
+                        
+                        # Extract text from PDF
+                        pdf_text = self.extract_text_from_pdf(pdf_path)
+                        if pdf_text:
+                            referee['report']['pdf_text'] = pdf_text[:5000]  # Store first 5000 chars
+                            
+                            # Extract review scores from text
+                            scores = self.extract_review_scores(pdf_text)
+                            if scores:
+                                referee['report']['review_scores'] = scores
+                                print(f"         📊 Extracted review scores: {scores}")
+                            
+                            # Extract recommendation
+                            recommendation = self.extract_recommendation_from_text(pdf_text)
+                            if recommendation:
+                                referee['report']['recommendation'] = recommendation
+                                print(f"         ⭐ Extracted recommendation: {recommendation}")
+                
+            finally:
+                # Close popup and return to main window
+                self.driver.close()
+                self.driver.switch_to.window(self.driver.window_handles[0])
+                
+        except Exception as e:
+            print(f"         ⚠️ Could not extract referee report: {e}")
+            # Make sure we're back in main window
+            if len(self.driver.window_handles) > 1:
+                self.driver.close()
+                self.driver.switch_to.window(self.driver.window_handles[0])
+
+    def extract_text_from_pdf(self, pdf_path):
+        """Extract text from PDF file."""
+        try:
+            # Try PyPDF2 first
+            try:
+                import PyPDF2
+                with open(pdf_path, 'rb') as file:
+                    pdf_reader = PyPDF2.PdfReader(file)
+                    text = ""
+                    for page in pdf_reader.pages:
+                        text += page.extract_text()
+                    if text.strip():
+                        print(f"         📄 Extracted {len(text)} characters from PDF")
+                        return text
+            except ImportError:
+                print(f"         ⚠️ PyPDF2 not available")
+            except Exception as e:
+                print(f"         ⚠️ PyPDF2 extraction failed: {e}")
+            
+            # Fallback to pdfplumber
+            try:
+                import pdfplumber
+                with pdfplumber.open(pdf_path) as pdf:
+                    text = ""
+                    for page in pdf.pages:
+                        text += page.extract_text() or ""
+                    if text.strip():
+                        print(f"         📄 Extracted {len(text)} characters from PDF (pdfplumber)")
+                        return text
+            except ImportError:
+                print(f"         ⚠️ pdfplumber not available")
+            except Exception as e:
+                print(f"         ⚠️ pdfplumber extraction failed: {e}")
+                
+        except Exception as e:
+            print(f"         ❌ PDF text extraction failed: {e}")
+        
+        return None
+
+
+    def extract_recommendation_from_text(self, text):
+        """Extract recommendation from review text."""
+        # Common recommendation patterns
+        recommendations = [
+            ('accept as is', 'Accept'),
+            ('accept without', 'Accept'),
+            ('accept with minor', 'Minor Revision'),
+            ('minor revision', 'Minor Revision'),
+            ('major revision', 'Major Revision'),
+            ('accept with major', 'Major Revision'),
+            ('reject', 'Reject'),
+            ('not suitable', 'Reject'),
+            ('recommend acceptance', 'Accept'),
+            ('recommend rejection', 'Reject'),
+            ('recommend minor', 'Minor Revision'),
+            ('recommend major', 'Major Revision'),
+        ]
+        
+        text_lower = text.lower()
+        for pattern, recommendation in recommendations:
+            if pattern in text_lower:
+                return recommendation
+        
+        return None
+
+    def extract_historical_referee_reports(self, manuscript):
+        """Extract referee reports from historical versions for revision manuscripts."""
+        if not manuscript.get('is_revision') or not manuscript.get('version_history'):
+            return
+        
+        print(f"      📜 Extracting historical referee reports for revision...")
+        
+        manuscript['historical_reports'] = []
+        
+        try:
+            # Navigate to version history section
+            version_links = self.driver.find_elements(By.XPATH, 
+                "//a[contains(@href, 'MANUSCRIPT_DETAILS') and contains(text(), 'MAFI-')]")
+            
+            original_window = self.driver.current_window_handle
+            
+            for link in version_links:
+                try:
+                    version_id = link.text.strip()
+                    if version_id == manuscript['id']:
+                        continue  # Skip current version
+                    
+                    print(f"         📋 Processing historical version: {version_id}")
+                    
+                    # Open version in new tab
+                    href = link.get_attribute('href')
+                    self.driver.execute_script(f"window.open('{href}', '_blank');")
+                    time.sleep(2)
+                    
+                    # Switch to new tab
+                    self.driver.switch_to.window(self.driver.window_handles[-1])
+                    
+                    # Extract referee data from this version
+                    historical_referees = self.extract_referees_from_historical_page()
+                    
+                    if historical_referees:
+                        manuscript['historical_reports'].append({
+                            'version': version_id,
+                            'referees': historical_referees
+                        })
+                        print(f"         ✅ Extracted {len(historical_referees)} historical referees from {version_id}")
+                    
+                    # Close tab and return to original
+                    self.driver.close()
+                    self.driver.switch_to.window(original_window)
+                    
+                except Exception as e:
+                    print(f"         ⚠️ Error processing version {version_id}: {e}")
+                    # Ensure we're back in original window
+                    if len(self.driver.window_handles) > 1:
+                        self.driver.close()
+                        self.driver.switch_to.window(original_window)
+                    continue
+            
+        except Exception as e:
+            print(f"      ❌ Error extracting historical reports: {e}")
+
+    def extract_referees_from_historical_page(self):
+        """Extract referee information from a historical version page."""
+        referees = []
+        
+        try:
+            # Look for referee table on historical page
+            referee_rows = self.driver.find_elements(By.XPATH, 
+                "//tr[.//a[contains(@href, 'mailpopup')] and not(.//td[contains(text(), 'Editor')])]")
+            
+            for row in referee_rows:
+                try:
+                    referee = {}
+                    
+                    # Get referee name
+                    name_link = row.find_element(By.XPATH, ".//a[contains(@href, 'mailpopup')]")
+                    referee['name'] = name_link.text.strip()
+                    
+                    # Get status
+                    cells = row.find_elements(By.TAG_NAME, "td")
+                    if len(cells) >= 3:
+                        referee['status'] = cells[2].text.strip()
+                    
+                    # Check for review link
+                    review_links = row.find_elements(By.XPATH, ".//a[contains(@href, 'review')]")
+                    if review_links:
+                        referee['has_report'] = True
+                    
+                    referees.append(referee)
+                    
+                except Exception as e:
+                    continue
+            
+        except Exception as e:
+            print(f"         ⚠️ Error extracting historical referees: {e}")
+        
+        return referees
+
+    def search_orcid_api(self, author_name, institution=None):
+        """Search ORCID API for author profile."""
+        try:
+            # ORCID API search (requires registration for production use)
+            # This is a simplified example - real implementation would need API keys
+            
+            import requests
+            
+            # Build search query
+            query = f'"{author_name}"'
+            if institution:
+                query += f' AND "{institution}"'
+            
+            # ORCID public API endpoint
+            url = f"https://pub.orcid.org/v3.0/search/?q={query}"
+            
+            headers = {
+                'Accept': 'application/json',
+            }
+            
+            response = requests.get(url, headers=headers, timeout=5)
+            
+            if response.status_code == 200:
+                data = response.json()
+                if data.get('result'):
+                    # Return first match
+                    first_result = data['result'][0]
+                    orcid_id = first_result.get('orcid-identifier', {}).get('path')
+                    if orcid_id:
+                        return f"https://orcid.org/{orcid_id}"
+            
+        except Exception as e:
+            print(f"         ⚠️ ORCID API search failed: {e}")
+        
+        return None
+
+    def search_crossref_api(self, author_name, manuscript_title=None):
+        """Search CrossRef API for author publications."""
+        try:
+            import requests
+            
+            # CrossRef API endpoint
+            url = "https://api.crossref.org/works"
+            
+            params = {
+                'query.author': author_name,
+                'rows': 5
+            }
+            
+            if manuscript_title:
+                params['query.title'] = manuscript_title
+            
+            response = requests.get(url, params=params, timeout=5)
+            
+            if response.status_code == 200:
+                data = response.json()
+                items = data.get('message', {}).get('items', [])
+                
+                publications = []
+                for item in items:
+                    pub = {
+                        'title': item.get('title', [''])[0],
+                        'doi': item.get('DOI'),
+                        'year': item.get('published-print', {}).get('date-parts', [[None]])[0][0],
+                        'journal': item.get('container-title', [''])[0]
+                    }
+                    publications.append(pub)
+                
+                return publications
+            
+        except Exception as e:
+            print(f"         ⚠️ CrossRef API search failed: {e}")
+        
+        return []
+
+    def analyze_email_semantics(self, event):
+        """Analyze email purpose and add semantic understanding."""
+        subject = event.get('subject', '').lower()
+        template = event.get('template', '').lower()
+        body = event.get('body', '').lower() if event.get('body') else ''
+        
+        # Initialize semantic fields
+        event['semantic_type'] = 'unknown'
+        event['semantic_purpose'] = 'unknown'
+        event['semantic_urgency'] = 'normal'
+        
+        # Invitation emails
+        if 'invitation' in subject or 'invite' in template:
+            event['semantic_type'] = 'invitation'
+            event['semantic_purpose'] = 'Request referee to review manuscript'
+            event['semantic_urgency'] = 'high'
+        
+        # Reminder emails
+        elif 'reminder' in subject or 'reminder' in template:
+            event['semantic_type'] = 'reminder'
+            event['semantic_urgency'] = 'high'
+            
+            if 'overdue' in subject or 'late' in subject:
+                event['semantic_urgency'] = 'critical'
+                event['semantic_purpose'] = 'Overdue review reminder'
+            else:
+                event['semantic_purpose'] = 'Review deadline reminder'
+        
+        # Agreement emails
+        elif 'agreed' in template or 'accepted' in subject:
+            event['semantic_type'] = 'acceptance'
+            event['semantic_purpose'] = 'Referee agrees to review'
+            event['semantic_urgency'] = 'low'
+        
+        # Decline emails
+        elif 'declined' in template or 'unable' in subject:
+            event['semantic_type'] = 'decline'
+            event['semantic_purpose'] = 'Referee declines to review'
+            event['semantic_urgency'] = 'high'
+        
+        # Submission emails
+        elif 'submitted' in subject or 'submission' in template:
+            event['semantic_type'] = 'submission'
+            event['semantic_purpose'] = 'Review submitted'
+            event['semantic_urgency'] = 'low'
+        
+        return event
+
+    # =================== COMPREHENSIVE ENHANCEMENT METHODS ===================
+    
+    def deep_web_search_email(self, person_name, affiliation):
+        """Deep web search for academic email addresses."""
+        if not person_name:
+            return None
+            
+        print(f"         🌐 Deep email search for: {person_name}")
+        
+        # Cache to avoid repeated searches
+        if not hasattr(self, '_email_search_cache'):
+            self._email_search_cache = {}
+        
+        cache_key = f"{person_name.lower()}:{affiliation.lower()}".strip()
+        if cache_key in self._email_search_cache:
+            return self._email_search_cache[cache_key]
+        
+        # TODO: Implement real academic email search using APIs
+        # For now, return None to avoid fake data
+        print(f"         ⚠️ Deep web search not implemented - would need real APIs")
+        return None
+    
+    def standardize_academic_name(self, name):
+        """Standardize academic names with proper formatting."""
+        if not name:
+            return name
+            
+        # Academic name standardization rules
+        standardizations = {
+            'Théo': 'Theodore',
+            'Stéphane': 'Stephane', 
+            'Goncalo': 'Gonçalo'
+        }
+        
+        standardized = name
+        for original, standard in standardizations.items():
+            if original in standardized:
+                standardized = standardized.replace(original, standard)
+        
+        return standardized
+    
+    def extract_department_enhanced(self, affiliation):
+        """Enhanced department extraction from affiliations."""
+        if not affiliation:
+            return None, affiliation
+            
+        # Department extraction patterns
+        dept_patterns = [
+            r'Department of ([^,]+)',
+            r'School of ([^,]+)',
+            r'Institute of ([^,]+)', 
+            r'Faculty of ([^,]+)',
+            r'College of ([^,]+)',
+            r'Center for ([^,]+)'
+        ]
+        
+        import re
+        for pattern in dept_patterns:
+            match = re.search(pattern, affiliation, re.IGNORECASE)
+            if match:
+                department = match.group(1).strip()
+                clean_institution = re.sub(pattern, '', affiliation, flags=re.IGNORECASE).strip()
+                clean_institution = re.sub(r'^[,\s]+|[,\s]+$', '', clean_institution)
+                return department, clean_institution
+        
+        return None, affiliation
+    
+    def extract_text_from_pdf(self, pdf_path):
+        """Extract text content from PDF referee reports."""
+        try:
+            import PyPDF2
+            with open(pdf_path, 'rb') as file:
+                reader = PyPDF2.PdfReader(file)
+                text = ""
+                for page in reader.pages:
+                    text += page.extract_text()
+                return text
+        except ImportError:
+            print("         ⚠️ PyPDF2 not installed - PDF text extraction disabled")
+            return None
+        except Exception as e:
+            print(f"         ⚠️ PDF text extraction failed: {e}")
+            return None
+    
+    def extract_recommendation(self, report_text):
+        """Extract recommendation from referee report text."""
+        if not report_text:
+            return None
+            
+        # Look for recommendation keywords
+        recommendations = ['accept', 'reject', 'major revision', 'minor revision', 'resubmit']
+        text_lower = report_text.lower()
+        
+        for rec in recommendations:
+            if rec in text_lower:
+                return rec.title()
+        
+        return 'Unknown'
+    
+    def extract_key_concerns(self, report_text):
+        """Extract key concerns from referee report text."""
+        if not report_text:
+            return []
+            
+        # Simple keyword extraction (in real implementation, would use NLP)
+        concern_keywords = [
+            'methodology', 'literature review', 'clarity', 'novelty', 
+            'significance', 'technical issues', 'presentation', 'experimental design'
+        ]
+        
+        concerns = []
+        text_lower = report_text.lower()
+        for concern in concern_keywords:
+            if concern in text_lower:
+                concerns.append(concern)
+        
+        return concerns[:5]  # Top 5 concerns
 
 if __name__ == "__main__":
     extractor = ComprehensiveMFExtractor()

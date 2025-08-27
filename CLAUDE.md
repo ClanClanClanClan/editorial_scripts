@@ -251,22 +251,22 @@ Before making changes:
 
 ## 🎯 Current Priorities
 
-1. **MF Extractor Status**
-   - ✅ **COMPLETE AND WORKING** - All fixes implemented
-   - ✅ Single canonical version: `production/src/extractors/mf_extractor.py`
-   - ✅ Author extraction fixed, email extraction fixed, title/status extraction added
-   - ✅ Cleanup completed - duplicates removed
+1. **Working Extractors** (As of 2025-08-27)
+   - ✅ **MF (Mathematical Finance)** - ScholarOne - COMPLETE
+   - ✅ **MOR (Math Operations Research)** - ScholarOne - COMPLETE  
+   - ✅ **FS (Finance & Stochastics)** - Email/Gmail - COMPLETE WITH TIMELINE
+   - ⚠️ **SICON/SIFIN** - SIAM - Partial (needs OAuth)
+   - ❌ **JOTA/MAFE/NACO** - Not implemented
 
-2. **Future Architecture**
-   - ⬜ MOR extractor (use ScholarOne base)
-   - ⬜ SIAM base class for SICON, SIFIN
-   - ⬜ Editorial Manager base for JOTA, MAFE, NACO
-   - ⬜ Migrate MF to clean architecture when ready
+2. **Current FS Manuscripts** (Starred - Your Responsibility)
+   - **FS-25-4725**: Mastrogiacomo Elisa & Zhou Zhou (accepted, awaiting reports)
+   - **FS-25-4733**: Emma Hubert & Sebastian Jaimungal (accepted, awaiting reports)
 
 3. **Maintenance**
-   - Keep `production/src/extractors/mf_extractor.py` working
+   - All production extractors in `production/src/extractors/`
    - Don't break existing functionality
-   - Test thoroughly before changes
+   - FS uses Gmail API (NOT Editorial Manager!)
+   - Test before any changes
 
 ---
 

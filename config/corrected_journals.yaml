@@ -178,7 +178,7 @@ platforms:
       - 'a[href*="ViewPDF"]'
       - 'a[href*="DOWNLOAD=TRUE"]'
       - 'input[value="PDF"]'
-    
+
   email_based:
     gmail_api_required: true
     search_patterns:
@@ -188,7 +188,7 @@ platforms:
       - 'referee'
       - 'review'
       - 'manuscript'
-    
+
   siam_orcid:
     login_selectors:
       orcid_login: 'a[href*="orcid"]'
@@ -203,7 +203,7 @@ platforms:
     navigation:
       manuscript_list: 'a[href*="manuscripts"]'
       review_tasks: 'a[href*="review"]'
-    
+
   editorial_manager:
     login_selectors:
       username: 'input[id="username"]'
@@ -215,7 +215,7 @@ platforms:
     pdf_patterns:
       - 'a[class*="pdf-link"]'
       - 'a[title*="Download PDF"]'
-      
+
   editorial_manager_cloud:
     # Similar to editorial_manager but with cloud-specific selectors
     login_selectors:
@@ -225,7 +225,7 @@ platforms:
     navigation:
       editor_menu: 'a[href*="Editor"]'
       manuscript_list: 'a[href*="Tasks"]'
-      
+
   msp_custom:
     login_selectors:
       username: 'input[name="username"]'

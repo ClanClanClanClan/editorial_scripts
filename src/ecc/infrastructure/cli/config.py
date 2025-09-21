@@ -81,9 +81,7 @@ class CLIConfig:
 
         except Exception as e:
             # Don't fail on config loading errors, just log
-            logging.getLogger(__name__).warning(
-                "Could not load config file %s: %s", config_file, e
-            )
+            logging.getLogger(__name__).warning("Could not load config file %s: %s", config_file, e)
 
     def get_output_directory(self, custom_dir: str | None = None) -> Path:
         """Get output directory, creating if needed."""

@@ -16,7 +16,7 @@ This audit evaluates the implementation status of the editorial data extraction 
   - Evidence: `/archive/legacy_journals/journals/sicon/sicon_perfect_email_20250711_125651/data/perfect_email_extraction_results.json`
   - Includes: Names, emails, status, dates, institutions
   - Missing: Reminder count tracking (shows 0 for all)
-  
+
 - **SIFIN**: ✅ Working - Extracts referees with basic data
   - Evidence: `/extractions/SIFIN_20250711_140733/extraction_results.json`
   - Includes: Names, status, report availability

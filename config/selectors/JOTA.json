@@ -1,0 +1,6 @@
+[
+  "nav a:has-text('{category}')",
+  "a:has-text('{category}')",
+  "text={category}"
+]
+

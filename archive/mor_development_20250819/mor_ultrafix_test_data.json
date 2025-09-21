@@ -1,0 +1,119 @@
+[
+  {
+    "id": "MOR-2025-1037",
+    "category": "Awaiting Reviewer Reports",
+    "is_revision": false,
+    "referees": [
+      {
+        "name": "Anna Aksamit",
+        "email": "",
+        "affiliation": "The University of Sydney, School of Mathematics and Statistics",
+        "status": "Declined\ninvite again",
+        "dates": {
+          "invited": "04-Jun-2025"
+        }
+      },
+      {
+        "name": "Bahman Angoshtari",
+        "email": "",
+        "affiliation": "University of Miami, Mathematics",
+        "status": "Agreed",
+        "dates": {
+          "invited": "04-Jun-2025",
+          "agreed": "04-Jun-2025",
+          "due": "02-Sep-2025"
+        }
+      },
+      {
+        "name": "Umut Cetin",
+        "email": "",
+        "affiliation": "LSE, Statistics",
+        "status": "Agreed",
+        "dates": {
+          "invited": "06-Jun-2025",
+          "agreed": "11-Jun-2025",
+          "due": "09-Sep-2025"
+        }
+      }
+    ],
+    "authors": [
+      {
+        "name": "Test Author 1",
+        "email": "",
+        "affiliation": "Test University"
+      },
+      {
+        "name": "Test Author 2",
+        "email": "",
+        "affiliation": "Test College"
+      }
+    ]
+  },
+  {
+    "id": "MOR-2023-0376.R1",
+    "category": "Awaiting AE Recommendation",
+    "is_revision": true,
+    "referees": [
+      {
+        "name": "Xing, Hao",
+        "email": "hao.xing@bu.edu",
+        "affiliation": "Boston University, Department of Finance",
+        "status": "Reject",
+        "dates": {
+          "invited": "15-Jan-2024",
+          "agreed": "15-Jan-2024",
+          "due": "14-Apr-2024",
+          "returned": "07-Apr-2024"
+        },
+        "extracted_from": "brutal_force_complete"
+      },
+      {
+        "name": "tangpi, ludovic",
+        "email": "ludovic.tangpi@princeton.edu",
+        "affiliation": "Princeton University, ORFE",
+        "status": "Declined",
+        "dates": {
+          "invited": "15-Jan-2024",
+          "declined": "20-Jan-2024"
+        },
+        "extracted_from": "brutal_force_complete"
+      },
+      {
+        "name": "Zitkovic, Gordan",
+        "email": "gordanz@math.utexas.edu",
+        "affiliation": "UT Austin, Mathematics",
+        "status": "Declined",
+        "dates": {
+          "invited": "21-Jan-2024",
+          "declined": "21-Jan-2024"
+        },
+        "extracted_from": "brutal_force_complete"
+      },
+      {
+        "name": "Luo, Peng",
+        "email": "peng.luo@sjtu.edu.cn",
+        "affiliation": "Shanghai Jiao Tong University, School of Mathematical Sciences",
+        "status": "Major Revision",
+        "dates": {
+          "invited": "24-Jan-2024",
+          "agreed": "27-Jan-2024",
+          "due": "26-Apr-2024",
+          "returned": "01-Jul-2024"
+        },
+        "extracted_from": "brutal_force_complete"
+      }
+    ],
+    "authors": [
+      {
+        "name": "Stadje, Mitja",
+        "email": "mitja.stadje@uni-ulm.de",
+        "affiliation": "Ulm University"
+      },
+      {
+        "name": "Nguyen, Thai",
+        "email": "thai.nguyen@act.ulaval.ca",
+        "affiliation": "Universit\u00e9 Laval"
+      }
+    ]
+  }
+]

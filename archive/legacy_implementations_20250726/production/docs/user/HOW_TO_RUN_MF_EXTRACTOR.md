@@ -61,49 +61,49 @@ The extractor will show detailed progress:
       Title: Optimal investment and consumption under forward utilities...
       Status: Under Review
       Category: Awaiting Reviewer Selection
-      
+
    🔍 Looking for Authors & Institutions section...
       ✅ Navigated to Manuscript Information tab
       ✅ Found 'Authors & Institutions' section
       📊 Found 3 potential author rows
-      
+
       ✅ Author 1: Broux-Quemerais, Guillaume
          📧 Email: guillaume.broux97@gmail.com
          🏛️ Institution: Federation Recherche Mathematiques des Pays de Loire
          🌍 Country: France
          📝 Corresponding: False
-         
+
       ✅ Author 2: Matoussi, Anis
          📧 Email: anis.matoussi@univ-lemans.fr
          🏛️ Institution: Federation Recherche Mathematiques des Pays de Loire
          🌍 Country: France
          🆔 ORCID: https://orcid.org/0000-0002-8814-9402
          📝 Corresponding: True
-         
+
       ✅ Author 3: Zhou, Chao
          📧 Email: zccr333@gmail.com
          🏛️ Institution: National University of Singapore Risk Management Institute
          🌍 Country: Singapore
          📝 Corresponding: False
-         
+
    👥 Extracting referee details from audit trail...
       🔍 Navigating to Audit Trail...
       ✅ Successfully navigated to Audit Trail
       📋 Found 4 reviewer invitation events
       📊 Found 2 reviewer_agreement events
       📊 Found 1 reviewer_decline events
-      
+
       ✅ Processed referee: Dr. John Smith
       ✅ Processed referee: Prof. Jane Doe
       ✅ Processed referee: Dr. Bob Wilson
       ✅ Processed referee: Prof. Alice Johnson
-      
+
       📊 Total referees extracted from audit trail: 4
-      
+
    📁 Document extraction...
       ✅ PDF: downloads/manuscripts/MAFI-2025-0166.pdf (2.4 MB)
       ✅ Cover Letter: downloads/cover_letters/MAFI-2025-0166_cover_letter.pdf
-      
+
 📄 PROCESSING MANUSCRIPT 2/2: MAFI-2024-0167
    [Similar detailed output...]
 

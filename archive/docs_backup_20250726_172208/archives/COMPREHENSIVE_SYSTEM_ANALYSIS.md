@@ -1,6 +1,6 @@
 # 🔍 Comprehensive System Analysis & Refactoring Plan
 
-**Date**: July 14, 2025  
+**Date**: July 14, 2025
 **Status**: Complete System Audit & Optimization
 
 ---
@@ -162,7 +162,7 @@ class CredentialManager:
         # Environment variables first
         username = os.getenv('ORCID_EMAIL')
         password = os.getenv('ORCID_PASSWORD')
-        
+
         if username and password:
             return {'username': username, 'password': password}
 ```
@@ -174,7 +174,7 @@ async def _authenticate_orcid(self) -> bool:
     # Find ORCID login
     orcid_link = await self.page.wait_for_selector("a[href*='orcid']")
     await orcid_link.click()
-    
+
     # Fill credentials
     await self.page.fill("input[name='userId']", self.username)
     await self.page.fill("input[name='password']", self.password)

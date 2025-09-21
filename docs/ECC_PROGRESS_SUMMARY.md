@@ -1,7 +1,7 @@
 # 🚀 ECC Architecture Implementation Progress
 
-**Date:** August 22, 2025  
-**Session:** Current  
+**Date:** August 22, 2025
+**Session:** Current
 **Status:** Foundation Complete, Ready for Testing
 
 ## ✅ What We've Built Today
@@ -130,12 +130,12 @@ async def test_adapter():
         url="https://mc.manuscriptcentral.com/mafi",
         platform="ScholarOne"
     )
-    
+
     async with ScholarOneAdapter(config) as adapter:
         # Test authentication
         success = await adapter.authenticate()
         print(f"Auth success: {success}")
-        
+
         # Fetch manuscripts
         manuscripts = await adapter.fetch_manuscripts(["Under Review"])
         print(f"Found {len(manuscripts)} manuscripts")

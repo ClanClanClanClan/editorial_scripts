@@ -1,0 +1,9 @@
+{
+  "test_timestamp": "20250725_224331",
+  "email_validation_working": true,
+  "email_inference_working": true,
+  "web_search_robust": true,
+  "manuscripts_extracted": 0,
+  "authors_extracted": 0,
+  "conflicts_detected": 0
+}

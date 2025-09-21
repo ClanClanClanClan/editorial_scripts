@@ -7,49 +7,51 @@ Shows all the extraction capabilities and configuration.
 import json
 from pathlib import Path
 
+
 def load_config():
     """Load the MF configuration."""
     config_path = Path("config/mf_config.json")
     try:
-        with open(config_path, 'r') as f:
+        with open(config_path) as f:
             config = json.load(f)
         return config
     except Exception as e:
         print(f"❌ Failed to load config: {e}")
         return None
 
+
 def analyze_configuration():
     """Analyze and display the configuration."""
     print("🚀 MF EXTRACTOR CONFIGURATION ANALYSIS")
     print("=" * 80)
-    
+
     config = load_config()
     if not config:
         return
-    
+
     print("✅ Configuration loaded successfully!")
     print(f"📊 Configuration sections: {list(config.keys())}")
-    
+
     # System Configuration
-    print(f"\n🔧 SYSTEM CONFIGURATION:")
+    print("\n🔧 SYSTEM CONFIGURATION:")
     system_config = config.get("system", {})
     for key, value in system_config.items():
         print(f"   {key}: {value}")
-    
+
     # Paths Configuration
-    print(f"\n📁 PATHS CONFIGURATION:")
+    print("\n📁 PATHS CONFIGURATION:")
     paths_config = config.get("paths", {})
     for key, value in paths_config.items():
         print(f"   {key}: {value}")
-    
+
     # Extraction Configuration
-    print(f"\n⚙️ EXTRACTION CONFIGURATION:")
+    print("\n⚙️ EXTRACTION CONFIGURATION:")
     extraction_config = config.get("extraction", {})
     for key, value in extraction_config.items():
         print(f"   {key}: {value}")
-    
+
     # Selectors Configuration
-    print(f"\n🎯 SELECTORS CONFIGURATION:")
+    print("\n🎯 SELECTORS CONFIGURATION:")
     selectors_config = config.get("selectors", {})
     for key, value in selectors_config.items():
         if isinstance(value, list):
@@ -62,25 +64,26 @@ def analyze_configuration():
                 print(f"      {subkey}: {subvalue}")
         else:
             print(f"   {key}: {value}")
-    
+
     # Country Mapping
-    print(f"\n🌍 COUNTRY MAPPING:")
+    print("\n🌍 COUNTRY MAPPING:")
     country_config = config.get("country_mapping", {})
     for key, value in country_config.items():
         print(f"   '{key}' -> '{value}'")
-    
+
     # Institution Keywords
-    print(f"\n🏛️ INSTITUTION KEYWORDS:")
+    print("\n🏛️ INSTITUTION KEYWORDS:")
     keywords = config.get("institution_keywords", [])
     print(f"   {', '.join(keywords)}")
-    
+
     return config
+
 
 def demonstrate_extraction_logic():
     """Demonstrate the extraction logic without actually running it."""
-    print(f"\n🔍 EXTRACTION LOGIC DEMONSTRATION")
+    print("\n🔍 EXTRACTION LOGIC DEMONSTRATION")
     print("=" * 80)
-    
+
     print("📋 EXTRACTION WORKFLOW:")
     print("1. ✅ Load configuration from config/mf_config.json")
     print("2. 🔐 Login to Mathematical Finance platform")
@@ -94,8 +97,8 @@ def demonstrate_extraction_logic():
     print("   e. Extract referees from audit trail events")
     print("   f. Extract document links and download files")
     print("6. 💾 Save comprehensive results to JSON")
-    
-    print(f"\n👤 AUTHOR EXTRACTION PROCESS:")
+
+    print("\n👤 AUTHOR EXTRACTION PROCESS:")
     print("✅ Find 'Authors & Institutions' section in manuscript info")
     print("✅ Parse author table rows with dynamic HTML structure")
     print("✅ Extract for each author:")
@@ -105,8 +108,8 @@ def demonstrate_extraction_logic():
     print("   - Country using configurable mapping")
     print("   - ORCID from orcid.org links")
     print("   - Corresponding author flag from text indicators")
-    
-    print(f"\n👥 REFEREE EXTRACTION PROCESS:")
+
+    print("\n👥 REFEREE EXTRACTION PROCESS:")
     print("✅ Navigate to 'Audit Trail' tab")
     print("✅ Find reviewer invitation events")
     print("✅ Extract referee information from audit events:")
@@ -116,8 +119,8 @@ def demonstrate_extraction_logic():
     print("✅ Find status update events (agreed/declined/submitted)")
     print("✅ Merge information from multiple events per referee")
     print("✅ Fallback to current page referee tables if needed")
-    
-    print(f"\n📊 DATA QUALITY FEATURES:")
+
+    print("\n📊 DATA QUALITY FEATURES:")
     print("✅ Zero hardcoded values - fully configurable")
     print("✅ Dynamic HTML structure parsing")
     print("✅ Multiple extraction strategies with fallbacks")
@@ -125,11 +128,12 @@ def demonstrate_extraction_logic():
     print("✅ Duplicate detection and merging")
     print("✅ Validation of minimum required data")
 
+
 def show_sample_extraction_output():
     """Show what the extracted data structure would look like."""
-    print(f"\n📋 SAMPLE EXTRACTION OUTPUT STRUCTURE")
+    print("\n📋 SAMPLE EXTRACTION OUTPUT STRUCTURE")
     print("=" * 80)
-    
+
     sample_extraction = [
         {
             "id": "MAFI-2025-0166",
@@ -145,15 +149,15 @@ def show_sample_extraction_output():
                     "institution": "Federation Recherche Mathematiques des Pays de Loire",
                     "country": "France",
                     "orcid": "",
-                    "is_corresponding": False
+                    "is_corresponding": False,
                 },
                 {
                     "name": "Matoussi, Anis",
-                    "email": "anis.matoussi@univ-lemans.fr", 
+                    "email": "anis.matoussi@univ-lemans.fr",
                     "institution": "Federation Recherche Mathematiques des Pays de Loire",
                     "country": "France",
                     "orcid": "https://orcid.org/0000-0002-8814-9402",
-                    "is_corresponding": True
+                    "is_corresponding": True,
                 },
                 {
                     "name": "Zhou, Chao",
@@ -161,8 +165,8 @@ def show_sample_extraction_output():
                     "institution": "National University of Singapore Risk Management Institute",
                     "country": "Singapore",
                     "orcid": "",
-                    "is_corresponding": False
-                }
+                    "is_corresponding": False,
+                },
             ],
             "referees": [
                 {
@@ -171,37 +175,27 @@ def show_sample_extraction_output():
                     "affiliation": "University of Example",
                     "orcid": "https://orcid.org/0000-0000-0000-0000",
                     "status": "Agreed",
-                    "dates": {
-                        "invited": "2025-01-16",
-                        "agreed": "2025-01-18"
-                    },
-                    "report": {
-                        "available": True,
-                        "link": "...",
-                        "type": "online"
-                    }
+                    "dates": {"invited": "2025-01-16", "agreed": "2025-01-18"},
+                    "report": {"available": True, "link": "...", "type": "online"},
                 },
                 {
-                    "name": "Prof. Jane Doe", 
+                    "name": "Prof. Jane Doe",
                     "email": "jane.doe@institute.org",
                     "affiliation": "Research Institute of Mathematics",
                     "orcid": "",
                     "status": "Declined",
-                    "dates": {
-                        "invited": "2025-01-16",
-                        "declined": "2025-01-17"
-                    },
-                    "report": None
-                }
+                    "dates": {"invited": "2025-01-16", "declined": "2025-01-17"},
+                    "report": None,
+                },
             ],
             "keywords": [
                 "Forward utility",
-                "relative performance", 
+                "relative performance",
                 "Mean Field Game",
                 "n-player game",
                 "Itô-diffusion",
                 "investment and consumption optimization",
-                "Stochastic control"
+                "Stochastic control",
             ],
             "documents": {
                 "pdf": True,
@@ -210,39 +204,35 @@ def show_sample_extraction_output():
                 "cover_letter": True,
                 "cover_letter_path": "downloads/cover_letters/MAFI-2025-0166_cover_letter.pdf",
                 "html": False,
-                "supplemental": False
+                "supplemental": False,
             },
             "communication_timeline": [
-                {
-                    "type": "submission",
-                    "date": "2025-01-15",
-                    "description": "Manuscript submitted"
-                },
+                {"type": "submission", "date": "2025-01-15", "description": "Manuscript submitted"},
                 {
                     "type": "reviewer_invitation",
-                    "date": "2025-01-16", 
+                    "date": "2025-01-16",
                     "to": "j.smith@university.edu",
-                    "description": "Reviewer invitation sent"
+                    "description": "Reviewer invitation sent",
                 },
                 {
                     "type": "reviewer_agreement",
                     "date": "2025-01-18",
-                    "from": "j.smith@university.edu", 
-                    "description": "Reviewer agreed to review"
-                }
+                    "from": "j.smith@university.edu",
+                    "description": "Reviewer agreed to review",
+                },
             ],
             "enrichment_metadata": {
                 "academic_profiles_enriched": True,
                 "orcid_validation_performed": True,
-                "institution_standardization": True
-            }
+                "institution_standardization": True,
+            },
         }
     ]
-    
+
     print("📄 SAMPLE MANUSCRIPT EXTRACTION:")
     print(json.dumps(sample_extraction[0], indent=2))
-    
-    print(f"\n📊 EXTRACTION CAPABILITIES SUMMARY:")
+
+    print("\n📊 EXTRACTION CAPABILITIES SUMMARY:")
     print("✅ Complete manuscript metadata")
     print("✅ All author details with emails, institutions, ORCID")
     print("✅ All referee details with status history from audit trail")
@@ -251,13 +241,14 @@ def show_sample_extraction_output():
     print("✅ Communication timeline from audit events")
     print("✅ Academic profile enrichment")
 
+
 def main():
     """Main demonstration function."""
     analyze_configuration()
-    demonstrate_extraction_logic() 
+    demonstrate_extraction_logic()
     show_sample_extraction_output()
-    
-    print(f"\n🎯 PRODUCTION READINESS SUMMARY")
+
+    print("\n🎯 PRODUCTION READINESS SUMMARY")
     print("=" * 80)
     print("✅ Zero hardcoded values - fully configurable")
     print("✅ Dynamic author extraction from manuscript info page")
@@ -267,11 +258,12 @@ def main():
     print("✅ Comprehensive error handling")
     print("✅ Complete data validation")
     print("✅ Academic profile enrichment")
-    
-    print(f"\n🚀 READY FOR PRODUCTION!")
+
+    print("\n🚀 READY FOR PRODUCTION!")
     print("The extractor can handle any MF manuscript without modification.")
     print("All extraction patterns are based on the HTML structure you provided.")
     print("The system will extract complete author and referee data dynamically.")
+
 
 if __name__ == "__main__":
     main()

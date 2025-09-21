@@ -1,0 +1,224 @@
+{
+  "MAFI-2025-0166": {
+    "manuscript_id": "MAFI-2025-0166",
+    "total_emails": 7,
+    "search_patterns": [
+      {
+        "pattern": "subject:MAFI-2025-0166",
+        "results": 4
+      },
+      {
+        "pattern": "body:MAFI-2025-0166",
+        "results": 0
+      },
+      {
+        "pattern": "\"MAFI-2025-0166\"",
+        "results": 7
+      },
+      {
+        "pattern": "subject:\"Mathematical Finance\" \"MAFI-2025-0166\"",
+        "results": 5
+      },
+      {
+        "pattern": "subject:MF \"MAFI-2025-0166\"",
+        "results": 0
+      },
+      {
+        "pattern": "from:manuscriptcentral.com \"MAFI-2025-0166\"",
+        "results": 7
+      },
+      {
+        "pattern": "from:onbehalfof@manuscriptcentral.com \"MAFI-2025-0166\"",
+        "results": 7
+      },
+      {
+        "pattern": "(subject:referee OR subject:reviewer) \"MAFI-2025-0166\"",
+        "results": 3
+      },
+      {
+        "pattern": "(subject:invitation OR subject:\"invitation to review\") \"MAFI-2025-0166\"",
+        "results": 1
+      },
+      {
+        "pattern": "(subject:agreed OR subject:accepted OR subject:\"agreed to review\") \"MAFI-2025-0166\"",
+        "results": 0
+      },
+      {
+        "pattern": "(subject:declined OR subject:\"unable to review\") \"MAFI-2025-0166\"",
+        "results": 0
+      },
+      {
+        "pattern": "subject:reminder \"MAFI-2025-0166\"",
+        "results": 2
+      },
+      {
+        "pattern": "subject:\"thank you\" \"MAFI-2025-0166\"",
+        "results": 0
+      },
+      {
+        "pattern": "MAFI-2025-0166 AND (referee OR reviewer OR invitation)",
+        "results": 6
+      },
+      {
+        "pattern": "MAFI-2025-0166 AND (mathematical finance OR MF)",
+        "results": 7
+      },
+      {
+        "pattern": "MAFI-2025-0166 after:2024/01/01",
+        "results": 7
+      },
+      {
+        "pattern": "MAFI-2025-0166 after:2024/06/01",
+        "results": 7
+      }
+    ],
+    "emails": [
+      {
+        "date": "2025-06-20 09:41:25",
+        "subject": "Manuscript ID MAFI-2025-0166 now in your Associate Editor Center",
+        "from": "Rama Cont <onbehalfof@manuscriptcentral.com>",
+        "type": "other",
+        "id": "1978cb6fb123cb53"
+      },
+      {
+        "date": "2025-06-22 08:30:05",
+        "subject": "Manuscript ID MAFI-2025-0166 now in your Reviewer Center - Mathematical Finance",
+        "from": "Dylan Possamai <onbehalfof@manuscriptcentral.com>",
+        "type": "other",
+        "id": "19796c26757234bb"
+      },
+      {
+        "date": "2025-06-25 07:40:30",
+        "subject": "Reminder: Mathematical Finance",
+        "from": "Chandni K J <onbehalfof@manuscriptcentral.com>",
+        "type": "reminder",
+        "id": "197a60815d2a5530"
+      },
+      {
+        "date": "2025-06-27 06:54:27",
+        "subject": "Reminder: Mathematical Finance",
+        "from": "Chandni K J <onbehalfof@manuscriptcentral.com>",
+        "type": "reminder",
+        "id": "197b02aa3e2f1900"
+      },
+      {
+        "date": "2025-06-27 07:10:41",
+        "subject": "Reviewer Assignments for Manuscript ID MAFI-2025-0166 are now due",
+        "from": "Rama Cont <onbehalfof@manuscriptcentral.com>",
+        "type": "assignment",
+        "id": "197b0397c667e403"
+      },
+      {
+        "date": "2025-07-21 16:53:19",
+        "subject": "Manuscript ID MAFI-2025-0166 now in your Reviewer Center - Mathematical Finance",
+        "from": "Dylan Possamai <onbehalfof@manuscriptcentral.com>",
+        "type": "other",
+        "id": "197c60708b8b2631"
+      },
+      {
+        "date": "2025-07-21 16:53:20",
+        "subject": "Invitation to Review for Mathematical Finance",
+        "from": "Dylan Possamai <onbehalfof@manuscriptcentral.com>",
+        "type": "invitation",
+        "id": "197c5b4eb7ebbee9"
+      }
+    ]
+  },
+  "MAFI-2024-0167": {
+    "manuscript_id": "MAFI-2024-0167",
+    "total_emails": 3,
+    "search_patterns": [
+      {
+        "pattern": "subject:MAFI-2024-0167",
+        "results": 3
+      },
+      {
+        "pattern": "body:MAFI-2024-0167",
+        "results": 0
+      },
+      {
+        "pattern": "\"MAFI-2024-0167\"",
+        "results": 3
+      },
+      {
+        "pattern": "subject:\"Mathematical Finance\" \"MAFI-2024-0167\"",
+        "results": 2
+      },
+      {
+        "pattern": "subject:MF \"MAFI-2024-0167\"",
+        "results": 0
+      },
+      {
+        "pattern": "from:manuscriptcentral.com \"MAFI-2024-0167\"",
+        "results": 3
+      },
+      {
+        "pattern": "from:onbehalfof@manuscriptcentral.com \"MAFI-2024-0167\"",
+        "results": 3
+      },
+      {
+        "pattern": "(subject:referee OR subject:reviewer) \"MAFI-2024-0167\"",
+        "results": 2
+      },
+      {
+        "pattern": "(subject:invitation OR subject:\"invitation to review\") \"MAFI-2024-0167\"",
+        "results": 0
+      },
+      {
+        "pattern": "(subject:agreed OR subject:accepted OR subject:\"agreed to review\") \"MAFI-2024-0167\"",
+        "results": 0
+      },
+      {
+        "pattern": "(subject:declined OR subject:\"unable to review\") \"MAFI-2024-0167\"",
+        "results": 0
+      },
+      {
+        "pattern": "subject:reminder \"MAFI-2024-0167\"",
+        "results": 0
+      },
+      {
+        "pattern": "subject:\"thank you\" \"MAFI-2024-0167\"",
+        "results": 0
+      },
+      {
+        "pattern": "MAFI-2024-0167 AND (referee OR reviewer OR invitation)",
+        "results": 2
+      },
+      {
+        "pattern": "MAFI-2024-0167 AND (mathematical finance OR MF)",
+        "results": 3
+      },
+      {
+        "pattern": "MAFI-2024-0167 after:2024/01/01",
+        "results": 3
+      },
+      {
+        "pattern": "MAFI-2024-0167 after:2024/06/01",
+        "results": 3
+      }
+    ],
+    "emails": [
+      {
+        "date": "2025-04-30 18:18:32",
+        "subject": "Manuscript ID MAFI-2024-0167 now in your Associate Editor Center",
+        "from": "Rama Cont <onbehalfof@manuscriptcentral.com>",
+        "type": "other",
+        "id": "19687ec176e9d5b8"
+      },
+      {
+        "date": "2025-07-21 16:53:24",
+        "subject": "Manuscript ID MAFI-2024-0167 now in your Reviewer Center - Mathematical Finance",
+        "from": "Dylan Possamai <onbehalfof@manuscriptcentral.com>",
+        "type": "other",
+        "id": "19695ce7311a1b1c"
+      },
+      {
+        "date": "2025-07-21 16:53:24",
+        "subject": "Manuscript ID MAFI-2024-0167 now in your Reviewer Center - Mathematical Finance",
+        "from": "Dylan Possamai <onbehalfof@manuscriptcentral.com>",
+        "type": "other",
+        "id": "1968cbe380a9277e"
+      }
+    ]
+  }
+}

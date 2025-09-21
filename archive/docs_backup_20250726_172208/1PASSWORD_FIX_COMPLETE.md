@@ -6,7 +6,7 @@
 
 1. **Import Path Issue**: Fixed `run_unified_with_1password.py` to import from `src/core` instead of `core`
 2. **Missing Method**: Added `_get_1password_credentials()` method to credential manager
-3. **Method Name**: Changed `get_journal_credentials()` to `get_credentials()` 
+3. **Method Name**: Changed `get_journal_credentials()` to `get_credentials()`
 4. **Vault Access**: Added multi-vault support with fallbacks
 
 ### ✅ Test Results
@@ -17,7 +17,7 @@ python3 test_1password_final.py
 
 **Output:**
 - ✅ SICON credentials found!
-- ✅ SIFIN credentials found!  
+- ✅ SIFIN credentials found!
 - ✅ Direct 1Password ORCID retrieval working!
 - ✅ Available journals: sicon, sifin, mf, mor
 
@@ -42,7 +42,7 @@ python3 run_unified_with_1password.py --journal SICON
 
 **Results:**
 - ✅ 1Password CLI version: 2.31.1
-- ✅ Successfully signed in to 1Password  
+- ✅ Successfully signed in to 1Password
 - ✅ ORCID credentials found: dyl****@****
 - ✅ Authentication started
 - ⚠️ Network timeout (CloudFlare issue, not credential issue)

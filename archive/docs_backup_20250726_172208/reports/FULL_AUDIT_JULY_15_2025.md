@@ -1,6 +1,6 @@
 # 🔍 FULL AUDIT - EDITORIAL SCRIPTS
-**Date**: July 15, 2025  
-**Post-Cleanup Status**: ⚠️ Cleaned but BROKEN  
+**Date**: July 15, 2025
+**Post-Cleanup Status**: ⚠️ Cleaned but BROKEN
 
 ---
 
@@ -101,7 +101,7 @@ Which one is correct?
 
 ### **Current Reality**
 - 0 manuscripts (can't run)
-- 0 referees (can't run)  
+- 0 referees (can't run)
 - 0 PDFs (can't run)
 - Broken system
 
@@ -188,11 +188,11 @@ Looking at the git history and files, the ONLY things that might work are:
 
 ## 📊 FINAL VERDICT
 
-**System Status**: 🔴 **BROKEN**  
-**Completeness**: 25% (1 of 4 journals)  
-**Readiness**: 0% (can't run)  
-**Documentation**: 900% (way too much)  
-**Organization**: 80% (good structure, no content)  
+**System Status**: 🔴 **BROKEN**
+**Completeness**: 25% (1 of 4 journals)
+**Readiness**: 0% (can't run)
+**Documentation**: 900% (way too much)
+**Organization**: 80% (good structure, no content)
 
 **Bottom Line**: The "ultimate" system is neither ultimate nor a system. It's an incomplete, broken attempt that needs significant work to function.
 
@@ -248,7 +248,7 @@ editorial_scripts_ultimate/
 
 3. **Implement Missing Extractors**
    - MF extractor
-   - MOR extractor  
+   - MOR extractor
    - SIFIN extractor
 
 4. **Remove Empty Directories**

@@ -6,13 +6,8 @@ that supports all journal platforms while eliminating code duplication.
 """
 
 from .base import AuthenticationProvider
+from .editorial_manager_auth import EditorialManagerAuth
 from .orcid_auth import ORCIDAuth
 from .scholarone_auth import ScholarOneAuth
-from .editorial_manager_auth import EditorialManagerAuth
 
-__all__ = [
-    'AuthenticationProvider',
-    'ORCIDAuth', 
-    'ScholarOneAuth',
-    'EditorialManagerAuth'
-]
+__all__ = ["AuthenticationProvider", "ORCIDAuth", "ScholarOneAuth", "EditorialManagerAuth"]

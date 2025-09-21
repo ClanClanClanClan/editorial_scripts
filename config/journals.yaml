@@ -178,7 +178,7 @@ platforms:
       - 'a[href*="ViewPDF"]'
       - 'a[href*="DOWNLOAD=TRUE"]'
       - 'input[value="PDF"]'
-    
+
   editorial_manager:
     login_selectors:
       username: 'input[id="username"]'

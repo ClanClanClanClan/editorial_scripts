@@ -1,0 +1,97 @@
+{
+  "authors": [
+    {
+      "name": "Gechun Liang",
+      "enriched": true,
+      "orcid_found": false,
+      "orcid": "NOT FOUND",
+      "institution": "",
+      "department": "NOT FOUND",
+      "country": "NOT FOUND"
+    },
+    {
+      "name": "Martin Schweizer",
+      "enriched": true,
+      "orcid_found": false,
+      "orcid": "NOT FOUND",
+      "institution": "",
+      "department": "NOT FOUND",
+      "country": "NOT FOUND"
+    },
+    {
+      "name": "Johannes Muhle-Karbe",
+      "enriched": true,
+      "orcid_found": false,
+      "orcid": "NOT FOUND",
+      "institution": "",
+      "department": "NOT FOUND",
+      "country": "NOT FOUND"
+    },
+    {
+      "name": "Dylan Possamai",
+      "enriched": true,
+      "orcid_found": false,
+      "orcid": "NOT FOUND",
+      "institution": "",
+      "department": "NOT FOUND",
+      "country": "NOT FOUND"
+    },
+    {
+      "name": "Nizar Touzi",
+      "enriched": true,
+      "orcid_found": false,
+      "orcid": "NOT FOUND",
+      "institution": "",
+      "department": "NOT FOUND",
+      "country": "NOT FOUND"
+    }
+  ],
+  "referees": [
+    {
+      "name": "Peter Tankov",
+      "enriched": true,
+      "orcid_found": false,
+      "orcid": "NOT FOUND",
+      "institution": "",
+      "department": "NOT FOUND",
+      "country": "NOT FOUND"
+    },
+    {
+      "name": "Rama Cont",
+      "enriched": true,
+      "orcid_found": false,
+      "orcid": "NOT FOUND",
+      "institution": "",
+      "department": "NOT FOUND",
+      "country": "NOT FOUND"
+    },
+    {
+      "name": "Mathieu Rosenbaum",
+      "enriched": true,
+      "orcid_found": false,
+      "orcid": "NOT FOUND",
+      "institution": "",
+      "department": "NOT FOUND",
+      "country": "NOT FOUND"
+    },
+    {
+      "name": "Huyen Pham",
+      "enriched": true,
+      "orcid_found": false,
+      "orcid": "NOT FOUND",
+      "institution": "",
+      "department": "NOT FOUND",
+      "country": "NOT FOUND"
+    }
+  ],
+  "summary": {
+    "timestamp": "2025-09-16T00:13:25.738501",
+    "total_people": 9,
+    "total_enriched": 9,
+    "coverage_percent": 100.0,
+    "authors_enriched": 5,
+    "referees_enriched": 4,
+    "orcid_found_authors": 0,
+    "orcid_found_referees": 0
+  }
+}

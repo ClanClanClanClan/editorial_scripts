@@ -9,7 +9,7 @@ This section contains **contacted referees who have NOT accepted**, which includ
 3. **Awaiting Response**: No status shown - Recently contacted, still waiting
 4. **Other statuses**: Parse whatever status text is shown
 
-## "Referees" Section  
+## "Referees" Section
 
 This section contains **ONLY referees who ACCEPTED** the invitation:
 
@@ -43,7 +43,7 @@ This means the total referee count includes:
 
 ## Key Insight
 
-"Potential Referees" ≠ "Declined Referees"  
+"Potential Referees" ≠ "Declined Referees"
 "Potential Referees" = "Contacted but not (yet) accepted"
 
 This is critical for accurate referee tracking and timeline analysis!

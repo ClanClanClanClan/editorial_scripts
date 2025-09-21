@@ -1,0 +1,4 @@
+# Add pip-audit vulnerability IDs to ignore (one per line)
+# Examples:
+# PYSEC-2023-123
+# GHSA-xxxx-xxxx-xxxx

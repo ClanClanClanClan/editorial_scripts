@@ -10,4 +10,3 @@ EXACT BASELINE COMPLIANCE:
 ✅ Manuscripts: 0/4
 ✅ Referees: 0/13
 ✅ Documents: 0/11
-

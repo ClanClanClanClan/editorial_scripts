@@ -20,7 +20,7 @@ journals:
         pdfs: 3
         written_comments: 1
       url: "https://sicon.siam.org"
-      
+
     SIFIN:
       name: "SIAM Journal on Financial Mathematics"
       platform: "siam"
@@ -35,7 +35,7 @@ journals:
         pdfs: 1
         written_comments: 1
       url: "https://sifin.siam.org"
-      
+
     MF:
       name: "Mathematical Finance"
       platform: "scholarone"
@@ -50,7 +50,7 @@ journals:
         pdfs: 0
         written_comments: 0
       url: "https://mc.manuscriptcentral.com/mafi"
-      
+
     MOR:
       name: "Mathematics of Operations Research"
       platform: "scholarone"
@@ -65,7 +65,7 @@ journals:
         pdfs: 1
         written_comments: 0
       url: "https://mc.manuscriptcentral.com/moor"
-      
+
     FS:
       name: "Finance and Stochastics"
       platform: "editorial_manager"
@@ -87,13 +87,13 @@ journals:
       platform: "editorial_manager"
       manuscripts: 0
       url: "https://www.editorialmanager.com/jota"
-      
+
     MAFE:
       name: "Mathematics and Financial Economics"
       platform: "editorial_manager"
       manuscripts: 0
       url: "https://www.editorialmanager.com/mafe"
-      
+
     NACO:
       name: "North American Congress on Optimization"
       platform: "siam"
@@ -110,17 +110,17 @@ totals:
   referee_reports: 8
   referee_reports_pdfs: 5
   referee_reports_written: 3
-  
+
 # Success criteria
 success_criteria:
   minimum_success_rate: 0.95
   manuscript_extraction_rate: 1.0  # Should extract all manuscripts
   referee_extraction_rate: 0.95   # 95% of referees
   pdf_download_rate: 0.90          # 90% of available PDFs
-  
+
 # Validation thresholds (percentage of baseline to consider passing)
 validation:
   manuscripts: 0.90      # Extract at least 90% of expected manuscripts
-  referees: 0.85         # Extract at least 85% of expected referees  
+  referees: 0.85         # Extract at least 85% of expected referees
   referee_reports: 0.80  # Extract at least 80% of expected reports
   pdfs: 0.75            # Download at least 75% of expected PDFs

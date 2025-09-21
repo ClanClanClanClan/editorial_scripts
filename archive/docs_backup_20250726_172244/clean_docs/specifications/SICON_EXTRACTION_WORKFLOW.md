@@ -113,7 +113,7 @@ For manuscript M172838:
 ## Critical Implementation Notes
 
 1. **Two Referee Sections**: Must parse both "Potential Referees" (declined) and "Referees" (accepted)
-2. **Status Parsing**: 
+2. **Status Parsing**:
    - "Status: Declined" in Potential Referees
    - "Rcvd: [date]" = report submitted
    - "Due: [date]" = report pending

@@ -14,11 +14,11 @@
   - Pure Python classes with no external dependencies
   - Manuscript, Referee, Review, Author entities
   - Proper enums for statuses
-  
+
 - ✅ Created domain ports (`src/core/domain/ports.py`)
   - Abstract interfaces for infrastructure
   - JournalExtractor, Repository, and Service interfaces
-  
+
 - ✅ Set up proper directory structure following hexagonal architecture
 
 ### 3. **Modern Technology Stack**
@@ -26,17 +26,17 @@
   - Environment-based configuration
   - Type-safe settings
   - Created `.env.example` template
-  
+
 - ✅ Async PostgreSQL setup (`src/infrastructure/database/`)
   - SQLAlchemy 2.0 with async support
   - Connection pooling
   - Proper ORM models
-  
+
 - ✅ Playwright browser pool (`src/infrastructure/browser_pool.py`)
   - Concurrent browser management
   - Session persistence
   - Stealth mode integration
-  
+
 - ✅ Redis caching layer (`src/infrastructure/cache/redis_cache.py`)
   - Async Redis client
   - Automatic serialization
@@ -48,7 +48,7 @@
   - Health checks
   - CORS support
   - Prometheus metrics
-  
+
 - ✅ Extraction endpoints (`src/api/routers/extractions.py`)
   - Background task processing
   - Status tracking
@@ -115,7 +115,7 @@ editorial_scripts/
 1. **Complete journal migrations**
    - Port MF, MOR to new architecture
    - Implement remaining journals
-   
+
 2. **Testing framework**
    - Unit tests for domain logic
    - Integration tests for scrapers

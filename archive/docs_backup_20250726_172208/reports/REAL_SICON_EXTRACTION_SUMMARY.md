@@ -101,7 +101,7 @@ Based on the real testing, the Phase 1 foundation should achieve:
 1. ✅ **Connect to real SICON**: `https://sicon.siam.org/cgi-bin/main.plex`
 2. 🟡 **Authenticate via ORCID**: Partially working (redirect success, form submission fails)
 3. ❌ **Extract 4 manuscripts**: Blocked by authentication
-4. ❌ **Extract 10 referees**: Blocked by authentication  
+4. ❌ **Extract 10 referees**: Blocked by authentication
 5. ❌ **Verify 1 email**: Blocked by authentication
 6. ❌ **Download documents**: Blocked by authentication
 
@@ -135,7 +135,7 @@ Based on the real testing, the Phase 1 foundation should achieve:
 
 **Achievements**:
 - ✅ Corrected baseline understanding (major audit finding)
-- ✅ Fixed SICON website connection 
+- ✅ Fixed SICON website connection
 - ✅ Implemented real browser automation
 - ✅ Successfully detected and navigated to ORCID authentication
 

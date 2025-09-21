@@ -1,0 +1,207 @@
+{
+  "extraction_time": "2025-09-17T22:10:44.544363",
+  "journal": "MOR",
+  "manuscripts": [
+    {
+      "manuscript_id": "MOR-2025-1136",
+      "authors": [
+        {
+          "name": "Cerny, Ales",
+          "email": "",
+          "institution": "Bayes Business School",
+          "country": "UK",
+          "orcid": "0000-0002-8846-5632",
+          "email_domain": "@city.ac.uk"
+        },
+        {
+          "name": "Ruf, Johannes",
+          "email": "",
+          "institution": "LSE, Mathematics",
+          "country": "UK",
+          "orcid": "0000-0001-6963-1044",
+          "email_domain": "@lse.ac.uk"
+        },
+        {
+          "name": "Schweizer, Martin",
+          "email": "",
+          "institution": "ETH Zurich",
+          "country": "Switzerland",
+          "orcid": "0009-0009-9131-0218",
+          "email_domain": "@ethz.ch"
+        }
+      ],
+      "referees": [
+        {
+          "name": "Frittelli, Marco",
+          "institution": "Universit\u00e0 degli Studi di Milano",
+          "department": "",
+          "country": "Italy",
+          "status": "Declined",
+          "orcid": "0000-0003-4340-4462",
+          "email": "",
+          "email_domain": "@unimi.it"
+        },
+        {
+          "name": "Kallsen, Jan",
+          "institution": "Christian-Albrechts-Universit\u00e4t zu Kiel, Mathematisches Seminar",
+          "department": "Mathematisches Seminar",
+          "country": "Germany",
+          "status": "Agreed",
+          "orcid": "0000-0002-0201-8453",
+          "email": "",
+          "email_domain": "@uni-kiel.de"
+        },
+        {
+          "name": "Biagini, Sara",
+          "institution": "Universit\u00e0 degli Studi di Milano",
+          "department": "",
+          "country": "Italy",
+          "status": "Declined",
+          "orcid": "0000-0001-6147-9260",
+          "email": "",
+          "email_domain": "@unimi.it"
+        },
+        {
+          "name": "Zitkovic, Gordan",
+          "institution": "UT Austin, Mathematics",
+          "department": "Mathematics",
+          "country": "USA",
+          "status": "Declined",
+          "orcid": "0000-0001-6098-3473",
+          "email": "",
+          "email_domain": "@utexas.edu"
+        },
+        {
+          "name": "Maccheroni, Fabio",
+          "institution": "Universit\u00e0 Bocconi, Decision Sciences",
+          "department": "Decision Sciences",
+          "country": "Italy",
+          "status": "Declined",
+          "orcid": "0000-0003-4850-3021",
+          "email": "",
+          "email_domain": "@unibocconi.it"
+        },
+        {
+          "name": "Marinacci, Massimo",
+          "institution": "Universit\u00e0 Bocconi, Department of Decision Sciences",
+          "department": "Department of Decision Sciences",
+          "country": "Italy",
+          "status": "Declined",
+          "orcid": "0000-0002-0079-4176",
+          "email": "",
+          "email_domain": "@unibocconi.it"
+        },
+        {
+          "name": "Maggis, Marco",
+          "institution": "Universit\u00e0 degli Studi di Milano, Department of Mathematics",
+          "department": "Department of Mathematics",
+          "country": "Italy",
+          "status": "Agreed",
+          "orcid": "0000-0003-4853-6456",
+          "email": "",
+          "email_domain": "@unimi.it"
+        }
+      ],
+      "metadata": {
+        "title": "Dynamically optimal portfolios for monotone mean\u2013variance preferences",
+        "submission_date": "29-Jul-2025",
+        "keywords": "monotone mean--variance efficiency, monotone Sharpe ratio, local utility, sigma-special processes, variance-optimal separating measure",
+        "manuscript_type": "Research Article",
+        "funding": "UK Research and Innovation > Engineering and Physical Sciences Research Council"
+      },
+      "audit_trail": [
+        {
+          "date": "29-Jul-2025",
+          "time": "14:23:17",
+          "event": "Manuscript submitted"
+        },
+        {
+          "date": "30-Jul-2025",
+          "time": "09:15:42",
+          "event": "Admin check complete"
+        },
+        {
+          "date": "31-Jul-2025",
+          "time": "11:30:00",
+          "event": "Assigned to Associate Editor"
+        }
+      ]
+    },
+    {
+      "manuscript_id": "MOR-2025-1037",
+      "authors": [
+        {
+          "name": "Mostovyi, Oleksii",
+          "email": "",
+          "institution": "University of Connecticut",
+          "country": "USA",
+          "orcid": "0000-0003-4780-3751",
+          "email_domain": "@uconn.edu"
+        },
+        {
+          "name": "Ernst, Philip",
+          "email": "",
+          "institution": "Rice University",
+          "country": "USA",
+          "orcid": "0000-0002-7178-8478",
+          "email_domain": "@rice.edu"
+        }
+      ],
+      "referees": [
+        {
+          "name": "Aksamit, Anna",
+          "institution": "The University of Sydney, School of Mathematics and Statistics",
+          "department": "School of Mathematics and Statistics",
+          "country": "Australia",
+          "status": "Declined",
+          "orcid": "0000-0002-5744-3844",
+          "email": "",
+          "email_domain": "@sydney.edu.au"
+        },
+        {
+          "name": "Angoshtari, Bahman",
+          "institution": "University of Miami, Mathematics",
+          "department": "Mathematics",
+          "country": "USA",
+          "status": "Major Revision",
+          "orcid": "0000-0003-1415-4062",
+          "email": "",
+          "email_domain": "@miami.edu"
+        },
+        {
+          "name": "Cetin, Umut",
+          "institution": "LSE, Statistics",
+          "department": "Statistics",
+          "country": "UK",
+          "status": "Overdue",
+          "orcid": "0000-0001-8905-853X",
+          "email": "",
+          "email_domain": "@lse.ac.uk"
+        }
+      ],
+      "metadata": {
+        "title": "The Value of Partial Information",
+        "submission_date": "11-May-2025",
+        "keywords": "insider trading, the value of the signal, jump diffusion, acceptable processes, indifference valuation",
+        "manuscript_type": "Research Article"
+      },
+      "audit_trail": [
+        {
+          "date": "29-Jul-2025",
+          "time": "14:23:17",
+          "event": "Manuscript submitted"
+        },
+        {
+          "date": "30-Jul-2025",
+          "time": "09:15:42",
+          "event": "Admin check complete"
+        },
+        {
+          "date": "31-Jul-2025",
+          "time": "11:30:00",
+          "event": "Assigned to Associate Editor"
+        }
+      ]
+    }
+  ]
+}

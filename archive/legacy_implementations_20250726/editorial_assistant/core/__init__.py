@@ -7,14 +7,13 @@ the journal extraction system.
 
 from .base_extractor import BaseExtractor
 from .browser_manager import BrowserManager
-from .pdf_handler import PDFHandler
 from .data_models import (
-    Referee,
-    Manuscript,
+    ExtractionResult,
     Journal,
+    Manuscript,
+    Referee,
     RefereeDates,
     RefereeStatus,
-    ExtractionResult,
 )
 from .exceptions import (
     ExtractionError,
@@ -23,13 +22,13 @@ from .exceptions import (
     PDFDownloadError,
     RefereeDataError,
 )
+from .pdf_handler import PDFHandler
 
 __all__ = [
     # Core Classes
     "BaseExtractor",
     "BrowserManager",
     "PDFHandler",
-    
     # Data Models
     "Referee",
     "Manuscript",
@@ -37,7 +36,6 @@ __all__ = [
     "RefereeDates",
     "RefereeStatus",
     "ExtractionResult",
-    
     # Exceptions
     "ExtractionError",
     "LoginError",

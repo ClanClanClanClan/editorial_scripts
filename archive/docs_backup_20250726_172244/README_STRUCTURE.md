@@ -7,18 +7,18 @@
 - **unified_system/** - Main extraction system (DO NOT MODIFY)
   - extractors/ - Journal-specific extractors
   - core/ - Core functionality
-  
+
 - **tests/** - All test files
 - **docs/** - Documentation
   - reports/ - Analysis and audit reports
   - guides/ - Setup and usage guides
-  
+
 - **output/** - Extraction results by journal
 - **scripts/** - Utility and maintenance scripts
 - **archive/** - Archived old files
   - old_debug/ - Old debug files
   - old_tests/ - Old test files
-  
+
 - **data/** - Data files and cache
 - **config/** - Configuration files
 

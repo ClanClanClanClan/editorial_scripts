@@ -1,0 +1,27 @@
+{
+  "success": true,
+  "journal_code": "SICON",
+  "journal_name": "SIAM Journal on Control and Optimization",
+  "platform": "SIAM",
+  "extraction_time": 0.00025010108947753906,
+  "extraction_timestamp": "2025-07-20T16:19:59.120090",
+  "data": {
+    "journal": "SICON",
+    "extraction_date": "2025-07-20T16:19:59.120084",
+    "error": "'SICONConsolidatedExtractor' object has no attribute 'driver'",
+    "manuscripts": [],
+    "total_manuscripts": 0,
+    "total_referees": 0
+  },
+  "analysis": {
+    "manuscript_count": 0,
+    "referee_count": 0,
+    "data_quality_score": 0.0,
+    "status_breakdown": {},
+    "author_count": 0,
+    "unique_authors": [],
+    "date_range": {},
+    "field_completeness": {},
+    "referee_analysis": {}
+  }
+}

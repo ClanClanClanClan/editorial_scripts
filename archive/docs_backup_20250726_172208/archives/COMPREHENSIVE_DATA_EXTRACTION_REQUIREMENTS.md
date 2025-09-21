@@ -45,38 +45,38 @@ class Manuscript:
     id: str                           # Journal-specific manuscript ID (e.g., "M172838")
     external_id: Optional[str]        # Secondary ID if available
     journal_code: str                 # Journal identifier (SICON, SIFIN, MF, etc.)
-    
+
     # Core Metadata
     title: str                        # Complete manuscript title
     abstract: Optional[str]           # Full abstract text
     keywords: List[str]               # Author-provided keywords
     subject_areas: List[str]          # Journal classification areas
-    
+
     # Author Information
     authors: List[Author]             # Complete author list with details
     corresponding_author: Optional[Author]  # Identified corresponding author
-    
+
     # Status & Timeline
     status: ManuscriptStatus          # Current manuscript status
     submission_date: datetime         # Original submission date
     status_history: List[StatusChange]  # Complete status timeline
-    
+
     # Editorial Assignment
     corresponding_editor: Optional[str]  # Chief/Corresponding Editor name
     associate_editor: Optional[str]      # Associate Editor name
-    
+
     # Review Process
     referees: List[RefereeAssignment]    # All referee assignments (past & current)
     review_rounds: List[ReviewRound]     # Multiple review rounds if applicable
-    
+
     # Documents
     documents: List[Document]            # All associated files
-    
+
     # Analytics & Metadata
     days_in_system: int                  # Total days since submission
     current_bottleneck: Optional[str]   # Identified process bottleneck
     priority_level: int                  # Editorial priority (1-5)
-    
+
     # System Metadata
     last_updated: datetime               # Last data refresh
     extraction_metadata: ExtractionMetadata  # Source & quality info
@@ -106,41 +106,41 @@ class RefereeAssignment:
     name: str                         # Full referee name
     email: str                        # Primary email address
     email_aliases: List[str]          # Additional known email addresses
-    
+
     # Institution & Expertise
     institution: str                  # Current institutional affiliation
     department: Optional[str]         # Department/division
     country: Optional[str]            # Country
     expertise_areas: List[str]        # Subject matter expertise
     seniority_level: Optional[str]    # Junior/Senior/Emeritus classification
-    
+
     # Assignment Details
     assignment_date: datetime         # When referee was first contacted
     invitation_method: str            # How contacted (email, system, etc.)
     due_date: Optional[datetime]      # Originally assigned due date
     extended_due_date: Optional[datetime]  # Extended deadline if applicable
-    
+
     # Response Timeline
     response_date: Optional[datetime] # When referee responded to invitation
     acceptance_date: Optional[datetime]  # When referee accepted (if applicable)
     decline_date: Optional[datetime]     # When referee declined (if applicable)
     decline_reason: Optional[str]        # Reason for declining if provided
-    
+
     # Review Process
     status: RefereeStatus             # Current status
     report_submission_date: Optional[datetime]  # When report was submitted
     report_quality_score: Optional[float]       # Quality assessment (1-10)
-    
+
     # Communication History
     email_thread: List[EmailEvent]    # Complete email conversation
     reminder_count: int               # Number of reminders sent
     last_reminder_date: Optional[datetime]  # Most recent reminder
-    
+
     # Performance Metrics
     days_to_respond: Optional[int]    # Days from invitation to accept/decline
     days_to_complete: Optional[int]   # Days from acceptance to submission
     total_days_assigned: int          # Total days referee was assigned
-    
+
     # Documents
     referee_report: Optional[Document]  # Final referee report
     supplementary_materials: List[Document]  # Additional referee files
@@ -157,13 +157,13 @@ class EmailEvent:
     subject: str                     # Email subject line
     sender: str                      # Sender email address
     recipients: List[str]            # All recipients
-    
+
     # Content Analysis
     content_summary: Optional[str]   # AI-generated summary
     sentiment: Optional[str]         # Positive/Neutral/Negative
     contains_acceptance: bool        # Whether email contains acceptance
     contains_decline: bool           # Whether email contains decline
-    
+
     # System Metadata
     message_id: str                  # Email message ID for threading
     thread_id: str                   # Conversation thread identifier
@@ -207,29 +207,29 @@ def validate_manuscript_data(manuscript: Manuscript) -> ValidationResult:
     """Comprehensive manuscript data validation"""
     errors = []
     warnings = []
-    
+
     # Required field validation
     if not manuscript.id or len(manuscript.id) < 3:
         errors.append("Invalid manuscript ID")
-    
+
     if not manuscript.title or len(manuscript.title) < 10:
         errors.append("Title missing or too short")
-    
+
     if not manuscript.authors:
         errors.append("No authors found")
-    
+
     if not manuscript.submission_date:
         errors.append("Submission date missing")
-    
+
     # Date logic validation
     if manuscript.submission_date > datetime.now():
         errors.append("Submission date cannot be in future")
-    
+
     # Author validation
     for author in manuscript.authors:
         if not author.name or len(author.name) < 2:
             warnings.append(f"Invalid author name: {author.name}")
-    
+
     return ValidationResult(errors=errors, warnings=warnings, valid=len(errors) == 0)
 ```
 
@@ -276,14 +276,14 @@ For each referee assignment, the system must capture the complete journey:
 class EmailTracker:
     def extract_referee_communications(self, manuscript_id: str) -> List[EmailEvent]:
         """Extract all referee-related emails for a manuscript"""
-        
+
         # Search patterns for referee emails
         search_queries = [
             f"subject:(referee OR review OR invitation) {manuscript_id}",
             f"from:(sicon.siam.org OR sifin.siam.org) {manuscript_id}",
             f"to:(referee_email) subject:(manuscript OR review)"
         ]
-        
+
         # Extract and categorize emails
         emails = []
         for query in search_queries:
@@ -291,9 +291,9 @@ class EmailTracker:
             for email in results:
                 categorized_email = self.categorize_email(email)
                 emails.append(categorized_email)
-        
+
         return self.deduplicate_and_sort(emails)
-    
+
     def categorize_email(self, email: Email) -> EmailEvent:
         """Categorize email type using NLP patterns"""
         patterns = {
@@ -303,7 +303,7 @@ class EmailTracker:
             'decline': ['decline', 'unable to review', 'cannot review'],
             'submission': ['submitted', 'completed review', 'attached report']
         }
-        
+
         email_type = self.classify_by_patterns(email.content, patterns)
         return EmailEvent(
             timestamp=email.timestamp,
@@ -350,19 +350,19 @@ class DocumentManager:
     def __init__(self):
         self.storage_backend = self.get_storage_backend()  # S3, local, etc.
         self.document_processor = DocumentProcessor()
-        
+
     def store_document(self, document: Document, manuscript_id: str) -> StorageResult:
         """Store document with proper organization and metadata"""
-        
+
         # Generate storage path
         storage_path = self.generate_storage_path(document, manuscript_id)
-        
+
         # Process document
         processed_doc = self.document_processor.process(document)
-        
+
         # Extract metadata
         metadata = self.extract_metadata(processed_doc)
-        
+
         # Store with versioning
         result = self.storage_backend.store(
             path=storage_path,
@@ -370,18 +370,18 @@ class DocumentManager:
             metadata=metadata,
             versioning=True
         )
-        
+
         # Update database
         self.db.store_document_reference(manuscript_id, storage_path, metadata)
-        
+
         return result
-    
+
     def generate_storage_path(self, document: Document, manuscript_id: str) -> str:
         """Generate organized storage path"""
         journal = manuscript_id.split('_')[0] if '_' in manuscript_id else 'UNKNOWN'
         year = datetime.now().year
         doc_type = document.document_type
-        
+
         return f"{journal}/{year}/{manuscript_id}/{doc_type}/{document.filename}"
 ```
 
@@ -422,28 +422,28 @@ class DocumentManager:
 class ChangeDetector:
     def detect_changes(self, manuscript_id: str) -> ChangeDetection:
         """Detect if manuscript data has changed since last extraction"""
-        
+
         # Get last extraction metadata
         last_extraction = self.db.get_last_extraction(manuscript_id)
-        
+
         if not last_extraction:
             return ChangeDetection(changed=True, reason="First extraction")
-        
+
         # Quick checks
         current_checksum = self.calculate_page_checksum(manuscript_id)
         if current_checksum != last_extraction.page_checksum:
             return ChangeDetection(changed=True, reason="Page content changed")
-        
+
         # Deep checks for time-sensitive data
         if self.time_sensitive_data_changed(manuscript_id, last_extraction):
             return ChangeDetection(changed=True, reason="Time-sensitive data updated")
-        
+
         # Check for new referee assignments
         if self.new_referees_detected(manuscript_id, last_extraction):
             return ChangeDetection(changed=True, reason="New referee assignments")
-        
+
         return ChangeDetection(changed=False, reason="No changes detected")
-    
+
     def calculate_page_checksum(self, manuscript_id: str) -> str:
         """Calculate checksum of key page elements"""
         key_elements = self.extract_key_elements(manuscript_id)
@@ -470,12 +470,12 @@ class ChangeDetector:
 def validate_extraction_quality(extracted_data: Dict) -> QualityScore:
     """Assess quality of extracted data"""
     score = QualityScore()
-    
+
     # Completeness check
     required_fields = ['id', 'title', 'authors', 'status', 'submission_date']
     completeness = sum(1 for field in required_fields if extracted_data.get(field)) / len(required_fields)
     score.completeness = completeness
-    
+
     # Accuracy indicators
     if extracted_data.get('submission_date'):
         try:
@@ -484,13 +484,13 @@ def validate_extraction_quality(extracted_data: Dict) -> QualityScore:
                 score.accuracy_issues.append("Future submission date")
         except:
             score.accuracy_issues.append("Invalid date format")
-    
+
     # Data consistency
     if extracted_data.get('referees'):
         for referee in extracted_data['referees']:
             if not referee.get('email') and referee.get('status') != 'Not contacted':
                 score.consistency_issues.append(f"Missing email for {referee.get('name')}")
-    
+
     return score
 ```
 
@@ -513,11 +513,11 @@ class QualityMetrics:
     extraction_success_rate: float       # % of successful extractions
     data_completeness_score: float       # Average completeness of extracted data
     accuracy_score: float                # Accuracy based on manual validation
-    
+
     # Detailed breakdowns
     field_completeness: Dict[str, float] # Completeness by field
     error_categories: Dict[str, int]     # Count of error types
-    
+
     # Trends
     quality_trend: str                   # Improving/Declining/Stable
     last_validation_date: datetime      # When metrics were last calculated
@@ -553,19 +553,19 @@ class QualityMetrics:
 class PerformanceOptimizer:
     def optimize_extraction_pipeline(self):
         """Optimize extraction for maximum performance"""
-        
+
         # Parallel processing
         self.enable_concurrent_processing(max_workers=10)
-        
+
         # Intelligent batching
         self.implement_smart_batching(batch_size=20)
-        
+
         # Connection pooling
         self.setup_connection_pools(database=20, browser=5)
-        
+
         # Caching optimization
         self.configure_multilevel_caching()
-        
+
         # Resource monitoring
         self.setup_performance_monitoring()
 ```
@@ -594,21 +594,21 @@ class PerformanceOptimizer:
 class SecurityManager:
     def anonymize_referee_data(self, data: RefereeData) -> AnonymizedData:
         """Anonymize sensitive referee information"""
-        
+
         anonymized = RefereeData()
-        
+
         # Hash email addresses
         anonymized.email_hash = self.hash_email(data.email)
-        
+
         # Generalize institutions
         anonymized.institution_category = self.categorize_institution(data.institution)
-        
+
         # Remove direct identifiers
         anonymized.name_initials = self.extract_initials(data.name)
-        
+
         # Preserve analytics-relevant data
         anonymized.performance_metrics = data.performance_metrics
-        
+
         return anonymized
 ```
 
@@ -623,37 +623,37 @@ class SecurityManager:
 class AIContentAnalyzer:
     def analyze_manuscript_quality(self, manuscript: Manuscript) -> QualityAnalysis:
         """AI-powered manuscript quality assessment"""
-        
+
         analysis = QualityAnalysis()
-        
+
         # Desk rejection prediction
         analysis.desk_rejection_probability = self.predict_desk_rejection(manuscript)
-        
+
         # Quality indicators
         analysis.writing_quality_score = self.assess_writing_quality(manuscript.content)
         analysis.methodology_strength = self.evaluate_methodology(manuscript.content)
         analysis.novelty_score = self.assess_novelty(manuscript)
-        
+
         # Recommendations
         analysis.improvement_suggestions = self.generate_suggestions(manuscript)
-        
+
         return analysis
-    
+
     def recommend_referees(self, manuscript: Manuscript) -> List[RefereeRecommendation]:
         """AI-powered referee recommendations"""
-        
+
         # Extract expertise requirements
         required_expertise = self.extract_expertise_requirements(manuscript)
-        
+
         # Match with referee database
         candidate_referees = self.find_candidate_referees(required_expertise)
-        
+
         # Score candidates
         scored_referees = []
         for referee in candidate_referees:
             score = self.calculate_referee_score(referee, manuscript)
             scored_referees.append(RefereeRecommendation(referee=referee, score=score))
-        
+
         return sorted(scored_referees, key=lambda x: x.score, reverse=True)
 ```
 
@@ -670,22 +670,22 @@ class AIContentAnalyzer:
 class AutomatedQA:
     def detect_anomalies(self, manuscript_data: List[Manuscript]) -> List[Anomaly]:
         """Detect data anomalies requiring review"""
-        
+
         anomalies = []
-        
+
         for manuscript in manuscript_data:
             # Timeline anomalies
             if self.detect_timeline_anomalies(manuscript):
                 anomalies.append(Anomaly(type="timeline", manuscript_id=manuscript.id))
-            
+
             # Referee assignment anomalies
             if self.detect_referee_anomalies(manuscript):
                 anomalies.append(Anomaly(type="referee", manuscript_id=manuscript.id))
-            
+
             # Data quality anomalies
             if self.detect_quality_anomalies(manuscript):
                 anomalies.append(Anomaly(type="quality", manuscript_id=manuscript.id))
-        
+
         return anomalies
 ```
 
@@ -745,35 +745,35 @@ class ProductionRefereeExtractor:
         self.logger = logging.getLogger(__name__)
         self.validator = DataValidator()
         self.cache = CacheManager()
-        
+
     def extract_referee_data(self, manuscript_id: str) -> ExtractionResult:
         """Extract referee data with comprehensive error handling"""
-        
+
         try:
             # Check cache first
             cached_data = self.cache.get(f"referee_data_{manuscript_id}")
             if cached_data and self.is_data_fresh(cached_data):
                 self.logger.info(f"Using cached data for {manuscript_id}")
                 return ExtractionResult(data=cached_data, source="cache")
-            
+
             # Extract fresh data
             self.logger.info(f"Extracting fresh referee data for {manuscript_id}")
             raw_data = self.scrape_referee_data(manuscript_id)
-            
+
             # Validate extracted data
             validation_result = self.validator.validate_referee_data(raw_data)
             if not validation_result.valid:
                 self.logger.error(f"Validation failed for {manuscript_id}: {validation_result.errors}")
                 return ExtractionResult(error=validation_result.errors)
-            
+
             # Process and clean data
             processed_data = self.process_referee_data(raw_data)
-            
+
             # Cache successful result
             self.cache.set(f"referee_data_{manuscript_id}", processed_data, ttl=3600)
-            
+
             return ExtractionResult(data=processed_data, source="extraction")
-            
+
         except Exception as e:
             self.logger.error(f"Failed to extract referee data for {manuscript_id}: {str(e)}", exc_info=True)
             return ExtractionResult(error=str(e))
@@ -809,18 +809,18 @@ class ProductionRefereeExtractor:
 class ManualValidationFramework:
     def create_validation_sample(self, extraction_results: List[ExtractionResult]) -> ValidationSample:
         """Create sample for manual validation"""
-        
+
         # Stratified sampling across manuscripts
         sample = self.stratified_sample(
             extraction_results,
             strata=['journal', 'status', 'referee_count'],
             sample_size=50
         )
-        
+
         # Include edge cases
         edge_cases = self.identify_edge_cases(extraction_results)
         sample.extend(edge_cases[:10])
-        
+
         return ValidationSample(
             items=sample,
             validation_instructions=self.generate_validation_instructions(),

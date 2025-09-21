@@ -266,7 +266,7 @@ UC Berkeley, IEOR
 Hong Kong
 Hong Kong
 152531662...
-      ✅ Author 1: 
+      ✅ Author 1:
          📧 Email: 15253166207@163.com
          🏛️ Institution: The Hong Kong Polytechnic University Department of Applied Mathematics
          🌍 Country: Hong Kong
@@ -351,7 +351,7 @@ Nantes 44322
 Franc...
       ✅ Author 3: Guillaume Broux-Quemerais
          📧 Email: guillaume.broux97@gmail.com
-         🏛️ Institution: 
+         🏛️ Institution:
          🌍 Country: France
          📝 Corresponding: False
       ✅ Successfully extracted 3 authors with complete details
@@ -456,7 +456,7 @@ BMZ-Forward-MF-compet_MF.zip - Main Document...
 
 📄 MANUSCRIPT 1/2: MAFI-2025-0166
    Title: Optimal investment and consumption under forward utilities w...
-   Status: 
+   Status:
    Category: Awaiting Reviewer Scores
    👥 Authors (3): Chao Zhou, Anis Matoussi, Guillaume Broux-Quemerais
    🔍 Referees (4):
@@ -470,7 +470,7 @@ BMZ-Forward-MF-compet_MF.zip - Main Document...
 
 📄 MANUSCRIPT 2/2: MAFI-2024-0167
    Title: Competitive optimal portfolio selection in a non-Markovian f...
-   Status: 
+   Status:
    Category: Awaiting Reviewer Scores
    👥 Authors (3): , Zuo Quan Xu, Guangchen Wang
    🔍 Referees (2):

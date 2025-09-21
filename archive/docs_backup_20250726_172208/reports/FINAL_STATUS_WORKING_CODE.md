@@ -1,6 +1,6 @@
 # ✅ FINAL STATUS - WORKING CODE RETRIEVED
 
-**Date**: July 15, 2025  
+**Date**: July 15, 2025
 **Status**: ✅ **WORKING CODE FOUND AND INSTALLED**
 
 ---
@@ -32,7 +32,7 @@ editorial_scripts/
 │   ├── extractors/              # All journal extractors
 │   │   ├── sicon.py            # ✅ SICON extractor
 │   │   ├── sifin.py            # ✅ SIFIN extractor
-│   │   ├── implementations/     
+│   │   ├── implementations/
 │   │   │   ├── mf_extractor.py # ✅ MF extractor
 │   │   │   └── mor_extractor.py # ✅ MOR extractor
 │   │   └── base_platform_extractors.py
@@ -74,7 +74,7 @@ python run_extraction.py mor     # Mathematics of Operations Research
 
 ### **Working Extractors**
 - ✅ SICON (SIAM Control and Optimization)
-- ✅ SIFIN (SIAM Financial Mathematics)  
+- ✅ SIFIN (SIAM Financial Mathematics)
 - ✅ MF (Mathematical Finance)
 - ✅ MOR (Mathematics of Operations Research)
 

@@ -17,42 +17,42 @@
 ```python
 class RefereeAnalytics:
     """Comprehensive analytics for individual referee performance"""
-    
+
     # Performance Metrics
     acceptance_rate: float              # % of invitations accepted
     completion_rate: float              # % of accepted reviews completed
     on_time_rate: float                # % of reviews submitted on time
-    
+
     # Time Metrics
     avg_response_time: float           # Days to respond to invitation
     avg_review_time: float             # Days to complete review
     fastest_review: float              # Shortest review time
     slowest_review: float              # Longest review time
-    
+
     # Quality Metrics
     avg_quality_score: float           # 1-10 scale
     quality_consistency: float         # Standard deviation of scores
     report_thoroughness: float         # Based on length and detail
     constructiveness_score: float      # AI-analyzed metric
-    
+
     # Expertise Metrics
     expertise_areas: List[str]         # Primary research areas
     expertise_confidence: Dict[str, float]  # Confidence per area
     h_index: int                       # Academic impact metric
     recent_publications: int           # Papers in last 3 years
-    
+
     # Workload Metrics
     current_reviews: int               # Active assignments
     monthly_average: float             # Reviews per month
     peak_capacity: int                 # Max concurrent reviews handled
     availability_score: float          # 0-1 based on current load
-    
+
     # Reliability Metrics
     ghost_rate: float                  # % of no-response to invitations
     decline_after_accept_rate: float   # % of withdrawals
     reminder_effectiveness: float      # Response rate after reminders
     communication_score: float         # Responsiveness rating
-    
+
     # Journal-Specific Metrics
     journal_experience: Dict[str, int] # Reviews per journal
     journal_acceptance_rate: Dict[str, float]  # Per journal
@@ -63,7 +63,7 @@ class RefereeAnalytics:
 ```python
 class ComparativeRefereeAnalytics:
     """Compare referees against benchmarks and peers"""
-    
+
     def calculate_percentile_ranks(self, referee_id: str) -> PercentileRanks:
         return PercentileRanks(
             speed_percentile=self._calculate_speed_percentile(referee_id),
@@ -71,7 +71,7 @@ class ComparativeRefereeAnalytics:
             reliability_percentile=self._calculate_reliability_percentile(referee_id),
             expertise_percentile=self._calculate_expertise_percentile(referee_id)
         )
-    
+
     def get_peer_comparison(self, referee_id: str) -> PeerComparison:
         """Compare against referees in same field and experience level"""
         peers = self._find_comparable_peers(referee_id)
@@ -92,36 +92,36 @@ referee_analytics_dashboard:
     - performance_spider_chart:
         axes: [speed, quality, reliability, expertise, availability]
         comparison: [individual, peer_avg, journal_avg]
-    
+
     - timeline_view:
         x_axis: time
         y_axis: [reviews_completed, quality_score, response_time]
         period: [30d, 90d, 1y, all_time]
-    
+
     - heatmap_calendar:
         shows: review_activity
         color_scale: workload_intensity
         tooltips: detailed_review_info
-  
+
   performance_trends:
     - quality_over_time:
         chart_type: line_with_confidence_bands
         metrics: [quality_score, report_length, timeliness]
-    
+
     - workload_impact:
         chart_type: scatter_plot
         x: concurrent_reviews
         y: quality_score
         size: review_time
         color: on_time_status
-  
+
   expertise_mapping:
     - knowledge_graph:
         nodes: expertise_areas
         edges: co_occurrence_in_reviews
         size: confidence_score
         clusters: research_domains
-    
+
     - expertise_evolution:
         type: sankey_diagram
         shows: expertise_area_changes_over_time
@@ -131,19 +131,19 @@ referee_analytics_dashboard:
 ```python
 class PredictiveRefereeAnalytics:
     """Machine learning models for referee behavior prediction"""
-    
+
     def predict_response_probability(self, referee_id: str, manuscript: Manuscript) -> ResponsePrediction:
         """Predict likelihood of accepting review invitation"""
         features = self._extract_features(referee_id, manuscript)
         probability = self.response_model.predict_proba(features)[0][1]
-        
+
         return ResponsePrediction(
             accept_probability=probability,
             estimated_response_time=self._predict_response_time(features),
             confidence_score=self._calculate_confidence(features),
             key_factors=self._explain_prediction(features)
         )
-    
+
     def predict_review_timeline(self, referee_id: str, current_workload: int) -> TimelinePrediction:
         """Predict review completion timeline"""
         return TimelinePrediction(
@@ -160,10 +160,10 @@ class PredictiveRefereeAnalytics:
 ```python
 class RefereeScoreCard:
     """Comprehensive scoring system for referee evaluation"""
-    
+
     def calculate_overall_score(self, referee_id: str) -> RefereeScore:
         weights = self.get_configurable_weights()
-        
+
         scores = {
             'timeliness': self._score_timeliness(referee_id) * weights['timeliness'],
             'quality': self._score_quality(referee_id) * weights['quality'],
@@ -172,7 +172,7 @@ class RefereeScoreCard:
             'communication': self._score_communication(referee_id) * weights['communication'],
             'workload_management': self._score_workload_management(referee_id) * weights['workload']
         }
-        
+
         return RefereeScore(
             overall=sum(scores.values()),
             breakdown=scores,
@@ -186,10 +186,10 @@ class RefereeScoreCard:
 ```python
 class DynamicRefereeRanking:
     """Real-time referee ranking with context awareness"""
-    
+
     def get_ranked_referees(self, manuscript: Manuscript, constraints: Dict) -> List[RankedReferee]:
         candidates = self.get_eligible_referees(manuscript)
-        
+
         rankings = []
         for referee in candidates:
             score = self.calculate_context_score(
@@ -199,7 +199,7 @@ class DynamicRefereeRanking:
                 recent_performance=self.get_recent_performance(referee),
                 expertise_match=self.calculate_expertise_match(referee, manuscript)
             )
-            
+
             rankings.append(RankedReferee(
                 referee=referee,
                 match_score=score.match_score,
@@ -208,7 +208,7 @@ class DynamicRefereeRanking:
                 overall_score=score.overall,
                 rationale=self.generate_selection_rationale(referee, manuscript, score)
             ))
-        
+
         return sorted(rankings, key=lambda x: x.overall_score, reverse=True)
 ```
 
@@ -218,7 +218,7 @@ class DynamicRefereeRanking:
 ```python
 class ReviewQualityAnalyzer:
     """Deep analysis of review report quality"""
-    
+
     def analyze_review_quality(self, review: Review) -> QualityAnalysis:
         # Content Analysis
         content_metrics = ContentMetrics(
@@ -228,7 +228,7 @@ class ReviewQualityAnalyzer:
             constructiveness=self._measure_constructiveness(review.text),
             specificity=self._measure_specificity(review.text)
         )
-        
+
         # Structure Analysis
         structure_metrics = StructureMetrics(
             has_summary=self._check_summary_presence(review.text),
@@ -237,7 +237,7 @@ class ReviewQualityAnalyzer:
             has_recommendations=self._check_recommendations(review.text),
             organization_score=self._assess_organization(review.text)
         )
-        
+
         # Impact Analysis
         impact_metrics = ImpactMetrics(
             alignment_with_decision=self._check_decision_alignment(review),
@@ -245,7 +245,7 @@ class ReviewQualityAnalyzer:
             author_feedback_score=self._get_author_feedback(review),
             editor_agreement=self._check_editor_agreement(review)
         )
-        
+
         return QualityAnalysis(
             overall_score=self._calculate_overall_quality(
                 content_metrics, structure_metrics, impact_metrics
@@ -263,10 +263,10 @@ class ReviewQualityAnalyzer:
 ```python
 class QualityTrendAnalyzer:
     """Analyze quality trends over time and identify patterns"""
-    
+
     def analyze_referee_quality_trends(self, referee_id: str) -> QualityTrends:
         reviews = self.get_referee_reviews(referee_id, limit=50)
-        
+
         trends = QualityTrends(
             overall_trend=self._calculate_trend_line(reviews, 'quality_score'),
             consistency_trend=self._calculate_consistency_trend(reviews),
@@ -274,7 +274,7 @@ class QualityTrendAnalyzer:
             predicted_future_quality=self._predict_future_quality(reviews),
             intervention_recommendations=self._suggest_quality_interventions(trends)
         )
-        
+
         return trends
 ```
 
@@ -284,7 +284,7 @@ class QualityTrendAnalyzer:
 ```python
 class RefereeBehaviorAnalytics:
     """Analyze referee behavioral patterns"""
-    
+
     def analyze_response_patterns(self, referee_id: str) -> ResponsePatterns:
         return ResponsePatterns(
             response_time_by_day=self._analyze_day_of_week_patterns(referee_id),
@@ -294,11 +294,11 @@ class RefereeBehaviorAnalytics:
             optimal_invitation_time=self._calculate_optimal_invitation_time(referee_id),
             workload_impact=self._analyze_workload_impact(referee_id)
         )
-    
+
     def predict_burnout_risk(self, referee_id: str) -> BurnoutRisk:
         """Predict referee burnout risk based on patterns"""
         indicators = self._calculate_burnout_indicators(referee_id)
-        
+
         return BurnoutRisk(
             risk_score=indicators.overall_risk,
             warning_signs=indicators.warning_signs,
@@ -311,7 +311,7 @@ class RefereeBehaviorAnalytics:
 ```python
 class CommunicationAnalytics:
     """Analyze communication patterns and effectiveness"""
-    
+
     def analyze_communication_effectiveness(self, referee_id: str) -> CommunicationMetrics:
         return CommunicationMetrics(
             response_rate_by_reminder_count=self._analyze_reminder_effectiveness(referee_id),
@@ -328,11 +328,11 @@ class CommunicationAnalytics:
 ```python
 class RefereeNetworkAnalytics:
     """Analyze referee networks and relationships"""
-    
+
     def build_referee_network(self) -> RefereeNetwork:
         """Build network graph of referee relationships"""
         network = NetworkGraph()
-        
+
         # Add nodes (referees)
         for referee in self.get_all_referees():
             network.add_node(
@@ -343,13 +343,13 @@ class RefereeNetworkAnalytics:
                     'performance_score': referee.performance_score
                 }
             )
-        
+
         # Add edges (relationships)
         for manuscript in self.get_all_manuscripts():
             referees = manuscript.get_assigned_referees()
             for r1, r2 in combinations(referees, 2):
                 network.add_edge(r1.id, r2.id, weight='co-review')
-        
+
         return RefereeNetwork(
             graph=network,
             communities=self._detect_communities(network),
@@ -373,13 +373,13 @@ editorial_value_stream:
       time: 5_days
       value_added_time: 2_hours
       efficiency: 1.7%
-    
+
     future_state:
       steps: [auto_receive, auto_log, ai_triage, smart_assign]
       time: 1_hour
       value_added_time: 45_minutes
       efficiency: 75%
-    
+
     improvements:
       - eliminate: manual_data_entry
       - automate: initial_screening
@@ -390,7 +390,7 @@ editorial_value_stream:
 ```python
 class WasteIdentification:
     """Identify and eliminate waste in editorial process"""
-    
+
     WASTE_TYPES = {
         'waiting': 'Time spent waiting for responses',
         'overprocessing': 'Unnecessary review rounds',
@@ -400,7 +400,7 @@ class WasteIdentification:
         'transportation': 'Moving data between systems',
         'overproduction': 'Excessive reminders and follow-ups'
     }
-    
+
     def analyze_waste(self) -> WasteAnalysis:
         return WasteAnalysis(
             waiting_time=self._measure_waiting_time(),
@@ -419,7 +419,7 @@ class WasteIdentification:
 ```python
 class KaizenTracker:
     """Track and implement continuous improvements"""
-    
+
     def track_improvement_opportunity(self, opportunity: ImprovementOpportunity):
         return Improvement(
             id=generate_id(),
@@ -432,10 +432,10 @@ class KaizenTracker:
             assigned_to=opportunity.owner,
             status='identified'
         )
-    
+
     def measure_improvement_impact(self, improvement_id: str) -> ImpactMeasurement:
         improvement = self.get_improvement(improvement_id)
-        
+
         return ImpactMeasurement(
             time_saved=self._measure_time_reduction(improvement),
             quality_improvement=self._measure_quality_increase(improvement),
@@ -449,7 +449,7 @@ class KaizenTracker:
 ```python
 class EditorialABTesting:
     """A/B testing for editorial process optimization"""
-    
+
     def create_referee_selection_test(self) -> ABTest:
         return ABTest(
             name="AI vs Traditional Referee Selection",
@@ -478,26 +478,26 @@ lean_kpi_dashboard:
         target: "< 60 days"
         current: "82 days"
         trend: "improving"
-    
+
     - first_time_right:
         definition: "% of correct referee assignments"
         target: "> 90%"
         current: "78%"
         action: "Implement AI matching"
-    
+
     - value_add_ratio:
         definition: "Value-added time / Total time"
         target: "> 50%"
         current: "23%"
         improvement_areas: ["automation", "parallel_processing"]
-  
+
   quality_metrics:
     - review_quality_score:
         definition: "Average review quality (1-10)"
         target: "> 8.0"
         current: "7.3"
         factors: ["referee_selection", "clear_guidelines", "training"]
-    
+
     - author_satisfaction:
         definition: "NPS from authors"
         target: "> 50"
@@ -509,11 +509,11 @@ lean_kpi_dashboard:
 ```python
 class ProcessOptimizationEngine:
     """Use ML to optimize editorial processes"""
-    
+
     def optimize_referee_panel_size(self, manuscript_type: str) -> PanelOptimization:
         """Determine optimal number of referees"""
         historical_data = self.get_historical_panels(manuscript_type)
-        
+
         optimization = self.ml_model.optimize(
             objective='minimize_time_while_maintaining_quality',
             constraints={
@@ -524,7 +524,7 @@ class ProcessOptimizationEngine:
             },
             data=historical_data
         )
-        
+
         return PanelOptimization(
             optimal_size=optimization.panel_size,
             expected_time_reduction=optimization.time_savings,
@@ -539,7 +539,7 @@ class ProcessOptimizationEngine:
 ```python
 class IntelligentAutomation:
     """Automate routine editorial tasks with intelligence"""
-    
+
     AUTOMATION_OPPORTUNITIES = {
         'manuscript_triage': {
             'current_time': '2 hours/manuscript',
@@ -572,7 +572,7 @@ class IntelligentAutomation:
 ```python
 class EditorialRPA:
     """RPA for repetitive editorial tasks"""
-    
+
     def automate_manuscript_intake(self):
         """Fully automate manuscript intake process"""
         return RPAWorkflow(
@@ -619,7 +619,7 @@ referee_kpis:
     - on_time_rate:
         target: "> 90%"
         weight: 20%
-  
+
   quality:
     - review_quality_score:
         target: "> 8/10"
@@ -630,7 +630,7 @@ referee_kpis:
     - constructiveness_rating:
         target: "> 4/5"
         weight: 20%
-  
+
   reliability:
     - acceptance_rate:
         target: "> 70%"
@@ -652,39 +652,39 @@ system_kpis:
         current: "45%"
         target: "80%"
         timeline: "6 months"
-    
+
     - mean_time_to_decision:
         definition: "Average submission to decision time"
         current: "82 days"
         target: "45 days"
         timeline: "12 months"
-    
+
     - referee_utilization:
         definition: "Active referees / Total referees"
         current: "62%"
         target: "85%"
         timeline: "3 months"
-  
+
   quality:
     - decision_accuracy:
         definition: "% decisions aligned with impact"
         measurement: "3-year citation correlation"
         current: "73%"
         target: "85%"
-    
+
     - author_satisfaction:
         definition: "Author NPS score"
         current: "32"
         target: "60"
         timeline: "12 months"
-  
+
   growth:
     - manuscript_throughput:
         definition: "Manuscripts processed/month"
         current: "450"
         target: "750"
         constraint: "maintain quality"
-    
+
     - referee_pool_growth:
         definition: "New quality referees/month"
         current: "25"
@@ -698,7 +698,7 @@ system_kpis:
 ```python
 class ExecutiveDashboard:
     """High-level metrics for editorial leadership"""
-    
+
     widgets = [
         HealthScoreWidget(
             metrics=['system_uptime', 'automation_rate', 'quality_score'],
@@ -727,7 +727,7 @@ class ExecutiveDashboard:
 ```python
 class OperationalDashboard:
     """Detailed metrics for daily operations"""
-    
+
     sections = {
         'manuscript_pipeline': PipelineVisualization(
             stages=['submitted', 'screening', 'review', 'revision', 'decision'],

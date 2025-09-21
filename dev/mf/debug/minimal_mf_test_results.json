@@ -1,0 +1,25 @@
+[
+  {
+    "id": "",
+    "referees": [
+      {
+        "name": "Villeneuve, St\u00e9phane",
+        "email": "",
+        "status": "Agreed :",
+        "affiliation": "Universite Toulouse 1 Capitole, Toulouse school of economics-TSM-R"
+      },
+      {
+        "name": "Strulovici, Bruno",
+        "email": "",
+        "status": "Declined :",
+        "affiliation": "Northwestern University, Economics"
+      },
+      {
+        "name": "Durandard, Th\u00e9o",
+        "email": "",
+        "status": "Agreed :",
+        "affiliation": "University of Illinois at Urbana-Champaign"
+      }
+    ]
+  }
+]

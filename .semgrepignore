@@ -51,7 +51,7 @@ adapters/driven/browser/
 # Allow exec/eval in configuration loading (controlled usage)
 utils/config_loader.py
 
-# Allow shell injection in build scripts (controlled environment)  
+# Allow shell injection in build scripts (controlled environment)
 scripts/build/
 scripts/deployment/
 nix/

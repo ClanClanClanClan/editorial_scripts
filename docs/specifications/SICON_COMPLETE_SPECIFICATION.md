@@ -30,7 +30,7 @@ The SICON extractor needs to:
 ### Main Dashboard Categories
 ```
 Under Review (4 AE)                    ← Click if > 0
-All Pending Manuscripts (4 AE)         ← Click if > 0  
+All Pending Manuscripts (4 AE)         ← Click if > 0
 Waiting for Revision (1 AE)            ← Click if > 0
 ```
 
@@ -45,7 +45,7 @@ Potential Referees:                    ← DECLINED REFEREES
   Samuel Daudin #1 (Last Contact Date: 2025-02-04) (Status: Declined)
   [4 more declined referees...]
 
-Referees:                             ← ACCEPTED REFEREES  
+Referees:                             ← ACCEPTED REFEREES
   Giorgio Ferrari #1 (Rcvd: 2025-06-02)    ← Report submitted
   Juan Li #2 (Due: 2025-04-17)            ← Report pending
 

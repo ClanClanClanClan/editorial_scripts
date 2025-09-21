@@ -1,7 +1,7 @@
 # 📋 COMPREHENSIVE JOURNAL EXTRACTION SPECIFICATIONS
 
-**Date**: 2025-07-14  
-**Status**: Ultra-detailed analysis of requirements vs reality  
+**Date**: 2025-07-14
+**Status**: Ultra-detailed analysis of requirements vs reality
 **Purpose**: Perfect base for implementation completion
 
 ---
@@ -46,7 +46,7 @@ Category page
 
 **Implementation**: `SICONRealExtractor._extract_manuscripts()` - **STATUS: ⚠️ Inconsistent**
 
-**EXPECTED RESULT**: 4 manuscripts (M172838, M173704, M173889, M176733)  
+**EXPECTED RESULT**: 4 manuscripts (M172838, M173704, M173889, M176733)
 **ACTUAL RESULT**: 1-4 manuscripts (varies by run)
 
 #### **Step 3: Per-Manuscript Data Extraction**
@@ -78,7 +78,7 @@ For each manuscript URL:
 
 **CRITICAL ISSUE**: Core manuscript fields are missing despite HTML parsing implementation.
 
-#### **B. Referee Information**  
+#### **B. Referee Information**
 | Field | Required | Current Status | Extraction Method |
 |-------|----------|----------------|-------------------|
 | **Name** | ✅ Required | ⚠️ Partial | Parse from HTML links, click for full name |
@@ -92,16 +92,16 @@ For each manuscript URL:
 **STATUS PARSING LOGIC** (Working):
 ```
 Potential Referees section:
-- No status = "Declined" 
+- No status = "Declined"
 - "(Status: Declined)" = "Declined"
 - "(Status: ...)" = Other statuses
 
-Referees section:  
+Referees section:
 - Report submitted + date = "Report submitted"
 - Accepted but no report = "Accepted, awaiting report"
 ```
 
-**EXPECTED REFEREE COUNT**: 13 unique across 4 manuscripts  
+**EXPECTED REFEREE COUNT**: 13 unique across 4 manuscripts
 **ACTUAL REFEREE COUNT**: 2-4 per run (inconsistent)
 
 #### **C. Document Collection**
@@ -116,7 +116,7 @@ Referees section:
 **PDF URL PATTERNS** (Working):
 ```
 Manuscript: sicon_files/.../art_file_...pdf
-Cover Letter: sicon_files/.../auth_cover_letter_...pdf  
+Cover Letter: sicon_files/.../auth_cover_letter_...pdf
 Supplement: sicon_files/.../supplementary_...pdf
 AE Recommendation: cgi-bin/main.plex?form_type=display_me_review...
 ```
@@ -135,10 +135,10 @@ AE Recommendation: cgi-bin/main.plex?form_type=display_me_review...
 
 #### **Priority 1: Core Data Extraction**
 1. **Fix manuscript metadata parsing** - Title, authors, dates all missing
-2. **Fix referee email extraction** - Many referees have empty emails  
+2. **Fix referee email extraction** - Many referees have empty emails
 3. **Fix PDF downloading** - 0 downloads despite URL extraction working
 
-#### **Priority 2: Consistency**  
+#### **Priority 2: Consistency**
 4. **Fix navigation reliability** - Should consistently find all 4 manuscripts
 5. **Fix referee deduplication** - Ensure unique referees per manuscript
 
@@ -220,7 +220,7 @@ https://mc.manuscriptcentral.com/mathfin
 
 #### **ScholarOne Platform Features**:
 - **Device verification handling** - 2FA support
-- **Manuscript queue navigation** - AE dashboard access  
+- **Manuscript queue navigation** - AE dashboard access
 - **Referee report extraction** - PDF and text reports
 - **Status tracking** - ScholarOne status workflow
 - **Document management** - Multiple file types
@@ -236,7 +236,7 @@ https://mc.manuscriptcentral.com/mathfin
 
 #### **Test Plan**:
 1. **Authentication test** - Verify login works
-2. **Navigation test** - Find AE dashboard and manuscript queue  
+2. **Navigation test** - Find AE dashboard and manuscript queue
 3. **Data extraction test** - Verify referee and manuscript data
 4. **Document download test** - Verify PDF extraction
 
@@ -290,7 +290,7 @@ Gmail OAuth2 Authentication
 
 #### **Email Pattern Analysis**:
 - **Manuscript submission notifications**
-- **Referee invitation emails** 
+- **Referee invitation emails**
 - **Referee response tracking**
 - **Report submission notifications**
 - **Editorial decision emails**
@@ -351,7 +351,7 @@ Gmail OAuth2 → Search JOTA emails → Parse communications → Extract data
 ### **🎯 NEXT PHASE PRIORITIES**:
 
 1. **Fix SICON** - Complete the partially working implementation
-2. **Fix SIFIN** - Debug navigation failure  
+2. **Fix SIFIN** - Debug navigation failure
 3. **Test ScholarOne** - Validate MF and MOR scrapers
 4. **Test Email-based** - Validate FS and JOTA scrapers
 5. **Integration testing** - End-to-end workflow validation

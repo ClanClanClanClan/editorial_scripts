@@ -1,6 +1,6 @@
 # 🏗️ EDITORIAL SCRIPTS REORGANIZATION COMPLETE
 
-**Date**: 2025-07-14  
+**Date**: 2025-07-14
 **Status**: ✅ COMPLETED - Major cleanup and consolidation
 
 ## 🎯 MISSION ACCOMPLISHED
@@ -90,7 +90,7 @@ src/infrastructure/scrapers/
 export EDITORIAL_MASTER_PASSWORD='your_password'
 
 python3 run_all_journals.py --journal SICON --verbose
-python3 run_all_journals.py --journal SIFIN --verbose  
+python3 run_all_journals.py --journal SIFIN --verbose
 python3 run_all_journals.py --journal MF --verbose
 python3 run_all_journals.py --journal MOR --verbose
 python3 run_all_journals.py --journal FS --verbose
@@ -136,7 +136,7 @@ python3 run_all_journals.py --journal JOTA --verbose
 
 ## 🎉 MISSION STATUS: SUCCESS
 
-The Editorial Scripts project has been successfully **reorganized, consolidated, and unified**. 
+The Editorial Scripts project has been successfully **reorganized, consolidated, and unified**.
 
 - **Before**: Chaotic, duplicated, partially working
 - **After**: Clean, organized, ready for systematic testing and improvement

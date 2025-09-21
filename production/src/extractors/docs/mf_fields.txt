@@ -3,7 +3,7 @@ MF EXTRACTOR COMPREHENSIVE FIELD LIST (51 FIELDS - 100% MOR PARITY)
 
 BASIC MANUSCRIPT INFO (6 fields):
 1. id
-2. title  
+2. title
 3. status
 4. status_details
 5. submission_date
@@ -20,7 +20,7 @@ AUTHORS (7 fields):
 
 REFEREES (8 fields):
 14. referees (with name, affiliation, status, dates)
-15. referee email (FIXED - now working) 
+15. referee email (FIXED - now working)
 16. orcid (MF UNIQUE)
 17. mathscinet_id (MF UNIQUE)
 18. report.pdf_downloaded

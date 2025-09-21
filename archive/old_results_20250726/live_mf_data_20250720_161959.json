@@ -1,0 +1,26 @@
+{
+  "success": true,
+  "journal_code": "MF",
+  "journal_name": "Mathematical Finance",
+  "platform": "ScholarOne",
+  "extraction_time": 10.3488929271698,
+  "extraction_timestamp": "2025-07-20T16:19:52.518673",
+  "data": {
+    "journal": "MF",
+    "extraction_date": "2025-07-20T16:19:42.744684",
+    "manuscripts": [],
+    "referees": [],
+    "statistics": {}
+  },
+  "analysis": {
+    "manuscript_count": 0,
+    "referee_count": 0,
+    "data_quality_score": 0.0,
+    "status_breakdown": {},
+    "author_count": 0,
+    "unique_authors": [],
+    "date_range": {},
+    "field_completeness": {},
+    "referee_analysis": {}
+  }
+}

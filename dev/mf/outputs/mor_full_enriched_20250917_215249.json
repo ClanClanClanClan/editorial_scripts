@@ -1,0 +1,119 @@
+{
+  "extraction_time": "2025-09-17T21:51:25.073159",
+  "journal": "MOR",
+  "manuscripts": [
+    {
+      "manuscript_id": "MOR-2025-1136",
+      "authors": [
+        {
+          "name": "Cerny, Ales",
+          "email": "",
+          "institution": "Bayes Business School",
+          "department": "",
+          "country": "UK",
+          "orcid": "0000-0002-8846-5632",
+          "email_domain": "city.ac.uk"
+        },
+        {
+          "name": "Ruf, Johannes",
+          "email": "",
+          "institution": "LSE, Mathematics",
+          "department": "Mathematics",
+          "country": "UK",
+          "orcid": "0000-0001-6963-1044",
+          "email_domain": "lse.ac.uk"
+        },
+        {
+          "name": "Schweizer, Martin",
+          "email": "",
+          "institution": "ETH Zurich",
+          "department": "",
+          "country": "Switzerland",
+          "orcid": "0009-0009-9131-0218",
+          "email_domain": "ethz.ch"
+        }
+      ],
+      "referees": [
+        {
+          "name": "Frittelli, Marco",
+          "institution": "Universit\u00e0 degli Studi di Milano",
+          "department": "",
+          "country": "Italy",
+          "status": "Declined",
+          "orcid": "0000-0003-4340-4462",
+          "email": "",
+          "email_domain": "unimi.it"
+        },
+        {
+          "name": "Kallsen, Jan",
+          "institution": "Christian-Albrechts-Universit\u00e4t zu Kiel, Mathematisches Seminar",
+          "department": "Mathematisches Seminar",
+          "country": "Germany",
+          "status": "Agreed",
+          "orcid": "0000-0002-0201-8453",
+          "email": "",
+          "email_domain": "uni-kiel.de"
+        },
+        {
+          "name": "Biagini, Sara",
+          "institution": "Universit\u00e0 degli Studi di Milano",
+          "department": "",
+          "country": "Italy",
+          "status": "Declined",
+          "orcid": "0000-0001-6147-9260",
+          "email": "",
+          "email_domain": "unimi.it"
+        },
+        {
+          "name": "Zitkovic, Gordan",
+          "institution": "UT Austin, Mathematics",
+          "department": "Mathematics",
+          "country": "USA",
+          "status": "Declined",
+          "orcid": "0000-0001-6098-3473",
+          "email": "",
+          "email_domain": "utexas.edu"
+        },
+        {
+          "name": "Maccheroni, Fabio",
+          "institution": "Universit\u00e0 Bocconi, Decision Sciences",
+          "department": "Decision Sciences",
+          "country": "Italy",
+          "status": "Declined",
+          "orcid": "0000-0003-4850-3021",
+          "email": "",
+          "email_domain": "unibocconi.it"
+        },
+        {
+          "name": "Marinacci, Massimo",
+          "institution": "Universit\u00e0 Bocconi, Department of Decision Sciences",
+          "department": "Department of Decision Sciences",
+          "country": "Italy",
+          "status": "Declined",
+          "orcid": "0000-0002-0079-4176",
+          "email": "",
+          "email_domain": "unibocconi.it"
+        },
+        {
+          "name": "Maggis, Marco",
+          "institution": "Universit\u00e0 degli Studi di Milano, Department of Mathematics",
+          "department": "Department of Mathematics",
+          "country": "Italy",
+          "status": "Agreed",
+          "orcid": "0000-0003-4853-6456",
+          "email": "",
+          "email_domain": "unimi.it"
+        }
+      ],
+      "metadata": {
+        "title": "Dynamically optimal portfolios for monotone mean\u2013variance preferences",
+        "submission_date": "29-Jul-2025",
+        "keywords": "monotone mean--variance efficiency , monotone Sharpe ratio , local utility , sigma-special processes , variance-optimal separating measure",
+        "manuscript_type": "Research Article",
+        "funding": "UK Research and Innovation >"
+      },
+      "audit_trail": [],
+      "documents": []
+    }
+  ]
+}

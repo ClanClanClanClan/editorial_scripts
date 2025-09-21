@@ -57,7 +57,7 @@ That's it. Nothing more.
 ## Timeline
 
 - Today: Steps 1
-- When site available: Steps 2-3  
+- When site available: Steps 2-3
 - If issues: Step 4
 - Always: Step 5 (honest reporting)
 

@@ -1,0 +1,108 @@
+{
+  "MAFI-2025-0166": {
+    "manuscript_id": "MAFI-2025-0166",
+    "total_emails": 7,
+    "date_range": "2025-07-21 to 2025-07-21",
+    "days_span": 0,
+    "email_types": {
+      "reviewer_center_notification": 2,
+      "invitation": 1,
+      "assignment_notification": 1,
+      "other": 3
+    },
+    "emails": [
+      {
+        "date": "2025-07-21 16:32:14",
+        "type": "reviewer_center_notification",
+        "subject": "Manuscript ID MAFI-2025-0166 now in your Reviewer Center - Mathematical Finance",
+        "referee": "Center",
+        "from": "Dylan Possamai <onbehalfof@manuscriptcentral.com>",
+        "to": "moris.strub@wbs.ac.uk"
+      },
+      {
+        "date": "2025-07-21 16:32:15",
+        "type": "invitation",
+        "subject": "Invitation to Review for Mathematical Finance",
+        "referee": "Strub",
+        "from": "Dylan Possamai <onbehalfof@manuscriptcentral.com>",
+        "to": "moris.strub@wbs.ac.uk"
+      },
+      {
+        "date": "2025-07-21 16:32:15",
+        "type": "assignment_notification",
+        "subject": "Reviewer Assignments for Manuscript ID MAFI-2025-0166 are now due",
+        "referee": "Possamai",
+        "from": "Rama Cont <onbehalfof@manuscriptcentral.com>",
+        "to": "dylan.possamai@math.ethz.ch"
+      },
+      {
+        "date": "2025-07-21 16:32:15",
+        "type": "other",
+        "subject": "Reminder: Mathematical Finance",
+        "referee": "Mrad",
+        "from": "Chandni K J <onbehalfof@manuscriptcentral.com>",
+        "to": "mohamed.kamel.mrad@gmail.com"
+      },
+      {
+        "date": "2025-07-21 16:32:15",
+        "type": "other",
+        "subject": "Reminder: Mathematical Finance",
+        "referee": "Mrad",
+        "from": "Chandni K J <onbehalfof@manuscriptcentral.com>",
+        "to": "mohamed.kamel.mrad@gmail.com"
+      },
+      {
+        "date": "2025-07-21 16:32:16",
+        "type": "reviewer_center_notification",
+        "subject": "Manuscript ID MAFI-2025-0166 now in your Reviewer Center - Mathematical Finance",
+        "referee": "Center",
+        "from": "Dylan Possamai <onbehalfof@manuscriptcentral.com>",
+        "to": "g.liang@warwick.ac.uk"
+      },
+      {
+        "date": "2025-07-21 16:32:16",
+        "type": "other",
+        "subject": "Manuscript ID MAFI-2025-0166 now in your Associate Editor Center",
+        "referee": "Possamai",
+        "from": "Rama Cont <onbehalfof@manuscriptcentral.com>",
+        "to": "dylan.possamai@math.ethz.ch"
+      }
+    ]
+  },
+  "MAFI-2024-0167": {
+    "manuscript_id": "MAFI-2024-0167",
+    "total_emails": 3,
+    "date_range": "2025-07-21 to 2025-07-21",
+    "days_span": 0,
+    "email_types": {
+      "reviewer_center_notification": 2,
+      "other": 1
+    },
+    "emails": [
+      {
+        "date": "2025-07-21 16:32:18",
+        "type": "reviewer_center_notification",
+        "subject": "Manuscript ID MAFI-2024-0167 now in your Reviewer Center - Mathematical Finance",
+        "referee": "Center",
+        "from": "Dylan Possamai <onbehalfof@manuscriptcentral.com>",
+        "to": "hamadene@univ-lemans.fr"
+      },
+      {
+        "date": "2025-07-21 16:32:19",
+        "type": "reviewer_center_notification",
+        "subject": "Manuscript ID MAFI-2024-0167 now in your Reviewer Center - Mathematical Finance",
+        "referee": "Center",
+        "from": "Dylan Possamai <onbehalfof@manuscriptcentral.com>",
+        "to": "mastrolia@berkeley.edu"
+      },
+      {
+        "date": "2025-07-21 16:32:19",
+        "type": "other",
+        "subject": "Manuscript ID MAFI-2024-0167 now in your Associate Editor Center",
+        "referee": "Possamai",
+        "from": "Rama Cont <onbehalfof@manuscriptcentral.com>",
+        "to": "dylan.possamai@math.ethz.ch"
+      }
+    ]
+  }
+}

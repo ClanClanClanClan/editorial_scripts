@@ -94,7 +94,7 @@ class Manuscript:
     authors: List['Author']
     submission_date: datetime
     status: 'ManuscriptStatus'
-    
+
     def assign_referee(self, referee: 'Referee') -> None:
         """Business rule: manuscript assignment logic"""
         if self.status != ManuscriptStatus.AWAITING_REFEREE:
@@ -104,10 +104,10 @@ class Manuscript:
 # src/domain/services/referee_matcher.py
 class RefereeMatcher:
     """Domain service for matching referees to manuscripts"""
-    
+
     def find_best_matches(
-        self, 
-        manuscript: Manuscript, 
+        self,
+        manuscript: Manuscript,
         available_referees: List[Referee]
     ) -> List[RefereeMatch]:
         """Pure business logic - no external dependencies"""
@@ -137,13 +137,13 @@ class AssignRefereeHandler:
         self.manuscript_repo = manuscript_repo
         self.referee_repo = referee_repo
         self.notification_service = notification_service
-    
+
     async def handle(self, command: AssignRefereeCommand) -> None:
         manuscript = await self.manuscript_repo.get(command.manuscript_id)
         referee = await self.referee_repo.get(command.referee_id)
-        
+
         manuscript.assign_referee(referee)
-        
+
         await self.manuscript_repo.save(manuscript)
         await self.notification_service.send_assignment(referee, manuscript)
 ```
@@ -156,7 +156,7 @@ from src.domain.ports import JournalScraper
 
 class PlaywrightJournalScraper(JournalScraper):
     """Playwright implementation of journal scraper port"""
-    
+
     async def login(self, credentials: Credentials) -> None:
         async with async_playwright() as p:
             browser = await p.chromium.launch()
@@ -168,10 +168,10 @@ from src.domain.ports import ManuscriptRepository
 
 class SQLAlchemyManuscriptRepository(ManuscriptRepository):
     """PostgreSQL implementation of manuscript repository"""
-    
+
     def __init__(self, session: AsyncSession):
         self.session = session
-    
+
     async def get(self, id: UUID) -> Manuscript:
         # Async database query
 ```
@@ -237,9 +237,9 @@ def test_manuscript_assignment_rules():
     """Test pure domain logic"""
     manuscript = Manuscript(status=ManuscriptStatus.AWAITING_REFEREE)
     referee = Referee(available=True)
-    
+
     manuscript.assign_referee(referee)
-    
+
     assert manuscript.assigned_referees == [referee]
 
 # tests/integration/test_referee_extraction.py
@@ -249,9 +249,9 @@ async def test_referee_extraction_flow():
     async with TestDatabase() as db:
         scraper = PlaywrightJournalScraper()
         handler = ExtractRefereesHandler(scraper, db)
-        
+
         result = await handler.extract_journal_data("SICON")
-        
+
         assert result.success
         assert len(result.manuscripts) > 0
 ```

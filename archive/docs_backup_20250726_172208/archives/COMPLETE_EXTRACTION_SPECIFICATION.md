@@ -1,8 +1,8 @@
 # 📋 COMPLETE EXTRACTION SPECIFICATION
 **Every field, every journal, every detail**
 
-**Date**: July 14, 2025  
-**Status**: AUTHORITATIVE SPECIFICATION  
+**Date**: July 14, 2025
+**Status**: AUTHORITATIVE SPECIFICATION
 **Purpose**: Exact definition of what must be extracted for every manuscript in every journal
 
 ---
@@ -19,27 +19,27 @@ class Manuscript:
     # === CORE IDENTIFIERS (REQUIRED) ===
     id: str                    # Journal-specific ID (e.g., "M172838", "MF-2025-0123")
     journal: str               # Journal code: "SICON", "SIFIN", "MF", "MOR", "FS", "JOTA"
-    
+
     # === BASIC METADATA (REQUIRED) ===
     title: str                 # Complete manuscript title (no truncation)
     authors: List[str]         # All authors with affiliations
     status: str                # Current status (exact wording from platform)
     submission_date: str       # Original submission date (YYYY-MM-DD)
-    
+
     # === EDITORIAL ASSIGNMENTS (REQUIRED IF VISIBLE) ===
     corresponding_editor: str  # Chief/Corresponding Editor name
     associate_editor: str      # Associate Editor name (YOU if it's your manuscript)
-    
+
     # === REFEREE DATA (REQUIRED) ===
     referees: List[Referee]    # ALL referee assignments (see Referee spec below)
-    
+
     # === DOCUMENT COLLECTION (REQUIRED) ===
     pdf_urls: Dict[str, str]   # All PDF URLs found: {"manuscript": "url", "cover_letter": "url"}
     pdf_paths: Dict[str, str]  # Downloaded PDFs: {"manuscript": "/path/to/file.pdf"}
-    
+
     # === TIMELINE DATA (REQUIRED IF AVAILABLE) ===
     days_in_system: int        # Days since original submission
-    
+
     # === COMPATIBILITY FIELDS ===
     manuscript_id: str         # Copy of id for backward compatibility
     submitted: str             # Copy of submission_date for backward compatibility
@@ -48,34 +48,34 @@ class Manuscript:
 ### **👤 REFEREE OBJECT** (Required for every referee found)
 
 ```python
-@dataclass  
+@dataclass
 class Referee:
     # === CORE IDENTITY (REQUIRED) ===
     name: str                  # Full referee name (click bio links if needed)
     email: str                 # Email address (extract from contact info)
     status: str                # Current status (see status parsing below)
-    
+
     # === INSTITUTIONAL DATA (EXTRACT IF VISIBLE) ===
     institution: str           # Current affiliation
     full_name: str             # Complete name with titles if different from name
-    
+
     # === ASSIGNMENT TIMELINE (EXTRACT IF VISIBLE) ===
     contact_date: str          # Date referee was first contacted (YYYY-MM-DD)
     due_date: str              # Original due date (YYYY-MM-DD)
     declined_date: str         # Date of decline if applicable (YYYY-MM-DD)
     report_date: str           # Date report was submitted (YYYY-MM-DD)
-    
+
     # === STATUS BOOLEANS (COMPUTE FROM STATUS STRING) ===
     declined: bool             # True if referee declined
     report_submitted: bool     # True if report was submitted
-    
+
     # === EMAIL INTEGRATION (POPULATE IF GMAIL API AVAILABLE) ===
     reminder_count: int        # Number of reminder emails sent
     email_verification: Dict   # Gmail API verification data
-    
+
     # === ANALYTICS (COMPUTE IF DATES AVAILABLE) ===
     days_since_invited: int    # Days from contact_date to now
-    
+
     # === TECHNICAL FIELDS ===
     biblio_url: str           # URL to referee bio/contact page
 ```
@@ -93,7 +93,7 @@ class Referee:
 ```
 1. Navigate to https://sicon.siam.org
 2. Wait 60 seconds for CloudFlare bypass
-3. Click ORCID login button  
+3. Click ORCID login button
 4. Enter ORCID_EMAIL and ORCID_PASSWORD
 5. Handle privacy modal (click Continue)
 6. Verify authentication success
@@ -115,7 +115,7 @@ For each manuscript URL:
 ```
 Required Fields:
 - Title: Extract from <title> or main heading
-- Authors: Parse author list with affiliations  
+- Authors: Parse author list with affiliations
 - Status: Extract current status (e.g., "Under Review")
 - Submission Date: Find "Submitted:" or "Date:" field
 - Corresponding Editor: Extract CE name
@@ -128,12 +128,12 @@ Required Fields:
 ```
 Parse pattern: Referee name links
 Status logic:
-- No status indicator = "Declined"  
+- No status indicator = "Declined"
 - "(Status: Declined)" = "Declined"
 - "(Status: X)" = Extract X as status
 ```
 
-**Section 2: "Referees"** (Active/Accepted)  
+**Section 2: "Referees"** (Active/Accepted)
 ```
 Parse pattern: Referee name links with status
 Status logic:
@@ -156,7 +156,7 @@ For each referee:
 ```
 PDF URL Patterns to Extract:
 - Manuscript: sicon_files/.../art_file_...pdf
-- Cover Letter: sicon_files/.../auth_cover_letter_...pdf  
+- Cover Letter: sicon_files/.../auth_cover_letter_...pdf
 - Supplements: sicon_files/.../supplementary_...pdf
 - AE Recommendations: cgi-bin/main.plex?form_type=display_me_review...
 
@@ -177,7 +177,7 @@ Download Method:
 
 ### **📘 SIFIN (SIAM Journal on Financial Mathematics)**
 
-#### **🔗 Platform**: https://sifin.siam.org  
+#### **🔗 Platform**: https://sifin.siam.org
 #### **📊 Expected Results**: TBD (currently 0 manuscripts found)
 
 #### **A. AUTHENTICATION**: Same as SICON ✅
@@ -202,7 +202,7 @@ Expected: Same pattern as SICON but for Financial Mathematics
 #### **A. AUTHENTICATION WORKFLOW**
 ```
 1. Navigate to ScholarOne login page
-2. Enter SCHOLARONE_EMAIL and SCHOLARONE_PASSWORD  
+2. Enter SCHOLARONE_EMAIL and SCHOLARONE_PASSWORD
 3. Handle device verification (2FA) if required
 4. Navigate to Associate Editor dashboard
 5. Access manuscript queue
@@ -254,7 +254,7 @@ Search Patterns:
 - "Finance and Stochastics" OR "Finance & Stochastics"
 - Manuscript submission notifications
 - Referee invitation emails
-- Referee response emails  
+- Referee response emails
 - Report submission notifications
 - Editorial decision emails
 ```
@@ -290,24 +290,24 @@ Extract from email content:
 ```python
 def validate_manuscript(manuscript: Manuscript) -> ValidationResult:
     errors = []
-    
+
     # Required fields
     if not manuscript.id: errors.append("Missing manuscript ID")
-    if not manuscript.title: errors.append("Missing title")  
+    if not manuscript.title: errors.append("Missing title")
     if not manuscript.authors: errors.append("Missing authors")
     if not manuscript.status: errors.append("Missing status")
     if not manuscript.submission_date: errors.append("Missing submission date")
-    
-    # Date validation  
+
+    # Date validation
     if manuscript.submission_date:
         try:
             date = datetime.strptime(manuscript.submission_date, '%Y-%m-%d')
             if date > datetime.now(): errors.append("Future submission date")
         except: errors.append("Invalid date format")
-    
+
     # Referee validation
     if not manuscript.referees: errors.append("No referees found")
-    
+
     return ValidationResult(valid=len(errors)==0, errors=errors)
 ```
 
@@ -315,16 +315,16 @@ def validate_manuscript(manuscript: Manuscript) -> ValidationResult:
 ```python
 def validate_referee(referee: Referee) -> ValidationResult:
     errors = []
-    
+
     # Required fields
     if not referee.name: errors.append("Missing referee name")
     if not referee.email: errors.append("Missing referee email")
     if not referee.status: errors.append("Missing referee status")
-    
+
     # Email format validation
     if referee.email and '@' not in referee.email:
         errors.append("Invalid email format")
-    
+
     return ValidationResult(valid=len(errors)==0, errors=errors)
 ```
 
@@ -346,7 +346,7 @@ Minimum Acceptable Quality:
 Expected Results:
 ✅ 4 manuscripts found
 ✅ All manuscripts have complete metadata (title, authors, dates)
-✅ 13 total referees across all manuscripts  
+✅ 13 total referees across all manuscripts
 ✅ All referees have names, emails, and status
 ✅ 4 PDFs downloaded successfully
 ✅ Gmail verification shows email history
@@ -372,7 +372,7 @@ FS/JOTA: TBD based on email analysis
 - [ ] Referee discovery working
 - [ ] Basic referee data (name, status)
 
-#### **✅ Phase 2: Complete Data**  
+#### **✅ Phase 2: Complete Data**
 - [ ] All manuscript metadata fields populated
 - [ ] All referee metadata fields populated
 - [ ] Email extraction working
@@ -401,7 +401,7 @@ Every extraction must produce a JSON file following this exact structure:
 ```json
 {
   "journal": "SICON",
-  "session_id": "20250714_230000", 
+  "session_id": "20250714_230000",
   "extraction_time": "2025-07-14T23:00:00",
   "total_manuscripts": 4,
   "total_referees": 13,
@@ -410,7 +410,7 @@ Every extraction must produce a JSON file following this exact structure:
   "manuscripts": [
     {
       "id": "M172838",
-      "journal": "SICON", 
+      "journal": "SICON",
       "title": "Constrained Mean-Field Control Problems...",
       "authors": ["Author One (Institution)", "Author Two (Institution)"],
       "status": "Under Review",
@@ -419,7 +419,7 @@ Every extraction must produce a JSON file following this exact structure:
       "associate_editor": "Dylan Possamaï",
       "referees": [
         {
-          "name": "Samuel Daudin", 
+          "name": "Samuel Daudin",
           "email": "samuel.daudin@example.com",
           "status": "Report submitted",
           "institution": "University of Example",
@@ -436,7 +436,7 @@ Every extraction must produce a JSON file following this exact structure:
       },
       "pdf_paths": {
         "manuscript": "/path/to/M172838_manuscript.pdf",
-        "cover_letter": "/path/to/M172838_cover_letter.pdf" 
+        "cover_letter": "/path/to/M172838_cover_letter.pdf"
       }
     }
   ]
@@ -450,7 +450,7 @@ Every extraction must produce a JSON file following this exact structure:
 **Before marking any journal as "complete":**
 
 - [ ] **Authentication**: Robust, handles all edge cases
-- [ ] **Navigation**: Finds ALL expected manuscripts consistently  
+- [ ] **Navigation**: Finds ALL expected manuscripts consistently
 - [ ] **Metadata**: Every required field populated accurately
 - [ ] **Referees**: Every referee has name, email, status
 - [ ] **Documents**: All PDFs download successfully

@@ -1,0 +1,39 @@
+{
+  "timestamp": "2025-09-16T00:42:23.081414",
+  "health_score": 68,
+  "issues": {
+    "critical": [
+      "No error handling in ORCID enrichment",
+      "Unmasked credentials in 5 places"
+    ],
+    "major": [
+      "manuscript['timeline'] not stored",
+      "Insufficient WebDriverWait usage: 4",
+      "Unchecked [0] access: 62",
+      "Unchecked .click(): 33",
+      "Unchecked .text access: 132",
+      "Unchecked int() conversion: 822",
+      "Memory leaks: 69",
+      "Debug code: 13"
+    ],
+    "optimization": [],
+    "verified_working": [
+      "manuscript_details extraction",
+      "referees extraction",
+      "timeline extraction",
+      "authors extraction",
+      "documents extraction",
+      "enrichment extraction",
+      "Response to reviewers",
+      "Revision tracking",
+      "LaTeX source",
+      "All documents",
+      "Recommendation storage"
+    ]
+  },
+  "summary": {
+    "critical": 2,
+    "major": 8,
+    "working": 11
+  }
+}

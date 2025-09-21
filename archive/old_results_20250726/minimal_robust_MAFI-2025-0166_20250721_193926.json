@@ -1,0 +1,9 @@
+{
+  "manuscript_id": "MAFI-2025-0166",
+  "status": "failed",
+  "data": null,
+  "errors": [
+    "Session failed: Login failed"
+  ],
+  "timestamp": "2025-07-21T19:39:06.792973"
+}

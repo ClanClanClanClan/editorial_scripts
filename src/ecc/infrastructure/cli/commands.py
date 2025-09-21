@@ -306,9 +306,7 @@ class ECCCLIApp:
                 self.console.print("🔍 [yellow]Dry run mode - validating configuration...[/yellow]")
 
             # Initialize extraction
-            self.console.print(
-                f"🚀 Starting extraction for journal: [bold]{journal.upper()}[/bold]"
-            )
+            self.console.print(f"🚀 Starting extraction for journal: [bold]{journal.upper()}[/bold]")
 
             # Set up progress tracking
             with Progress() as progress:
@@ -397,7 +395,7 @@ class ECCCLIApp:
 
                     db_url = os.getenv(
                         "DATABASE_URL",
-                        "postgresql+asyncpg://ecc_user:ecc_password@localhost:5433/ecc_db",
+                        "postgresql+asyncpg://localhost:5433/ecc_db",
                     )
                     try:
                         await initialize_database(db_url, echo=False)
@@ -429,9 +427,7 @@ class ECCCLIApp:
     ) -> None:
         """Execute referee extraction."""
         try:
-            self.console.print(
-                f"👥 Extracting referees for journal: [bold]{journal.upper()}[/bold]"
-            )
+            self.console.print(f"👥 Extracting referees for journal: [bold]{journal.upper()}[/bold]")
 
             if manuscript_id:
                 self.console.print(f"📄 Target manuscript: {manuscript_id}")
@@ -726,9 +722,7 @@ class ECCCLIApp:
     ) -> None:
         try:
             # Ensure DB is initialized
-            db_url = os.getenv(
-                "DATABASE_URL", "postgresql+asyncpg://ecc_user:ecc_password@localhost:5433/ecc_db"
-            )
+            db_url = os.getenv("DATABASE_URL", "postgresql+asyncpg://localhost:5433/ecc_db")
             try:
                 await initialize_database(db_url)
             except Exception:

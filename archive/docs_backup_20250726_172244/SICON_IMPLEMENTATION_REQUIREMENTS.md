@@ -11,7 +11,7 @@ async def _navigate_to_manuscripts(self) -> bool:
         # Navigate to main AE page
         main_url = f"{self.base_url}/cgi-bin/sicon/main.plex"
         await self.page.goto(main_url, wait_until="networkidle")
-        
+
         # Find all category links with counts
         categories_to_check = [
             ("Under Review", "ViewUnderReview"),
@@ -20,14 +20,14 @@ async def _navigate_to_manuscripts(self) -> bool:
             ("Awaiting Referee Assignment", "ViewAwaitingReferee"),
             ("Awaiting Associate Editor Recommendation", "ViewAwaitingAE")
         ]
-        
+
         all_manuscript_ids = set()
-        
+
         for category_name, view_name in categories_to_check:
             # Find link with pattern "N AE" where N > 0
             link_selector = f'a:has-text("{category_name}"):has-text("AE")'
             link = await self.page.query_selector(link_selector)
-            
+
             if link:
                 text = await link.inner_text()
                 count_match = re.search(r'(\d+)\s*AE', text)
@@ -35,7 +35,7 @@ async def _navigate_to_manuscripts(self) -> bool:
                     # Click the link
                     await link.click()
                     await self.page.wait_for_load_state("networkidle")
-                    
+
                     # Extract manuscript IDs from the list
                     manuscript_links = await self.page.query_selector_all('a[href*="/m/M"]')
                     for ms_link in manuscript_links:
@@ -43,13 +43,13 @@ async def _navigate_to_manuscripts(self) -> bool:
                         ms_id_match = re.search(r'M(\d+)', href)
                         if ms_id_match:
                             all_manuscript_ids.add(f"M{ms_id_match.group(1)}")
-                    
+
                     # Go back to main page for next category
                     await self.page.goto(main_url, wait_until="networkidle")
-        
+
         self.manuscript_ids = list(all_manuscript_ids)
         return len(self.manuscript_ids) > 0
-        
+
     except Exception as e:
         logger.error(f"Navigation failed: {e}")
         return False
@@ -60,14 +60,14 @@ async def _navigate_to_manuscripts(self) -> bool:
 ```python
 async def _extract_manuscript_details(self, manuscript_id: str) -> Manuscript:
     """Extract complete manuscript details from detail page"""
-    
+
     # Navigate to manuscript detail page
     detail_url = f"{self.base_url}/cgi-bin/sicon/ViewUnderReview/m/{manuscript_id}"
     await self.page.goto(detail_url, wait_until="networkidle")
-    
+
     content = await self.page.content()
     soup = BeautifulSoup(content, 'html.parser')
-    
+
     # Extract basic info
     manuscript = Manuscript(
         id=manuscript_id,
@@ -78,20 +78,20 @@ async def _extract_manuscript_details(self, manuscript_id: str) -> Manuscript:
         corresponding_editor=self._extract_field(soup, "Corresponding Editor"),
         associate_editor=self._extract_field(soup, "Associate Editor")
     )
-    
+
     # Extract authors
     manuscript.authors = self._extract_authors(soup)
-    
+
     # Extract BOTH referee sections
     declined_referees = await self._extract_potential_referees(soup)  # Declined
     active_referees = await self._extract_active_referees(soup)       # Accepted
-    
+
     # Combine without duplicates
     manuscript.referees = declined_referees + active_referees
-    
+
     # Extract PDFs
     manuscript.pdf_urls = self._extract_pdf_links(soup)
-    
+
     return manuscript
 ```
 
@@ -101,22 +101,22 @@ async def _extract_manuscript_details(self, manuscript_id: str) -> Manuscript:
 async def _extract_potential_referees(self, soup: BeautifulSoup) -> List[Referee]:
     """Extract DECLINED referees from 'Potential Referees' section"""
     referees = []
-    
+
     # Find the Potential Referees section
     potential_section = soup.find('td', text=re.compile(r'Potential\s+Referees'))
     if not potential_section:
         return referees
-    
+
     # Parse the content after this section
     current = potential_section.next_sibling
     while current and current.name != 'tr':
         if hasattr(current, 'text'):
             text = current.text
-            
+
             # Pattern: Name #N (Last Contact Date: YYYY-MM-DD) (Status: Declined)
             pattern = r'([^#]+)\s+#(\d+)\s*\(Last Contact Date:\s*(\d{4}-\d{2}-\d{2})\)\s*\(Status:\s*Declined\)'
             matches = re.findall(pattern, text)
-            
+
             for name, ref_num, contact_date in matches:
                 referee = Referee(
                     name=name.strip(),
@@ -126,37 +126,37 @@ async def _extract_potential_referees(self, soup: BeautifulSoup) -> List[Referee
                     contact_date=contact_date,
                     declined_date=contact_date  # Same as contact date
                 )
-                
+
                 # Find the link to click for details
                 link = soup.find('a', text=re.compile(name.strip()))
                 if link:
                     referee = await self._fetch_referee_details(referee, link)
-                
+
                 referees.append(referee)
-        
+
         current = current.next_sibling if hasattr(current, 'next_sibling') else None
-    
+
     return referees
 
 async def _extract_active_referees(self, soup: BeautifulSoup) -> List[Referee]:
     """Extract ACCEPTED referees from 'Referees' section"""
     referees = []
-    
+
     # Find the Referees section (not Potential Referees)
     referees_section = soup.find('td', text=re.compile(r'^Referees$'))
     if not referees_section:
         return referees
-    
+
     # Parse the content after this section
     current = referees_section.next_sibling
     while current and current.name != 'tr':
         if hasattr(current, 'text'):
             text = current.text
-            
+
             # Pattern 1: Name #N (Rcvd: YYYY-MM-DD) - Report submitted
             rcvd_pattern = r'([^#]+)\s+#(\d+)\s*\(Rcvd:\s*(\d{4}-\d{2}-\d{2})\)'
             rcvd_matches = re.findall(rcvd_pattern, text)
-            
+
             for name, ref_num, received_date in rcvd_matches:
                 referee = Referee(
                     name=name.strip(),
@@ -166,18 +166,18 @@ async def _extract_active_referees(self, soup: BeautifulSoup) -> List[Referee]:
                     report_date=received_date,
                     accepted=True
                 )
-                
+
                 # Find the link to click for details
                 link = soup.find('a', text=re.compile(name.strip()))
                 if link:
                     referee = await self._fetch_referee_details(referee, link)
-                
+
                 referees.append(referee)
-            
+
             # Pattern 2: Name #N (Due: YYYY-MM-DD) - Awaiting report
             due_pattern = r'([^#]+)\s+#(\d+)\s*\(Due:\s*(\d{4}-\d{2}-\d{2})\)'
             due_matches = re.findall(due_pattern, text)
-            
+
             for name, ref_num, due_date in due_matches:
                 referee = Referee(
                     name=name.strip(),
@@ -187,16 +187,16 @@ async def _extract_active_referees(self, soup: BeautifulSoup) -> List[Referee]:
                     due_date=due_date,
                     accepted=True
                 )
-                
+
                 # Find the link to click for details
                 link = soup.find('a', text=re.compile(name.strip()))
                 if link:
                     referee = await self._fetch_referee_details(referee, link)
-                
+
                 referees.append(referee)
-        
+
         current = current.next_sibling if hasattr(current, 'next_sibling') else None
-    
+
     return referees
 ```
 
@@ -210,23 +210,23 @@ async def _fetch_referee_details(self, referee: Referee, link_element) -> Refere
         href = await link_element.get_attribute('href')
         if not href:
             return referee
-        
+
         # Open in new tab to preserve current page
         new_page = await self.page.context.new_page()
-        
+
         try:
             # Navigate to biblio page
             biblio_url = f"{self.base_url}{href}" if not href.startswith('http') else href
             await new_page.goto(biblio_url, wait_until="networkidle")
-            
+
             content = await new_page.content()
             soup = BeautifulSoup(content, 'html.parser')
-            
+
             # Extract email
             email_match = re.search(r'([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})', content)
             if email_match:
                 referee.email = email_match.group(1).upper()
-            
+
             # Extract institution
             # Look for patterns like "University of...", "Institute of...", etc.
             inst_patterns = [
@@ -234,18 +234,18 @@ async def _fetch_referee_details(self, referee: Referee, link_element) -> Refere
                 r'[A-Z][a-z]+\s+(?:University|Institute|College)',
                 # Add more patterns as needed
             ]
-            
+
             for pattern in inst_patterns:
                 inst_match = re.search(pattern, content)
                 if inst_match:
                     referee.institution = inst_match.group(0).strip()
                     break
-            
+
         finally:
             await new_page.close()
-        
+
         return referee
-        
+
     except Exception as e:
         logger.error(f"Failed to fetch referee details: {e}")
         return referee
@@ -257,13 +257,13 @@ async def _fetch_referee_details(self, referee: Referee, link_element) -> Refere
 def _extract_pdf_links(self, soup: BeautifulSoup) -> Dict[str, str]:
     """Extract all PDF download links from manuscript page"""
     pdf_urls = {}
-    
+
     # Find Manuscript Items section
     items_section = soup.find('text', text=re.compile('Manuscript Items'))
     if items_section:
         # Look for PDF links
         pdf_links = soup.find_all('a', text=re.compile(r'PDF.*\(\d+KB\)'))
-        
+
         for i, link in enumerate(pdf_links):
             href = link.get('href', '')
             if 'Article File' in link.text or i == 0:
@@ -276,7 +276,7 @@ def _extract_pdf_links(self, soup: BeautifulSoup) -> Dict[str, str]:
                     pdf_urls[f'referee_report_{ref_num}'] = f"{self.base_url}{href}" if not href.startswith('http') else href
             elif 'Source' in link.text:
                 pdf_urls['source'] = f"{self.base_url}{href}" if not href.startswith('http') else href
-    
+
     return pdf_urls
 ```
 

@@ -1,12 +1,10 @@
+import asyncio
 from logging.config import fileConfig
 
-from sqlalchemy import engine_from_config
-from sqlalchemy import pool
-
-import asyncio
-from alembic import context
 from sqlalchemy import pool
 from sqlalchemy.ext.asyncio import create_async_engine
+
+from alembic import context
 
 # Import your models here
 from src.ecc.infrastructure.database.models import Base
@@ -56,10 +54,10 @@ def run_migrations_offline() -> None:
 
 async def run_async_migrations() -> None:
     """Run migrations in 'online' mode with async engine."""
-    
+
     configuration = config.get_section(config.config_ini_section)
     configuration["sqlalchemy.url"] = config.get_main_option("sqlalchemy.url")
-    
+
     connectable = create_async_engine(
         configuration["sqlalchemy.url"],
         poolclass=pool.NullPool,

@@ -10,7 +10,7 @@
 
 ### Phase 1: SAFE FOUNDATION (0% Risk)
 **Status: IN PROGRESS**
-- ✅ Clean up temporary files  
+- ✅ Clean up temporary files
 - ✅ Organize documentation
 - ✅ Create architecture documentation
 - ✅ Document current capabilities
@@ -24,15 +24,15 @@
 # NEW: core/browser_manager.py
 class BrowserManager:
     """Shared Selenium utilities for all platforms"""
-    
+
     @staticmethod
     def setup_chrome_driver(headless=True):
         # Extract from both MF and MOR setup_driver()
-    
-    @staticmethod  
+
+    @staticmethod
     def safe_click(element, retries=3):
         # Common click with retry logic
-    
+
     @staticmethod
     def wait_for_element(driver, selector, timeout=30):
         # Standardized element waiting
@@ -46,18 +46,18 @@ class BrowserManager:
 
 #### Step 2.2: Email Processing Utilities
 ```python
-# NEW: core/email_processor.py  
+# NEW: core/email_processor.py
 class EmailProcessor:
     """Email extraction utilities for popup windows"""
-    
+
     @staticmethod
     def extract_from_popup(driver, popup_url):
         # Extract get_email_from_popup_safe() logic
-    
+
     @staticmethod
     def parse_email_from_text(text):
         # Common email parsing patterns
-    
+
     @staticmethod
     def handle_javascript_popup(driver, js_url):
         # Standardized popup handling
@@ -73,15 +73,15 @@ class EmailProcessor:
 # NEW: core/document_manager.py
 class DocumentManager:
     """File download and management utilities"""
-    
+
     @staticmethod
     def download_pdf(url, filename, timeout=60):
         # Common PDF download logic
-    
+
     @staticmethod
     def ensure_download_directory(path):
         # Directory creation and management
-    
+
     @staticmethod
     def validate_download(file_path, expected_type):
         # File validation utilities
@@ -95,21 +95,21 @@ class DocumentManager:
 # NEW: platforms/scholarone.py
 class ScholarOneExtractor:
     """Base class for ScholarOne Manuscripts platform"""
-    
+
     def __init__(self, journal_name):
         self.browser_manager = BrowserManager()
         self.email_processor = EmailProcessor()
         self.document_manager = DocumentManager()
-    
+
     def authenticate(self):
         # Common ScholarOne authentication
-    
+
     def navigate_to_ae_center(self):
         # Shared navigation logic
-    
+
     def get_manuscript_categories(self):
         # Common category detection
-    
+
     # Abstract methods for journal-specific logic
     @abstractmethod
     def get_journal_specific_selectors(self):
@@ -127,11 +127,11 @@ class ScholarOneExtractor:
 # NEW: platforms/siam.py - For future SICON/SIFIN
 class SIAMExtractor(BaseExtractor):
     """Base for SIAM platform journals"""
-    
-# NEW: platforms/email_based.py - For Finance & Stochastics  
+
+# NEW: platforms/email_based.py - For Finance & Stochastics
 class EmailOnlyExtractor(BaseExtractor):
     """Base for email-only extraction"""
-    
+
 # NEW: platforms/springer.py - For JOTA/MAFE
 class SpringerExtractor(BaseExtractor):
     """Base for Springer platform journals"""
@@ -145,10 +145,10 @@ class SpringerExtractor(BaseExtractor):
 # NEW: mf_extractor_v2.py (side-by-side with original)
 class MathematicalFinanceExtractor(ScholarOneExtractor):
     """New MF extractor inheriting from ScholarOne base"""
-    
+
     def __init__(self):
         super().__init__(journal_name="Mathematical Finance")
-    
+
     def get_journal_specific_selectors(self):
         return {
             'ae_center_link': "Associate Editor Center",
@@ -158,7 +158,7 @@ class MathematicalFinanceExtractor(ScholarOneExtractor):
 
 #### Step 4.2: Validation and Testing
 - **Run both versions side-by-side**
-- **Compare output JSON files**  
+- **Compare output JSON files**
 - **Validate all functionality preserved**
 - **Performance testing**
 
@@ -174,8 +174,8 @@ class MathematicalFinanceExtractor(ScholarOneExtractor):
 # NEW: sicon_extractor.py
 class SICONExtractor(SIAMExtractor):
     """SIAM Control & Optimization extractor"""
-    
-# NEW: fs_extractor.py  
+
+# NEW: fs_extractor.py
 class FinanceStochasticsExtractor(EmailOnlyExtractor):
     """Finance & Stochastics email-based extractor"""
 ```
@@ -194,14 +194,14 @@ class FinanceStochasticsExtractor(EmailOnlyExtractor):
 # tests/validation/extractor_comparison.py
 def compare_extractor_outputs(old_extractor, new_extractor):
     """Validate new extractor produces identical results"""
-    
+
 def run_side_by_side_test():
     """Run both extractors on same data, compare results"""
 ```
 
 ### Checkpoints
 - ✅ **Phase 1 Complete:** Documentation and cleanup done
-- 🔄 **Phase 2 Checkpoint:** All utilities extracted and tested independently  
+- 🔄 **Phase 2 Checkpoint:** All utilities extracted and tested independently
 - 🔄 **Phase 3 Checkpoint:** Platform bases created and validated
 - 🔄 **Phase 4 Checkpoint:** New extractors match old output 100%
 - 🔄 **Phase 5 Checkpoint:** New journal extractors working
@@ -210,7 +210,7 @@ def run_side_by_side_test():
 
 ### Week 1: Utility Extraction (Phase 2)
 - Extract browser management utilities
-- Extract email processing utilities  
+- Extract email processing utilities
 - Extract document management utilities
 - **MF/MOR remain unchanged and working**
 
@@ -238,6 +238,6 @@ def run_side_by_side_test():
 
 ---
 
-**Current Status:** Phase 1 Complete, Phase 2 Ready to Begin  
-**Risk Level:** Minimal (existing functionality preserved)  
+**Current Status:** Phase 1 Complete, Phase 2 Ready to Begin
+**Risk Level:** Minimal (existing functionality preserved)
 **Success Criteria:** All extractors working + framework ready for new journals

@@ -1,0 +1,87 @@
+{
+  "system": {
+    "base_url": "https://mc.manuscriptcentral.com/mafi",
+    "timeout_default": 10,
+    "timeout_extended": 15,
+    "sleep_short": 2,
+    "sleep_medium": 3,
+    "sleep_long": 5
+  },
+  "paths": {
+    "download_dir": "downloads",
+    "debug_dir": "debug",
+    "output_dir": "data/results",
+    "backup_dir": "data/historical/extractions"
+  },
+  "file_naming": {
+    "output_prefix": "mf_comprehensive",
+    "debug_prefix": "debug_mf",
+    "timestamp_format": "%Y%m%d_%H%M%S"
+  },
+  "extraction": {
+    "max_retries": 3,
+    "retry_delay": 2,
+    "max_authors_per_manuscript": 50,
+    "max_referees_per_manuscript": 20
+  },
+  "selectors": {
+    "manuscript_info_tab": "//a[contains(text(), 'Manuscript Information')]",
+    "authors_section": "//tr[td[contains(text(), 'Authors & Institutions:')]]",
+    "author_rows": "//tr[td[contains(text(), 'Authors & Institutions:')]//following-sibling::tr[1]//table//tr[td[contains(@class, 'pagecontents')]]",
+    "author_email_links": "//a[contains(@href, 'mailpopup')]",
+    "author_name_links": "//a[contains(@href, 'mailpopup')]",
+    "author_institutions": "//td[contains(@class, 'pagecontents') and contains(., '@')]",
+    "orcid_links": "//a[contains(@href, 'orcid.org')]",
+    "corresponding_author_indicators": "//font[contains(text(), 'Corresponding Author')]",
+    "keywords_section": "//tr[td[contains(text(), 'Keywords:')]]//following-sibling::td",
+    "cover_letter_links": "//a[contains(@href, 'DOWNLOAD=TRUE') and contains(text(), 'Cover')]",
+    "email_patterns": [
+      "\\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Z|a-z]{2,}\\b"
+    ],
+    "title_selector": "//tr[td[contains(text(), 'Title:')]]//following-sibling::td",
+    "manuscript_id_selector": "//tr[td[contains(text(), 'Manuscript ID:')]]//following-sibling::td",
+    "audit_trail_tab": "//a[contains(text(), 'Audit Trail')]",
+    "referee_table_rows": "//td[@class='tablelines']//tr[td[@class='tablelightcolor'] and .//a[contains(@href,'mailpopup')]]",
+    "referee_status_patterns": [
+      "Agreed",
+      "Declined", 
+      "Unavailable",
+      "Invited",
+      "Reviewing",
+      "Review Submitted",
+      "Review Received"
+    ],
+    "audit_trail_events": {
+      "reviewer_invitation": "//tr[contains(., 'Reviewer Invitation')]",
+      "reviewer_agreement": "//tr[contains(., 'agreed') or contains(., 'Agreed')]",
+      "reviewer_decline": "//tr[contains(., 'declined') or contains(., 'Declined') or contains(., 'Unavailable')]",
+      "review_submission": "//tr[contains(., 'Review') and contains(., 'submitted')]",
+      "review_received": "//tr[contains(., 'Review') and contains(., 'received')]"
+    }
+  },
+  "country_mapping": {
+    "china": "China",
+    "hong kong": "Hong Kong",
+    "singapore": "Singapore", 
+    "france": "France",
+    "uk": "United Kingdom",
+    "united kingdom": "United Kingdom",
+    "britain": "United Kingdom",
+    "usa": "United States",
+    "united states": "United States",
+    "america": "United States"
+  },
+  "institution_keywords": [
+    "university",
+    "institute", 
+    "department",
+    "school",
+    "college",
+    "academy",
+    "research center",
+    "laboratory"
+  ],
+  "api_endpoints": {
+    "duckduckgo": "https://api.duckduckgo.com/"
+  }
+}

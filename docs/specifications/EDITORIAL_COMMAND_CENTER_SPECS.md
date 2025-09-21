@@ -28,7 +28,7 @@ Create a secure, scalable, AI-enhanced editorial management system that streamli
 
 ### **1.3 Supported Journals**
 - Mathematical Finance (MF) - ScholarOne
-- Mathematics of Operations Research (MOR) - ScholarOne  
+- Mathematics of Operations Research (MOR) - ScholarOne
 - Mathematical Finance and Economics (MAFE)
 - Journal of Optimization Theory and Applications (JOTA)
 - SIAM Journal on Control and Optimization (SICON)
@@ -181,13 +181,13 @@ class AuditEvent:
   - Explainable AI with evidence citations
   - Human review mandatory for scores < 0.8
   - Version tracking for model updates
-  
+
 - **Referee Recommendation**
   - Conflict of interest detection
   - Expertise matching via embeddings
   - Diversity considerations
   - Historical performance weighting
-  
+
 - **Report Synthesis**
   - Multi-report summarization
   - Contradiction detection
@@ -309,7 +309,7 @@ security:
     provider: keycloak
     mfa_required: true
     session_timeout: 30m
-    
+
   authorization:
     model: rbac
     roles:
@@ -317,7 +317,7 @@ security:
       - associate_editor
       - admin
       - auditor
-    
+
   encryption:
     at_rest:
       algorithm: AES-256-GCM
@@ -325,14 +325,14 @@ security:
     in_transit:
       tls_version: "1.3"
       cipher_suites: [TLS_AES_256_GCM_SHA384]
-    
+
   secrets_management:
     provider: hashicorp_vault
     policies:
       - auto_unseal: true
       - audit_logging: true
       - dynamic_credentials: true
-    
+
   data_protection:
     pii_detection: true
     masking_rules:
@@ -352,12 +352,12 @@ security:
    - Lawful basis: Legitimate interest
    - Data minimization: Only essential metadata
    - Retention: 7 years (regulatory requirement)
-   
+
 2. **AI Analysis**
    - Lawful basis: Consent (opt-in)
    - Purpose limitation: Editorial decisions only
    - Right to explanation: Implemented
-   
+
 3. **Referee Management**
    - Lawful basis: Contract performance
    - Access controls: Role-based
@@ -377,7 +377,7 @@ security:
 ```python
 class AIGovernance:
     """Enforces AI ethics and governance policies"""
-    
+
     async def pre_analysis_check(self, request: AIRequest) -> ValidationResult:
         """Validate AI request before processing"""
         checks = [
@@ -387,9 +387,9 @@ class AIGovernance:
             self._check_purpose_limitation(request)
         ]
         return all(checks)
-    
-    async def post_analysis_audit(self, 
-                                 request: AIRequest, 
+
+    async def post_analysis_audit(self,
+                                 request: AIRequest,
                                  response: AIResponse) -> AuditRecord:
         """Create comprehensive audit record"""
         return AuditRecord(
@@ -420,7 +420,7 @@ ai_monitoring:
         measure: prediction_distribution
         threshold: 2_sigma
         baseline: monthly
-        
+
   quality_controls:
     - input_validation:
         min_length: 1000_chars
@@ -433,7 +433,7 @@ ai_monitoring:
     - human_review:
         mandatory_below: 0.8
         random_sample: 0.1
-        
+
   model_management:
     versioning:
       strategy: semantic
@@ -452,13 +452,13 @@ ai_monitoring:
 ```python
 class AsyncJournalAdapter(ABC):
     """Async base adapter using Playwright"""
-    
+
     def __init__(self, config: JournalConfig):
         self.config = config
         self.playwright = None
         self.browser = None
         self.context = None
-        
+
     async def __aenter__(self):
         self.playwright = await async_playwright().start()
         self.browser = await self.playwright.chromium.launch(
@@ -470,13 +470,13 @@ class AsyncJournalAdapter(ABC):
             user_agent=self.config.user_agent
         )
         return self
-        
+
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         await self.context.close()
         await self.browser.close()
         await self.playwright.stop()
-        
-    @retry(stop=stop_after_attempt(3), 
+
+    @retry(stop=stop_after_attempt(3),
            wait=wait_exponential(multiplier=1, min=4, max=10))
     async def navigate_with_retry(self, page: Page, url: str):
         """Navigate with automatic retry and error handling"""
@@ -492,20 +492,20 @@ class AsyncJournalAdapter(ABC):
 ```python
 class ScholarOneAdapter(AsyncJournalAdapter):
     """Adapter for ScholarOne journals (MF, MOR)"""
-    
+
     async def authenticate(self, page: Page) -> bool:
         """Handle ScholarOne authentication with 2FA"""
         # Navigate to login
         await self.navigate_with_retry(page, self.config.url)
-        
+
         # Fill credentials from vault
         credentials = await self.vault.get_credentials(self.config.journal_id)
         await page.fill('#USERID', credentials.username)
         await page.fill('#PASSWORD', credentials.password)
-        
+
         # Submit and handle 2FA
         await page.click('#logInButton')
-        
+
         # Check for 2FA prompt
         if await page.is_visible('#TOKEN_VALUE', timeout=5000):
             # Fetch code from email
@@ -515,25 +515,25 @@ class ScholarOneAdapter(AsyncJournalAdapter):
             )
             await page.fill('#TOKEN_VALUE', code)
             await page.press('#TOKEN_VALUE', 'Enter')
-            
+
         # Verify login success
         await page.wait_for_selector('text=Dashboard', timeout=10000)
         return True
-        
-    async def fetch_manuscripts(self, 
-                              page: Page, 
+
+    async def fetch_manuscripts(self,
+                              page: Page,
                               categories: List[str]) -> List[Manuscript]:
         """Fetch manuscripts with progress tracking"""
         manuscripts = []
-        
+
         async with self.telemetry.span('fetch_manuscripts') as span:
             span.set_attribute('journal', self.config.journal_id)
             span.set_attribute('categories', len(categories))
-            
+
             # Navigate to AE center
             await page.click('text=Associate Editor Center')
             await page.wait_for_load_state('networkidle')
-            
+
             for category in categories:
                 try:
                     # Find category count
@@ -542,27 +542,27 @@ class ScholarOneAdapter(AsyncJournalAdapter):
                     )
                     if not count_elem:
                         continue
-                        
+
                     count = int(await count_elem.inner_text())
                     if count == 0:
                         continue
-                        
+
                     # Click to view manuscripts
                     await count_elem.click()
                     await page.wait_for_load_state('networkidle')
-                    
+
                     # Parse manuscript list
                     manuscripts.extend(
                         await self._parse_manuscript_list(page)
                     )
-                    
+
                     # Return to dashboard
                     await page.go_back()
-                    
+
                 except Exception as e:
                     span.record_exception(e)
                     self.logger.error(f"Error fetching {category}: {e}")
-                    
+
             span.set_attribute('manuscripts_found', len(manuscripts))
             return manuscripts
 ```
@@ -578,7 +578,7 @@ slos:
     measurement:
       query: sum(rate(http_requests_total{status!~"5.."}[5m])) / sum(rate(http_requests_total[5m]))
       window: 30d
-      
+
   - name: manuscript_sync_latency
     target:
       p50: 5s
@@ -586,24 +586,24 @@ slos:
       p99: 60s
     measurement:
       metric: manuscript_sync_duration_seconds
-      
+
   - name: ai_analysis_accuracy
     target: 85%
     measurement:
       query: sum(ai_human_agreement_total) / sum(ai_analysis_total)
       window: 7d
-      
+
   - name: data_freshness
     target: 15m
     measurement:
       metric: time_since_last_sync_seconds
-      
+
 error_budget:
   policy: linear
   burn_rate_alerts:
     - window: 1h
       threshold: 14.4%  # 14.4x burn rate
-    - window: 6h  
+    - window: 6h
       threshold: 6%     # 6x burn rate
 ```
 
@@ -612,12 +612,12 @@ error_budget:
 ```python
 class ObservabilityMiddleware:
     """FastAPI middleware for comprehensive observability"""
-    
+
     def __init__(self, app: FastAPI):
         self.app = app
         self.tracer = trace.get_tracer(__name__)
         self.meter = metrics.get_meter(__name__)
-        
+
         # Metrics
         self.request_counter = self.meter.create_counter(
             "http_requests_total",
@@ -627,11 +627,11 @@ class ObservabilityMiddleware:
             "http_request_duration_seconds",
             description="HTTP request duration"
         )
-        
+
     async def __call__(self, request: Request, call_next):
         # Generate request ID
         request_id = request.headers.get('X-Request-ID', str(uuid4()))
-        
+
         # Start span
         with self.tracer.start_as_current_span(
             f"{request.method} {request.url.path}",
@@ -640,13 +640,13 @@ class ObservabilityMiddleware:
             span.set_attribute("http.method", request.method)
             span.set_attribute("http.url", str(request.url))
             span.set_attribute("request.id", request_id)
-            
+
             # Timing
             start_time = time.time()
-            
+
             try:
                 response = await call_next(request)
-                
+
                 # Record metrics
                 duration = time.time() - start_time
                 labels = {
@@ -654,16 +654,16 @@ class ObservabilityMiddleware:
                     "endpoint": request.url.path,
                     "status": str(response.status_code)
                 }
-                
+
                 self.request_counter.add(1, labels)
                 self.request_duration.record(duration, labels)
-                
+
                 # Add trace headers
                 response.headers["X-Request-ID"] = request_id
                 response.headers["X-Trace-ID"] = format(span.get_span_context().trace_id, "032x")
-                
+
                 return response
-                
+
             except Exception as e:
                 span.record_exception(e)
                 span.set_status(trace.Status(trace.StatusCode.ERROR))
@@ -811,18 +811,18 @@ spec:
   - DPIA completion
   - Vault setup and secrets migration
   - IAM/RBAC implementation
-  
+
 - Week 3-4: Core infrastructure
   - PostgreSQL setup with encryption
   - Redis cluster for caching
   - Observability stack (OTel, Prometheus, Grafana)
-  
+
 **Month 2:**
 - Week 5-6: Domain modeling and clean architecture
   - Async repository pattern
   - Event sourcing for audit trail
   - CQRS for read/write separation
-  
+
 - Week 7-8: CI/CD pipeline
   - GitHub Actions with security scanning
   - Container image signing
@@ -835,17 +835,17 @@ spec:
   - Async adapter base class
   - Retry and error handling
   - Progress tracking
-  
+
 - Week 11-12: ScholarOne adapters (MF, MOR)
   - 2FA handling
   - Manuscript parsing
   - File downloads
-  
+
 **Month 4:**
 - Week 13-14: Additional journal adapters
   - MAFE, JOTA implementations
   - SICON, SIFIN implementations
-  
+
 - Week 15-16: Integration testing
   - E2E test suite with Playwright
   - Load testing with k6
@@ -857,7 +857,7 @@ spec:
   - OpenAI integration with retry
   - Prompt engineering and versioning
   - Vector database for embeddings
-  
+
 - Week 19-20: AI governance
   - Bias detection pipeline
   - Human review workflow
@@ -869,7 +869,7 @@ spec:
   - Penetration testing
   - OWASP compliance
   - Disaster recovery testing
-  
+
 - Week 23-24: Operations readiness
   - Runbooks and SOPs
   - On-call setup
@@ -897,13 +897,13 @@ metrics:
     - api_response_time_p95: <500ms
     - manuscript_sync_success_rate: >95%
     - ai_analysis_accuracy: >85%
-    
+
   business:
     - time_to_decision_reduction: 30%
     - editor_satisfaction_score: >4.5/5
     - manuscript_throughput_increase: 25%
     - error_rate_reduction: 80%
-    
+
   security:
     - zero_data_breaches: true
     - compliance_audit_pass_rate: 100%
@@ -929,7 +929,7 @@ incident_response:
         response_time: 4h
         escalation: 24h
         communication: on_call
-        
+
   runbooks:
     - database_connection_failure
     - journal_authentication_failure
@@ -964,10 +964,10 @@ This specification represents a production-ready, security-first approach to bui
 
 ---
 
-**Document Version:** 2.0  
-**Last Updated:** 2025-07-09  
-**Status:** APPROVED  
-**Classification:** CONFIDENTIAL  
+**Document Version:** 2.0
+**Last Updated:** 2025-07-09
+**Status:** APPROVED
+**Classification:** CONFIDENTIAL
 
 **Approval Chain:**
 - Technical Lead: _____________

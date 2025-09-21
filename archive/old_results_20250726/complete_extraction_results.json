@@ -1,0 +1,226 @@
+{
+  "extraction_time": "0:01:25.256879",
+  "total_manuscripts": 4,
+  "manuscripts": [
+    {
+      "id": "M174160",
+      "title": "Complex Discontinuities of $\\sqr...",
+      "status": "ManuscriptStatus.UNDER_REVIEW",
+      "documents": {
+        "manuscript_pdf": "https://sifin.siam.org/sifin_files/2025/03/13/00147228/00/147228_0_art_file_610976_st24v5_sc.pdf",
+        "versions": [
+          {
+            "url": "https://sifin.siam.org/sifin_files/2025/03/13/00147228/00/147228_0_art_file_610976_st24v5_sc.pdf",
+            "type": "pdf (5402kb)"
+          },
+          {
+            "url": "https://sifin.siam.org/sifin_files/2025/03/13/00147228/00/147228_0_art_file_610976_st24v5.pdf",
+            "type": "source file (5402kb)"
+          },
+          {
+            "url": "https://sifin.siam.org/sifin_files/2025/03/13/00147228/00/147228_0_art_file_610976_st24v5.pdf",
+            "type": "PDF"
+          },
+          {
+            "url": "http://sifin.siam.org/cgi-bin/main.plex?form_type=view_ms_obj&j_id=16&ms_id=147228&ms_rev_no=0&ms_id_key=ftdwRRHHaQbWpZJVg7a0yXw&object_id=610976&field=pdf_location&useupfn=2",
+            "type": "PDF"
+          },
+          {
+            "url": "http://sifin.siam.org/cgi-bin/main.plex?form_type=view_ms_obj&j_id=16&ms_id=147228&ms_rev_no=0&ms_id_key=ftdwRRHHaQbWpZJVg7a0yXw&object_id=610976&field=object_location&useupfn=2",
+            "type": "PDF"
+          }
+        ]
+      },
+      "referees": [
+        {
+          "name": "Eberhard Mayerhofer #1",
+          "status": "RefereeStatus.INVITED",
+          "invited_date": null,
+          "due_date": null
+        },
+        {
+          "name": "Aur\u00e9lien Alfonsi #2",
+          "status": "RefereeStatus.INVITED",
+          "invited_date": null,
+          "due_date": null
+        },
+        {
+          "name": "Nicolas Privault #1",
+          "status": "RefereeStatus.ACCEPTED",
+          "invited_date": null,
+          "due_date": null
+        },
+        {
+          "name": "Antoine Jacquier #2",
+          "status": "RefereeStatus.ACCEPTED",
+          "invited_date": null,
+          "due_date": null
+        }
+      ]
+    },
+    {
+      "id": "M174727",
+      "title": "Dynamic Mean-Variance Asset Allocation i...  78 days",
+      "status": "ManuscriptStatus.UNDER_REVIEW",
+      "documents": {
+        "manuscript_pdf": "https://sifin.siam.org/sifin_files/2025/03/31/00147862/00/147862_0_art_file_613644_ss0ybk_sc.pdf",
+        "versions": [
+          {
+            "url": "https://sifin.siam.org/sifin_files/2025/03/31/00147862/00/147862_0_art_file_613644_ss0ybk_sc.pdf",
+            "type": "pdf (1187kb)"
+          },
+          {
+            "url": "https://sifin.siam.org/sifin_files/2025/03/31/00147862/00/147862_0_art_file_613644_ss0ybk.pdf",
+            "type": "source file (1187kb)"
+          },
+          {
+            "url": "https://sifin.siam.org/sifin_files/2025/03/31/00147862/00/147862_0_art_file_613644_ss0ybk.pdf",
+            "type": "PDF"
+          },
+          {
+            "url": "http://sifin.siam.org/cgi-bin/main.plex?form_type=view_ms_obj&j_id=16&ms_id=147862&ms_rev_no=0&ms_id_key=ftdYRsDVZogDq68ua9sXrSngw&object_id=613644&field=pdf_location&useupfn=2",
+            "type": "PDF"
+          },
+          {
+            "url": "http://sifin.siam.org/cgi-bin/main.plex?form_type=view_ms_obj&j_id=16&ms_id=147862&ms_rev_no=0&ms_id_key=ftdYRsDVZogDq68ua9sXrSngw&object_id=613644&field=object_location&useupfn=2",
+            "type": "PDF"
+          }
+        ],
+        "cover_letter": "http://sifin.siam.org/cgi-bin/main.plex?form_type=view_ms_obj&j_id=16&ms_id=147862&ms_rev_no=0&ms_id_key=ftdYRsDVZogDq68ua9sXrSngw&object_id=613650&field=object_location&useupfn=2"
+      },
+      "referees": [
+        {
+          "name": "Jiongmin Yong #2",
+          "status": "RefereeStatus.INVITED",
+          "invited_date": null,
+          "due_date": null
+        },
+        {
+          "name": "Camilo hernandez #1",
+          "status": "RefereeStatus.ACCEPTED",
+          "invited_date": null,
+          "due_date": null
+        },
+        {
+          "name": "Qingmeng Wei #2",
+          "status": "RefereeStatus.ACCEPTED",
+          "invited_date": null,
+          "due_date": null
+        }
+      ]
+    },
+    {
+      "id": "M175988",
+      "title": "Numerical Analysis of a Particle System ...",
+      "status": "ManuscriptStatus.UNDER_REVIEW",
+      "documents": {
+        "manuscript_pdf": "https://sifin.siam.org/sifin_files/2025/05/12/00149254/00/149254_0_art_file_619694_swcrtd_sc.pdf",
+        "versions": [
+          {
+            "url": "https://sifin.siam.org/sifin_files/2025/05/12/00149254/00/149254_0_art_file_619694_swcrtd_sc.pdf",
+            "type": "pdf (4338kb)"
+          },
+          {
+            "url": "https://sifin.siam.org/sifin_files/2025/05/12/00149254/00/149254_0_art_file_619694_swcrtd.pdf",
+            "type": "source file (4338kb)"
+          },
+          {
+            "url": "https://sifin.siam.org/sifin_files/2025/05/12/00149254/00/149254_0_art_file_619694_swcrtd.pdf",
+            "type": "PDF"
+          },
+          {
+            "url": "http://sifin.siam.org/cgi-bin/main.plex?form_type=view_ms_obj&j_id=16&ms_id=149254&ms_rev_no=0&ms_id_key=ftdbx5i1qiQWV2lVr9UWqOA&object_id=619694&field=pdf_location&useupfn=2",
+            "type": "PDF"
+          },
+          {
+            "url": "http://sifin.siam.org/cgi-bin/main.plex?form_type=view_ms_obj&j_id=16&ms_id=149254&ms_rev_no=0&ms_id_key=ftdbx5i1qiQWV2lVr9UWqOA&object_id=619694&field=object_location&useupfn=2",
+            "type": "PDF"
+          }
+        ],
+        "cover_letter": "http://sifin.siam.org/cgi-bin/main.plex?form_type=view_ms_obj&j_id=16&ms_id=149254&ms_rev_no=0&ms_id_key=ftdbx5i1qiQWV2lVr9UWqOA&object_id=620070&field=object_location&useupfn=2",
+        "referee_reports": [
+          "https://sifin.siam.org/sifin_files/2025/05/19/00149254/00/1_reviewer_attachment_1_1751359320.pdf",
+          "https://sifin.siam.org/sifin_files/2025/05/19/00149254/00/1_reviewer_attachment_1_1751359320.pdf",
+          "http://sifin.siam.org/cgi-bin/main.plex?form_type=view_ms_obj&j_id=16&ms_id=149254&ms_rev_no=0&ms_id_key=ftdbx5i1qiQWV2lVr9UWqOA&object_id=626297&field=object_location&useupfn=2"
+        ]
+      },
+      "referees": [
+        {
+          "name": "Julien Guyon #1",
+          "status": "RefereeStatus.INVITED",
+          "invited_date": null,
+          "due_date": null
+        },
+        {
+          "name": "Cornelis Oosterlee #2",
+          "status": "RefereeStatus.INVITED",
+          "invited_date": null,
+          "due_date": null
+        },
+        {
+          "name": "Andreas Neuenkirch #1",
+          "status": "RefereeStatus.ACCEPTED",
+          "invited_date": null,
+          "due_date": null
+        },
+        {
+          "name": "Aur\u00e9lien Alfonsi #2",
+          "status": "RefereeStatus.ACCEPTED",
+          "invited_date": null,
+          "due_date": null
+        }
+      ]
+    },
+    {
+      "id": "M176140",
+      "title": "Optimal Investment and Consumption Strat...  31 days",
+      "status": "ManuscriptStatus.UNDER_REVIEW",
+      "documents": {
+        "manuscript_pdf": "https://sifin.siam.org/sifin_files/2025/05/19/00149423/00/149423_0_art_file_620597_swnkf1_sc.pdf",
+        "versions": [
+          {
+            "url": "https://sifin.siam.org/sifin_files/2025/05/19/00149423/00/149423_0_art_file_620597_swnkf1_sc.pdf",
+            "type": "pdf (1536kb)"
+          },
+          {
+            "url": "https://sifin.siam.org/sifin_files/2025/05/19/00149423/00/149423_0_art_file_620597_swnkf1.pdf",
+            "type": "source file (1536kb)"
+          },
+          {
+            "url": "https://sifin.siam.org/sifin_files/2025/05/19/00149423/00/149423_0_art_file_620597_swnkf1.pdf",
+            "type": "PDF"
+          },
+          {
+            "url": "http://sifin.siam.org/cgi-bin/main.plex?form_type=view_ms_obj&j_id=16&ms_id=149423&ms_rev_no=0&ms_id_key=ftdT4tUGVc5tWiJsZhUHzb1Fg&object_id=620597&field=pdf_location&useupfn=2",
+            "type": "PDF"
+          },
+          {
+            "url": "http://sifin.siam.org/cgi-bin/main.plex?form_type=view_ms_obj&j_id=16&ms_id=149423&ms_rev_no=0&ms_id_key=ftdT4tUGVc5tWiJsZhUHzb1Fg&object_id=620597&field=object_location&useupfn=2",
+            "type": "PDF"
+          }
+        ],
+        "cover_letter": "http://sifin.siam.org/cgi-bin/main.plex?form_type=view_ms_obj&j_id=16&ms_id=149423&ms_rev_no=0&ms_id_key=ftdT4tUGVc5tWiJsZhUHzb1Fg&object_id=620596&field=object_location&useupfn=2"
+      },
+      "referees": [
+        {
+          "name": "Martin Herdegen #2",
+          "status": "RefereeStatus.INVITED",
+          "invited_date": null,
+          "due_date": null
+        },
+        {
+          "name": "Xiaofei Shi #1",
+          "status": "RefereeStatus.ACCEPTED",
+          "invited_date": null,
+          "due_date": null
+        },
+        {
+          "name": "Frank Seifried #2",
+          "status": "RefereeStatus.ACCEPTED",
+          "invited_date": null,
+          "due_date": null
+        }
+      ]
+    }
+  ]
+}

@@ -7,19 +7,17 @@ Provides easy integration of the comprehensive cache system into extractors.
 Handles both test and production modes automatically.
 """
 
-import sys
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
 
 # Import cache components
-from .cache_manager import CacheManager, ExtractorCacheMixin
-from .multi_layer_cache import MultiLayerCache, EnhancedExtractorCacheMixin
+from .cache_manager import ExtractorCacheMixin
 
 
 class CachedExtractorMixin(ExtractorCacheMixin):
     """
     Enhanced mixin that integrates comprehensive caching into any extractor.
-    
+
     Features:
     - Automatic test/production mode detection
     - Safe download directory management
@@ -27,35 +25,37 @@ class CachedExtractorMixin(ExtractorCacheMixin):
     - Institution and country caching
     - Manuscript change detection
     """
-    
+
     def init_cached_extractor(self, journal_name: str):
         """Initialize the extractor with comprehensive caching."""
         # Initialize cache (auto-detects test mode)
         self.init_cache(journal_name)
-        
+
         # Store journal name for later use
         self.journal_name = journal_name
-        
+
         print(f"✅ Initialized {journal_name} with comprehensive caching")
         print(f"   Mode: {'🧪 TEST' if self.cache_manager.test_mode else '🚨 PRODUCTION'}")
         print(f"   Cache: {self.cache_manager.cache_dir}")
-    
+
     def get_safe_download_dir(self, subdir=""):
         """Get download directory that respects test/production mode."""
-        journal_name = getattr(self, 'journal_name', 'UNKNOWN')
+        journal_name = getattr(self, "journal_name", "UNKNOWN")
         date_str = datetime.now().strftime("%Y%m%d")
-        
+
         if self.cache_manager.test_mode:
             # In test mode, use cache directory for downloads
-            download_path = self.cache_manager.cache_dir / "downloads" / journal_name / date_str / subdir
+            download_path = (
+                self.cache_manager.cache_dir / "downloads" / journal_name / date_str / subdir
+            )
         else:
             # In production, use standard location
-            project_root = getattr(self, 'project_root', Path.cwd())
+            project_root = getattr(self, "project_root", Path.cwd())
             download_path = project_root / "data" / journal_name / date_str / subdir
-        
+
         download_path.mkdir(parents=True, exist_ok=True)
         return download_path
-    
+
     def infer_institution_from_email_cached(self, email_domain):
         """
         Get institution from email domain using cache.
@@ -67,42 +67,42 @@ class CachedExtractorMixin(ExtractorCacheMixin):
             institution, country = cached_result
             print(f"         📚 Cache hit: {email_domain} → {institution}")
             return institution
-        
+
         # If not in cache, use existing inference logic
         # This should call the original infer_institution_from_email_domain
-        if hasattr(self, 'infer_institution_from_email_domain'):
+        if hasattr(self, "infer_institution_from_email_domain"):
             inferred = self.infer_institution_from_email_domain(email_domain)
-            
+
             # Cache the result
             if inferred and inferred != "Unknown Institution":
                 # Try to get country too if we have the method
                 country = ""
-                if hasattr(self, 'infer_country_from_web_search'):
+                if hasattr(self, "infer_country_from_web_search"):
                     country = self.infer_country_from_web_search(inferred) or ""
-                
+
                 self.cache_manager.cache_institution(email_domain, inferred, country)
                 print(f"         💾 Cached: {email_domain} → {inferred}")
-            
+
             return inferred
-        
+
         return "Unknown Institution"
-    
+
     def get_cached_referee_info(self, email):
         """Get referee info from cache or create new entry."""
         return self.get_cached_referee_data(email)
-    
+
     def update_referee_cache(self, referee_data):
         """Update referee information in cache."""
         return self.cache_manager.update_referee(referee_data, self.journal_name)
-    
+
     def should_process_manuscript(self, manuscript_id, status=None, last_updated=None):
         """Check if manuscript needs processing based on cache."""
         return self.should_extract_manuscript(manuscript_id, status, last_updated)
-    
+
     def cache_manuscript(self, manuscript_data):
         """Cache manuscript data after extraction."""
         self.cache_manuscript_data(manuscript_data)
-    
+
     def finish_extraction_with_stats(self):
         """Finish extraction and show comprehensive statistics."""
         self.finish_extraction()
@@ -111,49 +111,48 @@ class CachedExtractorMixin(ExtractorCacheMixin):
 def integrate_cache_into_extractor(extractor_class):
     """
     Decorator to integrate caching into an extractor class.
-    
+
     Usage:
         @integrate_cache_into_extractor
         class ComprehensiveMORExtractor:
             ...
     """
-    
+
     # Create new class that inherits from both
     class CachedExtractor(CachedExtractorMixin, extractor_class):
-        
         def __init__(self):
             # Call original init
             super().__init__()
-            
+
             # Initialize cache system
             journal_name = self._detect_journal_name()
             self.init_cached_extractor(journal_name)
-            
+
             # Override methods to use cache
             self._override_cache_methods()
-        
+
         def _detect_journal_name(self):
             """Detect journal name from class name or URL."""
             class_name = self.__class__.__name__
-            if 'MOR' in class_name:
-                return 'MOR'
-            elif 'MF' in class_name:
-                return 'MF'
+            if "MOR" in class_name:
+                return "MOR"
+            elif "MF" in class_name:
+                return "MF"
             else:
-                return 'UNKNOWN'
-        
+                return "UNKNOWN"
+
         def _override_cache_methods(self):
             """Override methods to use cache instead of internal dictionaries."""
             # Save original methods
-            if hasattr(self, 'infer_institution_from_email_domain'):
+            if hasattr(self, "infer_institution_from_email_domain"):
                 self._original_infer_institution = self.infer_institution_from_email_domain
                 self.infer_institution_from_email_domain = self._cached_infer_institution
-            
+
             # Override get_download_dir if it exists
-            if hasattr(self, 'get_download_dir'):
+            if hasattr(self, "get_download_dir"):
                 self._original_get_download_dir = self.get_download_dir
                 self.get_download_dir = self.get_safe_download_dir
-        
+
         def _cached_infer_institution(self, domain):
             """Cached version of institution inference."""
             # Check persistent cache first
@@ -162,45 +161,45 @@ def integrate_cache_into_extractor(extractor_class):
                 institution, country = cached_result
                 print(f"         📚 Global cache hit: {domain} → {institution}")
                 return institution
-            
+
             # Fall back to original method
             result = self._original_infer_institution(domain)
-            
+
             # Cache the result if valid
             if result and result != "Unknown Institution":
                 # Try to get country
                 country = ""
-                if hasattr(self, 'infer_country_from_web_search'):
+                if hasattr(self, "infer_country_from_web_search"):
                     country = self.infer_country_from_web_search(result) or ""
-                
+
                 self.cache_manager.cache_institution(domain, result, country)
                 print(f"         💾 Cached to global database: {domain} → {result}")
-            
+
             return result
-        
+
         def extract_all_manuscripts(self, start_page=1, max_manuscripts=None):
             """Enhanced extraction with caching."""
             print(f"\n🚀 Starting cached extraction for {self.journal_name}")
             print(f"   Cache mode: {'🧪 TEST' if self.cache_manager.test_mode else '🚨 PRODUCTION'}")
-            
+
             try:
                 # Call original extraction
                 result = super().extract_all_manuscripts(start_page, max_manuscripts)
-                
+
                 # Show cache statistics
                 self.finish_extraction_with_stats()
-                
+
                 return result
-                
+
             except Exception as e:
                 print(f"❌ Extraction error: {e}")
                 self.finish_extraction_with_stats()
                 raise
-    
+
     # Set proper name and module
     CachedExtractor.__name__ = f"Cached{extractor_class.__name__}"
     CachedExtractor.__module__ = extractor_class.__module__
-    
+
     return CachedExtractor
 
 

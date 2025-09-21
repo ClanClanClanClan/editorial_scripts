@@ -66,7 +66,7 @@
    - **Impact:** Critical missing data in MF extraction
 
 2. **Verification Needed:** Confirm current MOR extractor status
-   - **Last known:** Working perfectly yesterday  
+   - **Last known:** Working perfectly yesterday
    - **Action needed:** Fresh extraction run to verify current state
 
 ### Medium Priority
@@ -96,11 +96,11 @@ production/src/extractors/
 
 ### Immediate (This Week)
 1. **Fix MF referee email extraction** (critical)
-2. **Verify MOR extractor current status** 
+2. **Verify MOR extractor current status**
 3. **Test recent MF enhancements**
 4. **Start Phase 2 of refactoring plan** (utility extraction)
 
-### Short Term (Next 2-3 Weeks)  
+### Short Term (Next 2-3 Weeks)
 1. **Extract common utilities** (browser management, email processing)
 2. **Create ScholarOne base class**
 3. **Begin other platform base classes**
@@ -125,7 +125,7 @@ production/src/extractors/
 - **Platforms Supported:** 1 (ScholarOne)
 - **Email Success Rate:** ~35% average (70% MF authors, 0% MF referees, ~95% MOR)
 
-### Target Goals  
+### Target Goals
 - **Working Extractors:** 8 (all journals)
 - **Platforms Supported:** 5 (ScholarOne, SIAM, Email, Springer, TBD)
 - **Email Success Rate:** >90% across all extractors
@@ -142,13 +142,13 @@ production/src/extractors/
 
 ### Framework Development Risks
 - **Platform Research:** May discover unexpected technical challenges
-- **Authentication Complexity:** Multiple auth methods to support  
+- **Authentication Complexity:** Multiple auth methods to support
 - **Timeline Dependencies:** Some platforms may take longer than expected
 - **Resource Requirements:** May need additional development time
 
 ---
 
-**Project Status:** ✅ **Organized and Ready for Development**  
-**Current Phase:** Documentation Complete, Ready for Utility Extraction  
-**Next Milestone:** Fix MF referee emails + begin framework implementation  
+**Project Status:** ✅ **Organized and Ready for Development**
+**Current Phase:** Documentation Complete, Ready for Utility Extraction
+**Next Milestone:** Fix MF referee emails + begin framework implementation
 **Overall Timeline:** 2-3 months to complete all 8 extractors

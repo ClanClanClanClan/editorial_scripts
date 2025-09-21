@@ -1,0 +1,673 @@
+
+============================================================
+SECTION: main_page
+============================================================
+ScholarOne Manuscripts™
+Dylan Possamaï 
+tpami-cs: Transactions on Pattern Analysis and Machine Intelligence
+sw-cs: IEEE Software
+tpds-cs: Transactions on Parallel and Distributed Systems
+cga-cs: IEEE Computer Graphics and Applications
+taffc-cs: Transactions on Affective Computing
+tbd-cs: Transactions on Big Data
+tp-cs: IEEE Transactions on Privacy
+cs-ieee: Computer Society
+ic-cs: IEEE Internet Computing
+tvcg-cs: Transactions on Visualization and Computer Graphics
+is-cs: IEEE Intelligent Systems
+tdsc-cs: Transactions on Dependable and Secure Computing
+mm-cs: IEEE MultiMedia
+ccm-cs: Cloud Computing
+tsusc-cs: Transactions on Sustainable Computing
+tkde-cs: Transactions on Knowledge and Data Engineering
+tmc-cs: Transactions on Mobile Computing
+tcbb-cs: IEEE Transactions on Computational Biology and Bioinformatics
+sp-cs: IEEE Security & Privacy
+itpro-cs: IT Professional
+annals-cs: IEEE Annals of the History of Computing
+tcc-cs: Transactions on Cloud Computing
+tnse-cs: Transactions on Network Science and Engineering
+tmscs-cs: Transactions on Multi-Scale Computing Systems
+opre: Operations Research
+mathor: Mathematics of Operations Research
+tc-cs: Transactions on Computers
+tse-cs: Transactions on Software Engineering
+com-cs: Computer
+pc-cs: IEEE Pervasive Computing
+cise-cs: Computing in Science and Engineering
+micro-cs: IEEE Micro
+tlt-cs: IEEE Transactions on Learning Technologies
+tsc-cs: Transactions on Services Computing
+tetc-cs: Transactions on Emerging Topics in Computing
+oj-cs: IEEE Open Journal of the Computer Society
+mafi: Mathematical Finance
+Switch to a different account
+Instructions & Forms
+Help
+Log Out
+Home
+Author
+Review
+Associate Editor Center
+Associate Editor Dashboard / Awaiting Reviewer Reports
+Search
+
+
+
+To take action on a manuscript or view the full manuscript record, click the "Take Action" button. To read the manuscript, click the "View Manuscript" link.   Read More ...
+Awaiting Reviewer Reports
+Manuscripts 1-1 of 1
+Manuscript ID  
+Manuscript Title
+Date Submitted  
+Status
+Take Action
+Manuscript Type
+Submitting Author
+MOR-2025-1136
+Dynamically optimal portfolios for monotone mean–variance preferences [ View Submission]
+29-Jul-2025
+AE: Possamaï, Dylan
+AreaED: Srikant, R.
+EIC: Scheinberg, Katya
+ME: Elmore (Editorial Office), Jeff
+
+Awaiting Reviewer Scores (Due 04-Nov-2025)
+2 active selections; 2 invited; 2 agreed; 5 declined; 0 returned
+Research Article
+  Cerny, Ales
+Manuscripts 1-1 of 1
+
+
+© Silverchair. All Rights Reserved
+ScholarOne and Manuscript Central are registered trademarks of ScholarOne,Inc
+Sign up to receive updates  |   System Requirements  |   Privacy Statement  |   Terms of Use  |  Cookies Settings  |  Accessibility
+
+============================================================
+SECTION: details_page
+============================================================
+ScholarOne Manuscripts™
+Dylan Possamaï 
+tpami-cs: Transactions on Pattern Analysis and Machine Intelligence
+sw-cs: IEEE Software
+tpds-cs: Transactions on Parallel and Distributed Systems
+cga-cs: IEEE Computer Graphics and Applications
+taffc-cs: Transactions on Affective Computing
+tbd-cs: Transactions on Big Data
+tp-cs: IEEE Transactions on Privacy
+cs-ieee: Computer Society
+ic-cs: IEEE Internet Computing
+tvcg-cs: Transactions on Visualization and Computer Graphics
+is-cs: IEEE Intelligent Systems
+tdsc-cs: Transactions on Dependable and Secure Computing
+mm-cs: IEEE MultiMedia
+ccm-cs: Cloud Computing
+tsusc-cs: Transactions on Sustainable Computing
+tkde-cs: Transactions on Knowledge and Data Engineering
+tmc-cs: Transactions on Mobile Computing
+tcbb-cs: IEEE Transactions on Computational Biology and Bioinformatics
+sp-cs: IEEE Security & Privacy
+itpro-cs: IT Professional
+annals-cs: IEEE Annals of the History of Computing
+tcc-cs: Transactions on Cloud Computing
+tnse-cs: Transactions on Network Science and Engineering
+tmscs-cs: Transactions on Multi-Scale Computing Systems
+opre: Operations Research
+mathor: Mathematics of Operations Research
+tc-cs: Transactions on Computers
+tse-cs: Transactions on Software Engineering
+com-cs: Computer
+pc-cs: IEEE Pervasive Computing
+cise-cs: Computing in Science and Engineering
+micro-cs: IEEE Micro
+tlt-cs: IEEE Transactions on Learning Technologies
+tsc-cs: Transactions on Services Computing
+tetc-cs: Transactions on Emerging Topics in Computing
+oj-cs: IEEE Open Journal of the Computer Society
+mafi: Mathematical Finance
+Switch to a different account
+Instructions & Forms
+Help
+Log Out
+Home
+Author
+Review
+Associate Editor Center
+Associate Editor Dashboard / Awaiting Reviewer Reports / Details for MOR-2025-1136
+Search
+
+
+
+  Click "Read More" to see the Guidelines for Referees, which you can copy and paste into your invitations to reviewers:   Read More ...
+  Awaiting Reviewer Scores
+
+  MOR-2025-1136
+Submitted: 29-Jul-2025; Last Updated: 18-Aug-2025; In Review: 50d 1h 1min 4sec
+Dynamically optimal portfolios for monotone mean–variance preferences
+Cerny, Ales (contact); Ruf, Johannes; Schweizer, Martin
+Research Article
+Topic Area: Stochastic Models
+Awaiting Reviewer Scores (Due 04-Nov-2025)
+2 active selections; 2 invited; 2 agreed; 5 declined; 0 returned
+AE: Possamaï, Dylan
+AreaED: Srikant, R.
+EIC: Scheinberg, Katya
+ME: Elmore (Editorial Office), Jeff
+  HTML    PDF    Supplemental Files   Original Files    Abstract    Cover Letter    External Searches   
+      Reviewer List
+1-7 of 7
+Order
+Name
+Status
+History
+Remove
+   
+              1
+     
+              2
+     
+              3
+     
+              4
+     
+              5
+     
+              6
+     
+              7
+                                     
+     Frittelli, Marco
+
+
+Declined
+invite again - Suggested Alternates
+view additional possibilities
+Invited:
+02-Aug-2025
+Declined :
+11-Aug-2025
+view full history
+  
+   
+              1
+     
+              2
+     
+              3
+     
+              4
+     
+              5
+     
+              6
+     
+              7
+                                     
+     Kallsen, Jan
+
+Christian-Albrechts-Universität zu Kiel, Mathematisches Seminar
+
+Grant an Extension
+Agreed
+Invited:
+02-Aug-2025
+Agreed :
+06-Aug-2025
+Due Date:
+04-Nov-2025
+Time in Review:
+42 Days.
+view full history
+edit reminders
+   
+              1
+     
+              2
+     
+              3
+     
+              4
+     
+              5
+     
+              6
+     
+              7
+                                     
+     Biagini, Sara
+
+
+Declined
+invite again - Suggested Alternates
+view additional possibilities
+Invited:
+11-Aug-2025
+Declined :
+11-Aug-2025
+view full history
+  
+   
+              1
+     
+              2
+     
+              3
+     
+              4
+     
+              5
+     
+              6
+     
+              7
+                                     
+     Zitkovic, Gordan
+
+UT Austin, Mathematics
+
+Declined
+invite again
+Invited:
+11-Aug-2025
+Declined :
+11-Aug-2025
+view full history
+  
+   
+              1
+     
+              2
+     
+              3
+     
+              4
+     
+              5
+     
+              6
+     
+              7
+                                     
+     Maccheroni, Fabio
+
+Università Bocconi, Decision Sciences
+
+
+  https://orcid.org/0000-0001-6338-6383  
+Declined
+invite again - Suggested Alternates
+view additional possibilities
+Invited:
+11-Aug-2025
+Declined :
+20-Aug-2025
+view full history
+  
+   
+              1
+     
+              2
+     
+              3
+     
+              4
+     
+              5
+     
+              6
+     
+              7
+                                     
+     Marinacci, Massimo
+
+Università Bocconi, Depratment of Decision Sciences
+
+
+  https://orcid.org/0000-0002-0079-4176  
+Declined
+invite again - Suggested Alternates
+view additional possibilities
+Invited:
+20-Aug-2025
+Declined :
+21-Aug-2025
+view full history
+  
+   
+              1
+     
+              2
+     
+              3
+     
+              4
+ 
+
+============================================================
+SECTION: manuscript_info_tab
+============================================================
+ScholarOne Manuscripts™
+Dylan Possamaï 
+tpami-cs: Transactions on Pattern Analysis and Machine Intelligence
+sw-cs: IEEE Software
+tpds-cs: Transactions on Parallel and Distributed Systems
+cga-cs: IEEE Computer Graphics and Applications
+taffc-cs: Transactions on Affective Computing
+tbd-cs: Transactions on Big Data
+tp-cs: IEEE Transactions on Privacy
+cs-ieee: Computer Society
+ic-cs: IEEE Internet Computing
+tvcg-cs: Transactions on Visualization and Computer Graphics
+is-cs: IEEE Intelligent Systems
+tdsc-cs: Transactions on Dependable and Secure Computing
+mm-cs: IEEE MultiMedia
+ccm-cs: Cloud Computing
+tsusc-cs: Transactions on Sustainable Computing
+tkde-cs: Transactions on Knowledge and Data Engineering
+tmc-cs: Transactions on Mobile Computing
+tcbb-cs: IEEE Transactions on Computational Biology and Bioinformatics
+sp-cs: IEEE Security & Privacy
+itpro-cs: IT Professional
+annals-cs: IEEE Annals of the History of Computing
+tcc-cs: Transactions on Cloud Computing
+tnse-cs: Transactions on Network Science and Engineering
+tmscs-cs: Transactions on Multi-Scale Computing Systems
+opre: Operations Research
+mathor: Mathematics of Operations Research
+tc-cs: Transactions on Computers
+tse-cs: Transactions on Software Engineering
+com-cs: Computer
+pc-cs: IEEE Pervasive Computing
+cise-cs: Computing in Science and Engineering
+micro-cs: IEEE Micro
+tlt-cs: IEEE Transactions on Learning Technologies
+tsc-cs: Transactions on Services Computing
+tetc-cs: Transactions on Emerging Topics in Computing
+oj-cs: IEEE Open Journal of the Computer Society
+mafi: Mathematical Finance
+Switch to a different account
+Instructions & Forms
+Help
+Log Out
+Home
+Author
+Review
+Associate Editor Center
+Associate Editor Dashboard / Awaiting Reviewer Reports / Details for MOR-2025-1136
+Search
+
+
+
+  Awaiting Reviewer Scores
+
+  MOR-2025-1136
+Submitted: 29-Jul-2025; Last Updated: 18-Aug-2025; In Review: 50d 1h 1min 9sec
+Dynamically optimal portfolios for monotone mean–variance preferences
+Cerny, Ales (contact); Ruf, Johannes; Schweizer, Martin
+Research Article
+Topic Area: Stochastic Models
+Awaiting Reviewer Scores (Due 04-Nov-2025)
+2 active selections; 2 invited; 2 agreed; 5 declined; 0 returned
+AE: Possamaï, Dylan
+AreaED: Srikant, R.
+EIC: Scheinberg, Katya
+ME: Elmore (Editorial Office), Jeff
+  HTML    PDF    Supplemental Files   Original Files    Abstract    Cover Letter    External Searches   
+  
+              Scroll To...
+      
+              
+              Peer Review Milestones
+                      
+             
+             
+              Version History
+              Manuscript Stub Data
+              Author-Supplied Data
+             
+
+              
+                
+                  Associate Editor List
+  
+               Assign to Issue
+                 
+              Companion Papers
+                Flag This Manuscript
+              Comments
+                Peer Review Milestones
+Date Submitted:
+29-Jul-2025
+Managing Editor:
+Elmore (Editorial Office), Jeff  AU REV AE AreaED EIC ME PROD  
+Date to Managing Editor:
+29-Jul-2025
+Editor-in-Chief:
+Scheinberg, Katya  AU REV AE AreaED EIC 
+Date to Editor-in-Chief:
+29-Jul-2025
+Area Editor:
+Srikant, R.  AU REV AE AreaED 
+Date to Area Editor:
+29-Jul-2025
+Associate Editor:
+Possamaï, Dylan  AU REV AE 
+Date to Associate Editor:
+31-Jul-2025
+   Version History
+  Manuscript ID
+Manuscript Title
+Date Submitted
+Decision Letter & Response
+Switch
+Details
+MOR-2025-1136
+Dynamically optimal portfolios for monotone mean–variance preferences
+29-Jul-2025
+     Author-Supplied Data
+Manuscript Type:
+Research Article
+Title:
+Dynamically optimal portfolios for monotone mean–variance preferences
+Manuscript ID:
+MOR-2025-1136
+Funding Information:
+UK Research and Innovation >
+Engineering and Physical Sciences Research Council
+EP/Y024524/1
+
+Submitting Author:
+Cerny, Ales
+Cerny, Ales
+primary affiliation
+City University London - Cass Business School
+London
+United Kingdom of Great Britain and Northern Ireland
+Authors & Institutions:
+  Cerny, Ales
+https://orcid.org/0000-0001-5583-6516
+  City University London - Cass Business School
+London
+United Kingdom of Great Britain and Northern Ireland
+Ruf, Johannes
+  LSE - math
+London
+United Kingdom of Great Britain and Northern Ireland
+Schweizer, Martin
+  ETH Zurich - Mathematics
+Zurich
+Switzerland
+Contact Author (populates the ##PROLE_AUTHOR_..## e-mail tags):
+Cerny, Ales
+  Current Contact Author: Cerny, Ales
+Keywords:
+monotone mean--variance efficiency , monotone Sharpe ratio , local utility , sigma-special processes , variance-optimal separating measure
+Author Recommended Reviewers:
+Author Opposed Reviewers:
+Author Recommended Editors:
+Dylan Possamaï ETH Zürich, Mathematics - dylan.possamai@math.ethz.ch
+Ruodu Wang University of Waterloo, Department of Statistics and Actuarial Science - wang@uwaterloo.ca
+Author Opposed Editors:
+Author's Cover Letter:
+Dear editor,
+
+this is an original submission offering what we believe is a complete analysis of monotone mean-variance portfolio selection with independent in
+
+============================================================
+SECTION: audit_trail_tab
+============================================================
+ScholarOne Manuscripts™
+Dylan Possamaï 
+tpami-cs: Transactions on Pattern Analysis and Machine Intelligence
+sw-cs: IEEE Software
+tpds-cs: Transactions on Parallel and Distributed Systems
+cga-cs: IEEE Computer Graphics and Applications
+taffc-cs: Transactions on Affective Computing
+tbd-cs: Transactions on Big Data
+tp-cs: IEEE Transactions on Privacy
+cs-ieee: Computer Society
+ic-cs: IEEE Internet Computing
+tvcg-cs: Transactions on Visualization and Computer Graphics
+is-cs: IEEE Intelligent Systems
+tdsc-cs: Transactions on Dependable and Secure Computing
+mm-cs: IEEE MultiMedia
+ccm-cs: Cloud Computing
+tsusc-cs: Transactions on Sustainable Computing
+tkde-cs: Transactions on Knowledge and Data Engineering
+tmc-cs: Transactions on Mobile Computing
+tcbb-cs: IEEE Transactions on Computational Biology and Bioinformatics
+sp-cs: IEEE Security & Privacy
+itpro-cs: IT Professional
+annals-cs: IEEE Annals of the History of Computing
+tcc-cs: Transactions on Cloud Computing
+tnse-cs: Transactions on Network Science and Engineering
+tmscs-cs: Transactions on Multi-Scale Computing Systems
+opre: Operations Research
+mathor: Mathematics of Operations Research
+tc-cs: Transactions on Computers
+tse-cs: Transactions on Software Engineering
+com-cs: Computer
+pc-cs: IEEE Pervasive Computing
+cise-cs: Computing in Science and Engineering
+micro-cs: IEEE Micro
+tlt-cs: IEEE Transactions on Learning Technologies
+tsc-cs: Transactions on Services Computing
+tetc-cs: Transactions on Emerging Topics in Computing
+oj-cs: IEEE Open Journal of the Computer Society
+mafi: Mathematical Finance
+Switch to a different account
+Instructions & Forms
+Help
+Log Out
+Home
+Author
+Review
+Associate Editor Center
+Associate Editor Dashboard / Awaiting Reviewer Reports / Details for MOR-2025-1136
+Search
+
+
+
+  Awaiting Reviewer Scores
+
+  MOR-2025-1136
+Submitted: 29-Jul-2025; Last Updated: 18-Aug-2025; In Review: 50d 1h 1min 34sec
+Dynamically optimal portfolios for monotone mean–variance preferences
+Cerny, Ales (contact); Ruf, Johannes; Schweizer, Martin
+Research Article
+Topic Area: Stochastic Models
+Awaiting Reviewer Scores (Due 04-Nov-2025)
+2 active selections; 2 invited; 2 agreed; 5 declined; 0 returned
+AE: Possamaï, Dylan
+AreaED: Srikant, R.
+EIC: Scheinberg, Katya
+ME: Elmore (Editorial Office), Jeff
+  HTML    PDF    Supplemental Files   Original Files    Abstract    Cover Letter    External Searches   
+    Audit Trail - view all / events only / letters only
+Events: 
+ 
+1-10
+11-20
+21-30
+31-40
+41-44
+ of 44
+  Date / Time
+Event
+Manuscript Status
+23-Aug-2025 3:25 AM EDT
+23-Aug-2025 7:25 AM GMT
+
+To: marco.maggis@unimi.it
+From: dylan.possamai@math.ethz.ch
+Subject: Manuscript ID MOR-2025-1136 now in your Reviewer Center - Mathematics of Operations Research
+Results: Successfully sent.
+Template Name: RSW - Reviewer Agreed
+23-Aug-2025 3:25 AM EDT
+23-Aug-2025 7:25 AM GMT
+
+To: marco.maggis@unimi.it
+From: hsimpson@informs.org
+Subject: Manuscript ID MOR-2025-1136 now in your Reviewer Center - Mathematics of Operations Research
+Results: Successfully sent.
+Template Name: SW - Reviewer Agreed
+  Attachment: * MOR-guidelines-for-reviewers.pdf
+23-Aug-2025 3:25 AM EDT
+23-Aug-2025 7:25 AM GMT
+Reviewers Score became pending
+AE: Possamaï, Dylan
+AreaED: Srikant, R.
+EIC: Scheinberg, Katya
+ME: Elmore (Editorial Office), Jeff
+
+Assign Reviewers (Due 09-Aug-2025)
+14 days overdue
+2 active selections; 2 invited; 2 agreed; 5 declined; 0 returned
+21-Aug-2025 5:33 PM EDT
+21-Aug-2025 9:33 PM GMT
+
+To: marco.maggis@unimi.it
+From: dylan.possamai@math.ethz.ch
+Subject: Invitation to Review MOR-2025-1136 for Mathematics of Operations Research
+Results: Successfully sent.
+Template Name: SW - AE Invites Reviewers
+21-Aug-2025 12:31 PM EDT
+21-Aug-2025 4:31 PM GMT
+
+To: massimo.marinacci@unibocconi.it
+From: dylan.possamai@math.ethz.ch
+Subject: Follow-up: Invitation to Review for Mathematics of Operations Research
+Results: Successfully sent.
+Template Name: SW - Reviewer Declined
+20-Aug-2025 9:09 AM EDT
+20-Aug-2025 1:09 PM GMT
+
+To: massimo.marinacci@unibocconi.it
+From: dylan.possamai@math.ethz.ch
+Subject: Invitation to Review MOR-2025-1136 for Mathematics of Operations Research
+Results: Successfully sent.
+Template Name: SW - AE Invites Reviewers
+20-Aug-2025 9:01 AM EDT
+20-Aug-2025 1:01 PM GMT
+
+To: fabio.maccheroni@unibocconi.it
+From: dylan.possamai@math.ethz.ch
+Subject: Follow-up: Invitation to Review for Mathematics of Operations Research
+Results: Successfully sent.
+Template Name: SW - Reviewer Declined
+18-Aug-2025 9:40 AM EDT
+18-Aug-2025 1:40 PM GMT
+
+To: fabio.maccheroni@unibocconi.it
+From: dylan.possamai@math.ethz.ch
+Subject: REMINDER: Invitation to Review MOR-2025-1136 for Mathematics of Operations Research
+Results: Successfully sent.
+Template Name: Reviewer invite -Reminder 1
+11-Aug-2025 11:18 AM EDT
+11-Aug-2025 3:18 PM GMT
+
+To: fabio.maccheroni@unibocconi.it
+From: dylan.possamai@math.ethz.ch
+Subject: Invitation to Review MOR-2025-1136 for Mathematics of Operations Research
+Results: Successfully sent.
+Template Name: SW - 

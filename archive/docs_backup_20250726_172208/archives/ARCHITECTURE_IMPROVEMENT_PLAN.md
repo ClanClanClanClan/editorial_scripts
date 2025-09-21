@@ -1,5 +1,5 @@
 # 🏗️ Architecture Improvement Plan
-**Date**: July 14, 2025  
+**Date**: July 14, 2025
 **Objective**: Create a single, working, maintainable extraction system
 
 ---
@@ -22,7 +22,7 @@ editorial_scripts/
 │   ├── base.py                   # Simple base class
 │   ├── siam/                     # SIAM journals
 │   │   ├── sicon.py             # SICON extractor
-│   │   └── sifin.py             # SIFIN extractor  
+│   │   └── sifin.py             # SIFIN extractor
 │   ├── scholarone/               # ScholarOne journals
 │   │   ├── mf.py                # MF extractor
 │   │   └── mor.py               # MOR extractor
@@ -52,16 +52,16 @@ editorial_scripts/
 ```python
 class BaseExtractor:
     """Minimal base for all extractors"""
-    
+
     async def extract(self, username: str, password: str) -> dict:
         """Standard interface"""
         await self.login(username, password)
         manuscripts = await self.get_manuscripts()
-        
+
         for ms in manuscripts:
             await self.get_referee_details(ms)
             await self.download_pdfs(ms)
-            
+
         return self.format_results(manuscripts)
 ```
 
@@ -69,16 +69,16 @@ class BaseExtractor:
 ```python
 class SICONExtractor(BaseExtractor):
     """SICON specific implementation"""
-    
+
     async def parse_manuscript(self, html: str) -> Manuscript:
         """Parse HTML BEFORE creating object"""
         # Extract data from table
         soup = BeautifulSoup(html, 'html.parser')
-        
+
         # Parse all fields FIRST
         title = self._extract_title(soup)
         authors = self._extract_authors(soup)
-        
+
         # THEN create manuscript
         return Manuscript(
             title=title,
@@ -91,7 +91,7 @@ class SICONExtractor(BaseExtractor):
 ```python
 class CredentialManager:
     """Simple credential handling"""
-    
+
     def get_credentials(self, journal: str) -> dict:
         # 1. Try 1Password
         # 2. Fall back to .env
@@ -103,15 +103,15 @@ class CredentialManager:
 ```python
 class PDFManager:
     """Simple PDF downloads"""
-    
+
     async def download(self, url: str, page: Page) -> Path:
         """Just download the PDF"""
         response = await page.goto(url)
         content = await response.body()
-        
+
         path = Path(f"output/pdfs/{filename}")
         path.write_bytes(content)
-        
+
         return path if self._is_valid_pdf(path) else None
 ```
 

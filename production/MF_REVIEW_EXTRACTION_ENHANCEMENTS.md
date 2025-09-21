@@ -38,15 +38,15 @@ def parse_referee_status_details(self, status_text):
         'review_score': None,
         'recommendation': None
     }
-    
+
     # Check if review is received
     if 'Review Received' in status_text:
         status_info['review_received'] = True
         status_info['review_complete'] = 'Complete' in status_text
-    
+
     # Extract dates from status cell or history
     # This would parse the detailed timeline
-    
+
     return status_info
 ```
 
@@ -67,7 +67,7 @@ def extract_review_scores(self, review_content):
         'clarity': None,
         'significance': None
     }
-    
+
     # Pattern matching for scores
     score_patterns = {
         'overall': r'Overall\s*Rating:\s*(\d+)[/\\](\d+)',
@@ -75,12 +75,12 @@ def extract_review_scores(self, review_content):
         'originality': r'Originality:\s*(\w+)',
         'clarity': r'Clarity:\s*(\w+)'
     }
-    
+
     for key, pattern in score_patterns.items():
         match = re.search(pattern, review_content, re.IGNORECASE)
         if match:
             scores[key] = match.group(1)
-    
+
     return scores
 ```
 
@@ -121,14 +121,14 @@ def extract_editorial_decision(self, review_text):
             'too preliminary'
         ]
     }
-    
+
     text_lower = review_text.lower()
-    
+
     for decision, patterns in decision_patterns.items():
         for pattern in patterns:
             if pattern in text_lower:
                 return decision
-    
+
     return 'unclear'
 ```
 
@@ -147,13 +147,13 @@ def extract_review_timeline(self, history_cell):
         'reminder_sent': [],
         'total_days_to_review': None
     }
-    
+
     # Parse date entries from history
     date_entries = history_cell.find_elements(By.XPATH, ".//tr")
-    
+
     for entry in date_entries:
         text = entry.text.strip()
-        
+
         # Match different event types
         if 'Invited:' in text:
             timeline['invitation_sent'] = self.parse_date(text)
@@ -163,12 +163,12 @@ def extract_review_timeline(self, history_cell):
             timeline['review_submitted'] = self.parse_date(text)
         elif 'Reminder' in text:
             timeline['reminder_sent'].append(self.parse_date(text))
-    
+
     # Calculate review duration
     if timeline['agreed_to_review'] and timeline['review_submitted']:
         delta = timeline['review_submitted'] - timeline['agreed_to_review']
         timeline['total_days_to_review'] = delta.days
-    
+
     return timeline
 ```
 
@@ -180,16 +180,16 @@ def extract_text_from_referee_pdf(self, pdf_path):
     """Extract text content from referee report PDF."""
     try:
         import PyPDF2
-        
+
         text_content = []
         with open(pdf_path, 'rb') as file:
             pdf_reader = PyPDF2.PdfReader(file)
-            
+
             for page in pdf_reader.pages:
                 text_content.append(page.extract_text())
-        
+
         full_text = '\n'.join(text_content)
-        
+
         # Extract key sections
         sections = {
             'summary': self.extract_section(full_text, 'Summary'),
@@ -197,9 +197,9 @@ def extract_text_from_referee_pdf(self, pdf_path):
             'minor_comments': self.extract_section(full_text, 'Minor Comments'),
             'recommendation': self.extract_section(full_text, 'Recommendation')
         }
-        
+
         return sections
-        
+
     except Exception as e:
         print(f"Could not extract PDF text: {e}")
         return None

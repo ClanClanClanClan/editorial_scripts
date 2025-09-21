@@ -39,7 +39,7 @@ I was incorrectly using the **SIFIN July 11 baseline** (10 referees, 1 verified 
   },
   "metadata_completeness": {
     "manuscripts": "100%",
-    "referees": "100%", 
+    "referees": "100%",
     "referee_statuses": "100%",
     "referee_emails": "~90%"
   }
@@ -114,7 +114,7 @@ Must distinguish between:
 Must properly identify:
 - **Manuscript PDFs**: Original submission files
 - **Cover Letters**: Author cover letters
-- **Referee Report PDFs**: Downloadable review documents  
+- **Referee Report PDFs**: Downloadable review documents
 - **Referee Report Comments**: Text reviews in system interface
 
 ### **Metadata Extraction**

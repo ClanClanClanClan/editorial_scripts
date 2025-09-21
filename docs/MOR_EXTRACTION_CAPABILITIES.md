@@ -8,7 +8,7 @@ The MOR extractor comprehensively extracts the following data from Mathematics o
 
 ### What We Extract
 - **Names**: Full referee names (e.g., "Jan Kallsen", "Marco Frittelli")
-- **Emails**: Direct email addresses from popup windows  
+- **Emails**: Direct email addresses from popup windows
 - **Affiliations**: Institution and department (e.g., "Christian-Albrechts-Universität zu Kiel, Mathematisches Seminar")
 - **Countries**: Auto-detected from institution names (e.g., Germany, Italy, USA)
 - **Status**: Current review status (Agreed, Declined, Invited, No Response)

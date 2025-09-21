@@ -1,0 +1,96 @@
+{
+  "extraction_time": "2025-09-17T19:36:38.599633",
+  "journal": "MOR",
+  "manuscripts": [
+    {
+      "manuscript_id": "MOR-2025-1136",
+      "authors": [],
+      "referees": [
+        {
+          "name": "Frittelli, Marco",
+          "institution": "",
+          "department": "",
+          "email": "",
+          "status": "Declined",
+          "country": "",
+          "orcid": ""
+        },
+        {
+          "name": "Biagini, Sara",
+          "institution": "",
+          "department": "",
+          "email": "",
+          "status": "Declined",
+          "country": "",
+          "orcid": ""
+        },
+        {
+          "name": "Zitkovic, Gordan",
+          "institution": "",
+          "department": "",
+          "email": "",
+          "status": "Declined",
+          "country": "",
+          "orcid": ""
+        },
+        {
+          "name": "UT Austin, Mathematics",
+          "institution": "",
+          "department": "",
+          "email": "",
+          "status": "Declined",
+          "country": "",
+          "orcid": ""
+        },
+        {
+          "name": "Universit\u00e0 Bocconi, Decision Sciences",
+          "institution": "",
+          "department": "",
+          "email": "",
+          "status": "Declined",
+          "country": "",
+          "orcid": ""
+        }
+      ],
+      "metadata": {},
+      "audit_trail": [],
+      "documents": []
+    },
+    {
+      "manuscript_id": "MOR-2025-1037",
+      "authors": [],
+      "referees": [
+        {
+          "name": "Aksamit, Anna recommended",
+          "institution": "",
+          "department": "",
+          "email": "",
+          "status": "Declined",
+          "country": "",
+          "orcid": ""
+        },
+        {
+          "name": "University of Miami, Mathematics",
+          "institution": "",
+          "department": "",
+          "email": "",
+          "status": "Major Revision",
+          "country": "",
+          "orcid": ""
+        },
+        {
+          "name": "LSE, Statistics",
+          "institution": "",
+          "department": "",
+          "email": "",
+          "status": "Overdue",
+          "country": "",
+          "orcid": "0000-0002-9001-2122"
+        }
+      ],
+      "metadata": {},
+      "audit_trail": [],
+      "documents": []
+    }
+  ]
+}

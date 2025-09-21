@@ -55,7 +55,7 @@ Only **15%** of code is journal-specific:
 - URL patterns: `/mf/` in paths
 - Field mappings: Some different form field names
 
-#### **MOR-Specific**  
+#### **MOR-Specific**
 - Category names: "Awaiting Reviewer Selection", "Overdue Reviewer Reports"
 - Referee table XPaths: Different popup structures
 - URL patterns: `/mor/` in paths
@@ -83,17 +83,17 @@ class ScholarOneExtractor(CachedExtractorMixin):
     Universal base class for ALL ScholarOne journals.
     Contains 85% of shared functionality.
     """
-    
+
     # ABSTRACT METHODS (must be overridden)
     def get_journal_config(self):
         """Return journal-specific configuration"""
-        
+
     def get_category_mappings(self):
         """Return journal-specific category names"""
-        
+
     def get_xpath_patterns(self):
         """Return journal-specific XPath selectors"""
-        
+
     # SHARED METHODS (work for all journals)
     def login_with_2fa(self):
     def navigate_to_ae_center(self):
@@ -108,21 +108,21 @@ class ScholarOneExtractor(CachedExtractorMixin):
 ```python
 class MFExtractor(ScholarOneExtractor):
     """Mathematical Finance specific implementation"""
-    
+
     def get_journal_config(self):
         return {
             'journal_code': 'mf',
             'base_url': 'https://mc.manuscriptcentral.com/mf',
             'credential_key': 'editorial-scripts-MF'
         }
-    
+
     def get_category_mappings(self):
         return {
             'awaiting_reports': 'Awaiting Reviewer Reports',
             'ae_recommendation': 'Awaiting AE Recommendation',
             'overdue': 'Overdue Reviewer Reports'
         }
-    
+
     def get_xpath_patterns(self):
         return {
             'referee_table': "//table[@class='mf-referee-table']",
@@ -132,14 +132,14 @@ class MFExtractor(ScholarOneExtractor):
 
 class MORExtractor(ScholarOneExtractor):
     """Mathematics of Operations Research specific"""
-    
+
     def get_journal_config(self):
         return {
             'journal_code': 'mor',
             'base_url': 'https://mc.manuscriptcentral.com/mor',
             'credential_key': 'editorial-scripts-MOR'
         }
-    
+
     # Override only the differences...
 ```
 
@@ -156,11 +156,11 @@ class MORExtractor(ScholarOneExtractor):
 ### **Phase 2: Migrate MF Extractor** (30 minutes)
 1. **Inherit from ScholarOneExtractor**
 2. **Override journal-specific methods only**
-3. **Test full MF functionality** 
+3. **Test full MF functionality**
 4. **Validate no regression** in features or performance
 
 ### **Phase 3: Migrate MOR Extractor** (30 minutes)
-1. **Inherit from ScholarOneExtractor**  
+1. **Inherit from ScholarOneExtractor**
 2. **Override journal-specific methods only**
 3. **Test full MOR functionality**
 4. **Validate no regression** in features or performance
@@ -210,7 +210,7 @@ JOURNAL_CONFIGS = {
 class SICONExtractor(ScholarOneExtractor):
     def __init__(self):
         super().__init__(journal_code='sicon')
-    
+
     # That's it! Inherits all functionality
     # Only override if journal has unique requirements
 ```
@@ -221,7 +221,7 @@ class SICONExtractor(ScholarOneExtractor):
 
 ### **Code Reduction**
 - **MF Extractor**: 6,489 → ~800 lines (87% reduction)
-- **MOR Extractor**: 11,149 → ~900 lines (92% reduction)  
+- **MOR Extractor**: 11,149 → ~900 lines (92% reduction)
 - **Total Codebase**: Significant reduction while adding new journal support
 
 ### **Maintainability**
@@ -248,7 +248,7 @@ class SICONExtractor(ScholarOneExtractor):
 
 ### **Testing Strategy**
 - **Unit tests** for base class methods
-- **Integration tests** for journal-specific implementations  
+- **Integration tests** for journal-specific implementations
 - **Regression testing** against known good outputs
 - **Performance benchmarking** to ensure no slowdown
 
@@ -272,10 +272,10 @@ class SICONExtractor(ScholarOneExtractor):
 ```python
 class NewJournalExtractor(ScholarOneExtractor):
     """Template for any new ScholarOne journal"""
-    
+
     def get_journal_config(self):
         return JOURNAL_CONFIGS['new_journal']
-    
+
     # Override only if journal has unique requirements:
     # def extract_special_feature(self):
     #     # Journal-specific implementation
@@ -289,7 +289,7 @@ class NewJournalExtractor(ScholarOneExtractor):
 
 **Timeline**: ~3-4 hours total implementation
 - Phase 1 (Base class): 2 hours
-- Phase 2 (MF migration): 30 minutes  
+- Phase 2 (MF migration): 30 minutes
 - Phase 3 (MOR migration): 30 minutes
 - Phase 4 (Cleanup): 30 minutes
 
@@ -302,6 +302,6 @@ class NewJournalExtractor(ScholarOneExtractor):
 
 ---
 
-**Last Updated**: August 19, 2025  
-**Status**: Ready for Implementation  
+**Last Updated**: August 19, 2025
+**Status**: Ready for Implementation
 **Priority**: High - Significant code reduction and maintainability improvement

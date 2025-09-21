@@ -139,7 +139,7 @@ To create the most advanced editorial management system that empowers editors wi
 
 #### 1.1 Status Tracking
 - **Real-time Updates**: Track manuscript status across all journals
-- **Status Categories**: 
+- **Status Categories**:
   - New Submissions
   - Under Review
   - Awaiting Revision
@@ -305,7 +305,7 @@ editorial_scripts/
 - **Web Framework**: FastAPI
 - **Task Queue**: Celery with Redis
 - **Scheduling**: APScheduler
-- **Web Scraping**: 
+- **Web Scraping**:
   - Selenium 4.x with undetected-chromedriver
   - Playwright for complex scenarios
   - BeautifulSoup for HTML parsing
@@ -361,7 +361,7 @@ paths:
           in: query
           schema:
             type: integer
-    
+
   /api/v1/manuscripts/{id}/analyze:
     post:
       summary: Analyze manuscript for desk rejection
@@ -410,25 +410,25 @@ services:
     depends_on:
       - db
       - redis
-  
+
   worker:
     build: ./worker
     command: celery -A worker beat -l info
     depends_on:
       - redis
-  
+
   scraper:
     build: ./scraper
     volumes:
       - ./data:/app/data
     cap_add:
       - SYS_ADMIN  # For Chrome sandbox
-  
+
   db:
     image: postgres:14-alpine
     volumes:
       - postgres_data:/var/lib/postgresql/data
-  
+
   redis:
     image: redis:6-alpine
 ```
@@ -459,7 +459,7 @@ class Manuscript:
     keywords: List[str]        # Paper keywords
     pdf_path: str             # Local PDF storage
     metadata: Dict            # Additional metadata
-    
+
     # Relationships
     referees: List[RefereeAssignment]
     reviews: List[Review]
@@ -477,19 +477,19 @@ class Referee:
     orcid: Optional[str]       # ORCID identifier
     institution: str           # Current affiliation
     expertise_areas: List[str] # Research areas
-    
+
     # Performance Metrics
     total_reviews: int
     average_response_time: float  # Days
     acceptance_rate: float        # 0-1
     quality_score: float          # 1-10
     reliability_score: float      # 0-1
-    
+
     # Availability
     max_concurrent_reviews: int
     current_reviews: int
     blackout_dates: List[DateRange]
-    
+
     # Relationships
     review_history: List[Review]
     expertise_embeddings: np.ndarray
@@ -504,14 +504,14 @@ class Review:
     assigned_date: datetime
     due_date: datetime
     submitted_date: Optional[datetime]
-    
+
     # Review Content
     recommendation: ReviewRecommendation
     confidence: float          # 0-1
     summary: str
     detailed_comments: str
     quality_assessment: QualityMetrics
-    
+
     # Metadata
     response_time: Optional[int]  # Days
     reminder_count: int
@@ -619,30 +619,30 @@ class DeskRejectionAnalyzer:
         self.llm = self._initialize_llm(model_provider)
         self.embedder = SentenceTransformer('all-MiniLM-L6-v2')
         self.journal_scope_db = self._load_journal_scopes()
-    
+
     async def analyze_manuscript(self, manuscript: Manuscript) -> AnalysisResult:
         # Extract key information
         content = self._extract_content(manuscript)
-        
+
         # Generate embeddings
         manuscript_embedding = self.embedder.encode(content)
-        
+
         # Compare with journal scope
         scope_similarity = self._calculate_scope_fit(
-            manuscript_embedding, 
+            manuscript_embedding,
             manuscript.journal_id
         )
-        
+
         # LLM analysis
         llm_analysis = await self._llm_analysis(manuscript)
-        
+
         # Combine results
         return AnalysisResult(
             scope_fit=scope_similarity,
             quality_score=llm_analysis.quality,
             novelty_score=llm_analysis.novelty,
             recommendation=self._make_recommendation(
-                scope_similarity, 
+                scope_similarity,
                 llm_analysis
             ),
             confidence=self._calculate_confidence(llm_analysis),
@@ -686,36 +686,36 @@ class RefereeSuggestionEngine:
         self.workload_balancer = WorkloadBalancer()
         self.performance_ranker = PerformanceRanker()
         self.diversity_optimizer = DiversityOptimizer()
-    
+
     async def suggest_referees(
-        self, 
-        manuscript: Manuscript, 
+        self,
+        manuscript: Manuscript,
         num_suggestions: int = 10
     ) -> List[RefereeSuggestion]:
-        
+
         # Step 1: Content-based matching
         expertise_scores = await self.expertise_matcher.match(
             manuscript.abstract + manuscript.title,
             self.get_all_referees()
         )
-        
+
         # Step 2: Filter by availability
         available_referees = self.workload_balancer.filter_available(
             expertise_scores.keys()
         )
-        
+
         # Step 3: Rank by performance
         performance_scores = self.performance_ranker.rank(
             available_referees,
             manuscript.journal_id
         )
-        
+
         # Step 4: Optimize for diversity
         diverse_selection = self.diversity_optimizer.optimize(
             performance_scores,
             num_suggestions * 2  # Get more for filtering
         )
-        
+
         # Step 5: Generate final recommendations
         recommendations = []
         for referee_id in diverse_selection[:num_suggestions]:
@@ -732,7 +732,7 @@ class RefereeSuggestionEngine:
                 rationale=self._generate_rationale(referee_id, manuscript)
             )
             recommendations.append(recommendation)
-        
+
         return sorted(recommendations, key=lambda x: x.overall_score, reverse=True)
 ```
 
@@ -742,11 +742,11 @@ class ExpertiseMatcher:
     def __init__(self):
         self.embedder = SentenceTransformer('allenai-specter')
         self.index = self._build_referee_index()
-    
+
     def _build_referee_index(self):
         # Load all referee expertise profiles
         referees = self.db.get_all_referees()
-        
+
         # Generate embeddings for each referee's expertise
         embeddings = []
         for referee in referees:
@@ -758,7 +758,7 @@ class ExpertiseMatcher:
                 )
             embedding = self.embedder.encode(expertise_text)
             embeddings.append(embedding)
-        
+
         # Build FAISS index for fast similarity search
         index = faiss.IndexFlatIP(embeddings[0].shape[0])
         index.add(np.array(embeddings))
@@ -778,7 +778,7 @@ class ReportQualityAnalyzer:
             evidence_based=self._assess_evidence_usage(review),
             timeliness=self._assess_timeliness(review)
         )
-    
+
     def _assess_thoroughness(self, review: Review) -> float:
         # Factors: length, coverage of sections, specific examples
         factors = {
@@ -796,7 +796,7 @@ class ReportQualityAnalyzer:
 ### 1. **Authentication & Authorization**
 
 #### 1.1 Multi-Layer Security
-- **User Authentication**: 
+- **User Authentication**:
   - OAuth 2.0 with Google/Microsoft
   - Optional 2FA with TOTP
   - Session management with JWT
@@ -862,8 +862,8 @@ PERMISSIONS = {
 ```python
 @audit_log
 async def update_manuscript_status(
-    manuscript_id: str, 
-    new_status: str, 
+    manuscript_id: str,
+    new_status: str,
     user: User
 ) -> None:
     # Automatic logging of:
@@ -931,9 +931,9 @@ async def update_manuscript_status(
     <style>
         /* Modern, responsive email design */
         .digest-container { max-width: 600px; margin: auto; }
-        .journal-section { 
-            border-left: 4px solid #2196F3; 
-            padding-left: 15px; 
+        .journal-section {
+            border-left: 4px solid #2196F3;
+            padding-left: 15px;
             margin: 20px 0;
         }
         .manuscript-card {
@@ -957,7 +957,7 @@ async def update_manuscript_status(
 <body>
     <div class="digest-container">
         <h1>Editorial Digest - {date}</h1>
-        
+
         <div class="summary-box">
             <h2>Summary</h2>
             <ul>
@@ -966,9 +966,9 @@ async def update_manuscript_status(
                 <li>Overdue Items: {overdue_count}</li>
             </ul>
         </div>
-        
+
         {journal_sections}
-        
+
         <div class="ai-insights">
             <h2>AI Insights</h2>
             <p>3 papers flagged for potential desk rejection</p>
@@ -1168,7 +1168,7 @@ This specification serves as the north star for development, ensuring that every
 
 ---
 
-**Document Version**: 1.0  
-**Last Updated**: July 2025  
-**Next Review**: January 2026  
+**Document Version**: 1.0
+**Last Updated**: July 2025
+**Next Review**: January 2026
 **Owner**: Editorial Scripts Development Team

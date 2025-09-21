@@ -47,4 +47,3 @@ This project processes sensitive academic and personal data. The following guide
 - Dependencies are pinned via Poetry
 - Use `pre-commit` hooks (black, ruff, mypy, detect-secrets)
 - Container images are built from `python:3.11-slim` with a non-root user
-

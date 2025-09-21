@@ -1,0 +1,197 @@
+[
+  {
+    "id": "MAFI-2025-0166",
+    "title": "Optimal investment and consumption under forward utilities with relative performance concerns",
+    "authors": [],
+    "submission_date": "19-Jun-2025; Last Updated: 27-Jun-2025; In Review: 36d 9h 8min 2sec",
+    "last_updated": "",
+    "in_review_time": "",
+    "status": "",
+    "status_details": "",
+    "article_type": "",
+    "special_issue": "",
+    "referees": [
+      {
+        "name": "Liang, Gechun",
+        "email": "g.liang@warwick.ac.uk",
+        "affiliation": "University of Warwick, Department of Statistics",
+        "country": "",
+        "orcid": "0000-0003-0752-0773",
+        "status": "Agreed",
+        "dates": {
+          "invited": "22-Jun-2025",
+          "agreed": "22-Jun-2025",
+          "due_date": "20-Sep-2025",
+          "review_time": "33"
+        },
+        "review_links": [],
+        "report": null
+      },
+      {
+        "name": "Mrad, Mohamed",
+        "email": "mohamed.kamel.mrad@gmail.com",
+        "affiliation": "Université Sorbonne Paris Nord, LAGA",
+        "country": "France",
+        "orcid": "",
+        "status": "Declined",
+        "dates": {
+          "invited": "22-Jun-2025",
+          "declined": "01-Jul-2025"
+        },
+        "review_links": [],
+        "report": null
+      },
+      {
+        "name": "Dos Reis, Goncalo",
+        "email": "g.dosreis@ed.ac.uk, gnreis@gmail.com",
+        "affiliation": "University of Edinburgh, School of Mathematics",
+        "country": "United Kingdom",
+        "orcid": "0000-0002-4993-2672",
+        "status": "Unavailable",
+        "dates": {
+          "invited": "01-Jul-2025",
+          "unavailable": "01-Jul-2025"
+        },
+        "review_links": [],
+        "report": null
+      },
+      {
+        "name": "Strub, Moris",
+        "email": "moris.strub@wbs.ac.uk",
+        "affiliation": "Warwick Business School, Information Systems Management & Analytics",
+        "country": "",
+        "orcid": "0000-0002-6303-6700",
+        "status": "Agreed",
+        "dates": {
+          "invited": "01-Jul-2025",
+          "agreed": "01-Jul-2025",
+          "due_date": "29-Sep-2025",
+          "review_time": "24"
+        },
+        "review_links": [],
+        "report": null
+      }
+    ],
+    "editors": {},
+    "documents": {
+      "abstract": true,
+      "pdf": true,
+      "pdf_size": "PDF Proof:  1725 K",
+      "pdf_path": "/Users/dylanpossamai/Library/CloudStorage/Dropbox/Work/editorial_scripts/production/src/downloads/manuscripts/MAFI-2025-0166.pdf",
+      "html": true,
+      "cover_letter": true,
+      "cover_letter_path": "downloads/MAFI-2025-0166_cover_letter.pdf"
+    },
+    "abstract": "Abstract: We study a n-player and mean-field portfolio optimization problem under relative performance concerns with non-zero volatility, for wealth and consumption. The consistency assumption defining forward relative performance criteria leads to a sufficient characterization of such preferences with mean of a HJB-SPDE which highlights the link between wealth and consumption utility, and also characterizes the optimal strategies. In particular, forward relative performance criteria with a wealth utility of CRRA type and separable time and space dependence necessarily have a consumption utility of the same form, with the same risk aversion parameter. This characterization gives a better understanding of the drift condition ensuring time consistency. In this setting, we establish closed form of the Nash equilibrium for both the n-player and mean field problems. We also provide some numerical examples.",
+    "keywords": [],
+    "audit_trail": [],
+    "abstract_path": "downloads/abstracts/MAFI-2025-0166_abstract.txt",
+    "category": "Awaiting Reviewer Scores"
+  },
+  {
+    "id": "MAFI-2024-0167",
+    "title": "Competitive optimal portfolio selection in a non-Markovian financial market: A backward stochastic differential equation study",
+    "authors": [],
+    "submission_date": "15-Jan-2025; Last Updated: 15-Jan-2025; In Review: 191d 4h 30min 30sec",
+    "last_updated": "",
+    "in_review_time": "",
+    "status": "",
+    "status_details": "",
+    "article_type": "",
+    "special_issue": "",
+    "referees": [
+      {
+        "name": "Zhang, Panpan",
+        "email": "zhangpanpan@mail.sdu.edu.cn",
+        "affiliation": "",
+        "country": "",
+        "orcid": "",
+        "status": "Agreed",
+        "dates": {
+          "invited": "01-May-2025",
+          "agreed": "03-May-2025",
+          "due_date": "01-Aug-2025",
+          "review_time": "83"
+        },
+        "review_links": [
+          {
+            "text": "View full interactive search on reviewerlocator.webofscience.com",
+            "url": "https://publons.com/wos-op/partner/reviewer-connect/a693f02af0244c82a6b2bb3498a494f7/"
+          },
+          {
+            "text": "View full interactive search on reviewerlocator.webofscience.com",
+            "url": "https://publons.com/wos-op/partner/reviewer-connect/a693f02af0244c82a6b2bb3498a494f7/"
+          },
+          {
+            "text": "View full interactive search on reviewerlocator.webofscience.com",
+            "url": "https://publons.com/wos-op/partner/reviewer-connect/a693f02af0244c82a6b2bb3498a494f7/"
+          },
+          {
+            "text": "View full interactive search on reviewerlocator.webofscience.com",
+            "url": "https://publons.com/wos-op/partner/reviewer-connect/a693f02af0244c82a6b2bb3498a494f7/"
+          },
+          {
+            "text": "View full interactive search on reviewerlocator.webofscience.com",
+            "url": "https://publons.com/wos-op/partner/reviewer-connect/a693f02af0244c82a6b2bb3498a494f7/"
+          },
+          {
+            "text": "View full interactive search on reviewerlocator.webofscience.com",
+            "url": "https://publons.com/wos-op/partner/reviewer-connect/a693f02af0244c82a6b2bb3498a494f7/"
+          },
+          {
+            "text": "View full interactive search on reviewerlocator.webofscience.com",
+            "url": "https://publons.com/wos-op/partner/reviewer-connect/a693f02af0244c82a6b2bb3498a494f7/"
+          }
+        ],
+        "report": null
+      },
+      {
+        "name": "Mastrolia, Thibaut",
+        "email": "mastrolia@berkeley.edu",
+        "affiliation": "UC Berkeley, IEOR",
+        "country": "",
+        "orcid": "0000-0003-0578-0168",
+        "status": "Agreed",
+        "dates": {
+          "invited": "01-May-2025",
+          "agreed": "01-May-2025",
+          "due_date": "30-Jul-2025",
+          "review_time": "85"
+        },
+        "review_links": [],
+        "report": null
+      },
+      {
+        "name": "Hamadene, Said",
+        "email": "hamadene@univ-lemans.fr",
+        "affiliation": "",
+        "country": "",
+        "orcid": "",
+        "status": "Agreed",
+        "dates": {
+          "invited": "01-May-2025",
+          "agreed": "03-May-2025",
+          "due_date": "01-Aug-2025",
+          "review_time": "83"
+        },
+        "review_links": [],
+        "report": null
+      }
+    ],
+    "editors": {},
+    "documents": {
+      "abstract": true,
+      "pdf": true,
+      "pdf_size": "PDF Proof:  597 K",
+      "pdf_path": "/Users/dylanpossamai/Library/CloudStorage/Dropbox/Work/editorial_scripts/production/src/downloads/manuscripts/MAFI-2024-0167.pdf",
+      "html": true,
+      "cover_letter": true,
+      "cover_letter_path": "downloads/MAFI-2024-0167_cover_letter.docx"
+    },
+    "abstract": "Abstract: This paper studies a competitive optimal portfolio selection problem in a model where the interest rate, the appreciation rate and volatility rate of the risky asset are all stochastic processes, thus forming a non-Markovian financial market. In our model, all investors (or agents) aim to obtain an above-average wealth at the end of the common investment horizon. This competitive optimal portfolio problem is indeed a non-zero sum stochastic differential game problem. The quadratic BSDE theory is applied to tackle the problem and Nash equilibria in suitable spaces are found. We discuss both the CARA and CRRA utility cases. For the CARA utility case, there are three possible scenarios depending on market and competition parameters: a unique Nash equilibrium, no Nash equilibrium, and infinite Nash equilibria. The Nash equilibrium is given by the solutions of a quadratic BSDE and a linear BSDE with unbounded coefficient when it is unique. Different from the wealth-independent Nash equilibria in the existing literature, the equilibrium in our paper is of feedback form of wealth. For the CRRA utility case, the issue is a bit more complicated than the CARA utility case. We prove the solvability of a new kind of quadratic BSDEs with unbounded coefficients. A decoupling technology is used to relate the Nash equilibrium to a series of 1-dimensional quadratic BSDEs. With the help of this decoupling technology, we can even give the limiting strategies for both cases when the number of agents tends to be infinite.",
+    "keywords": [],
+    "audit_trail": [],
+    "abstract_path": "downloads/abstracts/MAFI-2024-0167_abstract.txt",
+    "category": "Awaiting Reviewer Scores"
+  }
+]

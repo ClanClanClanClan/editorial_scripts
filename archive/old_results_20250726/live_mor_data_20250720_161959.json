@@ -1,0 +1,26 @@
+{
+  "success": true,
+  "journal_code": "MOR",
+  "journal_name": "Mathematics of Operations Research",
+  "platform": "ScholarOne",
+  "extraction_time": 6.601111650466919,
+  "extraction_timestamp": "2025-07-20T16:19:59.119815",
+  "data": {
+    "journal": "MOR",
+    "extraction_date": "2025-07-20T16:19:52.975494",
+    "manuscripts": [],
+    "referees": [],
+    "statistics": {}
+  },
+  "analysis": {
+    "manuscript_count": 0,
+    "referee_count": 0,
+    "data_quality_score": 0.0,
+    "status_breakdown": {},
+    "author_count": 0,
+    "unique_authors": [],
+    "date_range": {},
+    "field_completeness": {},
+    "referee_analysis": {}
+  }
+}

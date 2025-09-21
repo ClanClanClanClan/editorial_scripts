@@ -8,11 +8,11 @@
 - **HTML Parsing**: Fixed extraction of titles and authors from table structure
   - Previously: Getting HTML fragments like `"Authors": ["\" target=\"_blank\" class=\"newnav\">Authors"]`
   - Now: Properly extracts clean text from `<th>Title</th><td>actual title</td>` structure
-  
+
 - **Referee Email Extraction**: Enhanced to extract emails for ALL referees
   - Previously: Only declined referees had emails
   - Now: System clicks on bio links for active referees too (Giorgio Ferrari, Juan LI)
-  
+
 - **Role Assignment**: Correctly identifies Dylan Possamai as Associate Editor
   - All other names (Yu, Zhang, Guo, Wan, Ren, Luo, Tangpi) are properly identified as referees
 

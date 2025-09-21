@@ -1,0 +1,63 @@
+[
+  {
+    "id": "MAFI-2025-0166",
+    "title": "Optimal investment and consumption under forward utilities with relative performance concerns",
+    "authors": [
+      {
+        "name": "Anis Matoussi",
+        "is_corresponding": true,
+        "email": ""
+      },
+      {
+        "name": "Guillaume Broux-Quemerais",
+        "is_corresponding": false,
+        "email": ""
+      },
+      {
+        "name": "Chao Zhou",
+        "is_corresponding": false,
+        "email": ""
+      }
+    ],
+    "submission_date": "19-Jun-2025",
+    "last_updated": "27-Jun-2025",
+    "in_review_time": "32d 4h 47min 41sec",
+    "status": "Awaiting Reviewer Scores",
+    "status_details": "2 active selections; 2 invited; 2 agreed; 2 declined; 0 returned",
+    "article_type": "Original Article",
+    "special_issue": "No",
+    "referees": [
+      {
+        "name": "Liang, Gechun",
+        "email": "",
+        "affiliation": "",
+        "affiliation_source": "table",
+        "orcid": "",
+        "status": "",
+        "dates": {},
+        "report": null,
+        "affiliation_crosscheck": {}
+      }
+    ],
+    "editors": {
+      "AE": {
+        "name": "Possamai, Dylan",
+        "email": ""
+      },
+      "EIC": {
+        "name": "Cont, Rama",
+        "email": ""
+      },
+      "CO": {
+        "name": "Cont, Rama",
+        "email": ""
+      },
+      "ADM": {
+        "name": "K J, Chandni",
+        "email": ""
+      }
+    },
+    "documents": {},
+    "category": "Awaiting Reviewer Scores"
+  }
+]

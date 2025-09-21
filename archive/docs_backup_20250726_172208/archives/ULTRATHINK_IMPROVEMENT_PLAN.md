@@ -1,6 +1,6 @@
 # 🧠 ULTRATHINK: Complete System Improvement Plan
 
-**Date**: July 14, 2025  
+**Date**: July 14, 2025
 **Status**: Critical Analysis & Action Plan
 
 ---
@@ -43,7 +43,7 @@ for row in soup.find_all('tr'):
     if len(cells) >= 2:
         label = cells[0].get_text(strip=True)
         value = cells[1].get_text(strip=True)
-        
+
         if 'Title' in label:
             title = value
         elif 'Corresponding Author' in label:
@@ -83,17 +83,17 @@ async def download_pdf_simple(self, url: str, filename: str) -> Optional[Path]:
     try:
         # Use the authenticated page directly
         response = await self.page.goto(url, wait_until="networkidle")
-        
+
         if response.status == 200:
             content = await response.body()
-            
+
             # Save it
             pdf_path = self.output_dir / "pdfs" / filename
             pdf_path.parent.mkdir(exist_ok=True)
-            
+
             with open(pdf_path, 'wb') as f:
                 f.write(content)
-            
+
             return pdf_path if pdf_path.stat().st_size > 1000 else None
     except:
         return None

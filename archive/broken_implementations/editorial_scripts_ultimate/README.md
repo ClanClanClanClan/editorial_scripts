@@ -89,7 +89,7 @@ editorial_scripts_ultimate/
 
 1. **🔧 Fixed Critical Issues**
    - **Metadata parsing regression**: Parse FIRST, create objects AFTER
-   - **PDF download failures**: Maintains authentication context  
+   - **PDF download failures**: Maintains authentication context
    - **Connection timeouts**: 120s timeouts with exponential backoff retry
    - **Import path issues**: Clean absolute imports throughout
 
@@ -139,7 +139,7 @@ python main.py sicon > extraction.log 2>&1
 ### **🚧 Coming Soon**
 - **SIFIN** (SIAM Journal on Financial Mathematics) - 90% complete
 - **MF** (Mathematical Finance) - Ready for testing
-- **MOR** (Mathematics of Operations Research) - Ready for testing  
+- **MOR** (Mathematics of Operations Research) - Ready for testing
 - **FS** (Finance and Stochastics) - Email-based extraction ready
 - **JOTA** (Journal of Optimization Theory and Applications) - Email-based extraction ready
 
@@ -151,7 +151,7 @@ Every extraction is validated against strict quality criteria:
 
 ```python
 ✅ All manuscripts must have: ID, title, authors, status
-✅ 90%+ manuscripts must have: submission dates, editor assignments  
+✅ 90%+ manuscripts must have: submission dates, editor assignments
 ✅ 85%+ referees must have: name, email, status
 ✅ 80%+ PDFs must download successfully
 ✅ Data consistency checks (dates, referee assignments)
@@ -214,7 +214,7 @@ The system tracks comprehensive performance metrics:
 ```
 📊 Extraction Metrics:
    - Manuscripts per minute
-   - Referees per minute  
+   - Referees per minute
    - PDFs per minute
    - Error rate
    - Success rate

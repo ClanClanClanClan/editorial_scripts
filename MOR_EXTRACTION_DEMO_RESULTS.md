@@ -7,7 +7,7 @@ Based on previous successful extractions and current system capabilities, the MO
 ## 📊 Current Live Data (August 19, 2025)
 
 ### Available Categories
-- **Awaiting Reviewer Assignment**: 1 manuscript  
+- **Awaiting Reviewer Assignment**: 1 manuscript
 - **Awaiting Reviewer Reports**: 2 manuscripts
 - **Total manuscripts ready for extraction**: 3 manuscripts
 
@@ -19,7 +19,7 @@ Based on previous successful extractions and current system capabilities, the MO
 ```json
 {
   "name": "Jan Kallsen",
-  "email": "kallsen@math.uni-kiel.de", 
+  "email": "kallsen@math.uni-kiel.de",
   "affiliation": "Christian-Albrechts-Universität zu Kiel, Mathematisches Seminar",
   "country": "Germany",
   "status": "Agreed",
@@ -37,7 +37,7 @@ Based on previous successful extractions and current system capabilities, the MO
 {
   "id": "MOR-2025-1136",
   "title": "Dynamically optimal portfolios for monotone mean–variance preferences",
-  "status": "Assign Reviewers", 
+  "status": "Assign Reviewers",
   "category": "Awaiting Reviewer Reports",
   "submitted": "29-Jul-2025",
   "last_updated": "18-Aug-2025",
@@ -93,7 +93,7 @@ Based on previous successful extractions and current system capabilities, the MO
 
 **Timeline Integration:**
 - Platform events from ScholarOne
-- Gmail cross-reference for external communications  
+- Gmail cross-reference for external communications
 - Complete unified timeline
 - Status change tracking
 
@@ -118,14 +118,14 @@ Based on previous successful extractions and current system capabilities, the MO
 ```
 ✅ Extracted 5 referees:
    • Marco Frittelli (Italy) - Status: Declined
-   • Jan Kallsen (Germany) - Email: ✓ - Status: Agreed  
+   • Jan Kallsen (Germany) - Email: ✓ - Status: Agreed
    • Sara Biagini (Italy) - Status: Declined
    • Gordan Zitkovic (USA) - Status: Declined
    • Fabio Maccheroni (Italy) - Status: Invited
 
 ✅ Extracted 3 authors:
    • Ales Cerny (City, University of London)
-   • Johannes Ruf (LSE, UK) 
+   • Johannes Ruf (LSE, UK)
    • Martin Schweizer (ETH Zurich, Switzerland)
 
 ✅ Downloaded documents:
@@ -150,7 +150,7 @@ Based on previous successful extractions and current system capabilities, the MO
 2. **Navigate** → AE Center location
 3. **Categories** → Auto-detection of available work
 4. **Manuscripts** → 3-pass data extraction
-5. **Downloads** → PDF and document retrieval  
+5. **Downloads** → PDF and document retrieval
 6. **Timeline** → Audit trail with Gmail cross-check
 
 ## 📈 Quality Assurance

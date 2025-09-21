@@ -234,9 +234,7 @@ def demonstrate_ecc_usage():
         f"Operations: {report['extraction_summary']['operations_attempted']} attempted, "
         f"{report['extraction_summary']['operations_successful']} successful"
     )
-    extractor.logger.info(
-        f"Success Rate: {report['extraction_summary']['success_rate']:.1f}%"
-    )
+    extractor.logger.info(f"Success Rate: {report['extraction_summary']['success_rate']:.1f}%")
     extractor.logger.info(f"Errors: {report['error_summary']['total_errors']}")
     extractor.logger.info(f"Warnings: {report['error_summary']['total_warnings']}")
     extractor.logger.info(

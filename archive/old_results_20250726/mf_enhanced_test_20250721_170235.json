@@ -1,0 +1,66 @@
+[
+  {
+    "id": "MAFI-2025-0166",
+    "title": "Optimal investment and consumption under forward utilities with relative performance concerns",
+    "authors": [
+      {
+        "name": "Anis Matoussi",
+        "is_corresponding": true,
+        "email": ""
+      },
+      {
+        "name": "Guillaume Broux-Quemerais",
+        "is_corresponding": false,
+        "email": ""
+      },
+      {
+        "name": "Chao Zhou",
+        "is_corresponding": false,
+        "email": ""
+      }
+    ],
+    "submission_date": "19-Jun-2025",
+    "last_updated": "27-Jun-2025",
+    "in_review_time": "32d 4h 50min 37sec",
+    "status": "Awaiting Reviewer Scores",
+    "status_details": "2 active selections; 2 invited; 2 agreed; 2 declined; 0 returned",
+    "article_type": "Original Article",
+    "special_issue": "No",
+    "referees": [
+      {
+        "name": "Liang, Gechun",
+        "email": "",
+        "affiliation": "Liang, Gechun\n\nUniversity of Warwick, Department of Statistics\n\n\n  https://orcid.org/0000-0003-0752-0773",
+        "affiliation_source": "table",
+        "orcid": "",
+        "status": "",
+        "dates": {},
+        "report": null,
+        "affiliation_crosscheck": {},
+        "affiliation_confidence": 55,
+        "affiliation_cell_index": 1,
+        "affiliation_reasoning": "institutional_keywords(2): ['university', 'department']"
+      }
+    ],
+    "editors": {
+      "AE": {
+        "name": "Possamai, Dylan",
+        "email": ""
+      },
+      "EIC": {
+        "name": "Cont, Rama",
+        "email": ""
+      },
+      "CO": {
+        "name": "Cont, Rama",
+        "email": ""
+      },
+      "ADM": {
+        "name": "K J, Chandni",
+        "email": ""
+      }
+    },
+    "documents": {},
+    "category": "Awaiting Reviewer Scores"
+  }
+]

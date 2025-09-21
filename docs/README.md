@@ -7,7 +7,7 @@
 - **[SICON_EXTRACTION_WORKFLOW.md](workflows/SICON_EXTRACTION_WORKFLOW.md)** - SICON extraction process
 - **[GMAIL_API_SETUP_GUIDE.md](workflows/GMAIL_API_SETUP_GUIDE.md)** - Gmail API configuration
 
-### 📋 Specifications  
+### 📋 Specifications
 - **[PROJECT_SPECIFICATIONS.md](specifications/PROJECT_SPECIFICATIONS.md)** - Complete project specifications
 - **[EDITORIAL_COMMAND_CENTER_SPECS.md](specifications/EDITORIAL_COMMAND_CENTER_SPECS.md)** - Command center specifications
 - **[SICON_COMPLETE_SPECIFICATION.md](specifications/SICON_COMPLETE_SPECIFICATION.md)** - SICON platform specs
@@ -34,7 +34,7 @@
 
 This documentation is **essential-only** - no bloat, just what you need to:
 - Understand the system architecture
-- Run extractors successfully  
+- Run extractors successfully
 - Implement new journal extractors
 - Maintain and troubleshoot
 

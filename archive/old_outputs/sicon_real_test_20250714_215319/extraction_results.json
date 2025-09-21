@@ -1,0 +1,15 @@
+{
+  "journal_code": "SICON",
+  "started_at": "2025-07-14T21:53:19.824937",
+  "completed_at": "2025-07-14T21:53:19.827584",
+  "duration_seconds": 0.002647,
+  "success": false,
+  "manuscripts_count": 0,
+  "referees_count": 0,
+  "pdfs_count": 0,
+  "quality_metrics": {},
+  "baseline_comparison": {},
+  "errors": [
+    "Failed to create browser session"
+  ]
+}

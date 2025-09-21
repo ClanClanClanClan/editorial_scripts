@@ -39,16 +39,16 @@ Expected output:
 - 13 referees with emails (not 2)
 
 ## What NOT to Do
-❌ Don't create another implementation  
-❌ Don't refactor working code  
-❌ Don't add more abstractions  
-❌ Don't overthink it  
+❌ Don't create another implementation
+❌ Don't refactor working code
+❌ Don't add more abstractions
+❌ Don't overthink it
 
 ## Success Criteria
-✅ Matches July 11 performance  
-✅ Extracts all metadata  
-✅ Downloads all PDFs  
-✅ Finds all referees  
+✅ Matches July 11 performance
+✅ Extracts all metadata
+✅ Downloads all PDFs
+✅ Finds all referees
 
 ## If You're Stuck
 The working code is here:

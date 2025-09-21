@@ -17,20 +17,20 @@ async def download_pdf_simple(self, url: str, filename: str) -> Optional[Path]:
         pdf_dir = self.output_dir / "pdfs"
         pdf_dir.mkdir(exist_ok=True)
         pdf_path = pdf_dir / filename
-        
+
         # Use the authenticated page to download
         response = await self.page.goto(url, wait_until="networkidle")
-        
+
         if response.status == 200:
             # Get the content
             content = await response.body()
-            
+
             # Verify it's a PDF
             if content[:4] == b'%PDF':
                 # Save to file
                 with open(pdf_path, 'wb') as f:
                     f.write(content)
-                
+
                 # Verify size
                 if pdf_path.stat().st_size > 1000:  # At least 1KB
                     logger.info(f"✅ Downloaded: {filename} ({len(content)} bytes)")
@@ -42,10 +42,10 @@ async def download_pdf_simple(self, url: str, filename: str) -> Optional[Path]:
                 logger.warning(f"Not a PDF: {url}")
         else:
             logger.error(f"HTTP {response.status}: {url}")
-            
+
     except Exception as e:
         logger.error(f"Download failed: {e}")
-    
+
     return None
 ```
 

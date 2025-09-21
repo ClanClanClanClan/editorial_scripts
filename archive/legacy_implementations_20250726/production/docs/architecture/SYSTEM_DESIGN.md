@@ -46,16 +46,16 @@ The Editorial Scripts system is a production-ready academic manuscript extractio
 ```python
 class BaseExtractor:
     """Abstract base for all journal extractors."""
-    
+
     def __init__(self, config, debug=False):
         self.driver = None
         self.config = config
         self.debug = debug
-        
+
     def login(self) -> bool:
         """Authentication implementation."""
         raise NotImplementedError
-        
+
     def extract(self, category: str) -> list:
         """Main extraction implementation."""
         raise NotImplementedError
@@ -63,7 +63,7 @@ class BaseExtractor:
 
 **Specialization:**
 - `ComprehensiveMFExtractor` - MF journal implementation
-- `SiconExtractor` - SICON journal implementation  
+- `SiconExtractor` - SICON journal implementation
 - `SifinExtractor` - SIFIN journal implementation
 
 ### 2. Authentication System
@@ -72,7 +72,7 @@ class BaseExtractor:
 ```python
 class SecureCredentialManager:
     """Manages credentials via macOS Keychain."""
-    
+
     def store_credentials(self, email, password) -> bool
     def load_credentials(self) -> tuple[str, str]
     def setup_environment(self) -> bool
@@ -94,7 +94,7 @@ Pass 1: Main Pages Forward (1→2→...→n)
 ├── Download cover letters
 └── Extract abstracts
 
-Pass 2: Manuscript Info Backward (n→...→2→1)  
+Pass 2: Manuscript Info Backward (n→...→2→1)
 ├── Extract complete author information
 ├── Extract keywords and classifications
 └── Extract detailed metadata
@@ -153,7 +153,7 @@ Browser Cleanup → Result Aggregation → Report Generation → File Organizati
     "authors": [
         {
             "name": "Dr. Jane Smith",
-            "email": "jane.smith@university.edu", 
+            "email": "jane.smith@university.edu",
             "affiliation": "University of Finance",
             "orcid": "0000-0000-0000-0000",
             "corresponding": true
@@ -284,7 +284,7 @@ User Input → macOS Keychain → Encrypted Storage → Runtime Access
 - Encrypted credential storage
 - Audit trail for access
 
-### Browser Security  
+### Browser Security
 - Isolated browser profiles
 - Automatic cleanup
 - No persistent cookies
@@ -327,5 +327,5 @@ User Input → macOS Keychain → Encrypted Storage → Runtime Access
 
 ---
 
-*Last Updated: January 25, 2025*  
+*Last Updated: January 25, 2025*
 *Architecture Version: 3.0*

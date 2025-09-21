@@ -16,7 +16,7 @@ The comprehensive extractor for Mathematical Finance journal manuscripts.
 class ComprehensiveMFExtractor:
     """
     Production-ready extractor for Mathematical Finance journal.
-    
+
     Features:
     - Multi-pass extraction strategy
     - Secure credential management
@@ -184,7 +184,7 @@ SIAM Journal on Control and Optimization extractor.
 
 ---
 
-### SifinExtractor  
+### SifinExtractor
 
 **File:** `src/extractors/sifin_extractor.py`
 
@@ -246,13 +246,13 @@ def safe_operation():
 def test_extractor_functionality():
     """Standard test pattern for extractor testing."""
     extractor = MathematicalFinanceExtractor(debug=True)
-    
+
     # Test login
     assert extractor.login()
-    
+
     # Test extraction
     extractor.extract_from_category("Test Category")
-    
+
     # Validate results
     assert len(extractor.manuscripts) > 0
 ```
@@ -278,5 +278,5 @@ def test_extractor_functionality():
 
 ---
 
-*Last Updated: January 25, 2025*  
+*Last Updated: January 25, 2025*
 *API Version: 3.0*

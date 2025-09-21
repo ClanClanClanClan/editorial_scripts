@@ -21,7 +21,7 @@ browser:
     width: 1920
     height: 1080
   download_directory: "data/downloads"
-  
+
 # Extraction Settings
 extraction:
   max_retries: 3
@@ -31,7 +31,7 @@ extraction:
   checkpoint_interval: 5  # Save checkpoint every N manuscripts
   parallel_downloads: false
   max_workers: 4
-  
+
 # PDF Handling
 pdf:
   min_size: 1024  # 1KB minimum
@@ -40,7 +40,7 @@ pdf:
   organize_by_date: true
   keep_originals: false
   compression_enabled: false
-  
+
 # Email Integration
 email:
   gmail_api_enabled: true
@@ -48,7 +48,7 @@ email:
   token_file: "config/gmail_token.pickle"
   check_interval: 3600  # seconds (1 hour)
   auto_mark_read: false
-  
+
 # Data Export
 export:
   formats:
@@ -58,7 +58,7 @@ export:
   include_raw_data: false
   compress_exports: true
   anonymize_referees: false
-  
+
 # Performance
 performance:
   memory_limit: 2048  # MB
@@ -66,14 +66,14 @@ performance:
   disk_space_warning: 1073741824  # 1GB
   cleanup_old_files: true
   cleanup_after_days: 30
-  
+
 # Security
 security:
   encrypt_credentials: true
   secure_delete: true
   audit_logging: true
   mask_sensitive_data: true
-  
+
 # Notifications
 notifications:
   enabled: false
@@ -83,7 +83,7 @@ notifications:
   on_completion: true
   on_error: true
   daily_summary: true
-  
+
 # Development
 development:
   debug_mode: false

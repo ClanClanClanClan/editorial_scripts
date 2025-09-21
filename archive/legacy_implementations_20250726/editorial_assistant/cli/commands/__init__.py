@@ -1,7 +1,5 @@
 """CLI commands for Editorial Assistant."""
 
-from . import extract
-from . import analyze  
-from . import report
+from . import analyze, extract, report
 
 __all__ = ["extract", "analyze", "report"]

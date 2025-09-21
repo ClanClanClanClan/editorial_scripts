@@ -94,7 +94,7 @@ src/
 
 ### What Was Archived
 - `archive/legacy_implementations_20250714/` - Old competing systems
-- `archive/legacy_journals/` - Legacy standalone implementations  
+- `archive/legacy_journals/` - Legacy standalone implementations
 - `archive/old_test_files/` - Debug and test files
 - `archive/screenshots/` - Debug screenshots
 

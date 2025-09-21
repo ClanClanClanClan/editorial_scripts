@@ -1,7 +1,7 @@
 # 📧 Gmail API Setup Guide for Editorial Scripts
 
-**Status**: Ready for implementation  
-**Purpose**: Enable email-based extraction for FS and JOTA journals  
+**Status**: Ready for implementation
+**Purpose**: Enable email-based extraction for FS and JOTA journals
 **Estimated Time**: 15-30 minutes
 
 ---
@@ -186,7 +186,7 @@ async def test():
 asyncio.run(test())
 "
 
-# Test JOTA scraper  
+# Test JOTA scraper
 python -c "
 import asyncio
 from src.infrastructure.scrapers.email_based.jota_scraper import JOTAScraper

@@ -2,9 +2,9 @@
 
 ## 📋 MASTER REFERENCE FOR ALL FUTURE SESSIONS
 
-**Last Updated:** August 19, 2025  
-**Version:** 3.0 - Ultra-Complete Implementation  
-**Status:** PRODUCTION READY WITH ALL ENHANCEMENTS  
+**Last Updated:** August 19, 2025
+**Version:** 3.0 - Ultra-Complete Implementation
+**Status:** PRODUCTION READY WITH ALL ENHANCEMENTS
 
 ---
 
@@ -76,7 +76,7 @@ extractor.run()
 🔐 Login successful (with 2FA)
 📂 Found 3 categories: Awaiting Reports (12), AE Recommendation (3), etc.
 📋 PASS 1: Extracting referees + reports + documents
-📊 PASS 2: Extracting manuscript info + keywords  
+📊 PASS 2: Extracting manuscript info + keywords
 📜 PASS 3: Extracting timeline + analytics
 🌐 Deep web enrichment: 15/18 ORCIDs found
 📧 Gmail cross-check: 23 external emails merged
@@ -100,7 +100,7 @@ extractor.run()
 ```python
 Cache Hierarchy:
 ├── Level 1: In-memory (referee emails, institutions)
-├── Level 2: File-based (JSON cache files) 
+├── Level 2: File-based (JSON cache files)
 ├── Level 3: Redis (production environments)
 └── Level 4: Test isolation (temporary directories)
 ```
@@ -112,7 +112,7 @@ Cache Hierarchy:
 
 #### **4. Data Enrichment Pipeline**
 ```python
-Raw Data → Name Correction → MathSciNet Lookup → Institution Normalization → 
+Raw Data → Name Correction → MathSciNet Lookup → Institution Normalization →
 Department Extraction → ORCID Validation → Timeline Analytics → Export
 ```
 
@@ -121,7 +121,7 @@ Department Extraction → ORCID Validation → Timeline Analytics → Export
 ## 📊 THREE-PASS EXTRACTION SYSTEM
 
 ### **PASS 1: FORWARD (1 → N) - Core Data**
-**Duration:** ~60% of extraction time  
+**Duration:** ~60% of extraction time
 **Focus:** Referees, Reports, Documents
 
 ```python
@@ -137,7 +137,7 @@ for manuscript in manuscripts:
 - ✅ Manuscript ID, title, submission date, status
 - ✅ **ALL referees** with names, emails, affiliations, status
 - ✅ **COMPLETE referee reports** (when available):
-  - Recommendation (Accept/Reject/Minor/Major Revision)  
+  - Recommendation (Accept/Reject/Minor/Major Revision)
   - Comments to author (full text)
   - Comments to editor (confidential)
   - Review dates, quality scores
@@ -145,7 +145,7 @@ for manuscript in manuscripts:
 - ✅ All document downloads with deduplication
 
 ### **PASS 2: BACKWARD (N → 1) - Manuscript Details**
-**Duration:** ~25% of extraction time  
+**Duration:** ~25% of extraction time
 **Focus:** Keywords, MSC, Recommended Referees
 
 ```python
@@ -162,13 +162,13 @@ for manuscript in reversed(manuscripts):
 - ✅ Author-provided keywords
 - ✅ MSC classification codes (2020 system)
 - ✅ Recommended referees (if provided by authors)
-- ✅ Opposed referees (if specified by authors)  
+- ✅ Opposed referees (if specified by authors)
 - ✅ Data availability statements
 - ✅ Conflict of interest declarations
 - ✅ Funding acknowledgments
 
-### **PASS 3: FORWARD (1 → N) - Timeline & Analytics**  
-**Duration:** ~15% of extraction time  
+### **PASS 3: FORWARD (1 → N) - Timeline & Analytics**
+**Duration:** ~15% of extraction time
 **Focus:** Communication History
 
 ```python
@@ -185,7 +185,7 @@ for manuscript in manuscripts:
 - ✅ **Gmail cross-checked timeline** with external communications
 - ✅ **Advanced timeline analytics:**
   - Response times per referee
-  - Reminder effectiveness analysis  
+  - Reminder effectiveness analysis
   - Communication patterns and peak periods
   - Referee reliability scoring (0-100)
   - Editor workload metrics
@@ -232,7 +232,7 @@ institution_corrections = {
 def extract_department(institution_text):
     # Input: "LSE - Mathematics Department"
     # Output: department="Mathematics Department", institution="LSE"
-    
+
     patterns = [
         r'^(.+?)\s*[-–—]\s*(.+)$',           # LSE - Mathematics
         r'^(.+?),\s*(Department of .+)$',     # LSE, Department of Math
@@ -248,7 +248,7 @@ def extract_department(institution_text):
 ```python
 report_states = {
     'completed': 'Full report with recommendation available',
-    'in_progress': 'Referee accepted but not yet submitted', 
+    'in_progress': 'Referee accepted but not yet submitted',
     'declined': 'Referee declined invitation',
     'overdue': 'Past deadline, reminder sent',
     'revision_historical': 'Report from previous manuscript version'
@@ -278,7 +278,7 @@ def extract_referee_report_comprehensive(report_link, referee_name, manuscript_i
   "comments_to_author": "The paper presents interesting results but requires clarification on...",
   "comments_to_editor": "I recommend acceptance after minor revisions. The methodology is sound...",
   "date_assigned": "2025-01-10",
-  "date_completed": "2025-01-25", 
+  "date_completed": "2025-01-25",
   "quality_score": 4,
   "timeliness_score": 5,
   "pdf_reports": [
@@ -296,7 +296,7 @@ def extract_referee_report_comprehensive(report_link, referee_name, manuscript_i
 downloads/
 ├── manuscripts/
 │   └── MOR-2025-0166.pdf
-├── cover_letters/ 
+├── cover_letters/
 │   └── MOR-2025-0166_cover.pdf
 ├── referee_reports/
 │   ├── MOR-2025-0166/
@@ -348,7 +348,7 @@ For revision manuscripts, the system:
     "current_version": "R1",
     "version_history": [
       {
-        "version": "R0", 
+        "version": "R0",
         "decision": "Major Revision",
         "referees": [...],
         "decision_date": "2024-12-15"
@@ -357,7 +357,7 @@ For revision manuscripts, the system:
   },
   "referee_continuity": {
     "continuing_referees": ["John Smith", "Jane Doe"],
-    "new_referees": ["Bob Wilson"], 
+    "new_referees": ["Bob Wilson"],
     "declined_re_review": ["Alice Johnson"]
   }
 }
@@ -377,7 +377,7 @@ def enhance_with_gmail_crosscheck(manuscript):
     - Author follow-ups and inquiries
     - Administrative notifications
     """
-    
+
     search_query = f'({manuscript_id} OR {referee_emails}) AND (review OR manuscript OR referee)'
     external_emails = gmail_search(search_query)
     merged_timeline = merge_with_audit_trail(platform_events, external_emails)
@@ -449,7 +449,7 @@ if category == "Awaiting AE Recommendation":
         calculate_referee_agreement()      # 67% agreement on minor revision
 ```
 
-### **2. Awaiting Reviewer Reports** 
+### **2. Awaiting Reviewer Reports**
 - **Status:** Some referees still working
 - **Action:** Extract available reports, track pending ones
 - **Output:** Partial data with status tracking
@@ -468,7 +468,7 @@ if category == "Awaiting AE Recommendation":
 # Credentials stored in macOS Keychain (encrypted, persistent)
 credential_locations = {
     'primary': 'macOS Keychain',
-    'service_name': 'editorial-scripts-MOR', 
+    'service_name': 'editorial-scripts-MOR',
     'auto_load': '~/.editorial_scripts/load_all_credentials.sh',
     'verification': 'verify_all_credentials.py'
 }
@@ -523,7 +523,7 @@ def handle_2fa():
   ],
   "summary_statistics": {
     "total_authors": 45,
-    "total_referees": 67,  
+    "total_referees": 67,
     "orcids_found": 52,
     "reports_extracted": 23,
     "pdfs_downloaded": 89,
@@ -538,7 +538,7 @@ def handle_2fa():
 ├── MOR_extraction_results.json           # Complete data
 ├── MOR_summary_20250819.txt             # Human-readable summary
 ├── manuscripts/                          # PDF manuscripts
-├── cover_letters/                        # Cover letters  
+├── cover_letters/                        # Cover letters
 ├── referee_reports/                      # Organized by manuscript
 ├── timeline_reports/                     # Communication analytics
 └── debug/                               # Error logs and HTML snapshots
@@ -571,7 +571,7 @@ def handle_2fa():
 ```python
 error_handling = {
     'popup_failures': 'Retry with JavaScript execution',
-    'navigation_timeouts': 'Exponential backoff retry',  
+    'navigation_timeouts': 'Exponential backoff retry',
     '2fa_failures': 'Fresh Gmail token + retry',
     'download_errors': 'Queue for batch retry',
     'cache_corruption': 'Auto-rebuild from source',
@@ -656,7 +656,7 @@ Recovery: Return to category listing + continue
 # Generated debug files
 debug_files = [
     'debug_ae_recommendation_page.html',    # AE category page
-    'debug_detailed_review_John_Smith.html',  # Individual reports  
+    'debug_detailed_review_John_Smith.html',  # Individual reports
     'debug_popup_extraction.html',         # Email popups
     'debug_version_history.html'           # Revision manuscripts
 ]
@@ -668,7 +668,7 @@ debug_files = [
 
 ### **Pre-Deployment Checklist**
 - [ ] ✅ Credentials loaded: `python3 verify_all_credentials.py`
-- [ ] ✅ Gmail API working: Check `config/gmail_token.json`  
+- [ ] ✅ Gmail API working: Check `config/gmail_token.json`
 - [ ] ✅ Cache system initialized: Test vs production mode
 - [ ] ✅ Download directories exist and writable
 - [ ] ✅ Browser dependencies installed (Chrome/ChromeDriver)
@@ -707,11 +707,11 @@ validation_report = {
 
 ### **Phase 4: Advanced Analytics**
 - Machine learning report sentiment analysis
-- Predictive referee performance modeling  
+- Predictive referee performance modeling
 - Automated recommendation consensus detection
 - Real-time dashboard with live metrics
 
-### **Phase 5: Integration Expansion** 
+### **Phase 5: Integration Expansion**
 - Direct database integration (bypass file exports)
 - REST API for real-time queries
 - Automated report generation and distribution
@@ -751,7 +751,7 @@ validation_report = {
 
 ### **Performance Targets**
 - ✅ **< 3 minutes** per manuscript (average)
-- ✅ **99%+** extraction completion rate  
+- ✅ **99%+** extraction completion rate
 - ✅ **< 5%** error rate with automatic recovery
 - ✅ **Zero** manual intervention required
 - ✅ **100%** reproducible results
@@ -819,7 +819,7 @@ search_mathscinet()                   # ORCID database lookup
 
 ---
 
-**Last Updated:** August 19, 2025  
-**Session Context:** Ultra-complete implementation with all enhancements  
-**Status:** ✅ PRODUCTION READY - COMPREHENSIVE WORKFLOW DOCUMENTED  
+**Last Updated:** August 19, 2025
+**Session Context:** Ultra-complete implementation with all enhancements
+**Status:** ✅ PRODUCTION READY - COMPREHENSIVE WORKFLOW DOCUMENTED
 **Critical Note:** NEVER create duplicate extractors - single source of truth at `/production/src/extractors/mor_extractor.py`

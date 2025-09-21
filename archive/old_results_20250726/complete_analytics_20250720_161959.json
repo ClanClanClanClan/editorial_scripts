@@ -1,0 +1,112 @@
+{
+  "generation_timestamp": "2025-07-20T16:19:59.120237",
+  "summary": {
+    "total_journals_attempted": 4,
+    "successful_extractions": 4,
+    "failed_extractions": 0,
+    "success_rate": 100.0,
+    "total_manuscripts": 0,
+    "total_referees": 0
+  },
+  "platform_analytics": {
+    "scholarone": {
+      "journals": [
+        "MF",
+        "MOR"
+      ],
+      "manuscript_count": 0,
+      "referee_count": 0,
+      "avg_data_quality": 0.0
+    },
+    "siam": {
+      "journals": [
+        "SICON",
+        "SIFIN"
+      ],
+      "manuscript_count": 0,
+      "referee_count": 0,
+      "avg_data_quality": 0.0
+    }
+  },
+  "journal_details": {
+    "MF": {
+      "journal_name": "Mathematical Finance",
+      "platform": "ScholarOne",
+      "extraction_time": 10.3488929271698,
+      "manuscript_count": 0,
+      "referee_count": 0,
+      "data_quality_score": 0.0,
+      "status_breakdown": {},
+      "author_statistics": {
+        "total_author_entries": 0,
+        "unique_authors": 0,
+        "avg_authors_per_manuscript": 0
+      },
+      "date_range": {},
+      "field_completeness": {},
+      "referee_analysis": {}
+    },
+    "MOR": {
+      "journal_name": "Mathematics of Operations Research",
+      "platform": "ScholarOne",
+      "extraction_time": 6.601111650466919,
+      "manuscript_count": 0,
+      "referee_count": 0,
+      "data_quality_score": 0.0,
+      "status_breakdown": {},
+      "author_statistics": {
+        "total_author_entries": 0,
+        "unique_authors": 0,
+        "avg_authors_per_manuscript": 0
+      },
+      "date_range": {},
+      "field_completeness": {},
+      "referee_analysis": {}
+    },
+    "SICON": {
+      "journal_name": "SIAM Journal on Control and Optimization",
+      "platform": "SIAM",
+      "extraction_time": 0.00025010108947753906,
+      "manuscript_count": 0,
+      "referee_count": 0,
+      "data_quality_score": 0.0,
+      "status_breakdown": {},
+      "author_statistics": {
+        "total_author_entries": 0,
+        "unique_authors": 0,
+        "avg_authors_per_manuscript": 0
+      },
+      "date_range": {},
+      "field_completeness": {},
+      "referee_analysis": {}
+    },
+    "SIFIN": {
+      "journal_name": "SIAM Journal on Financial Mathematics",
+      "platform": "SIAM",
+      "extraction_time": 0.0001239776611328125,
+      "manuscript_count": 0,
+      "referee_count": 0,
+      "data_quality_score": 0.0,
+      "status_breakdown": {},
+      "author_statistics": {
+        "total_author_entries": 0,
+        "unique_authors": 0,
+        "avg_authors_per_manuscript": 0
+      },
+      "date_range": {},
+      "field_completeness": {},
+      "referee_analysis": {}
+    }
+  },
+  "cross_platform_insights": {
+    "global_status_distribution": {},
+    "total_unique_authors": 0,
+    "status_diversity": 0,
+    "manuscript_distribution": {
+      "MF": 0,
+      "MOR": 0,
+      "SICON": 0,
+      "SIFIN": 0
+    }
+  }
+}

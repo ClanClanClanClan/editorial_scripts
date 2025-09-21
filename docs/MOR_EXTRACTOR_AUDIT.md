@@ -10,7 +10,7 @@
 
 ### 1. DUPLICATE VERSION HISTORY METHODS
 - `extract_version_history_BROKEN_BACKUP()` (line 2451)
-- `extract_version_history()` (line 3516) 
+- `extract_version_history()` (line 3516)
 - `extract_historical_manuscript_data()` (line 3597)
 - `extract_version_history_page_data()` (line 3683)
 - `extract_version_history_popup_data()` (line 3560)
@@ -20,7 +20,7 @@
 ### 2. WRONG REFEREE EXTRACTION (CRITICAL BUG)
 **Location**: `extract_referees_awaiting_reports()` (line 1742)
 ```python
-referee_table_rows = self.driver.find_elements(By.XPATH, 
+referee_table_rows = self.driver.find_elements(By.XPATH,
     "//td[@class='tablelines']//tr[td[@class='tablelightcolor'] and .//a[contains(@href,'mailpopup')]]")
 ```
 **Problem**: Finds ALL mailpopup links, not just referees
@@ -40,7 +40,7 @@ referee_table_rows = self.driver.find_elements(By.XPATH,
 
 ### 5. REDUNDANT METHODS
 - Multiple audit trail extraction methods
-- Multiple document extraction methods  
+- Multiple document extraction methods
 - Multiple review content extraction methods
 
 ## Core Extraction Flow
@@ -95,14 +95,14 @@ For each category:
 ### 1. Fix Referee Extraction
 ```python
 # WRONG (current)
-referee_table_rows = self.driver.find_elements(By.XPATH, 
+referee_table_rows = self.driver.find_elements(By.XPATH,
     "//td[@class='tablelines']//tr[td[@class='tablelightcolor'] and .//a[contains(@href,'mailpopup')]]")
 
 # RIGHT (should be)
 # Find "Reviewer List" section first
-reviewer_list_section = self.driver.find_element(By.XPATH, 
+reviewer_list_section = self.driver.find_element(By.XPATH,
     "//*[contains(text(), 'Reviewer List')]/ancestor::table[1]/following-sibling::*")
-referee_table_rows = reviewer_list_section.find_elements(By.XPATH, 
+referee_table_rows = reviewer_list_section.find_elements(By.XPATH,
     ".//tr[.//select[contains(@name, 'ORDER')]]")
 ```
 
@@ -110,12 +110,12 @@ referee_table_rows = reviewer_list_section.find_elements(By.XPATH,
 ```python
 def get_email_from_popup(self, link, name):
     # ... extract email ...
-    
+
     # Close popup BEFORE returning
     if len(self.driver.window_handles) > 1:
         self.driver.close()
         self.driver.switch_to.window(original_window)
-    
+
     return email  # Return AFTER closing
 ```
 

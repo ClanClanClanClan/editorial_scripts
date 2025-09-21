@@ -1,0 +1,6 @@
+[
+  "text={category}",
+  "a:has-text('{category}')",
+  "td:has-text('{category}')"
+]
+

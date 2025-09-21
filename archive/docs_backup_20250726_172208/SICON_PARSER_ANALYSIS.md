@@ -59,7 +59,7 @@ await page.goto(f"{base_url}/cgi-bin/sicon/main.plex")
 # Step 2: Find and click category links with count > 0
 categories = [
     "Under Review",
-    "All Pending Manuscripts", 
+    "All Pending Manuscripts",
     "Waiting for Revision"
 ]
 
@@ -132,7 +132,7 @@ For manuscript M172838:
       "declined": true
     },
     // ... 4 more declined referees
-    
+
     // Accepted referees (from Referees section)
     {
       "name": "Giorgio Ferrari",

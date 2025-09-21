@@ -1,0 +1,224 @@
+[
+  {
+    "id": "MAFI-2025-0212",
+    "category": "Awaiting Reviewer Scores",
+    "referees": [
+      {
+        "name": "St\u00e9phane Villeneuve",
+        "email": "",
+        "affiliation": "Universite Toulouse 1 Capitole, Toulouse",
+        "orcid": "https://orcid.org/0000-0003-3213-1905",
+        "status": "Agreed",
+        "dates": {
+          "invited": "06-Aug-2025",
+          "agreed": "06-Aug-2025",
+          "due": "04-Nov-2025"
+        },
+        "report": {
+          "available": true,
+          "url": "javascript: popWindow('mafi?PARAMS=xik_5NrRonSaFSdKVFUqJnrn6J7FbeLy2EBm5Hc94swCnEiVe8SLVqvz5KQYLmZuyNEnncTiWKwo8xzYTawLmAQSMzEYAzPj7dLpRaJvowdhimrwPmSZXaVwN8YWPaLMsagxgu3hdXfn9wV4oDsWeJtNe5pCc3eMyU8Yjua9GbiqGW476ks7aE67Sx4DkEQwak93MKDYRqnstLgxHC9mrYKa47peycM6rbvm6cZWFw373LuKBXKfr9ksJ5uBfsEMmB52F8DYZkdengPBM4qUBsEbzd9GjvwH7rJ7vFUNvmCE7As65SL9hxC233yreskJDPzj8fgZ4J1fZuyFJGTt5hZmefVebnZRug7nX5vh6MebQ28Cy9doASAN%27,%27history_popup%27,%20550,%20450);"
+        },
+        "institution_parsed": "Universite Toulouse 1 Capitole",
+        "country_hints": [
+          "France"
+        ],
+        "status_details": {
+          "status": "Agreed",
+          "review_received": false,
+          "review_complete": false,
+          "review_pending": true,
+          "agreed_to_review": true,
+          "declined": false,
+          "no_response": false
+        },
+        "timeline": {
+          "invitation_sent": "06-Aug-2025",
+          "invitation_viewed": null,
+          "agreed_to_review": "06-Aug-2025",
+          "declined_date": null,
+          "review_submitted": null,
+          "review_modified": null,
+          "reminder_sent": [],
+          "total_days_to_review": null,
+          "days_to_respond": 0
+        },
+        "name_standardized": "Stephane Villeneuve",
+        "department": "economics-TSM-R"
+      },
+      {
+        "name": "Bruno Strulovici",
+        "email": "",
+        "affiliation": "Northwestern University, Economics",
+        "orcid": "",
+        "status": "Declined\ninvite again",
+        "dates": {
+          "invited": "06-Aug-2025"
+        },
+        "report": {
+          "available": true,
+          "url": "javascript: popWindow('mafi?PARAMS=xik_6Me5ksVanooKmu6tiKr4iMfyt2w8eXzzFsUyeF6YMqyH9EBsNbSDgZRLHA8vrniFdKdAatWBifo6xwm8bBYeWUnnomX398wfJ7vcobDZQA4KqsRVAVNWgCtLvZZSwrsFKvNS3vi5jcRRX9dBdpX6ueb94H7JZ3HXrn3AZN1XCYKQoy6KRfeALVaXbMhRwCafQy9igbQ6XL7sSWPgPzeZUn3eXrNPHDJQGCa8HhT7FW9jHV39DAuGow816zZ5ijLxiYKRqsFPUNg2rixaHsgwUSp5WKMi644Z2uzsVAggBfr4pzZw23jrCHgreuLc65MdAikhTXSHYEr1vUZhKfVeTNjUaJtaMD35zvxdy61xtrT1ppUTSgH6%27,%27history_popup%27,%20550,%20450);"
+        },
+        "institution_parsed": "Northwestern University",
+        "country_hints": [
+          "United States"
+        ],
+        "status_details": {
+          "status": "Declined\ninvite again",
+          "review_received": false,
+          "review_complete": false,
+          "review_pending": false,
+          "agreed_to_review": false,
+          "declined": true,
+          "no_response": false
+        },
+        "timeline": {
+          "invitation_sent": "06-Aug-2025",
+          "invitation_viewed": null,
+          "agreed_to_review": null,
+          "declined_date": "07-Aug-2025",
+          "review_submitted": null,
+          "review_modified": null,
+          "reminder_sent": [],
+          "total_days_to_review": null,
+          "days_to_respond": null
+        },
+        "name_standardized": "Bruno Strulovici"
+      },
+      {
+        "name": "Th\u00e9o Durandard",
+        "email": "",
+        "affiliation": "University of Illinois at Urbana-Champaign",
+        "orcid": "https://orcid.org/0009-0005-6331-1345",
+        "status": "Agreed",
+        "dates": {
+          "invited": "07-Aug-2025",
+          "agreed": "07-Aug-2025",
+          "due": "05-Nov-2025"
+        },
+        "report": {
+          "available": true,
+          "url": "javascript: popWindow('mafi?PARAMS=xik_55ziMHgEmLUUefY2DtfKECXiAkPzoe9V5UvosX7iKyDJuB2Ark6sU8PZcrZa2FRuCxc54BdfvPfPixm22KvjCZyxbTVmmgHwiPWb42NKFtcA75Jhrze4wWbDQStAZ4kSjyjEaNGqnaTekDurPYPnqGiaMaLELPvvihxXAfNjA2YNqXzLicbPEk3YeqVGme8QNAkNrigqGhcRF3HBCF9rUe6rJe3eW6D7W4RxksuhEtaad3xz8JULcJossGavTbJKvBK2Gn3GUDfx4w2PxbZQh5M8Hgk2foapED6MXHxJDvcHBjb3Rq4Dch3umpKmbTfbFPzByCh4Z5n1ExVQrZXbxfp7eCkPo9XK4xZ5JEP1MgM6BF3K9hvL%27,%27history_popup%27,%20550,%20450);"
+        },
+        "institution_parsed": "University of Illinois at Urbana-Champaign",
+        "country_hints": [
+          "United States"
+        ],
+        "status_details": {
+          "status": "Agreed",
+          "review_received": false,
+          "review_complete": false,
+          "review_pending": true,
+          "agreed_to_review": true,
+          "declined": false,
+          "no_response": false
+        },
+        "timeline": {
+          "invitation_sent": "07-Aug-2025",
+          "invitation_viewed": null,
+          "agreed_to_review": "07-Aug-2025",
+          "declined_date": null,
+          "review_submitted": null,
+          "review_modified": null,
+          "reminder_sent": [],
+          "total_days_to_review": null,
+          "days_to_respond": 0
+        },
+        "name_standardized": "Theodore Durandard"
+      }
+    ],
+    "documents": {
+      "pdf": true,
+      "pdf_size": "PDF Proof:  1064 K",
+      "html": true,
+      "abstract": true,
+      "cover_letter": true,
+      "supplementary_files": [
+        {
+          "name": "Original Files",
+          "url": "javascript:popWindow('mafi?PARAMS=xik_53LSABqBQ7Rurdh3n4AVWRuZmmLgSLcWvkXoEzSUUoy61ejpeyTSm9j3fFHPynJTZwBRm1SyiNRgcunaHZCmj8v1Jx5b2d9pUJQi8fP4mKvPXybRBd2W7iQyN8Nteuf3ReDdoJHcqMiZSkiNrQSHPNVfVJGGVPzkMTeh6XJrmZL9MQKCNXoyxXCXirTVDR7XKmBQwLYuvvvxaEpSXkBaJZfXYUJxmGCM6Rmo3Ucvp6b5hviziiTjWvyqm3j2cqF2SvSMQEHkwbEPFTxLTKgMZe5TVLoauHMQsnSHbRiahpsUPK6Jsh1Tudp2StxAWF5wWz4rGbLnHQa2Y1eHXwmCsdNzCKogto%27,%27ms_origfiles%27,%20600,%20400);",
+          "type": "supplementary"
+        },
+        {
+          "name": "External Searches",
+          "url": "javascript:popWindow('mafi?PARAMS=xik_BQVZEwx9opg5vU1BtpWvmoUkuQFfs6Ei4DAKuXZA24K2kVkVUUpi7s3QPhE5XNkCdHNYXdR6UXpcXz4pkCSoKXounCLhDUsQWqWpJ4XHXU1xt1rEc15kHA81ZZWiroXnquVb7vJt3tw1yZBgGdoq1dD5kVoyvUkxykE6z7EGD1CKFMqSs1cdz2JqtrVr9Fo7kW9aemq3R5tWzWJZ6uvhYDKgX2SJWhxNu3fq2TYayuCRDU1Hfx6G1XoptAxpj2RYEoiSdFRmjvt2C7cHH7GmBcvCBsktvcWLgDdm17YGngdqPMYVpL37ndX9TwMvJpcZGNrkbXEA%27,%27extenal_search%27,%20600,%20400);",
+          "type": "supplementary"
+        }
+      ]
+    },
+    "authors": [
+      {
+        "name": "Hao Xing",
+        "email": "",
+        "institution": "",
+        "country": "",
+        "is_corresponding": false,
+        "orcid": ""
+      },
+      {
+        "name": "Yuyang Zhang",
+        "email": "yyz@bu.edu",
+        "institution": "Boston University Questrom School of Business",
+        "country": "United States",
+        "is_corresponding": false,
+        "orcid": ""
+      }
+    ],
+    "editors": {},
+    "title": "Optimal Contract, Delegated Investment, and Information Acquisition",
+    "submission_date": "05-Aug-2025",
+    "last_updated": "05-Aug-2025",
+    "in_review_time": "19d 6h 10min 52sec",
+    "status": "Awaiting Reviewer Scores",
+    "status_details": "2 active selections; 2 invited; 2 agreed; 1 declined; 0 returned",
+    "article_type": "Original Article",
+    "special_issue": "No",
+    "abstract": "Abstract: This paper examines a model of delegated investment within a noisy rational expectations equilibrium framework. Portfolio managers can acquire costly signals about asset payoffs but incur portfolio management costs. They are compensated by delegating investors and make investment decisions on their behalf. The optimal contract features a benchmark component that helps mitigate agency frictions arising from these management costs. The precision of the private signals chosen by managers is determined endogenously through market equilibrium. Private and public signals act as substitutes. When portfolio management costs increase, both the performance and benchmark components of the optimal contract rise, however fewer private signals are incorporated into the public signal, reducing the informational efficiency of prices. When a social planner places sufficient weight on the welfare of direct investors or liquidity providers, the socially optimal equilibrium yields greater price informational efficiency compared to the decentralized equilibrium.",
+    "keywords": [
+      "asset-management",
+      "equilibrium asset pricing",
+      "information acquisition",
+      "optimal contracts",
+      "principal-agent problem"
+    ],
+    "funding_information": "There are no funders to report for this submission",
+    "data_availability_statement": "Data sharing not applicable to this article as no datasets were generated or analysed during the current study.",
+    "conflict_of_interest": "No conflict of interest",
+    "submission_requirements_acknowledged": true,
+    "associate_editor": {
+      "name": "Possamai, Dylan  AU REV AE",
+      "email": null
+    },
+    "files": [
+      {
+        "filename": "MF_submission.zip",
+        "type": "Main Document - LaTeX",
+        "description": "Main Document - LaTeX"
+      },
+      {
+        "filename": "main.pdf",
+        "type": "Main Document - LaTeX PDF",
+        "description": "Main Document"
+      }
+    ],
+    "is_revision": false,
+    "word_count": 10659,
+    "figure_count": 7,
+    "table_count": 0,
+    "data_availability": "Files\nMF_submission.zip - Main Document - LaTeX (Main Document - LaTeX)\nmain.pdf - Main Document - LaTeX PDF (Main Document)\n\nAll submission requirements questions were acknowledged by the submitter\n\nDo you or any of your co-authors have a conflict of interest to disclose?\nNo, there is no conflict of interest\n\nNumber of words\n10659\n\nNumber of figures\n7\n\nNumber of tables\n0",
+    "audit_trail": [
+      {
+        "timestamp_edt": "07-Aug-2025 6:47 PM EDT",
+        "timestamp_gmt": "07-Aug-2025 10:47 PM GMT",
+        "event_type": "email",
+        "to": "theod@illinois.edu",
+        "from": "dylan.possamai@math.ethz.ch",
+        "subject": "Manuscript ID MAFI-2025-0212 now in your Reviewer Center - Mathematical Finance",
+        "delivery_status": "Successfully sent.",
+        "template": "SW - Reviewer Agreed",
+        "type": "reviewer_agreement",
+        "source": "mf_platform",
+        "platform": "Mathematical Finance",
+        "external": false,
+        "sequence": 1,
+        "manuscript_id": "MAFI-2025-0212",
+        "parsed_date": 

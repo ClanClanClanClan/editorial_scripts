@@ -1,0 +1,45 @@
+{
+  "timestamp": "2025-07-20T16:07:40.933991",
+  "health_score": 100,
+  "status": "EXCELLENT",
+  "critical_issues": [],
+  "warnings": [],
+  "component_health": {
+    "all_present": true,
+    "present": 9,
+    "total": 9,
+    "missing": []
+  },
+  "import_health": {
+    "success_rate": 100.0,
+    "successful": 9,
+    "total": 9,
+    "failed_imports": []
+  },
+  "config_health": {
+    "all_configs_present": true,
+    "completeness": 100.0,
+    "missing_configs": []
+  },
+  "extractor_health": {
+    "success_rate": 100.0,
+    "successful": 4,
+    "total": 4,
+    "failed_initializations": []
+  },
+  "performance_health": {
+    "all_working": true,
+    "working_components": 3,
+    "total_components": 3,
+    "issues": []
+  },
+  "integration_health": {
+    "working": 3,
+    "total": 3,
+    "critical_missing": []
+  },
+  "security_health": {
+    "status": "SECURE",
+    "critical_issues": []
+  }
+}

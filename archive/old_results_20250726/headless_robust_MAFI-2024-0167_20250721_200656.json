@@ -1,0 +1,13 @@
+{
+  "manuscript_id": "MAFI-2024-0167",
+  "extraction_mode": "headless",
+  "session_number": 2,
+  "status": "failed",
+  "data": null,
+  "components": {},
+  "errors": [
+    "Session failed: Headless login failed"
+  ],
+  "timestamp": "2025-07-21T20:06:22.285280",
+  "completeness_score": 0
+}

@@ -66,7 +66,7 @@ So cover letters can be in different formats: **PDF** or **DOCX**
   - Declined: 01-Jul-2025
 - **🔗 Review Links**: None
 
-### 🔸 REFEREE 3: Dos Reis, Goncalo  
+### 🔸 REFEREE 3: Dos Reis, Goncalo
 - **📧 Email**: g.dosreis@ed.ac.uk, gnreis@gmail.com
 - **🏢 Affiliation**: University of Edinburgh, School of Mathematics
 - **🌍 Country**: United Kingdom

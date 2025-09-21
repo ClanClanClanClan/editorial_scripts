@@ -1,0 +1,655 @@
+{
+  "timestamp": "2025-09-16T00:08:40.686517",
+  "test_subject": {
+    "name": "Gechun Liang",
+    "institution": "University of Warwick"
+  },
+  "enriched_profile": {
+    "name": "Gechun Liang",
+    "institution": "University of Warwick",
+    "orcid": "0000-0003-0752-0773",
+    "orcid_confidence": 0.8,
+    "publications": [
+      {
+        "title": "Convergence rates for Chernoff-type approximations of convex monotone semigroups",
+        "year": "2025",
+        "journal": "Stochastic Processes and their Applications",
+        "doi": "10.1016/j.spa.2025.104700",
+        "type": "journal-article",
+        "authors": [
+          "Jonas Blessing",
+          "Lianzi Jiang",
+          "Michael Kupper",
+          "Gechun Liang"
+        ],
+        "source": "ORCID"
+      },
+      {
+        "title": "Recursive Optimal Stopping with Poisson Stopping Constraints",
+        "year": "2025",
+        "journal": "SIAM Journal on Control and Optimization",
+        "doi": "10.1137/24M1680301",
+        "type": "journal-article",
+        "authors": [
+          "Gechun Liang",
+          "Wei Wei",
+          "Zhen Wu",
+          "Zhenda Xu"
+        ],
+        "source": "ORCID"
+      },
+      {
+        "title": "Singular Stochastic Control Problems Motivated by the Optimal Sustainable Exploitation of an Ecosystem",
+        "year": "2025",
+        "journal": "SIAM Journal on Control and Optimization",
+        "doi": "10.1137/24M1700235",
+        "type": "journal-article",
+        "authors": [
+          "Gechun Liang",
+          "Zhesheng Liu",
+          "Mihail Zervos"
+        ],
+        "source": "ORCID"
+      },
+      {
+        "title": "On the rate of convergence for an \u03b1-stable central limit theorem under sublinear expectation",
+        "year": "2025",
+        "journal": "Journal of Applied Probability",
+        "doi": "10.1017/jpr.2024.62",
+        "type": "journal-article",
+        "authors": [
+          "Mingshang Hu",
+          "Lianzi Jiang",
+          "Gechun Liang"
+        ],
+        "source": "ORCID"
+      },
+      {
+        "title": "Callable Convertible Bonds Under Liquidity Constraints and Hybrid Priorities",
+        "year": "2024",
+        "journal": "SIAM Journal on Financial Mathematics",
+        "doi": "10.1137/24M1648454",
+        "type": "journal-article",
+        "authors": [
+          "David Hobson",
+          "Gechun Liang",
+          "Edward Wang"
+        ],
+        "source": "ORCID"
+      },
+      {
+        "title": "A Robust $$\\alpha $$-Stable Central Limit Theorem Under Sublinear Expectation without Integrability Condition",
+        "year": "2024",
+        "journal": "Journal of Theoretical Probability",
+        "doi": "10.1007/s10959-023-01298-x",
+        "type": "journal-article",
+        "authors": [
+          "Lianzi Jiang",
+          "Gechun Liang"
+        ],
+        "source": "ORCID"
+      },
+      {
+        "title": "A monotone scheme for G-equations with application to the explicit convergence rate of robust central limit theorem",
+        "year": "2024",
+        "journal": "Journal of Differential Equations",
+        "doi": "10.1016/j.jde.2024.03.013",
+        "type": "journal-article",
+        "authors": [
+          "Shuo Huang",
+          "Gechun Liang"
+        ],
+        "source": "ORCID"
+      },
+      {
+        "title": "Introduction for recent advances in forward performance processes",
+        "year": "2024",
+        "journal": "Probability, Uncertainty and Quantitative Risk",
+        "doi": "10.3934/puqr.2024007",
+        "type": "journal-article",
+        "authors": [
+          "Gechun Liang",
+          "Thaleia Zariphopoulou"
+        ],
+        "source": "ORCID"
+      },
+      {
+        "title": "Optimal investment and consumption with forward preferences and uncertain parameters",
+        "year": "2024",
+        "journal": "Probability, Uncertainty and Quantitative Risk",
+        "doi": "10.3934/puqr.2024004",
+        "type": "journal-article",
+        "authors": [
+          "Wing Fung Chong",
+          "Gechun Liang"
+        ],
+        "source": "ORCID"
+      },
+      {
+        "title": "Predictable forward performance processes: Infrequent evaluation and applications to human\u2010machine interactions",
+        "year": "2023",
+        "journal": "Mathematical Finance",
+        "doi": "10.1111/mafi.12408",
+        "type": "journal-article",
+        "authors": [
+          "Gechun Liang",
+          "Moris S. Strub",
+          "Yuwei Wang"
+        ],
+        "source": "ORCID"
+      },
+      {
+        "title": "A New Monotonicity Condition for Ergodic Backward SDEs and Ergodic Control with Superquadratic Hamiltonians",
+        "year": "2023",
+        "journal": "SIAM Journal on Control and Optimization",
+        "doi": "10.1137/21M1460958",
+        "type": "journal-article",
+        "authors": [
+          "Joe Jackson",
+          "Gechun Liang"
+        ],
+        "source": "ORCID"
+      },
+      {
+        "title": "A universal robust limit theorem for nonlinear L\u00e9vy processes under sublinear expectation",
+        "year": "2023",
+        "journal": "Probability, Uncertainty and Quantitative Risk",
+        "doi": "10.3934/puqr.2023001",
+        "type": "journal-article",
+        "authors": [
+          "Mingshang Hu",
+          "Zhongtai Securities Institute for Financial Studies, Shandong University, Jinan 250100, China",
+          "Lianzi Jiang",
+          "Gechun Liang",
+          "Shige Peng",
+          "College of Mathematics and Systems Science, Shandong University of Science and Technology, Qingdao 266590,  China",
+          "Department of Statistics, University of Warwick, Coventry CV4 7AL, UK",
+          "School of Mathematics, Shandong University, Jinan 250100, China"
+        ],
+        "source": "ORCID"
+      },
+      {
+        "title": "Quantitative stability and numerical analysis of Markovian quadratic BSDEs with reflection",
+        "year": "2022",
+        "journal": "Probability, Uncertainty and Quantitative Risk",
+        "doi": "10.3934/PUQR.2022002",
+        "type": "journal-article",
+        "authors": [
+          "Sun, Dingqian",
+          "Liang, Gechun",
+          "Tang, Shanjian"
+        ],
+        "source": "ORCID"
+      },
+      {
+        "title": "Analysis of the optimal exercise boundary of American put options with delivery lags",
+        "year": "2021",
+        "journal": "Journal of Mathematical Analysis and Applications",
+        "doi": "10.1016/j.jmaa.2020.124916",
+        "type": "journal-article",
+        "authors": [
+          "Gechun Liang",
+          "Zhou Yang"
+        ],
+        "source": "ORCID"
+      },
+      {
+        "title": "Pricing vulnerable options in a hybrid credit risk model driven by Heston\u2013Nandi GARCH processes",
+        "year": "2021",
+        "journal": "Review of Derivatives Research",
+        "doi": "10.1007/s11147-020-09167-z",
+        "type": "journal-article",
+        "authors": [],
+        "source": "ORCID"
+      },
+      {
+        "title": "A Game Theoretical Approach to Homothetic Robust Forward Investment Performance Processes in Stochastic Factor Models",
+        "year": "2021",
+        "journal": "SIAM Journal on Financial Mathematics",
+        "doi": "10.1137/20M1334280",
+        "type": "journal-article",
+        "authors": [
+          "Juan Li",
+          "Wenqiang Li",
+          "Gechun Liang"
+        ],
+        "source": "ORCID"
+      },
+      {
+        "title": "An Approximation Scheme for Semilinear Parabolic PDEs with Convex and Coercive Hamiltonians",
+        "year": "2020",
+        "journal": "SIAM Journal on Control and Optimization",
+        "doi": "10.1137/18M1198831",
+        "type": "journal-article",
+        "authors": [
+          "Shuo Huang",
+          "Gechun Liang",
+          "Thaleia Zariphopoulou"
+        ],
+        "source": "ORCID"
+      },
+      {
+        "title": "Systems of Ergodic BSDEs Arising in Regime Switching Forward Performance Processes",
+        "year": "2020",
+        "journal": "SIAM Journal on Control and Optimization",
+        "doi": "10.1137/18M1234783",
+        "type": "journal-article",
+        "authors": [
+          "Ying Hu",
+          "Gechun Liang",
+          "Shanjian Tang"
+        ],
+        "source": "ORCID"
+      },
+      {
+        "title": "Constrained portfolio-consumption strategies with uncertain parameters and borrowing costs",
+        "year": "2019",
+        "journal": "Mathematics and Financial Economics",
+        "doi": "10.1007/s11579-018-0232-5",
+        "type": "journal-article",
+        "authors": [
+          "Zhou Yang",
+          "Gechun Liang",
+          "Chao Zhou"
+        ],
+        "source": "ORCID"
+      },
+      {
+        "title": "Dynkin Games with Poisson Random Intervention Times",
+        "year": "2019",
+        "journal": "SIAM Journal on Control and Optimization",
+        "doi": "10.1137/18M1175720",
+        "type": "journal-article",
+        "authors": [
+          "Gechun Liang",
+          "Haodong Sun"
+        ],
+        "source": "ORCID"
+      },
+      {
+        "title": "An ergodic BSDE approach to forward entropic risk measures: representation and large-maturity behavior",
+        "year": "2018",
+        "journal": "Finance and Stochastics",
+        "doi": "10.1007/s00780-018-0377-3",
+        "type": "journal-article",
+        "authors": [
+          "Chong, W.F.",
+          "Hu, Y.",
+          "Liang, G.",
+          "Zariphopoulou, T."
+        ],
+        "source": "ORCID"
+      },
+      {
+        "title": "Representation of Homothetic Forward Performance Processes in Stochastic Factor Models via Ergodic and Infinite Horizon BSDE",
+        "year": "2017",
+        "journal": "Siam Journal on Financial Mathematics",
+        "doi": "10.1137/15m1048847",
+        "type": "journal-article",
+        "authors": [
+          "Liang, G. C.",
+          "Zariphopoulou, T."
+        ],
+        "source": "ORCID"
+      },
+      {
+        "title": "A multidimensional exponential utility indifference pricing model with applications to counterparty risk",
+        "year": "2016",
+        "journal": "SIAM Journal on Control and Optimization",
+        "doi": "10.1137/15M1040293",
+        "type": "journal-article",
+        "authors": [
+          "Henderson, V.",
+          "Liang, G."
+        ],
+        "source": "ORCID"
+      },
+      {
+        "title": "Optimal switching at poisson random intervention times",
+        "year": "2016",
+        "journal": "Discrete and Continuous Dynamical Systems - Series B",
+        "doi": "10.3934/dcdsb.2016008",
+        "type": "journal-article",
+        "authors": [
+          "Liang, G.",
+          "Wei, W."
+        ],
+        "source": "ORCID"
+      },
+      {
+        "title": "Dynkin game of convertible bonds and their optimal strategy",
+        "year": "2015",
+        "journal": "Journal of Mathematical Analysis and Applications",
+        "doi": "10.1016/j.jmaa.2015.01.040",
+        "type": "journal-article",
+        "authors": [
+          "Yan, H.",
+          "Yi, F.",
+          "Yang, Z.",
+          "Liang, G."
+        ],
+        "source": "ORCID"
+      },
+      {
+        "title": "Funding liquidity, debt tenor structure, and creditor\u2019s belief: an exogenous dynamic debt run model",
+        "year": "2015",
+        "journal": "Mathematics and Financial Economics",
+        "doi": "10.1007/s11579-015-0144-6",
+        "type": "journal-article",
+        "authors": [
+          "Liang, G.",
+          "L\u00fctkebohmert, E.",
+          "Wei, W."
+        ],
+        "source": "ORCID"
+      },
+      {
+        "title": "Indifference pricing and hedging in a multiple-priors model with trading constraints",
+        "year": "2015",
+        "journal": "Science China Mathematics",
+        "doi": "10.1007/s11425-014-4885-0",
+        "type": "journal-article",
+        "authors": [
+          "Yan, H.W.",
+          "Liang, G.C.",
+          "Yang, Z."
+        ],
+        "source": "ORCID"
+      },
+      {
+        "title": "Stochastic control representations for penalized backward stochastic differential equations",
+        "year": "2015",
+        "journal": "SIAM Journal on Control and Optimization",
+        "doi": "10.1137/130942681",
+        "type": "journal-article",
+        "authors": [
+          "Liang, G."
+        ],
+        "source": "ORCID"
+      },
+      {
+        "title": "A multiperiod bank run model for liquidity risk",
+        "year": "2014",
+        "journal": "Review of Finance",
+        "doi": "10.1093/rof/rft016",
+        "type": "journal-article",
+        "authors": [
+          "Liang, G.",
+          "L\u00fctkebohmert, E.",
+          "Xiao, Y."
+        ],
+        "source": "ORCID"
+      },
+      {
+        "title": "Fully coupled forward-backward stochastic dynamics and functional differential systems",
+        "year": "2014",
+        "journal": "Stochastics and Dynamics",
+        "doi": "10.1142/S0219493715500069",
+        "type": "journal-article",
+        "authors": [
+          "Casserini, M.",
+          "Liang, G."
+        ],
+        "source": "ORCID"
+      },
+      {
+        "title": "Pseudo linear pricing rule for utility indifference valuation",
+        "year": "2014",
+        "journal": "Finance and Stochastics",
+        "doi": "10.1007/s00780-014-0235-x",
+        "type": "journal-article",
+        "authors": [
+          "Henderson, V.",
+          "Liang, G."
+        ],
+        "source": "ORCID"
+      },
+      {
+        "title": "A modified structural model for credit risk",
+        "year": "2012",
+        "journal": "IMA Journal of Management Mathematics",
+        "doi": "10.1093/imaman/dpr004",
+        "type": "journal-article",
+        "authors": [
+          "Liang, G.",
+          "Jiang, L."
+        ],
+        "source": "ORCID"
+      },
+      {
+        "title": "Backward stochastic dynamics on a filtered probability space",
+        "year": "2011",
+        "journal": "Annals of Probability",
+        "doi": "10.1214/10-AOP588",
+        "type": "journal-article",
+        "authors": [
+          "Liang, G.",
+          "Lyons, T.",
+          "Qian, Z."
+        ],
+        "source": "ORCID"
+      },
+      {
+        "title": "The valuation of the basket CDS in a primary-subsidiary model",
+        "year": "2011",
+        "journal": "Asia-Pacific Journal of Operational Research",
+        "doi": "10.1142/S0217595911003144",
+        "type": "journal-article",
+        "authors": [
+          "Lin, J.",
+          "Liang, G.",
+          "Wu, S.",
+          "Zheng, H."
+        ],
+        "source": "ORCID"
+      },
+      {
+        "title": "The credit risk and pricing of OTC options",
+        "year": "2007",
+        "journal": "Asia-Pacific Financial Markets",
+        "doi": "10.1007/s10690-007-9053-x",
+        "type": "journal-article",
+        "authors": [
+          "Liang, G.",
+          "Ren, X."
+        ],
+        "source": "ORCID"
+      }
+    ],
+    "publication_count": 35,
+    "research_interests": [
+      "Differential Equations",
+      "Modeling",
+      "Stochastic",
+      "Credit",
+      "Pricing"
+    ],
+    "metrics": {
+      "total_publications": 35,
+      "years_active": 19,
+      "journals": [
+        "SIAM Journal on Financial Mathematics",
+        "Finance and Stochastics",
+        "Probability, Uncertainty and Quantitative Risk",
+        "Siam Journal on Financial Mathematics",
+        "Journal of Theoretical Probability",
+        "IMA Journal of Management Mathematics",
+        "Discrete and Continuous Dynamical Systems - Series B",
+        "Science China Mathematics",
+        "Review of Derivatives Research",
+        "Mathematical Finance"
+      ],
+      "publication_years": [
+        2007,
+        2011,
+        2012,
+        2014,
+        2015,
+        2016,
+        2017,
+        2018,
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+      ],
+      "first_publication": 2007,
+      "latest_publication": 2025,
+      "unique_journals": 21
+    },
+    "affiliation_history": [
+      {
+        "type": "employment",
+        "organization": "University of Warwick",
+        "department": "Department of Statistics",
+        "role": "Reader",
+        "start_date": "2021-08",
+        "end_date": null,
+        "current": true,
+        "city": "Coventry ",
+        "country": "GB"
+      },
+      {
+        "type": "employment",
+        "organization": "University of Warwick",
+        "department": "Department of Statistics",
+        "role": "Associate Professor",
+        "start_date": "2017-09",
+        "end_date": "2021-07",
+        "current": false,
+        "city": "Coventry",
+        "country": "GB"
+      },
+      {
+        "type": "employment",
+        "organization": "King's College London",
+        "department": "Department of Mathematics",
+        "role": "Lecturer",
+        "start_date": "2013-06",
+        "end_date": "2017-08",
+        "current": false,
+        "city": "London",
+        "country": "GB"
+      },
+      {
+        "type": "employment",
+        "organization": "University of Oxford",
+        "department": "Oxford-Man Institute of Quantitative Finance",
+        "role": "Research Fellow",
+        "start_date": "2010-11",
+        "end_date": "2013-06",
+        "current": false,
+        "city": "Oxford",
+        "country": "GB"
+      },
+      {
+        "type": "education",
+        "organization": "University of Oxford",
+        "department": "Mathematical Institute",
+        "role": "DPhil",
+        "degree": "DPhil",
+        "start_date": "2007-10",
+        "end_date": "2011-06",
+        "city": "Oxford",
+        "country": "GB"
+      },
+      {
+        "type": "education",
+        "organization": "Tongji University",
+        "department": "School of Mathematics",
+        "role": "MPhil",
+        "degree": "MPhil",
+        "start_date": "2005-10",
+        "end_date": "2007-09",
+        "city": "Shanghai",
+        "country": "CN"
+      },
+      {
+        "type": "education",
+        "organization": "Jilin University",
+        "department": "School of Economics",
+        "role": "Bachelor",
+        "degree": "Bachelor",
+        "start_date": "2001-10",
+        "end_date": "2005-09",
+        "city": "Changchun",
+        "country": "CN"
+      }
+    ],
+    "current_affiliation": {
+      "type": "employment",
+      "organization": "University of Warwick",
+      "department": "Department of Statistics",
+      "role": "Reader",
+      "start_date": "2021-08",
+      "end_date": null,
+      "current": true,
+      "city": "Coventry ",
+      "country": "GB"
+    },
+    "department": "Department of Statistics",
+    "role": "Reader",
+    "country": "United Kingdom",
+    "enrichment_date": "2025-09-16T00:08:40.680954",
+    "enrichment_source": "ORCID"
+  },
+  "verification_checks": [
+    {
+      "field": "ORCID ID",
+      "expected": "0000-0003-0752-0773",
+      "actual": "0000-0003-0752-0773",
+      "passed": true
+    },
+    {
+      "field": "Institution",
+      "expected": "University of Warwick",
+      "actual": "University of Warwick",
+      "passed": true
+    },
+    {
+      "field": "Department",
+      "expected": "Department of Statistics",
+      "actual": "Department of Statistics",
+      "passed": true
+    },
+    {
+      "field": "Role",
+      "expected": "Reader",
+      "actual": "Reader",
+      "passed": true
+    },
+    {
+      "field": "Country",
+      "expected": "United Kingdom",
+      "actual": "United Kingdom",
+      "passed": true
+    },
+    {
+      "field": "Current Affiliation",
+      "expected": "Present",
+      "actual": "Present",
+      "passed": true
+    },
+    {
+      "field": "Affiliation History Count",
+      "expected": "7 affiliations",
+      "actual": "7 affiliations",
+      "passed": true
+    },
+    {
+      "field": "Research Interests",
+      "expected": "Present",
+      "actual": "5 found",
+      "passed": true
+    }
+  ],
+  "summary": {
+    "passed": 8,
+    "failed": 0,
+    "total": 8,
+    "success_rate": "100.0%"
+  }
+}

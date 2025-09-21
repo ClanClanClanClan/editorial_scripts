@@ -127,8 +127,8 @@ The Editorial Scripts Referee Analytics API now has:
 
 ---
 
-**Optimization Date**: July 11, 2025  
-**Issue**: Connection pool creating too many connections under load  
-**Solution**: Aggressive pool size reduction and timeout optimization  
-**Result**: Maximum 5 connections in test, 15 in production  
+**Optimization Date**: July 11, 2025
+**Issue**: Connection pool creating too many connections under load
+**Solution**: Aggressive pool size reduction and timeout optimization
+**Result**: Maximum 5 connections in test, 15 in production
 **Status**: OPTIMIZATION COMPLETE ✅

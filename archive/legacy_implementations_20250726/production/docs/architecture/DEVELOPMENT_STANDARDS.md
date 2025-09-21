@@ -37,7 +37,7 @@ Module docstring describing purpose and usage.
 
 Example:
     Basic usage of this module:
-    
+
     >>> from mf_extractor import ComprehensiveMFExtractor
     >>> extractor = ComprehensiveMFExtractor()
     >>> extractor.login()
@@ -66,15 +66,15 @@ from ensure_credentials import load_credentials
 class ComprehensiveMFExtractor:
     """
     Production-ready extractor for Mathematical Finance journal.
-    
+
     This extractor implements a multi-pass strategy for comprehensive
     manuscript data extraction including referees, authors, and documents.
-    
+
     Attributes:
         driver (WebDriver): Selenium WebDriver instance
         config (dict): Configuration settings
         manuscripts (list): Extracted manuscript data
-        
+
     Example:
         >>> extractor = ComprehensiveMFExtractor(debug=True)
         >>> extractor.login()
@@ -87,21 +87,21 @@ class ComprehensiveMFExtractor:
 def extract_referees_comprehensive(self, manuscript: dict) -> None:
     """
     Extract comprehensive referee information including emails.
-    
+
     Performs the following steps:
     1. Locate referee table rows using XPath selectors
     2. Filter out editorial staff and manuscript authors
     3. Click referee names to open email composition popups
     4. Extract email addresses from EMAIL_TEMPLATE_TO fields
     5. Parse referee status and affiliation information
-    
+
     Args:
         manuscript (dict): Manuscript data dictionary to update
-        
+
     Raises:
         WebDriverException: If browser automation fails
         TimeoutException: If popups don't load within timeout
-        
+
     Note:
         This method modifies the manuscript dictionary in-place,
         adding referee data to the 'referees' key.
@@ -136,7 +136,7 @@ def safe_extraction_method(self, element_id: str) -> Optional[str]:
 def with_retry(max_attempts: int = 3, delay: float = 1.0):
     """
     Decorator for automatic retry with exponential backoff.
-    
+
     Args:
         max_attempts: Maximum number of retry attempts
         delay: Base delay between attempts (exponentially increased)
@@ -163,22 +163,22 @@ def with_retry(max_attempts: int = 3, delay: float = 1.0):
 ```python
 class ConfigurableExtractor:
     """Base pattern for configuration-driven extractors."""
-    
+
     def __init__(self, config_path: Optional[str] = None):
         self.config = self._load_config(config_path)
-        
+
     def _load_config(self, config_path: Optional[str]) -> dict:
         """Load configuration with fallback hierarchy."""
         default_config = self._get_default_config()
-        
+
         if config_path and Path(config_path).exists():
             with open(config_path) as f:
                 user_config = json.load(f)
             # Merge configurations
             return {**default_config, **user_config}
-        
+
         return default_config
-        
+
     def get_selector(self, selector_name: str) -> str:
         """Get XPath selector with validation."""
         selector = self.config.get('selectors', {}).get(selector_name)
@@ -197,45 +197,45 @@ from mf_extractor import ComprehensiveMFExtractor
 
 class TestComprehensiveMFExtractor:
     """Test suite for MF extractor functionality."""
-    
+
     @pytest.fixture
     def extractor(self):
         """Create extractor instance for testing."""
         return ComprehensiveMFExtractor(debug=True)
-    
+
     @pytest.fixture
     def mock_driver(self):
         """Create mock WebDriver for testing."""
         return Mock()
-    
+
     def test_login_success(self, extractor, mock_driver):
         """Test successful login process."""
         # Arrange
         extractor.driver = mock_driver
         mock_driver.get.return_value = None
         mock_driver.find_element.return_value.send_keys.return_value = None
-        
+
         # Act
         result = extractor.login()
-        
+
         # Assert
         assert result is True
         mock_driver.get.assert_called_once()
-    
+
     def test_referee_extraction_with_email(self, extractor):
         """Test referee extraction including email retrieval."""
         # Arrange
         manuscript = {"referees": []}
-        
+
         with patch.object(extractor, 'driver') as mock_driver:
             mock_row = Mock()
             mock_row.find_element.return_value.text = "Prof. John Doe"
             mock_row.find_element.return_value.get_attribute.return_value = "javascript:popWindow()"
             mock_driver.find_elements.return_value = [mock_row]
-            
+
             # Act
             extractor.extract_referees_comprehensive(manuscript)
-            
+
             # Assert
             assert len(manuscript["referees"]) > 0
             assert manuscript["referees"][0]["name"] == "Prof. John Doe"
@@ -252,7 +252,7 @@ def test_validate_email_format():
     """Unit test for email validation."""
     pass
 
-# Integration Tests (slower, with dependencies)  
+# Integration Tests (slower, with dependencies)
 def test_login_with_real_credentials():
     """Integration test with actual authentication."""
     pass
@@ -282,7 +282,7 @@ src/
 │   ├── mf_extractor.py
 │   ├── sicon_extractor.py
 │   └── sifin_extractor.py
-├── core/               # Core shared functionality  
+├── core/               # Core shared functionality
 │   ├── __init__.py
 │   ├── secure_credentials.py
 │   ├── browser_manager.py
@@ -430,5 +430,5 @@ password = "secret123"      # DON'T DO THIS
 
 ---
 
-*Last Updated: January 25, 2025*  
+*Last Updated: January 25, 2025*
 *Standards Version: 3.0*

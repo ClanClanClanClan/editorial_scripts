@@ -1,8 +1,8 @@
 # 🧹 GIANT CLEANUP PLAN - EDITORIAL SCRIPTS
 
-**Date**: July 15, 2025  
-**Current Size**: 1.8GB → **Target Size**: ~50MB  
-**Files to Remove**: ~23,000+ → **Target**: ~200  
+**Date**: July 15, 2025
+**Current Size**: 1.8GB → **Target Size**: ~50MB
+**Files to Remove**: ~23,000+ → **Target**: ~200
 
 ---
 
@@ -147,7 +147,7 @@ mv *SPECS*.md docs/specifications/
 ```bash
 # Merge all data directories
 mkdir -p data/extractions
-mkdir -p data/exports  
+mkdir -p data/exports
 mkdir -p data/pdfs
 mkdir -p data/logs
 

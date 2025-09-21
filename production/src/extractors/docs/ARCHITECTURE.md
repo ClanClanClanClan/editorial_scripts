@@ -17,7 +17,7 @@ The editorial extractors are production-grade Python applications that automate 
 ComprehensiveExtractor
 ├── Authentication (Keychain + 2FA)
 ├── Browser Management (Selenium)
-├── Data Extraction (XPath selectors)  
+├── Data Extraction (XPath selectors)
 ├── Email Processing (Popup windows)
 ├── Document Downloads (PDFs, Word)
 ├── Cache Management (Performance)
@@ -28,7 +28,7 @@ ComprehensiveExtractor
 
 ### 1. Authentication System
 - **Secure Storage:** macOS Keychain integration
-- **2FA Handling:** Gmail API for verification codes  
+- **2FA Handling:** Gmail API for verification codes
 - **Auto-login:** Persistent session management
 - **Error Recovery:** Retry mechanisms with exponential backoff
 
@@ -41,7 +41,7 @@ ComprehensiveExtractor
 ### 3. Data Extraction Engine
 - **Multi-pass System:** Forward → Backward → Forward extraction
 - **XPath Selectors:** Robust element location
-- **Popup Processing:** Email extraction from JavaScript windows  
+- **Popup Processing:** Email extraction from JavaScript windows
 - **Document Downloads:** Automated PDF/Word retrieval
 
 ### 4. Caching System
@@ -91,7 +91,7 @@ graph TD
 {
     "id": "MAFI-2025-0212",
     "title": "Paper Title",
-    "status": "Under Review", 
+    "status": "Under Review",
     "authors": [...],     # Author objects with emails
     "referees": [...],    # Referee objects with reports
     "documents": {...},   # File tracking
@@ -117,7 +117,7 @@ graph TD
 
 - **Login Time:** 30-60 seconds (including 2FA)
 - **Per Manuscript:** 10-30 seconds extraction time
-- **Email Success Rate:** 
+- **Email Success Rate:**
   - Authors: ~70% (MF working)
   - Referees: 0% (both broken - needs fixing)
 - **Document Downloads:** Automatic with retry
@@ -148,5 +148,5 @@ The architecture supports:
 
 ---
 
-**Architecture Status:** Production Stable  
+**Architecture Status:** Production Stable
 **Last Review:** August 22, 2025

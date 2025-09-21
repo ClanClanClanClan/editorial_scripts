@@ -55,7 +55,7 @@ Login → AE Center → Category Selection → Manuscript Processing → Documen
 
 ### 3-Pass Extraction System
 1. **Pass 1 (Forward)**: Referees, documents, basic info
-2. **Pass 2 (Backward)**: Manuscript info tab, authors, keywords  
+2. **Pass 2 (Backward)**: Manuscript info tab, authors, keywords
 3. **Pass 3 (Forward)**: Audit trail, communication timeline
 
 ## Configuration
@@ -71,7 +71,7 @@ extractor = ComprehensiveMORExtractor(headless=False)
 
 ### Categories Processed
 - Awaiting Reviewer Selection
-- Awaiting Reviewer Invitation  
+- Awaiting Reviewer Invitation
 - Overdue Reviewer Response
 - Awaiting Reviewer Assignment
 - Awaiting Reviewer Reports
@@ -147,6 +147,6 @@ extractor = ComprehensiveMORExtractor(headless=False)
 
 ---
 
-**Status**: ✅ Production Ready  
-**Last Updated**: 2025-08-19  
+**Status**: ✅ Production Ready
+**Last Updated**: 2025-08-19
 **Version**: 2.0 (Complete Implementation)

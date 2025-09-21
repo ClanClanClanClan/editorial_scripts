@@ -1,0 +1,78 @@
+{
+  "MAFI-2025-0166": {
+    "manuscript_id": "MAFI-2025-0166",
+    "total_emails": 7,
+    "referee_invitations": 1,
+    "referee_responses": 0,
+    "emails": [
+      {
+        "date": "2025-07-21 16:03:02",
+        "type": "other",
+        "subject": "Manuscript ID MAFI-2025-0166 now in your Reviewer Center - Mathematical Finance",
+        "referee": "Professor Strub"
+      },
+      {
+        "date": "2025-07-21 16:03:02",
+        "type": "invitation",
+        "subject": "Invitation to Review for Mathematical Finance",
+        "referee": "Professor Strub"
+      },
+      {
+        "date": "2025-07-21 16:03:02",
+        "type": "other",
+        "subject": "Reviewer Assignments for Manuscript ID MAFI-2025-0166 are now due",
+        "referee": "Professor Possamai"
+      },
+      {
+        "date": "2025-07-21 16:03:02",
+        "type": "reminder",
+        "subject": "Reminder: Mathematical Finance",
+        "referee": "Mrad"
+      },
+      {
+        "date": "2025-07-21 16:03:03",
+        "type": "reminder",
+        "subject": "Reminder: Mathematical Finance",
+        "referee": "Mrad"
+      },
+      {
+        "date": "2025-07-21 16:03:03",
+        "type": "other",
+        "subject": "Manuscript ID MAFI-2025-0166 now in your Reviewer Center - Mathematical Finance",
+        "referee": "Liang"
+      },
+      {
+        "date": "2025-07-21 16:03:03",
+        "type": "other",
+        "subject": "Manuscript ID MAFI-2025-0166 now in your Associate Editor Center",
+        "referee": "Professor Possamai"
+      }
+    ]
+  },
+  "MAFI-2024-0167": {
+    "manuscript_id": "MAFI-2024-0167",
+    "total_emails": 3,
+    "referee_invitations": 0,
+    "referee_responses": 0,
+    "emails": [
+      {
+        "date": "2025-07-21 16:03:04",
+        "type": "other",
+        "subject": "Manuscript ID MAFI-2024-0167 now in your Reviewer Center - Mathematical Finance",
+        "referee": "Professor Hamadene"
+      },
+      {
+        "date": "2025-07-21 16:03:04",
+        "type": "other",
+        "subject": "Manuscript ID MAFI-2024-0167 now in your Reviewer Center - Mathematical Finance",
+        "referee": "Mastrolia"
+      },
+      {
+        "date": "2025-07-21 16:03:04",
+        "type": "other",
+        "subject": "Manuscript ID MAFI-2024-0167 now in your Associate Editor Center",
+        "referee": "Professor Possamai"
+      }
+    ]
+  }
+}

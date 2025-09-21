@@ -1,0 +1,102 @@
+[
+  {
+    "id": "MAFI-2025-0166",
+    "title": "Optimal investment and consumption under forward utilities with relative performance concerns",
+    "authors": [
+      {
+        "name": "Anis Matoussi",
+        "is_corresponding": true
+      },
+      {
+        "name": "Guillaume Broux-Quemerais",
+        "is_corresponding": false
+      },
+      {
+        "name": "Chao Zhou",
+        "is_corresponding": false
+      }
+    ],
+    "referees": [
+      {
+        "name": "Gechun Liang",
+        "email": "",
+        "institution": "University of Warwick",
+        "status": "Agreed",
+        "dates": {}
+      },
+      {
+        "name": "Moris Strub",
+        "email": "",
+        "institution": "Warwick Business School",
+        "status": "Agreed",
+        "dates": {}
+      },
+      {
+        "name": "Mohamed Mrad",
+        "email": "",
+        "institution": "",
+        "status": "Declined",
+        "dates": {}
+      },
+      {
+        "name": "Goncalo Dos Reis",
+        "email": "",
+        "institution": "University of Edinburgh",
+        "status": "Unavailable",
+        "dates": {}
+      }
+    ],
+    "submission_date": "",
+    "status": ""
+  },
+  {
+    "id": "MAFI-2024-0167",
+    "title": "Optimal investment and consumption under forward utilities with relative performance concerns",
+    "authors": [
+      {
+        "name": "Anis Matoussi",
+        "is_corresponding": true
+      },
+      {
+        "name": "Guillaume Broux-Quemerais",
+        "is_corresponding": false
+      },
+      {
+        "name": "Chao Zhou",
+        "is_corresponding": false
+      }
+    ],
+    "referees": [
+      {
+        "name": "Gechun Liang",
+        "email": "",
+        "institution": "University of Warwick",
+        "status": "Agreed",
+        "dates": {}
+      },
+      {
+        "name": "Moris Strub",
+        "email": "",
+        "institution": "Warwick Business School",
+        "status": "Agreed",
+        "dates": {}
+      },
+      {
+        "name": "Mohamed Mrad",
+        "email": "",
+        "institution": "",
+        "status": "Declined",
+        "dates": {}
+      },
+      {
+        "name": "Goncalo Dos Reis",
+        "email": "",
+        "institution": "University of Edinburgh",
+        "status": "Unavailable",
+        "dates": {}
+      }
+    ],
+    "submission_date": "",
+    "status": ""
+  }
+]

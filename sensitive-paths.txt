@@ -1,0 +1,11 @@
+debug_*.html
+*debug*.html
+*timeline_report_*.txt
+*comprehensive_*.json
+ULTRATHINK_*.json
+ULTRAFIX_*.json
+EXTRACTOR_TEST_RESULTS_*.md
+FS_*_ANALYSIS_*.md
+.ruff_cache/
+.pytest_cache/
+**/__pycache__/

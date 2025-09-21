@@ -1,0 +1,32 @@
+[
+  {
+    "orcid": "0000-0003-0752-0773",
+    "name": "Gechun Liang",
+    "institution_found": "University of Warwick",
+    "department_found": "Department of Statistics",
+    "role_found": "Reader",
+    "country_found": "United Kingdom",
+    "affiliations_count": 7,
+    "current_affiliation": {
+      "type": "employment",
+      "organization": "University of Warwick",
+      "department": "Department of Statistics",
+      "role": "Reader",
+      "start_date": "2021-08",
+      "end_date": null,
+      "current": true,
+      "city": "Coventry ",
+      "country": "GB"
+    }
+  },
+  {
+    "orcid": "0000-0002-1825-0097",
+    "name": "Test Person",
+    "institution_found": null,
+    "department_found": null,
+    "role_found": null,
+    "country_found": null,
+    "affiliations_count": 2,
+    "current_affiliation": {}
+  }
+]

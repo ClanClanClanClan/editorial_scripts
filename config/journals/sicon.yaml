@@ -9,7 +9,7 @@ authentication:
   browser_preference: chrome  # Standard browser
   workflow_steps: 8           # Exact 8-step workflow documented July 15, 2025
   orcid_button_selector: "a[href*='sso_site_redirect'][href*='orcid']"
-  
+
 extraction:
   manuscript_folders:
     selector: "tbody[role='assoc_ed']"
@@ -25,7 +25,7 @@ extraction:
   referee_details:
     profile_table_id: "profile_table"
     history_table_id: "history_info"
-    
+
 timings:
   initial_load: 3
   orcid_click: 2
@@ -33,10 +33,10 @@ timings:
   redirect_timeout: 30
   page_navigation: 5
   manuscript_load: 3
-  
+
 features:
   use_config_system: false      # Start disabled for safety
-  use_navigation_module: false  # Start disabled for safety  
+  use_navigation_module: false  # Start disabled for safety
   use_smart_cache: false        # Start disabled for safety
   use_8_step_workflow: true     # SICON requires exact workflow
 

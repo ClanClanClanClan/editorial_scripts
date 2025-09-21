@@ -1,0 +1,4 @@
+# Add Bandit check IDs to skip (comma-separated will be constructed automatically)
+# Examples:
+# B101  # assert_used
+# B603  # subprocess_with_shell_equals_true

@@ -1,5 +1,5 @@
 # 🔍 Deep Audit Findings - Editorial Scripts
-**Date**: July 14, 2025  
+**Date**: July 14, 2025
 **Status**: Critical Analysis Complete
 
 ---
@@ -9,7 +9,7 @@
 After comprehensive analysis, the system has **3 major issues**:
 
 1. **Empty metadata bug**: Titles/authors hardcoded as empty
-2. **Multiple competing implementations**: No single source of truth  
+2. **Multiple competing implementations**: No single source of truth
 3. **Broken PDF downloads**: 0 PDFs successfully downloaded
 
 **Good news**: The core extraction works - it finds manuscripts and referees correctly.

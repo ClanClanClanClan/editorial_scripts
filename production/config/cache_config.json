@@ -1,0 +1,53 @@
+{
+  "cache_settings": {
+    "enabled": true,
+    "cache_directory": "cache",
+    "database_name": "editorial_cache.db",
+    "expiry_days": {
+      "completed_manuscripts": 30,
+      "active_manuscripts": 1,
+      "referee_profiles": 365,
+      "institution_lookups": 180
+    },
+    "auto_cleanup": {
+      "enabled": true,
+      "older_than_days": 90,
+      "run_on_startup": false
+    },
+    "incremental_extraction": {
+      "enabled": true,
+      "force_full_extraction_every_n_days": 30
+    }
+  },
+  "cache_rules": {
+    "always_update": [
+      "Awaiting Reviewer Reports",
+      "Awaiting AE Recommendation",
+      "With Editor"
+    ],
+    "rarely_update": [
+      "Published",
+      "Rejected",
+      "Withdrawn"
+    ],
+    "referee_profile_fields": [
+      "name",
+      "email",
+      "institution",
+      "department",
+      "country",
+      "orcid"
+    ],
+    "manuscript_change_detection_fields": [
+      "status",
+      "last_updated",
+      "referee_count",
+      "title"
+    ]
+  },
+  "performance": {
+    "batch_size": 100,
+    "concurrent_lookups": 5,
+    "session_cache_size": 1000
+  }
+}

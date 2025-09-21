@@ -45,15 +45,15 @@ def _get_1password_credentials(self, item_name: str) -> Optional[Dict[str, str]]
     try:
         import subprocess
         import json
-        
+
         cmd = ['op', 'item', 'get', item_name, '--vault', 'Personal', '--format=json']
         result = subprocess.run(cmd, capture_output=True, text=True)
-        
+
         if result.returncode == 0:
             item = json.loads(result.stdout)
             # Extract username/password from item
             # Return {'username': username, 'password': password}
-        
+
     except Exception:
         pass
     return None
@@ -73,7 +73,7 @@ The bio link clicking logic is implemented but needs testing to ensure all activ
 ```
 editorial_scripts/
 ├── README.md                        # Main documentation
-├── run_unified_with_1password.py    # Main extraction runner  
+├── run_unified_with_1password.py    # Main extraction runner
 ├── requirements.txt                 # Dependencies
 ├── .env                            # Credentials
 ├── unified_system/                 # Core extraction system ✅

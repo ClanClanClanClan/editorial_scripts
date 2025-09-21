@@ -23,7 +23,7 @@ These are Selenium-based web scrapers that extract manuscript data from journal 
 
 ### Current Extractors
 - **Mathematical Finance (MF)** - 🟡 ~70% working (referee extraction broken)
-- **SICON** - SIAM Journal on Control and Optimization (basic functionality)  
+- **SICON** - SIAM Journal on Control and Optimization (basic functionality)
 - **SIFIN** - SIAM Journal on Financial Mathematics (basic functionality)
 
 ### Known Issues
@@ -57,7 +57,7 @@ production/
 
 ### Core Extractors
 - **`src/extractors/mf_extractor.py`** - Mathematical Finance extractor
-- **`src/extractors/sicon_extractor.py`** - SICON extractor  
+- **`src/extractors/sicon_extractor.py`** - SICON extractor
 - **`src/extractors/sifin_extractor.py`** - SIFIN extractor
 
 ### Support Systems
@@ -196,5 +196,5 @@ Proprietary - Internal use only
 
 ---
 
-*Last Updated: January 25, 2025*  
+*Last Updated: January 25, 2025*
 *Version: 3.0 (Post-Refactoring)*

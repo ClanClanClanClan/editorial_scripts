@@ -29,7 +29,7 @@ editorial_extractors/
 │   └── cache_manager.py          # Performance caching
 ├── platforms/                     # Platform-specific bases
 │   ├── scholarone.py             # ScholarOne base class
-│   ├── siam.py                   # SIAM base class  
+│   ├── siam.py                   # SIAM base class
 │   ├── email_based.py            # Email-only base class
 │   ├── springer.py               # Springer base class
 │   └── unknown.py                # Extensible base
@@ -58,31 +58,31 @@ editorial_extractors/
 ```python
 class ScholarOneExtractor(BaseExtractor):
     """Base for ScholarOne Manuscripts platform"""
-    
+
     def authenticate(self):
         # Email/password + 2FA via Gmail
-    
+
     def navigate_to_ae_center(self):
         # Common ScholarOne navigation
-    
+
     def extract_popup_emails(self, javascript_url):
         # Shared popup email extraction
-    
+
     def get_manuscript_categories(self):
         # Common category detection
 ```
 
-### 2. SIAM Platform (SICON, SIFIN)  
+### 2. SIAM Platform (SICON, SIFIN)
 ```python
 class SIAMExtractor(BaseExtractor):
     """Base for SIAM journals"""
-    
+
     def authenticate(self):
         # ORCID OAuth flow
-    
+
     def navigate_to_dashboard(self):
         # SIAM-specific navigation
-    
+
     def extract_reviewer_data(self):
         # SIAM reviewer system
 ```
@@ -91,13 +91,13 @@ class SIAMExtractor(BaseExtractor):
 ```python
 class EmailExtractor(BaseExtractor):
     """Base for email-only extraction"""
-    
+
     def authenticate(self):
         # Gmail API only
-    
+
     def extract_from_email_threads(self):
         # Email parsing and thread analysis
-    
+
     def build_manuscript_from_emails(self):
         # Reconstruct submission data from email
 ```
@@ -106,10 +106,10 @@ class EmailExtractor(BaseExtractor):
 ```python
 class SpringerExtractor(BaseExtractor):
     """Base for Springer journals"""
-    
+
     def authenticate(self):
         # Username/password
-    
+
     def navigate_to_editorial_dashboard(self):
         # Springer-specific interface
 ```
@@ -121,7 +121,7 @@ All extractors output consistent JSON structure:
 ```python
 {
     "platform": "ScholarOne",           # Platform identifier
-    "journal": "Mathematical Finance",   # Journal name  
+    "journal": "Mathematical Finance",   # Journal name
     "extractor_version": "2.0.0",       # Version tracking
     "extraction_date": "2025-08-22",    # When extracted
     "manuscripts": [
@@ -131,7 +131,7 @@ All extractors output consistent JSON structure:
             "title": "Paper Title",
             "status": "under_review",    # Standardized status
             "authors": [...],            # Standardized author objects
-            "referees": [...],           # Standardized referee objects  
+            "referees": [...],           # Standardized referee objects
             "documents": [...],          # Standardized document objects
             "timeline": [...],           # Standardized event timeline
             "platform_specific": {      # Platform-unique fields
@@ -150,10 +150,10 @@ All extractors output consistent JSON structure:
 ```python
 class MultiPlatformCredentialManager:
     """Manages credentials across all platforms"""
-    
+
     platforms = {
         'scholarone': KeychainCredentials,
-        'siam': OAuthCredentials, 
+        'siam': OAuthCredentials,
         'email': GmailAPICredentials,
         'springer': BasicCredentials
     }
@@ -181,7 +181,7 @@ class MultiPlatformCredentialManager:
 
 ### Phase 3: New Extractors (Low Risk)
 1. **SICON/SIFIN:** Inherit from SIAMExtractor
-2. **Finance & Stochastics:** Inherit from EmailExtractor  
+2. **Finance & Stochastics:** Inherit from EmailExtractor
 3. **JOTA/MAFE:** Inherit from SpringerExtractor
 4. **NACO:** TBD based on platform discovery
 
@@ -197,7 +197,7 @@ class MultiPlatformCredentialManager:
 - **Platform updates** contained to base classes
 - **New journals** easy to add with minimal code
 
-### Testing  
+### Testing
 - **Platform-level tests** cover multiple journals
 - **Common utilities** tested once, used everywhere
 - **Mock platforms** for development testing
@@ -211,7 +211,7 @@ class MultiPlatformCredentialManager:
 
 ### Current → Framework (Safe)
 1. **Keep existing MF/MOR working** during migration
-2. **Extract utilities gradually** without breaking functionality  
+2. **Extract utilities gradually** without breaking functionality
 3. **Test extensively** at each step
 4. **Parallel development** of new platform bases
 
@@ -222,6 +222,6 @@ class MultiPlatformCredentialManager:
 
 ---
 
-**Framework Status:** Design Phase  
-**Current Extractors:** Preserved and Working  
+**Framework Status:** Design Phase
+**Current Extractors:** Preserved and Working
 **Next Steps:** Extract common utilities safely

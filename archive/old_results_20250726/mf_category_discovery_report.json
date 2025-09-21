@@ -1,0 +1,133 @@
+{
+  "journal": "MF",
+  "timestamp": "2025-07-10 00:11:41",
+  "discovered_categories": {
+    "category_links": [
+      "Awaiting Reviewer Scores",
+      "Overdue Manuscripts Awaiting Revision",
+      "Manuscript Status and Summary Reports",
+      "Peer Review Details Reports",
+      "Manuscripts with Reviewers",
+      "User Account Reports",
+      "User Performance Reports",
+      "Reviewer Contact Info and Lifetime Statistics",
+      "Reviewer Contact Info and Lifetime Statistics for Export",
+      "Reviewer Summary",
+      "Publication Folders, My Folders, Custom Reports, and Role Reports"
+    ],
+    "categories_with_counts": [],
+    "headers": [
+      "You can access manuscripts in each peer review status by clicking on the status queue title. The number next to each status queue title indicates the number of manuscripts in that status. You may search for specific manuscripts with the Quick Manuscript Search form or conduct an \"Advanced Search\" by clicking the link below (the advanced search form will display at the bottom of the screen). For tips on conducting searches, click the following link:Read More ...Associate Editor ListsQuick Search -Show Advanced SearchYou may click on the manuscript list title to view a full listing of manuscripts in each status, or click on the number next to the list to jump directly to the first manuscript in the list.0Awaiting Reviewer Selection0Awaiting Reviewer Invitation0Awaiting Reviewer Assignment2Awaiting Reviewer Scores0Overdue Reviewer Scores0Awaiting AE RecommendationManuscripts Awaiting Revision0Manuscripts Awaiting Revision1Overdue Manuscripts Awaiting RevisionYou may conduct a wildcard search by adding an asterisk (*) to the end of the search string. For example, to view a list of all of the manuscripts whose titles begin with the words \"neuroscience\" or \"neurology\" simply type \"neuro*\" in the Title field and click \"Search.\"Saved Search:Select...Manuscript ID:External Manuscript ID:Title:Author's First (Given)or Last (Family) name:*Keywords:ReportsManuscript Status and Summary ReportsStandard ReportsFinal DecisionsManuscripts DecidedPeer Review Details ReportsStandard ReportsManuscripts with ReviewersManuscripts by Decision StatusUser Account ReportsStandard ReportsBlocked Email AddressesUser Performance ReportsStandard ReportsReviewer Contact Info and Lifetime StatisticsReviewer Contact Info and Lifetime Statistics for ExportReviewer SummaryPublication Folders, My Folders, Custom Reports, and Role Reports",
+      "You can access manuscripts in each peer review status by clicking on the status queue title. The number next to each status queue title indicates the number of manuscripts in that status. You may search for specific manuscripts with the Quick Manuscript Search form or conduct an \"Advanced Search\" by clicking the link below (the advanced search form will display at the bottom of the screen). For tips on conducting searches, click the following link:Read More ...Associate Editor ListsQuick Search -Show Advanced SearchYou may click on the manuscript list title to view a full listing of manuscripts in each status, or click on the number next to the list to jump directly to the first manuscript in the list.0Awaiting Reviewer Selection0Awaiting Reviewer Invitation0Awaiting Reviewer Assignment2Awaiting Reviewer Scores0Overdue Reviewer Scores0Awaiting AE RecommendationManuscripts Awaiting Revision0Manuscripts Awaiting Revision1Overdue Manuscripts Awaiting RevisionYou may conduct a wildcard search by adding an asterisk (*) to the end of the search string. For example, to view a list of all of the manuscripts whose titles begin with the words \"neuroscience\" or \"neurology\" simply type \"neuro*\" in the Title field and click \"Search.\"Saved Search:Select...Manuscript ID:External Manuscript ID:Title:Author's First (Given)or Last (Family) name:*Keywords:ReportsManuscript Status and Summary ReportsStandard ReportsFinal DecisionsManuscripts DecidedPeer Review Details ReportsStandard ReportsManuscripts with ReviewersManuscripts by Decision StatusUser Account ReportsStandard ReportsBlocked Email AddressesUser Performance ReportsStandard ReportsReviewer Contact Info and Lifetime StatisticsReviewer Contact Info and Lifetime Statistics for ExportReviewer SummaryPublication Folders, My Folders, Custom Reports, and Role Reports",
+      "You may click on the manuscript list title to view a full listing of manuscripts in each status, or click on the number next to the list to jump directly to the first manuscript in the list.0Awaiting Reviewer Selection0Awaiting Reviewer Invitation0Awaiting Reviewer Assignment2Awaiting Reviewer Scores0Overdue Reviewer Scores0Awaiting AE RecommendationManuscripts Awaiting Revision0Manuscripts Awaiting Revision1Overdue Manuscripts Awaiting RevisionYou may conduct a wildcard search by adding an asterisk (*) to the end of the search string. For example, to view a list of all of the manuscripts whose titles begin with the words \"neuroscience\" or \"neurology\" simply type \"neuro*\" in the Title field and click \"Search.\"Saved Search:Select...Manuscript ID:External Manuscript ID:Title:Author's First (Given)or Last (Family) name:*Keywords:ReportsManuscript Status and Summary ReportsStandard ReportsFinal DecisionsManuscripts DecidedPeer Review Details ReportsStandard ReportsManuscripts with ReviewersManuscripts by Decision StatusUser Account ReportsStandard ReportsBlocked Email AddressesUser Performance ReportsStandard ReportsReviewer Contact Info and Lifetime StatisticsReviewer Contact Info and Lifetime Statistics for ExportReviewer SummaryPublication Folders, My Folders, Custom Reports, and Role Reports",
+      "You may click on the manuscript list title to view a full listing of manuscripts in each status, or click on the number next to the list to jump directly to the first manuscript in the list.0Awaiting Reviewer Selection0Awaiting Reviewer Invitation0Awaiting Reviewer Assignment2Awaiting Reviewer Scores0Overdue Reviewer Scores0Awaiting AE RecommendationManuscripts Awaiting Revision0Manuscripts Awaiting Revision1Overdue Manuscripts Awaiting Revision",
+      "Awaiting Reviewer Selection",
+      "Awaiting Reviewer Invitation",
+      "Awaiting Reviewer Assignment",
+      "Awaiting Reviewer Scores",
+      "Overdue Reviewer Scores",
+      "Awaiting AE Recommendation",
+      "Manuscripts Awaiting Revision",
+      "Manuscripts Awaiting Revision",
+      "Overdue Manuscripts Awaiting Revision",
+      "Manuscript Status and Summary ReportsStandard ReportsFinal DecisionsManuscripts DecidedPeer Review Details ReportsStandard ReportsManuscripts with ReviewersManuscripts by Decision StatusUser Account ReportsStandard ReportsBlocked Email AddressesUser Performance ReportsStandard ReportsReviewer Contact Info and Lifetime StatisticsReviewer Contact Info and Lifetime Statistics for ExportReviewer SummaryPublication Folders, My Folders, Custom Reports, and Role Reports",
+      "Standard ReportsManuscripts with ReviewersManuscripts by Decision Status",
+      "Manuscripts with ReviewersManuscripts by Decision Status",
+      "Manuscripts with Reviewers",
+      "Standard ReportsReviewer Contact Info and Lifetime StatisticsReviewer Contact Info and Lifetime Statistics for ExportReviewer Summary",
+      "Reviewer Contact Info and Lifetime StatisticsReviewer Contact Info and Lifetime Statistics for ExportReviewer Summary",
+      "Reviewer Contact Info and Lifetime Statistics",
+      "Reviewer Contact Info and Lifetime Statistics for Export",
+      "Reviewer Summary"
+    ],
+    "manuscript_contexts": []
+  },
+  "navigation_tests": {
+    "Awaiting Reviewer Scores": {
+      "found": true,
+      "visible": true,
+      "enabled": true,
+      "tested_click": true,
+      "result_url": "https://mc.manuscriptcentral.com/mafi?PARAMS=xik_nziSCNy8oLk9FMeL9bQARogkiiJXs3xjsY6eMGamtbcCB11Rkq5be5z4mapSK8RKv27dfsjMLQBzmaA47Vf8g2F98f3J2MrCSH9Y5x3ckH5StErpZLRUufJAMixdDzEde2nWH1MR1bg4pFrH1FP1C4StXaatbG8by8ZerC7T8odAnBdqv2yFFMjHpmwHdLNxHES4S4GtFCMxfuerYZYw2igBR5f9WpGYM6cdp1Uhmhrt7QCacGyUmPyzLnYU5etbzJBEX2ge8EExxBc2FFXEU34yo11K",
+      "result_title": "ScholarOne Manuscripts",
+      "has_manuscripts": true
+    },
+    "Overdue Manuscripts Awaiting Revision": {
+      "found": true,
+      "visible": true,
+      "enabled": true,
+      "tested_click": true,
+      "result_url": "https://mc.manuscriptcentral.com/mafi?PARAMS=xik_4rUExLAxuS7WTHJpMWqCeUdw8EX9NEDc8uT2XsdyZTmM6gmBMF8ZNyGooCNzXS3ScJe71Vnr1Bq6hFCtsJhnbo9SFWXSExP9L8tzk6kP4AdGSTjC3N1sNyyN4YqXoABbHuGn39tUPjdGKPJ121s9jGrR12HksB3DLynAYujTbgjbYWG5eUWK12YWvvW71AtnJVgS4EZrbx1nhcf2rPTRLg9ecUUjCAfjy6fKJbW6uLUQCcMZ2ifsJrafSFaL2fTHfAvvim3VG4G3sFr3ujGkMvyp2vrJ3tKfMgu8gykBz57yyYL72qcTDskpJjAngGRw9DYGbUWz",
+      "result_title": "ScholarOne Manuscripts",
+      "has_manuscripts": true
+    },
+    "Manuscript Status and Summary Reports": {
+      "found": true,
+      "visible": true,
+      "enabled": true,
+      "tested_click": true,
+      "result_url": "https://mc.manuscriptcentral.com/mafi",
+      "result_title": "ScholarOne Manuscripts",
+      "has_manuscripts": false
+    },
+    "Peer Review Details Reports": {
+      "found": true,
+      "visible": true,
+      "enabled": true,
+      "tested_click": true,
+      "result_url": "https://mc.manuscriptcentral.com/mafi",
+      "result_title": "ScholarOne Manuscripts",
+      "has_manuscripts": false
+    },
+    "Manuscripts with Reviewers": {
+      "found": false,
+      "error": "Message: no such element: Unable to locate element: {\"method\":\"link text\",\"selector\":\"Manuscripts with Reviewers\"}\n  (Session info: chrome=138.0.7204.100); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#no-such-element-exception\nStacktrace:\n0   undetected_chromedriver             0x000000010320f308 undetected_chromedriver + 6148872\n1   undetected_chromedriver             0x00000001032068ba undetected_chromedriver + 6113466\n2   undetected_chromedriver             0x0000000102c97e10 undetected_chromedriver + 417296\n3   undetected_chromedriver             0x0000000102ce9c94 undetected_chromedriver + 752788\n4   undetected_chromedriver             0x0000000102ce9eb1 undetected_chromedriver + 753329\n5   undetected_chromedriver             0x0000000102d39dd4 undetected_chromedriver + 1080788\n6   undetected_chromedriver             0x0000000102d0fced undetected_chromedriver + 908525\n7   undetected_chromedriver             0x0000000102d3718c undetected_chromedriver + 1069452\n8   undetected_chromedriver             0x0000000102d0fa93 undetected_chromedriver + 907923\n9   undetected_chromedriver             0x0000000102cdc0f7 undetected_chromedriver + 696567\n10  undetected_chromedriver             0x0000000102cdcd61 undetected_chromedriver + 699745\n11  undetected_chromedriver             0x00000001031cc250 undetected_chromedriver + 5874256\n12  undetected_chromedriver             0x00000001031d0289 undetected_chromedriver + 5890697\n13  undetected_chromedriver             0x00000001031a8022 undetected_chromedriver + 5726242\n14  undetected_chromedriver             0x00000001031d0bff undetected_chromedriver + 5893119\n15  undetected_chromedriver             0x0000000103196d14 undetected_chromedriver + 5655828\n16  undetected_chromedriver             0x00000001031f3de8 undetected_chromedriver + 6036968\n17  undetected_chromedriver             0x00000001031f3fb0 undetected_chromedriver + 6037424\n18  undetected_chromedriver             0x0000000103206451 undetected_chromedriver + 6112337\n19  libsystem_pthread.dylib             0x00007ff8073f2df1 _pthread_start + 99\n20  libsystem_pthread.dylib             0x00007ff8073ee857 thread_start + 15\n"
+    },
+    "User Account Reports": {
+      "found": true,
+      "visible": true,
+      "enabled": true,
+      "tested_click": true,
+      "result_url": "https://mc.manuscriptcentral.com/mafi",
+      "result_title": "ScholarOne Manuscripts",
+      "has_manuscripts": false
+    },
+    "User Performance Reports": {
+      "found": true,
+      "visible": true,
+      "enabled": true,
+      "tested_click": true,
+      "result_url": "https://mc.manuscriptcentral.com/mafi",
+      "result_title": "ScholarOne Manuscripts",
+      "has_manuscripts": false
+    },
+    "Reviewer Contact Info and Lifetime Statistics": {
+      "found": false,
+      "error": "Message: no such element: Unable to locate element: {\"method\":\"link text\",\"selector\":\"Reviewer Contact Info and Lifetime Statistics\"}\n  (Session info: chrome=138.0.7204.100); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#no-such-element-exception\nStacktrace:\n0   undetected_chromedriver             0x000000010320f308 undetected_chromedriver + 6148872\n1   undetected_chromedriver             0x00000001032068ba undetected_chromedriver + 6113466\n2   undetected_chromedriver             0x0000000102c97e10 undetected_chromedriver + 417296\n3   undetected_chromedriver             0x0000000102ce9c94 undetected_chromedriver + 752788\n4   undetected_chromedriver             0x0000000102ce9eb1 undetected_chromedriver + 753329\n5   undetected_chromedriver             0x0000000102d39dd4 undetected_chromedriver + 1080788\n6   undetected_chromedriver             0x0000000102d0fced undetected_chromedriver + 908525\n7   undetected_chromedriver             0x0000000102d3718c undetected_chromedriver + 1069452\n8   undetected_chromedriver             0x0000000102d0fa93 undetected_chromedriver + 907923\n9   undetected_chromedriver             0x0000000102cdc0f7 undetected_chromedriver + 696567\n10  undetected_chromedriver             0x0000000102cdcd61 undetected_chromedriver + 699745\n11  undetected_chromedriver             0x00000001031cc250 undetected_chromedriver + 5874256\n12  undetected_chromedriver             0x00000001031d0289 undetected_chromedriver + 5890697\n13  undetected_chromedriver             0x00000001031a8022 undetected_chromedriver + 5726242\n14  undetected_chromedriver             0x00000001031d0bff undetected_chromedriver + 5893119\n15  undetected_chromedriver             0x0000000103196d14 undetected_chromedriver + 5655828\n16  undetected_chromedriver             0x00000001031f3de8 undetected_chromedriver + 6036968\n17  undetected_chromedriver             0x00000001031f3fb0 undetected_chromedriver + 6037424\n18  undetected_chromedriver             0x0000000103206451 undetected_chromedriver + 6112337\n19  libsystem_pthread.dylib             0x00007ff8073f2df1 _pthread_start + 99\n20  libsystem_pthread.dylib             0x00007ff8073ee857 thread_start + 15\n"
+    },
+    "Reviewer Contact Info and Lifetime Statistics for Export": {
+      "found": false,
+      "error": "Message: no such element: Unable to locate element: {\"method\":\"link text\",\"selector\":\"Reviewer Contact Info and Lifetime Statistics for Export\"}\n  (Session info: chrome=138.0.7204.100); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#no-such-element-exception\nStacktrace:\n0   undetected_chromedriver             0x000000010320f308 undetected_chromedriver + 6148872\n1   undetected_chromedriver             0x00000001032068ba undetected_chromedriver + 6113466\n2   undetected_chromedriver             0x0000000102c97e10 undetected_chromedriver + 417296\n3   undetected_chromedriver             0x0000000102ce9c94 undetected_chromedriver + 752788\n4   undetected_chromedriver             0x0000000102ce9eb1 undetected_chromedriver + 753329\n5   undetected_chromedriver             0x0000000102d39dd4 undetected_chromedriver + 1080788\n6   undetected_chromedriver             0x0000000102d0fced undetected_chromedriver + 908525\n7   undetected_chromedriver             0x0000000102d3718c undetected_chromedriver + 1069452\n8   undetected_chromedriver             0x0000000102d0fa93 undetected_chromedriver + 907923\n9   undetected_chromedriver             0x0000000102cdc0f7 undetected_chromedriver + 696567\n10  undetected_chromedriver             0x0000000102cdcd61 undetected_chromedriver + 699745\n11  undetected_chromedriver             0x00000001031cc250 undetected_chromedriver + 5874256\n12  undetected_chromedriver             0x00000001031d0289 undetected_chromedriver + 5890697\n13  undetected_chromedriver             0x00000001031a8022 undetected_chromedriver + 5726242\n14  undetected_chromedriver             0x00000001031d0bff undetected_chromedriver + 5893119\n15  undetected_chromedriver             0x0000000103196d14 undetected_chromedriver + 5655828\n16  undetected_chromedriver             0x00000001031f3de8 undetected_chromedriver + 6036968\n17  undetected_chromedriver             0x00000001031f3fb0 undetected_chromedriver + 6037424\n18  undetected_chromedriver             0x0000000103206451 undetected_chromedriver + 6112337\n19  libsystem_pthread.dylib             0x00007ff8073f2df1 _pthread_start + 99\n20  libsystem_pthread.dylib             0x00007ff8073ee857 thread_start + 15\n"
+    },
+    "Reviewer Summary": {
+      "found": false,
+      "error": "Message: no such element: Unable to locate element: {\"method\":\"link text\",\"selector\":\"Reviewer Summary\"}\n  (Session info: chrome=138.0.7204.100); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#no-such-element-exception\nStacktrace:\n0   undetected_chromedriver             0x000000010320f308 undetected_chromedriver + 6148872\n1   undetected_chromedriver             0x00000001032068ba undetected_chromedriver + 6113466\n2   undetected_chromedriver             0x0000000102c97e10 undetected_chromedriver + 417296\n3   undetected_chromedriver             0x0000000102ce9c94 undetected_chromedriver + 752788\n4   undetected_chromedriver             0x0000000102ce9eb1 undetected_chromedriver + 753329\n5   undetected_chromedriver             0x0000000102d39dd4 undetected_chromedriver + 1080788\n6   undetected_chromedriver             0x0000000102d0fced undetected_chromedriver + 908525\n7   undetected_chromedriver             0x0000000102d3718c undetected_chromedriver + 1069452\n8   undetected_chromedriver             0x0000000102d0fa93 undetected_chromedriver + 907923\n9   undetected_chromedriver             0x0000000102cdc0f7 undetected_chromedriver + 696567\n10  undetected_chromedriver             0x0000000102cdcd61 undetected_chromedriver + 699745\n11  undetected_chromedriver             0x00000001031cc250 undetected_chromedriver + 5874256\n12  undetected_chromedriver             0x00000001031d0289 undetected_chromedriver + 5890697\n13  undetected_chromedriver             0x00000001031a8022 undetected_chromedriver + 5726242\n14  undetected_chromedriver             0x00000001031d0bff undetected_chromedriver + 5893119\n15  undetected_chromedriver             0x0000000103196d14 undetected_chromedriver + 5655828\n16  undetected_chromedriver             0x00000001031f3de8 undetected_chromedriver + 6036968\n17  undetected_chromedriver             0x00000001031f3fb0 undetected_chromedriver + 6037424\n18  undetected_chromedriver             0x0000000103206451 undetected_chromedriver + 6112337\n19  libsystem_pthread.dylib             0x00007ff8073f2df1 _pthread_start + 99\n20  libsystem_pthread.dylib             0x00007ff8073ee857 thread_start + 15\n"
+    },
+    "Publication Folders, My Folders, Custom Reports, and Role Reports": {
+      "found": true,
+      "visible": true,
+      "enabled": true,
+      "tested_click": true,
+      "result_url": "https://mc.manuscriptcentral.com/mafi",
+      "result_title": "ScholarOne Manuscripts",
+      "has_manuscripts": false
+    }
+  },
+  "recommendations": [
+    "\u2705 Working categories: ['Awaiting Reviewer Scores', 'Overdue Manuscripts Awaiting Revision']",
+    "\u274c Failed categories: ['Manuscripts with Reviewers', 'Reviewer Contact Info and Lifetime Statistics', 'Reviewer Contact Info and Lifetime Statistics for Export', 'Reviewer Summary']"
+  ],
+  "potential_issues": [
+    "Some expected categories are not accessible"
+  ]
+}

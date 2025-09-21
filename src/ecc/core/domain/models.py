@@ -3,13 +3,13 @@
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any
 from uuid import UUID, uuid4
 
 
 class ManuscriptStatus(Enum):
     """Manuscript workflow status."""
-    
+
     SUBMITTED = "submitted"
     UNDER_REVIEW = "under_review"
     AWAITING_REFEREE_REPORTS = "awaiting_referee_reports"
@@ -22,7 +22,7 @@ class ManuscriptStatus(Enum):
 
 class RefereeStatus(Enum):
     """Referee assignment status."""
-    
+
     INVITED = "invited"
     AGREED = "agreed"
     DECLINED = "declined"
@@ -33,7 +33,7 @@ class RefereeStatus(Enum):
 
 class AnalysisType(Enum):
     """AI analysis types."""
-    
+
     DESK_REJECTION = "desk_rejection"
     REFEREE_RECOMMENDATION = "referee_recommendation"
     REPORT_SYNTHESIS = "report_synthesis"
@@ -43,7 +43,7 @@ class AnalysisType(Enum):
 
 class DocumentType(Enum):
     """Document types in the system."""
-    
+
     MANUSCRIPT = "manuscript"
     COVER_LETTER = "cover_letter"
     REFEREE_REPORT = "referee_report"
@@ -55,14 +55,14 @@ class DocumentType(Enum):
 @dataclass
 class Author:
     """Author information."""
-    
+
     id: UUID = field(default_factory=uuid4)
     name: str = ""
     email: str = ""
-    orcid: Optional[str] = None
-    institution: Optional[str] = None
-    department: Optional[str] = None
-    country: Optional[str] = None
+    orcid: str | None = None
+    institution: str | None = None
+    department: str | None = None
+    country: str | None = None
     is_corresponding: bool = False
     created_at: datetime = field(default_factory=datetime.utcnow)
 
@@ -70,38 +70,38 @@ class Author:
 @dataclass
 class Referee:
     """Referee information."""
-    
+
     id: UUID = field(default_factory=uuid4)
     name: str = ""
     email: str = ""
-    institution: Optional[str] = None
-    department: Optional[str] = None
-    country: Optional[str] = None
+    institution: str | None = None
+    department: str | None = None
+    country: str | None = None
     status: RefereeStatus = RefereeStatus.INVITED
-    invited_date: Optional[datetime] = None
-    agreed_date: Optional[datetime] = None
-    report_due_date: Optional[datetime] = None
-    report_submitted_date: Optional[datetime] = None
-    expertise_score: Optional[float] = None
+    invited_date: datetime | None = None
+    agreed_date: datetime | None = None
+    report_due_date: datetime | None = None
+    report_submitted_date: datetime | None = None
+    expertise_score: float | None = None
     conflict_of_interest: bool = False
-    historical_performance: Dict[str, Any] = field(default_factory=dict)
+    historical_performance: dict[str, Any] = field(default_factory=dict)
     created_at: datetime = field(default_factory=datetime.utcnow)
 
 
 @dataclass
 class Report:
     """Referee report information."""
-    
+
     id: UUID = field(default_factory=uuid4)
     referee_id: UUID = field(default_factory=uuid4)
     manuscript_id: UUID = field(default_factory=uuid4)
     recommendation: str = ""
-    confidence_score: Optional[float] = None
+    confidence_score: float | None = None
     summary: str = ""
     major_comments: str = ""
     minor_comments: str = ""
     confidential_comments: str = ""
-    file_path: Optional[str] = None
+    file_path: str | None = None
     submitted_date: datetime = field(default_factory=datetime.utcnow)
     version: int = 1
 
@@ -109,7 +109,7 @@ class Report:
 @dataclass
 class File:
     """File attachment information."""
-    
+
     id: UUID = field(default_factory=uuid4)
     manuscript_id: UUID = field(default_factory=uuid4)
     document_type: DocumentType = DocumentType.MANUSCRIPT
@@ -125,29 +125,29 @@ class File:
 @dataclass
 class Evidence:
     """Evidence for AI analysis."""
-    
+
     text: str = ""
     source: str = ""
     confidence: float = 0.0
-    location: Optional[str] = None
+    location: str | None = None
 
 
 @dataclass
 class HumanReview:
     """Human review of AI analysis."""
-    
+
     id: UUID = field(default_factory=uuid4)
     reviewer_id: str = ""
     decision: str = ""
     reasoning: str = ""
-    overrides: Dict[str, Any] = field(default_factory=dict)
+    overrides: dict[str, Any] = field(default_factory=dict)
     reviewed_at: datetime = field(default_factory=datetime.utcnow)
 
 
 @dataclass
 class AIAnalysis:
     """AI analysis result with governance."""
-    
+
     id: UUID = field(default_factory=uuid4)
     manuscript_id: UUID = field(default_factory=uuid4)
     analysis_type: AnalysisType = AnalysisType.DESK_REJECTION
@@ -155,17 +155,17 @@ class AIAnalysis:
     confidence_score: float = 0.0
     reasoning: str = ""
     recommendation: str = ""
-    evidence: List[Evidence] = field(default_factory=list)
-    human_review: Optional[HumanReview] = None
-    audit_trail: List['AuditEvent'] = field(default_factory=list)
+    evidence: list[Evidence] = field(default_factory=list)
+    human_review: HumanReview | None = None
+    audit_trail: list["AuditEvent"] = field(default_factory=list)
     created_at: datetime = field(default_factory=datetime.utcnow)
-    expires_at: Optional[datetime] = None
+    expires_at: datetime | None = None
 
 
 @dataclass
 class StatusChange:
     """Manuscript status change record."""
-    
+
     from_status: ManuscriptStatus
     to_status: ManuscriptStatus
     changed_by: str = ""
@@ -176,7 +176,7 @@ class StatusChange:
 @dataclass
 class AuditEvent:
     """Comprehensive audit trail event."""
-    
+
     id: UUID = field(default_factory=uuid4)
     entity_type: str = ""
     entity_id: UUID = field(default_factory=uuid4)
@@ -184,7 +184,7 @@ class AuditEvent:
     actor: str = ""
     ip_address: str = ""
     user_agent: str = ""
-    changes: Dict[str, Any] = field(default_factory=dict)
+    changes: dict[str, Any] = field(default_factory=dict)
     timestamp: datetime = field(default_factory=datetime.utcnow)
     request_id: str = ""
 
@@ -192,39 +192,39 @@ class AuditEvent:
 @dataclass
 class Manuscript:
     """Core manuscript entity with full audit trail."""
-    
+
     id: UUID = field(default_factory=uuid4)
     journal_id: str = ""
     external_id: str = ""  # Journal's manuscript ID
     title: str = ""
     abstract: str = ""
-    keywords: List[str] = field(default_factory=list)
-    authors: List[Author] = field(default_factory=list)
+    keywords: list[str] = field(default_factory=list)
+    authors: list[Author] = field(default_factory=list)
     submission_date: datetime = field(default_factory=datetime.utcnow)
     current_status: ManuscriptStatus = ManuscriptStatus.SUBMITTED
-    status_history: List[StatusChange] = field(default_factory=list)
-    referees: List[Referee] = field(default_factory=list)
-    reports: List[Report] = field(default_factory=list)
-    files: List[File] = field(default_factory=list)
-    ai_analyses: List[AIAnalysis] = field(default_factory=list)
-    audit_trail: List[AuditEvent] = field(default_factory=list)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    status_history: list[StatusChange] = field(default_factory=list)
+    referees: list[Referee] = field(default_factory=list)
+    reports: list[Report] = field(default_factory=list)
+    files: list[File] = field(default_factory=list)
+    ai_analyses: list[AIAnalysis] = field(default_factory=list)
+    audit_trail: list[AuditEvent] = field(default_factory=list)
+    metadata: dict[str, Any] = field(default_factory=dict)
     created_at: datetime = field(default_factory=datetime.utcnow)
     updated_at: datetime = field(default_factory=datetime.utcnow)
     version: int = 1  # For optimistic locking
-    
+
     # Additional fields from production extractors
-    page_count: Optional[int] = None
-    word_count: Optional[int] = None
-    figure_count: Optional[int] = None
-    table_count: Optional[int] = None
-    funding_information: Optional[str] = None
-    conflict_of_interest: Optional[str] = None
-    data_availability: Optional[str] = None
-    msc_codes: List[str] = field(default_factory=list)
-    topic_area: Optional[str] = None
-    editor_assigned: Optional[str] = None
-    
+    page_count: int | None = None
+    word_count: int | None = None
+    figure_count: int | None = None
+    table_count: int | None = None
+    funding_information: str | None = None
+    conflict_of_interest: str | None = None
+    data_availability: str | None = None
+    msc_codes: list[str] = field(default_factory=list)
+    topic_area: str | None = None
+    editor_assigned: str | None = None
+
     def add_status_change(self, new_status: ManuscriptStatus, changed_by: str, reason: str = ""):
         """Record a status change."""
         if self.current_status != new_status:
@@ -232,46 +232,38 @@ class Manuscript:
                 from_status=self.current_status,
                 to_status=new_status,
                 changed_by=changed_by,
-                reason=reason
+                reason=reason,
             )
             self.status_history.append(change)
             self.current_status = new_status
             self.updated_at = datetime.utcnow()
             self.version += 1
-    
+
     def add_audit_event(self, action: str, actor: str, **kwargs):
         """Add an audit trail event."""
         event = AuditEvent(
-            entity_type="Manuscript",
-            entity_id=self.id,
-            action=action,
-            actor=actor,
-            **kwargs
+            entity_type="Manuscript", entity_id=self.id, action=action, actor=actor, **kwargs
         )
         self.audit_trail.append(event)
         self.updated_at = datetime.utcnow()
-    
-    def get_corresponding_author(self) -> Optional[Author]:
+
+    def get_corresponding_author(self) -> Author | None:
         """Get the corresponding author."""
         for author in self.authors:
             if author.is_corresponding:
                 return author
         return self.authors[0] if self.authors else None
-    
-    def get_active_referees(self) -> List[Referee]:
+
+    def get_active_referees(self) -> list[Referee]:
         """Get referees who are actively reviewing."""
         return [
-            r for r in self.referees 
-            if r.status in [RefereeStatus.AGREED, RefereeStatus.INVITED]
+            r for r in self.referees if r.status in [RefereeStatus.AGREED, RefereeStatus.INVITED]
         ]
-    
-    def get_submitted_reports(self) -> List[Report]:
+
+    def get_submitted_reports(self) -> list[Report]:
         """Get all submitted reports."""
-        return [
-            report for report in self.reports
-            if report.submitted_date is not None
-        ]
-    
+        return [report for report in self.reports if report.submitted_date is not None]
+
     def needs_ai_analysis(self, analysis_type: AnalysisType) -> bool:
         """Check if manuscript needs a specific AI analysis."""
         for analysis in self.ai_analyses:

@@ -1,0 +1,10 @@
+{
+  "test_mode": "headless",
+  "timestamp": "2025-07-21T20:17:25.763259",
+  "success": false,
+  "data": {
+    "login": "success",
+    "url": "https://mc.manuscriptcentral.com/mafi",
+    "ae_links_found": 0
+  }
+}

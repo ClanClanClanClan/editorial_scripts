@@ -9,7 +9,7 @@
 ## 🎯 Claim-by-Claim Audit
 
 ### 1. "Working Async Extraction Pipeline" ❌ MISLEADING
-**CLAIM**: Complete end-to-end async extraction pipeline working  
+**CLAIM**: Complete end-to-end async extraction pipeline working
 **REALITY**:
 - ✅ Playwright adapter creates and initializes
 - ✅ Browser automation launches successfully
@@ -22,7 +22,7 @@
 ---
 
 ### 2. "18.7% Memory Improvement" ⚠️ HIGHLY MISLEADING
-**CLAIM**: Async uses 18.7% less memory than legacy  
+**CLAIM**: Async uses 18.7% less memory than legacy
 **REALITY**:
 ```json
 // From actual benchmark file:
@@ -61,7 +61,7 @@
 ---
 
 ### 4. "66.7% Feature Parity" ❌ FALSE
-**CLAIM**: 6/9 critical features working  
+**CLAIM**: 6/9 critical features working
 **REALITY**:
 - ❌ Manuscript extraction: **NO** (can't authenticate)
 - ❌ Referee extraction: **NO** (can't get to data)
@@ -185,6 +185,6 @@ What I did:
 
 ---
 
-**Generated**: 2025-08-22  
-**Honesty Level**: BRUTAL  
+**Generated**: 2025-08-22
+**Honesty Level**: BRUTAL
 **Actual Progress**: ~5% (some infrastructure exists)

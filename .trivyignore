@@ -1,4 +1,4 @@
-# V3 Trivy Ignore File - Infrastructure Hardening  
+# V3 Trivy Ignore File - Infrastructure Hardening
 # Target: "trivy, semgrep, bandit: zero high or critical"
 
 # Development dependencies - not in production
@@ -38,7 +38,7 @@ dist/
 CVE-2024-XXXX  # Example: base image issue with mitigation
 CVE-2023-YYYY  # Example: PostgreSQL extension issue (pg_uuidv7)
 
-# Node.js vulnerabilities in development tools only  
+# Node.js vulnerabilities in development tools only
 CVE-2024-NODE1  # Development tooling, not runtime
 CVE-2023-NODE2  # Build pipeline only
 

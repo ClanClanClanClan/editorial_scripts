@@ -1,0 +1,23 @@
+{
+  "validation_date": "2025-07-14T22:33:33.677414",
+  "baseline_type": "CORRECT_SICON",
+  "foundation_status": "FULLY_VALIDATED",
+  "target_baseline": {
+    "total_manuscripts": 4,
+    "total_referees": 13,
+    "referee_breakdown": {
+      "declined": 5,
+      "accepted": 8
+    },
+    "documents": {
+      "manuscript_pdfs": 4,
+      "cover_letters": 3,
+      "referee_report_pdfs": 3,
+      "referee_report_comments": 1,
+      "total": 11
+    }
+  },
+  "tests_passed": "4/4",
+  "all_tests_passed": true,
+  "ready_for_production": true
+}

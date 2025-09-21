@@ -16,7 +16,7 @@ from urllib.parse import quote
 
 class AcademicProfileEnricher:
     """Enrich author and referee profiles with academic data from multiple sources."""
-    
+
     def __init__(self):
         self.session = requests.Session()
         self.session.headers.update({
@@ -24,24 +24,24 @@ class AcademicProfileEnricher:
             'Accept': 'application/json'
         })
         self.logger = logging.getLogger(__name__)
-        
+
         # Rate limiting
         self.last_orcid_request = 0
         self.last_scholar_request = 0
         self.min_request_interval = 1.0  # seconds between requests
-        
+
         # Cache for API responses
         self.orcid_cache = {}
         self.scholar_cache = {}
-    
+
     def enrich_person_profile(self, person_data: Dict[str, Any]) -> Dict[str, Any]:
         """Enrich a person's profile with academic data from multiple sources."""
-        
+
         enriched_profile = person_data.copy()
         enrichment_sources = []
-        
+
         print(f"🔍 Enriching profile for: {person_data.get('name', 'Unknown')}")
-        
+
         # 1. ORCID enrichment (most reliable)
         if person_data.get('orcid'):
             orcid_data = self.get_orcid_profile(person_data['orcid'])
@@ -49,15 +49,15 @@ class AcademicProfileEnricher:
                 enriched_profile.update(self._merge_orcid_data(enriched_profile, orcid_data))
                 enrichment_sources.append('orcid')
                 print(f"   ✅ ORCID data found: {len(orcid_data.get('publications', []))} publications")
-        
+
         # 2. Google Scholar enrichment (for metrics)
         if person_data.get('name'):
             scholar_data = self.get_scholar_profile(person_data['name'], person_data.get('institution', ''))
             if scholar_data:
-                enriched_profile.update(self._merge_scholar_data(enriched_profile, scholar_data))  
+                enriched_profile.update(self._merge_scholar_data(enriched_profile, scholar_data))
                 enrichment_sources.append('google_scholar')
                 print(f"   ✅ Scholar data found: h-index {scholar_data.get('h_index', 'N/A')}")
-        
+
         # 3. Institution enrichment (using ROR API)
         if person_data.get('institution'):
             institution_data = self.get_institution_data(person_data['institution'])
@@ -65,7 +65,7 @@ class AcademicProfileEnricher:
                 enriched_profile['institution_enriched'] = institution_data
                 enrichment_sources.append('ror_api')
                 print(f"   ✅ Institution data found: {institution_data.get('name', 'Unknown')}")
-        
+
         # 4. Cross-reference validation
         enriched_profile['enrichment_metadata'] = {
             'sources': enrichment_sources,
@@ -73,88 +73,88 @@ class AcademicProfileEnricher:
             'confidence_score': self._calculate_confidence_score(enriched_profile, enrichment_sources),
             'data_completeness': self._assess_data_completeness(enriched_profile)
         }
-        
+
         return enriched_profile
-    
+
     def get_orcid_profile(self, orcid_id: str) -> Optional[Dict[str, Any]]:
         """Get comprehensive profile data from ORCID API."""
-        
+
         # Check cache first
         if orcid_id in self.orcid_cache:
             return self.orcid_cache[orcid_id]
-        
+
         try:
             # Rate limiting
             time_since_last = time.time() - self.last_orcid_request
             if time_since_last < self.min_request_interval:
                 time.sleep(self.min_request_interval - time_since_last)
-            
+
             # Clean ORCID ID format
             orcid_clean = orcid_id.replace('https://orcid.org/', '').replace('http://orcid.org/', '')
-            
+
             # ORCID API endpoint
             url = f"https://pub.orcid.org/v3.0/{orcid_clean}"
             headers = {'Accept': 'application/json'}
-            
+
             response = self.session.get(url, headers=headers, timeout=10)
             self.last_orcid_request = time.time()
-            
+
             if response.status_code == 200:
                 orcid_data = response.json()
-                
+
                 # Parse ORCID response
                 profile = {
                     'orcid_id': orcid_id,
                     'name': self._extract_orcid_name(orcid_data),
-                    'biography': self._extract_orcid_biography(orcid_data), 
+                    'biography': self._extract_orcid_biography(orcid_data),
                     'affiliations': self._extract_orcid_affiliations(orcid_data),
                     'publications': self._extract_orcid_publications(orcid_data),
                     'external_ids': self._extract_orcid_external_ids(orcid_data),
                     'last_modified': orcid_data.get('history', {}).get('last-modified-date', {}).get('value')
                 }
-                
+
                 # Cache the result
                 self.orcid_cache[orcid_id] = profile
                 return profile
-            
+
             else:
                 print(f"   ⚠️ ORCID API error {response.status_code} for {orcid_id}")
                 return None
-                
+
         except Exception as e:
             print(f"   ❌ ORCID API error for {orcid_id}: {str(e)}")
             return None
-    
+
     def get_scholar_profile(self, name: str, institution: str = "") -> Optional[Dict[str, Any]]:
         """Get academic metrics from Google Scholar (via serpapi or scraping)."""
-        
+
         cache_key = f"{name}_{institution}".lower()
         if cache_key in self.scholar_cache:
             return self.scholar_cache[cache_key]
-        
+
         try:
             # Rate limiting for Scholar
-            time_since_last = time.time() - self.last_scholar_request  
+            time_since_last = time.time() - self.last_scholar_request
             if time_since_last < 2.0:  # More conservative for Scholar
                 time.sleep(2.0 - time_since_last)
-            
+
             # Search for scholar profile
             scholar_data = self._search_scholar_profile(name, institution)
             self.last_scholar_request = time.time()
-            
+
             if scholar_data:
                 self.scholar_cache[cache_key] = scholar_data
                 return scholar_data
-            
+
             return None
-            
+
         except Exception as e:
             print(f"   ❌ Scholar API error for {name}: {str(e)}")
             return None
-    
+
     def _search_scholar_profile(self, name: str, institution: str) -> Optional[Dict[str, Any]]:
         """Search for Google Scholar profile using web scraping or API."""
-        
+
         # For now, return a mock profile structure that we'll enhance
         # This would be replaced with actual Scholar API or careful scraping
         mock_profile = {
@@ -168,31 +168,31 @@ class AcademicProfileEnricher:
             'profile_url': None,
             'data_source': 'scholar_placeholder'
         }
-        
+
         # TODO: Implement actual Scholar scraping/API
         # This is a placeholder to establish the data structure
-        
+
         return mock_profile
-    
+
     def get_institution_data(self, institution_name: str) -> Optional[Dict[str, Any]]:
         """Get institution data from ROR (Research Organization Registry) API."""
-        
+
         try:
             # Clean institution name for search
             clean_name = re.sub(r'[^\w\s]', '', institution_name).strip()
-            
+
             # ROR API search
             url = "https://api.ror.org/organizations"
             params = {'query': clean_name, 'limit': 5}
-            
+
             response = self.session.get(url, params=params, timeout=10)
-            
+
             if response.status_code == 200:
                 ror_data = response.json()
-                
+
                 if ror_data.get('items'):
                     best_match = ror_data['items'][0]  # Take best match
-                    
+
                     return {
                         'ror_id': best_match.get('id'),
                         'name': best_match.get('name'),
@@ -204,29 +204,29 @@ class AcademicProfileEnricher:
                         'established': best_match.get('established'),
                         'aliases': best_match.get('aliases', [])
                     }
-            
+
             return None
-            
+
         except Exception as e:
             print(f"   ❌ ROR API error for {institution_name}: {str(e)}")
             return None
-    
+
     def _extract_orcid_name(self, orcid_data: Dict) -> Optional[str]:
         """Extract name from ORCID data."""
         try:
             person = orcid_data.get('person', {})
             name_data = person.get('name', {})
-            
+
             given_names = name_data.get('given-names', {}).get('value', '')
             family_name = name_data.get('family-name', {}).get('value', '')
-            
+
             if given_names and family_name:
                 return f"{given_names} {family_name}"
-            
+
             return None
         except:
             return None
-    
+
     def _extract_orcid_biography(self, orcid_data: Dict) -> Optional[str]:
         """Extract biography from ORCID data."""
         try:
@@ -237,14 +237,14 @@ class AcademicProfileEnricher:
             return None
         except:
             return None
-    
+
     def _extract_orcid_affiliations(self, orcid_data: Dict) -> List[Dict[str, Any]]:
         """Extract employment/education history from ORCID."""
         affiliations = []
-        
+
         try:
             activities = orcid_data.get('activities-summary', {})
-            
+
             # Employment
             employments = activities.get('employments', {}).get('affiliation-group', [])
             for emp_group in employments:
@@ -258,8 +258,8 @@ class AcademicProfileEnricher:
                         'end_date': self._parse_orcid_date(emp_data.get('end-date')),
                         'department': emp_data.get('department-name')
                     })
-            
-            # Education  
+
+            # Education
             educations = activities.get('educations', {}).get('affiliation-group', [])
             for edu_group in educations:
                 for edu in edu_group.get('summaries', []):
@@ -272,20 +272,20 @@ class AcademicProfileEnricher:
                         'end_date': self._parse_orcid_date(edu_data.get('end-date')),
                         'department': edu_data.get('department-name')
                     })
-            
+
         except Exception as e:
             print(f"   ⚠️ Error extracting ORCID affiliations: {e}")
-        
+
         return affiliations
-    
+
     def _extract_orcid_publications(self, orcid_data: Dict) -> List[Dict[str, Any]]:
         """Extract publication list from ORCID."""
         publications = []
-        
+
         try:
             activities = orcid_data.get('activities-summary', {})
             works = activities.get('works', {}).get('group', [])
-            
+
             for work_group in works[:20]:  # Limit to prevent API overuse
                 for work_summary in work_group.get('work-summary', []):
                     pub = {
@@ -297,41 +297,41 @@ class AcademicProfileEnricher:
                         'url': work_summary.get('url')
                     }
                     publications.append(pub)
-            
+
         except Exception as e:
             print(f"   ⚠️ Error extracting ORCID publications: {e}")
-        
+
         return publications
-    
+
     def _extract_orcid_external_ids(self, orcid_data: Dict) -> Dict[str, str]:
         """Extract external identifiers from ORCID."""
         external_ids = {}
-        
+
         try:
             person = orcid_data.get('person', {})
             external_identifiers = person.get('external-identifiers', {}).get('external-identifier', [])
-            
+
             for ext_id in external_identifiers:
                 id_type = ext_id.get('external-id-type')
                 id_value = ext_id.get('external-id-value')
                 if id_type and id_value:
                     external_ids[id_type.lower()] = id_value
-                    
+
         except Exception as e:
             print(f"   ⚠️ Error extracting ORCID external IDs: {e}")
-        
+
         return external_ids
-    
+
     def _parse_orcid_date(self, date_data: Optional[Dict]) -> Optional[str]:
-        """Parse ORCID date format.""" 
+        """Parse ORCID date format."""
         if not date_data:
             return None
-        
+
         try:
             year = date_data.get('year', {}).get('value')
             month = date_data.get('month', {}).get('value')
             day = date_data.get('day', {}).get('value')
-            
+
             if year:
                 if month and day:
                     return f"{year}-{month:02d}-{day:02d}"
@@ -341,60 +341,60 @@ class AcademicProfileEnricher:
                     return str(year)
         except:
             pass
-        
+
         return None
-    
+
     def _merge_orcid_data(self, profile: Dict, orcid_data: Dict) -> Dict[str, Any]:
         """Merge ORCID data into existing profile."""
         updates = {}
-        
+
         # Name verification/update
         if orcid_data.get('name') and not profile.get('name_verified'):
             updates['name_orcid'] = orcid_data['name']
             updates['name_verified'] = True
-        
+
         # Biography
         if orcid_data.get('biography'):
             updates['biography'] = orcid_data['biography']
-        
+
         # Publications and metrics
         publications = orcid_data.get('publications', [])
         if publications:
             updates['publications_count'] = len(publications)
             updates['recent_publications'] = [p for p in publications if self._is_recent_publication(p)]
             updates['publication_years'] = list(set([self._extract_year_from_pub(p) for p in publications if self._extract_year_from_pub(p)]))
-        
+
         # Affiliations
         if orcid_data.get('affiliations'):
             updates['affiliations_history'] = orcid_data['affiliations']
             current_affiliations = [a for a in orcid_data['affiliations'] if not a.get('end_date')]
             if current_affiliations:
                 updates['current_affiliations'] = current_affiliations
-        
+
         # External IDs
         if orcid_data.get('external_ids'):
             updates['external_identifiers'] = orcid_data['external_ids']
-        
+
         return updates
-    
+
     def _merge_scholar_data(self, profile: Dict, scholar_data: Dict) -> Dict[str, Any]:
         """Merge Google Scholar data into existing profile."""
         updates = {}
-        
+
         if scholar_data.get('h_index'):
             updates['h_index'] = scholar_data['h_index']
-        
+
         if scholar_data.get('total_citations'):
             updates['total_citations'] = scholar_data['total_citations']
-        
+
         if scholar_data.get('i10_index'):
             updates['i10_index'] = scholar_data['i10_index']
-        
+
         if scholar_data.get('research_interests'):
             updates['research_interests'] = scholar_data['research_interests']
-        
+
         return updates
-    
+
     def _is_recent_publication(self, publication: Dict, years: int = 3) -> bool:
         """Check if publication is within recent years."""
         pub_year = self._extract_year_from_pub(publication)
@@ -402,7 +402,7 @@ class AcademicProfileEnricher:
             current_year = datetime.now().year
             return current_year - pub_year <= years
         return False
-    
+
     def _extract_year_from_pub(self, publication: Dict) -> Optional[int]:
         """Extract publication year."""
         pub_date = publication.get('publication_date')
@@ -412,29 +412,29 @@ class AcademicProfileEnricher:
             except:
                 pass
         return None
-    
+
     def _calculate_confidence_score(self, profile: Dict, sources: List[str]) -> float:
         """Calculate confidence score for enriched profile."""
         score = 0.0
-        
+
         # Base score for having ORCID
         if 'orcid' in sources:
             score += 0.6
-        
+
         # Scholar data adds credibility
         if 'google_scholar' in sources:
             score += 0.3
-        
+
         # Institution verification
         if 'ror_api' in sources:
             score += 0.1
-        
+
         # Bonus for consistent data across sources
         if len(sources) >= 2:
             score += 0.1
-        
+
         return min(1.0, score)
-    
+
     def _assess_data_completeness(self, profile: Dict) -> Dict[str, bool]:
         """Assess completeness of profile data."""
         return {
@@ -450,12 +450,12 @@ class AcademicProfileEnricher:
 
 def enrich_all_people_from_mf_data(mf_extraction_file: str) -> Dict[str, Any]:
     """Enrich all authors and referees from MF extraction data."""
-    
+
     enricher = AcademicProfileEnricher()
-    
+
     print("🔍 ENRICHING ALL PEOPLE FROM MF EXTRACTION DATA")
     print("=" * 60)
-    
+
     # Load MF extraction data
     try:
         with open(mf_extraction_file, 'r') as f:
@@ -463,50 +463,50 @@ def enrich_all_people_from_mf_data(mf_extraction_file: str) -> Dict[str, Any]:
     except Exception as e:
         print(f"❌ Error loading MF data: {e}")
         return {}
-    
+
     enriched_people = {}
-    
+
     # Process all manuscripts (handle list structure)
     manuscripts = mf_data if isinstance(mf_data, list) else mf_data.get('manuscripts', [])
-    
+
     for manuscript in manuscripts:
         manuscript_id = manuscript.get('id', 'Unknown')
         print(f"\n📄 Processing {manuscript_id}...")
-        
+
         # Enrich authors
         authors = manuscript.get('authors', [])
         enriched_authors = []
-        
+
         for author in authors:
             print(f"\n👤 Enriching author: {author.get('name', 'Unknown')}")
             enriched_author = enricher.enrich_person_profile(author)
             enriched_authors.append(enriched_author)
-            
+
             # Store in people database
             person_key = f"author_{author.get('email', author.get('name', 'unknown'))}"
             enriched_people[person_key] = enriched_author
-        
+
         # Enrich referees
         referees = manuscript.get('referees', [])
         enriched_referees = []
-        
+
         for referee in referees:
             print(f"\n👥 Enriching referee: {referee.get('name', 'Unknown')}")
             enriched_referee = enricher.enrich_person_profile(referee)
             enriched_referees.append(enriched_referee)
-            
+
             # Store in people database
             person_key = f"referee_{referee.get('email', referee.get('name', 'unknown'))}"
             enriched_people[person_key] = enriched_referee
-        
+
         # Update manuscript with enriched data
         manuscript['authors_enriched'] = enriched_authors
         manuscript['referees_enriched'] = enriched_referees
-    
+
     # Save enriched data
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     output_file = f"academic_enrichment_{timestamp}.json"
-    
+
     enrichment_results = {
         'enriched_manuscripts': manuscripts,
         'people_database': enriched_people,
@@ -516,32 +516,32 @@ def enrich_all_people_from_mf_data(mf_extraction_file: str) -> Dict[str, Any]:
             'source_file': mf_extraction_file
         }
     }
-    
+
     with open(output_file, 'w', encoding='utf-8') as f:
         json.dump(enrichment_results, f, indent=2, ensure_ascii=False)
-    
+
     print(f"\n🎉 ENRICHMENT COMPLETE!")
     print(f"   👥 Enriched {len(enriched_people)} people")
     print(f"   💾 Results saved to: {output_file}")
-    
+
     # Summary statistics
     orcid_count = sum(1 for p in enriched_people.values() if p.get('orcid'))
     institution_count = sum(1 for p in enriched_people.values() if p.get('institution'))
-    
+
     print(f"   🆔 {orcid_count} people with ORCID IDs")
     print(f"   🏛️ {institution_count} people with institutions")
-    
+
     return enrichment_results
 
 if __name__ == "__main__":
     # Find latest MF extraction file
     import glob
-    
+
     mf_files = glob.glob("mf_comprehensive_*.json")
     if mf_files:
         latest_file = max(mf_files, key=os.path.getctime)
         print(f"Using latest MF extraction file: {latest_file}")
-        
+
         results = enrich_all_people_from_mf_data(latest_file)
     else:
         print("❌ No MF extraction files found. Run MF extraction first.")

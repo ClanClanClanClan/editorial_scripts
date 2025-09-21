@@ -47,7 +47,7 @@
 **Manuscript M174727:**
 - PDF: Available (URL provided)
 - Cover Letter: ✅ Extracted
-- Referee Reports: None available  
+- Referee Reports: None available
 - Referees: 2 (Camilo hernandez #1, Qingmeng Wei #2)
 
 **Manuscript M175988:**
@@ -114,7 +114,7 @@
 ### **Test Environment Problems**:
 1. **Mock data doesn't reflect real complexity**
 2. **No actual document downloading**
-3. **No email verification testing** 
+3. **No email verification testing**
 4. **No file system integration**
 5. **No error handling for partial extractions**
 
@@ -164,7 +164,7 @@ The Phase 1 foundation will be considered successful when it achieves:
 
 - ✅ **4/4 manuscripts** extracted with full metadata
 - ✅ **10/10 referees** identified with accurate status
-- ✅ **1+ email** verification working  
+- ✅ **1+ email** verification working
 - ✅ **4/4 manuscript PDFs** downloadable
 - ✅ **3/4 cover letters** extracted (75% rate)
 - ✅ **3+ referee reports** extracted when available

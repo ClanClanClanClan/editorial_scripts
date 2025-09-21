@@ -29,7 +29,7 @@ poetry shell
 ### Running ECC
 ```bash
 # API (FastAPI)
-uvicorn src.ecc.main:app --host 0.0.0.0 --port 8000 --reload
+uvicorn ecc.main:app --host 0.0.0.0 --port 8000 --reload
 
 # CLI
 ecc --help

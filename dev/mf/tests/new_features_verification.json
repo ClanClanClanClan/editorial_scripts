@@ -1,0 +1,24 @@
+{
+  "timestamp": "2025-09-16T00:36:26.328772",
+  "functions_added": [
+    "extract_response_to_reviewers",
+    "extract_revised_manuscripts",
+    "extract_latex_source",
+    "extract_all_documents",
+    "ensure_recommendation_storage"
+  ],
+  "functions_called": [
+    "extract_all_documents",
+    "ensure_recommendation_storage"
+  ],
+  "storage_fields": [
+    "manuscript['response_to_reviewers']",
+    "manuscript['revisions']",
+    "manuscript['latex_source']",
+    "referee['report']['recommendation']",
+    "referee['report']['recommendation_normalized']",
+    "referee['report']['confidence']"
+  ],
+  "issues": [],
+  "verification_passed": true
+}

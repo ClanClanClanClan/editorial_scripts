@@ -1,0 +1,134 @@
+{
+  "extraction_time": "2025-09-17T19:52:17.764107",
+  "journal": "MOR",
+  "manuscripts": [
+    {
+      "manuscript_id": "MOR-2025-1136",
+      "authors": [
+        {
+          "name": "Cerny, Ales",
+          "email": "",
+          "institution": "",
+          "orcid": ""
+        },
+        {
+          "name": "Ruf, Johannes",
+          "email": "",
+          "institution": "",
+          "orcid": ""
+        },
+        {
+          "name": "Schweizer, Martin",
+          "email": "",
+          "institution": "",
+          "orcid": ""
+        }
+      ],
+      "referees": [
+        {
+          "name": "Frittelli, Marco",
+          "institution": "",
+          "status": "Declined",
+          "orcid": "",
+          "email": ""
+        },
+        {
+          "name": "Kallsen, Jan",
+          "institution": "Christian-Albrechts-Universit\u00e4t zu Kiel",
+          "status": "Agreed",
+          "orcid": "",
+          "email": ""
+        },
+        {
+          "name": "Biagini, Sara",
+          "institution": "",
+          "status": "Declined",
+          "orcid": "",
+          "email": ""
+        },
+        {
+          "name": "Zitkovic, Gordan",
+          "institution": "UT Austin",
+          "status": "Declined",
+          "orcid": "",
+          "email": ""
+        },
+        {
+          "name": "Maccheroni, Fabio",
+          "institution": "Universit\u00e0 Bocconi",
+          "status": "Declined",
+          "orcid": "0000-0001-6338-6383",
+          "email": ""
+        },
+        {
+          "name": "Marinacci, Massimo",
+          "institution": "Universit\u00e0 Bocconi",
+          "status": "Declined",
+          "orcid": "0000-0002-0079-4176",
+          "email": ""
+        },
+        {
+          "name": "Maggis, Marco",
+          "institution": "Universita degli Studi di Milano",
+          "status": "Agreed",
+          "orcid": "0000-0003-4853-6456",
+          "email": ""
+        }
+      ],
+      "metadata": {
+        "title": "Dynamically optimal portfolios for monotone mean\u2013variance preferences",
+        "submission_date": "29-Jul-2025",
+        "keywords": "monotone mean--variance efficiency, monotone Sharpe ratio",
+        "manuscript_type": "Research Article"
+      },
+      "audit_trail": []
+    },
+    {
+      "manuscript_id": "MOR-2025-1037",
+      "authors": [
+        {
+          "name": "Mostovyi, Oleksii",
+          "email": "",
+          "institution": "",
+          "orcid": ""
+        },
+        {
+          "name": "Ernst, Philip",
+          "email": "",
+          "institution": "",
+          "orcid": ""
+        }
+      ],
+      "referees": [
+        {
+          "name": "Aksamit, Anna",
+          "institution": "University of Sydney",
+          "status": "Declined",
+          "orcid": "",
+          "email": ""
+        },
+        {
+          "name": "Angoshtari, Bahman",
+          "institution": "University of Miami",
+          "status": "Major Revision",
+          "orcid": "0000-0003-1415-4062",
+          "email": ""
+        },
+        {
+          "name": "Cetin, Umut",
+          "institution": "LSE",
+          "status": "Overdue",
+          "orcid": "",
+          "email": ""
+        }
+      ],
+      "metadata": {
+        "title": "The Value of Partial Information",
+        "submission_date": "11-May-2025",
+        "keywords": "insider trading, the value of the signal",
+        "manuscript_type": "Research Article"
+      },
+      "audit_trail": []
+    }
+  ]
+}

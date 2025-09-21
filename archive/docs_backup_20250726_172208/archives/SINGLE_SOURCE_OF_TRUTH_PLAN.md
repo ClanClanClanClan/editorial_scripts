@@ -43,11 +43,11 @@ async def main():
     # Get credentials
     cred_manager = CredentialManager()
     creds = cred_manager.get_credentials('SICON')
-    
+
     # Run extraction
     extractor = SICONExtractor()
     results = await extractor.extract(creds['username'], creds['password'])
-    
+
     print(f"✅ Extracted {len(results['manuscripts'])} manuscripts")
     return results
 

@@ -1,0 +1,13 @@
+{
+  "manuscripts": [],
+  "referees": [],
+  "documents": [],
+  "extraction_metadata": {
+    "authentication_success": false,
+    "extraction_success": false,
+    "pages_accessed": [],
+    "errors": [
+      "Authentication failed"
+    ]
+  }
+}

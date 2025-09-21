@@ -63,10 +63,10 @@ editorial_scripts/
 class AuthManager:
     def authenticate_orcid(self, username, password):
         # Handle ORCID with retries
-    
+
     def handle_cloudflare(self, page):
         # Cloudflare bypass logic
-    
+
     def use_1password(self):
         # 1Password integration
 ```
@@ -93,10 +93,10 @@ class BaseExtractor:
 class PDFManager:
     async def download_manuscript_pdf(self, url, manuscript_id):
         # Download with verification
-    
+
     async def download_referee_report(self, url, manuscript_id, referee_id):
         # Download and extract text
-    
+
     async def verify_pdf(self, file_path):
         # Ensure valid PDF
 ```
@@ -128,10 +128,10 @@ from core.base_extractor import BaseExtractor
 class MyJournalExtractor(BaseExtractor):
     name = "MyJournal"
     base_url = "https://myjournal.com"
-    
+
     def get_manuscripts_url(self):
         return f"{self.base_url}/editor/manuscripts"
-    
+
     def parse_manuscript_row(self, row):
         # Journal-specific parsing
         pass

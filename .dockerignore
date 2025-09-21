@@ -1,0 +1,49 @@
+# General
+.git
+.gitignore
+.DS_Store
+.python-version
+*.pyc
+__pycache__/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Virtualenvs
+.venv/
+venv/
+
+# Local env/secrets
+*.env
+.env*
+config/credentials.json
+config/gmail_token.json
+config/gmail_credentials.json
+config/env/
+
+# Docs & tests (not needed in runtime)
+docs/
+tests/
+dev/
+archive/
+downloads/
+results/
+
+# Debug and large artifacts
+debug_*.html
+*debug*.html
+*timeline_report_*.txt
+*comprehensive_*.json
+ULTRATHINK_*.json
+ULTRAFIX_*.json
+EXTRACTOR_TEST_RESULTS_*.md
+FS_*_ANALYSIS_*.md
+
+# Node/other build folders
+node_modules/
+build/
+dist/
+*.egg-info/
+

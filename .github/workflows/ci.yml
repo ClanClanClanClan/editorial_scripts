@@ -1,0 +1,113 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install Poetry + tools
+        run: |
+          python -m pip install --upgrade pip pipx
+          pipx install poetry
+          poetry --version
+          poetry install --no-interaction
+          poetry run python -V
+          # install tooling inside poetry env for consistent versions
+          poetry run pip install ruff black mypy bandit pip-audit detect-secrets
+      - name: Ruff (src, tests)
+        run: |
+          poetry run ruff check src tests
+      - name: Black (check)
+        run: |
+          poetry run black --check src tests
+      - name: Mypy (API + infra core)
+        run: |
+          poetry run mypy --follow-imports=skip src/ecc/interfaces src/ecc/infrastructure/database/connection.py src/ecc/infrastructure/tasks/celery_app.py
+      - name: Detect secrets (baseline)
+        run: |
+          poetry run detect-secrets-hook --baseline .secrets.baseline $(git ls-files)
+      - name: Bandit (security scan)
+        run: |
+          poetry run bandit -q -r src -x tests,dev,archive,production
+      - name: pip-audit (dependency vulnerabilities)
+        continue-on-error: true
+        run: |
+          # audit installed env under poetry
+          poetry run pip-audit -s -q
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install dependencies (Poetry)
+        run: |
+          python -m pip install --upgrade pip pipx
+          pipx install poetry
+          poetry install --no-interaction
+      - name: Run tests
+        env:
+          PYTHONPATH: .
+          ECC_GMAIL_2FA_CODE: "123456"
+        run: |
+          poetry run pytest -q
+
+  strict:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install dependencies (Poetry)
+        run: |
+          python -m pip install --upgrade pip pipx
+          pipx install poetry
+          poetry install --no-interaction
+      - name: Run tests (strict)
+        env:
+          PYTHONPATH: .
+          ECC_GMAIL_2FA_CODE: "123456"
+          ECC_REAL_DEPS: "1"
+        run: |
+          poetry run pytest -q
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install dependencies (Poetry)
+        run: |
+          python -m pip install --upgrade pip pipx
+          pipx install poetry
+          poetry install --no-interaction
+          # Ensure tools are present in env
+          poetry run pip install bandit pip-audit
+      - name: Bandit (fail on high severity; allowlist supported)
+        run: |
+          SKIPS=$(grep -v '^#' .security/bandit-allowlist.txt 2>/dev/null | tr '\n' ',' | sed 's/,$//')
+          if [ -n "$SKIPS" ]; then
+            poetry run bandit -r src -x tests,dev,archive,production -ll -s "$SKIPS"
+          else
+            poetry run bandit -r src -x tests,dev,archive,production -ll
+          fi
+      - name: pip-audit (fail on vulnerabilities; allowlist supported)
+        run: |
+          IGN=$(grep -v '^#' .security/pip-audit-allowlist.txt 2>/dev/null | xargs -I{} printf -- '--ignore-vuln %s ' '{}')
+          poetry run pip-audit -s $IGN

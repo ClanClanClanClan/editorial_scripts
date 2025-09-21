@@ -102,7 +102,7 @@ The system generates detailed analytics including:
    # In environment or script
    os.environ['ORCID_EMAIL'] = 'your_email'
    os.environ['ORCID_PASSWORD'] = 'your_password'
-   
+
    # For MF/MOR (optional)
    os.environ['SCHOLARONE_USER'] = 'your_username'
    os.environ['SCHOLARONE_PASS'] = 'your_password'
@@ -236,7 +236,7 @@ New journal platforms can be supported by implementing appropriate methods in `E
 
 This comprehensive system provides unprecedented visibility into the referee process across all journals, enabling data-driven decisions for:
 - Referee selection
-- Process optimization  
+- Process optimization
 - Performance management
 - Quality improvement
 

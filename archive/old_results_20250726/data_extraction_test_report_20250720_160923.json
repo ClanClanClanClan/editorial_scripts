@@ -1,0 +1,306 @@
+{
+  "test_timestamp": "2025-07-20T16:09:23.070584",
+  "overall_metrics": {
+    "success_rate": 100.0,
+    "total_journals_tested": 4,
+    "successful_extractions": 4,
+    "total_manuscripts_extracted": 8,
+    "total_referees_extracted": 8,
+    "average_data_quality_score": 100.0,
+    "total_extraction_time": 0.0019991397857666016
+  },
+  "platform_breakdown": {
+    "scholarone": {
+      "journals": 2,
+      "success_rate": 100.0,
+      "avg_quality_score": 100.0
+    },
+    "siam": {
+      "journals": 2,
+      "success_rate": 100.0,
+      "avg_quality_score": 100.0
+    }
+  },
+  "individual_results": [
+    {
+      "journal_code": "MF",
+      "journal_name": "Mathematical Finance",
+      "platform": "ScholarOne",
+      "success": true,
+      "error_message": null,
+      "manuscripts_count": 2,
+      "referees_count": 2,
+      "data_quality_score": 100.0,
+      "extraction_time": 0.001466989517211914,
+      "sample_data": {
+        "sample_manuscript": {
+          "id": "MF-2024-001",
+          "title": "Sample Manuscript Title for Testing",
+          "authors": [
+            "Dr. John Smith",
+            "Prof. Jane Doe"
+          ],
+          "status": "Under Review",
+          "submitted_date": "2024-01-15",
+          "last_updated": "2024-02-01",
+          "category": "Research Article",
+          "editor": "Associate Editor",
+          "word_count": 8500,
+          "referee_assignments": 3
+        },
+        "sample_referee": {
+          "name": "Dr. Reviewer One",
+          "email": "reviewer1@university.edu",
+          "affiliation": "University of Example",
+          "manuscript_id": "MF-2024-001",
+          "status": "Review in Progress",
+          "assigned_date": "2024-01-20",
+          "due_date": "2024-02-20",
+          "expertise_areas": [
+            "Mathematical Finance",
+            "Stochastic Processes"
+          ],
+          "previous_reviews": 5,
+          "response_time_avg": 25
+        },
+        "data_structure": {
+          "manuscripts_fields": [
+            "id",
+            "title",
+            "authors",
+            "status",
+            "submitted_date",
+            "last_updated",
+            "category",
+            "editor",
+            "word_count",
+            "referee_assignments"
+          ],
+          "referees_fields": [
+            "name",
+            "email",
+            "affiliation",
+            "manuscript_id",
+            "status",
+            "assigned_date",
+            "due_date",
+            "expertise_areas",
+            "previous_reviews",
+            "response_time_avg"
+          ]
+        }
+      }
+    },
+    {
+      "journal_code": "MOR",
+      "journal_name": "Mathematics of Operations Research",
+      "platform": "ScholarOne",
+      "success": true,
+      "error_message": null,
+      "manuscripts_count": 2,
+      "referees_count": 2,
+      "data_quality_score": 100.0,
+      "extraction_time": 0.0003681182861328125,
+      "sample_data": {
+        "sample_manuscript": {
+          "id": "MOR-2024-001",
+          "title": "Sample Manuscript Title for Testing",
+          "authors": [
+            "Dr. John Smith",
+            "Prof. Jane Doe"
+          ],
+          "status": "Under Review",
+          "submitted_date": "2024-01-15",
+          "last_updated": "2024-02-01",
+          "category": "Research Article",
+          "editor": "Associate Editor",
+          "word_count": 8500,
+          "referee_assignments": 3
+        },
+        "sample_referee": {
+          "name": "Dr. Reviewer One",
+          "email": "reviewer1@university.edu",
+          "affiliation": "University of Example",
+          "manuscript_id": "MOR-2024-001",
+          "status": "Review in Progress",
+          "assigned_date": "2024-01-20",
+          "due_date": "2024-02-20",
+          "expertise_areas": [
+            "Mathematical Finance",
+            "Stochastic Processes"
+          ],
+          "previous_reviews": 5,
+          "response_time_avg": 25
+        },
+        "data_structure": {
+          "manuscripts_fields": [
+            "id",
+            "title",
+            "authors",
+            "status",
+            "submitted_date",
+            "last_updated",
+            "category",
+            "editor",
+            "word_count",
+            "referee_assignments"
+          ],
+          "referees_fields": [
+            "name",
+            "email",
+            "affiliation",
+            "manuscript_id",
+            "status",
+            "assigned_date",
+            "due_date",
+            "expertise_areas",
+            "previous_reviews",
+            "response_time_avg"
+          ]
+        }
+      }
+    },
+    {
+      "journal_code": "SICON",
+      "journal_name": "SIAM Journal on Control and Optimization",
+      "platform": "SIAM",
+      "success": true,
+      "error_message": null,
+      "manuscripts_count": 2,
+      "referees_count": 2,
+      "data_quality_score": 100.0,
+      "extraction_time": 8.726119995117188e-05,
+      "sample_data": {
+        "sample_manuscript": {
+          "manuscript_id": "SICON_2025_001",
+          "title": "SIAM Test Manuscript",
+          "authors": [
+            "Dr. Alice Cooper",
+            "Prof. David Brown"
+          ],
+          "status": "In Review",
+          "submission_date": "2024-01-10",
+          "last_activity": "2024-01-25",
+          "subject_area": "Control Theory",
+          "handling_editor": "Section Editor",
+          "pages": 22,
+          "reviewer_count": 2
+        },
+        "sample_referee": {
+          "reviewer_name": "Dr. SIAM Reviewer",
+          "reviewer_email": "siam.reviewer@university.edu",
+          "institution": "SIAM University",
+          "manuscript_id": "SICON_2025_001",
+          "review_status": "Active",
+          "invitation_date": "2024-01-15",
+          "deadline": "2024-02-15",
+          "specialties": [
+            "Control Theory",
+            "Optimization"
+          ],
+          "review_history": 8,
+          "avg_review_time": 30
+        },
+        "data_structure": {
+          "manuscripts_fields": [
+            "manuscript_id",
+            "title",
+            "authors",
+            "status",
+            "submission_date",
+            "last_activity",
+            "subject_area",
+            "handling_editor",
+            "pages",
+            "reviewer_count"
+          ],
+          "referees_fields": [
+            "reviewer_name",
+            "reviewer_email",
+            "institution",
+            "manuscript_id",
+            "review_status",
+            "invitation_date",
+            "deadline",
+            "specialties",
+            "review_history",
+            "avg_review_time"
+          ]
+        }
+      }
+    },
+    {
+      "journal_code": "SIFIN",
+      "journal_name": "SIAM Journal on Financial Mathematics",
+      "platform": "SIAM",
+      "success": true,
+      "error_message": null,
+      "manuscripts_count": 2,
+      "referees_count": 2,
+      "data_quality_score": 100.0,
+      "extraction_time": 7.677078247070312e-05,
+      "sample_data": {
+        "sample_manuscript": {
+          "manuscript_id": "SIFIN_2025_001",
+          "title": "SIAM Test Manuscript",
+          "authors": [
+            "Dr. Alice Cooper",
+            "Prof. David Brown"
+          ],
+          "status": "In Review",
+          "submission_date": "2024-01-10",
+          "last_activity": "2024-01-25",
+          "subject_area": "Control Theory",
+          "handling_editor": "Section Editor",
+          "pages": 22,
+          "reviewer_count": 2
+        },
+        "sample_referee": {
+          "reviewer_name": "Dr. SIAM Reviewer",
+          "reviewer_email": "siam.reviewer@university.edu",
+          "institution": "SIAM University",
+          "manuscript_id": "SIFIN_2025_001",
+          "review_status": "Active",
+          "invitation_date": "2024-01-15",
+          "deadline": "2024-02-15",
+          "specialties": [
+            "Control Theory",
+            "Optimization"
+          ],
+          "review_history": 8,
+          "avg_review_time": 30
+        },
+        "data_structure": {
+          "manuscripts_fields": [
+            "manuscript_id",
+            "title",
+            "authors",
+            "status",
+            "submission_date",
+            "last_activity",
+            "subject_area",
+            "handling_editor",
+            "pages",
+            "reviewer_count"
+          ],
+          "referees_fields": [
+            "reviewer_name",
+            "reviewer_email",
+            "institution",
+            "manuscript_id",
+            "review_status",
+            "invitation_date",
+            "deadline",
+            "specialties",
+            "review_history",
+            "avg_review_time"
+          ]
+        }
+      }
+    }
+  ],
+  "coordinator_test": {
+    "success": false,
+    "error": "ExtractionRequest.__init__() got an unexpected keyword argument 'filters'"
+  }
+}

@@ -1,6 +1,6 @@
 # 🔍 HONEST ASSESSMENT: Editorial Scripts Implementation Status
 
-**Date**: July 14, 2025  
+**Date**: July 14, 2025
 **Assessment**: What's actually working vs what's not
 
 ---
@@ -44,7 +44,7 @@
 - **Good**: Extracts 4 manuscripts with referees
 - **Missing**: No email addresses for referees
 
-#### **MF/MOR** ✅ WORKING  
+#### **MF/MOR** ✅ WORKING
 - **Good**: Complete extraction with all referee details
 - **Evidence**: Full data in legacy results
 

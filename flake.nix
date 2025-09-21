@@ -20,7 +20,7 @@
         editorialScriptsV3 = mkPoetryApplication {
           projectDir = ./.;
           python = pkgs.python311;
-          
+
           # Override problematic packages
           overrides = defaultPoetryOverrides.extend (final: prev: {
             # Fix psycopg2-binary build
@@ -69,21 +69,21 @@
             postgresql_16
             redis
             chromium
-            
+
             # Development tools
             pre-commit
             git
             gh
-            
+
             # Security tools
             trivy
             cosign
             syft
-            
+
             # Kubernetes tools for E2E testing
             kubectl
             kind
-            
+
             # AI Act compliance (placeholder - would need actual tool)
             # ai-act-linter
           ];
@@ -92,7 +92,7 @@
             export POETRY_VENV_IN_PROJECT=1
             export PLAYWRIGHT_BROWSERS_PATH=${pkgs.playwright-driver.browsers}
             export PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
-            
+
             echo "🚀 Editorial Scripts V3 Development Environment"
             echo "Python: $(python --version)"
             echo "Poetry: $(poetry --version)"
@@ -108,7 +108,7 @@
         dockerImage = pkgs.dockerTools.buildImage {
           name = "editorial-scripts-v3";
           tag = "latest";
-          
+
           contents = with pkgs; [
             editorialScriptsV3
             postgresql_16
@@ -123,15 +123,15 @@
               "PLAYWRIGHT_BROWSERS_PATH=${pkgs.playwright-driver.browsers}"
               "PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1"
             ];
-            
+
             ExposedPorts = {
               "8000/tcp" = { };  # FastAPI
               "5432/tcp" = { };  # PostgreSQL
               "6379/tcp" = { };  # Redis
             };
-            
+
             Cmd = [ "${editorialScriptsV3}/bin/editorial" "web" "run" ];
-            
+
             Labels = {
               "org.opencontainers.image.title" = "Editorial Scripts V3";
               "org.opencontainers.image.description" = "Pristine-plus editorial manuscript processing system";
@@ -164,10 +164,10 @@
         checks = {
           # Build the application
           build = editorialScriptsV3;
-          
-          # Build the Docker image  
+
+          # Build the Docker image
           docker = dockerImage;
-          
+
           # Run basic tests (requires test setup)
           test = pkgs.stdenv.mkDerivation {
             name = "editorial-scripts-v3-tests";
@@ -177,10 +177,10 @@
               # Basic smoke test
               python -c "import src.foundation.types; print('✓ Foundation types import')"
               python -c "import src.domain.entities; print('✓ Domain entities import')"
-              
+
               # Run fast tests only during flake check
               # pytest tests/unit/foundation/ -v --tb=short || echo "Some tests failed but continuing..."
-              
+
               touch $out
             '';
             installPhase = "mkdir -p $out";

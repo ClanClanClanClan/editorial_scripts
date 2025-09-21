@@ -64,10 +64,10 @@ class GmailIntegration:
 class CacheManager:
     async def get_cached_extraction(self, journal: str) -> Optional[Dict]:
         """Get cached extraction if recent"""
-    
+
     async def save_extraction(self, journal: str, data: Dict):
         """Save extraction with timestamp"""
-    
+
     async def get_referee_analytics(self, referee_email: str) -> Dict:
         """Get historical referee analytics (never expires)"""
 ```

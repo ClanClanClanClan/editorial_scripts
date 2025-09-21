@@ -26,7 +26,7 @@
   - `test_sicon_fixed.py` - SICON with fixes
   - `test_sicon_gmail.py` - Gmail integration
   - `test_api_startup.py` - API test
-  
+
 - **Clean documentation** in `docs/`:
   - Essential guides only
   - No more 17 completion reports

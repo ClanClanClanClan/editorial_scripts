@@ -1,0 +1,258 @@
+{
+  "analysis_timestamp": "2025-07-20T16:14:23.855252",
+  "scripts_found": 66,
+  "scripts_analyzed": 20,
+  "data_files_found": 157,
+  "execution_attempts": 3,
+  "successful_executions": 0,
+  "script_capabilities": [
+    {
+      "script_name": "test_mf_complete_working.py",
+      "journal": "MF",
+      "extracts_manuscripts": true,
+      "extracts_referees": true,
+      "has_authentication": false,
+      "description": "Complete working MF extraction handling multiple manuscripts  import os import sys import time import json from pathlib import Path from dotenv import load_dotenv  load_dotenv('.env.production') sys.p"
+    },
+    {
+      "script_name": "test_mf_working_flow.py",
+      "journal": "MF",
+      "extracts_manuscripts": true,
+      "extracts_referees": true,
+      "has_authentication": true,
+      "description": "Test MF extraction using the PROVEN working flow from test_fresh_2fa.py  import os import sys import time import json from pathlib import Path from dotenv import load_dotenv from selenium import webdr"
+    },
+    {
+      "script_name": "show_mf_extraction_details.py",
+      "journal": "MF",
+      "extracts_manuscripts": true,
+      "extracts_referees": true,
+      "has_authentication": false,
+      "description": "Show exactly what data is being extracted from MF - complete transparency"
+    },
+    {
+      "script_name": "show_mf_extraction_summary.py",
+      "journal": "MF",
+      "extracts_manuscripts": true,
+      "extracts_referees": true,
+      "has_authentication": false,
+      "description": "Show summary of MF extraction data"
+    },
+    {
+      "script_name": "show_mf_data.py",
+      "journal": "MF",
+      "extracts_manuscripts": true,
+      "extracts_referees": true,
+      "has_authentication": false,
+      "description": "Show MF data that's currently being extracted  import json from pathlib import Path  # Look for the most recent MF extraction file extraction_files = list(Path('.').glob('*mf*.json')) if not extractio"
+    },
+    {
+      "script_name": "show_mf_results.py",
+      "journal": "MF",
+      "extracts_manuscripts": true,
+      "extracts_referees": true,
+      "has_authentication": false,
+      "description": "Show MF extraction results  import os import sys import json from pathlib import Path from dotenv import load_dotenv  # Load environment load_dotenv('.env.production')  # Add to path sys.path.insert(0"
+    },
+    {
+      "script_name": "show_mf_current_status.py",
+      "journal": "MF",
+      "extracts_manuscripts": true,
+      "extracts_referees": true,
+      "has_authentication": false,
+      "description": "Show current MF extraction status and what should be extracted"
+    },
+    {
+      "script_name": "show_current_results.py",
+      "journal": null,
+      "extracts_manuscripts": true,
+      "extracts_referees": true,
+      "has_authentication": false,
+      "description": "Show Current SICON Results Displays the actual extracted data from the SICON system"
+    },
+    {
+      "script_name": "show_working_extraction.py",
+      "journal": null,
+      "extracts_manuscripts": true,
+      "extracts_referees": true,
+      "has_authentication": false,
+      "description": "Show the working extraction with debug output  import os import sys import logging from pathlib import Path from dotenv import load_dotenv  load_dotenv('.env.production') sys.path.insert(0, str(Path(_"
+    },
+    {
+      "script_name": "test_mf_device_verification.py",
+      "journal": "MF",
+      "extracts_manuscripts": true,
+      "extracts_referees": false,
+      "has_authentication": false,
+      "description": "Test MF device verification fix"
+    },
+    {
+      "script_name": "test_mf_device_simple.py",
+      "journal": "MF",
+      "extracts_manuscripts": true,
+      "extracts_referees": false,
+      "has_authentication": true,
+      "description": "Simple test to debug MF device verification"
+    },
+    {
+      "script_name": "test_mf_take_action.py",
+      "journal": "MF",
+      "extracts_manuscripts": true,
+      "extracts_referees": true,
+      "has_authentication": false,
+      "description": "Test MF Take Action clicking with the fix  import os import sys from pathlib import Path from dotenv import load_dotenv  # Load environment load_dotenv('.env.production')  # Add to path sys.path.inser"
+    },
+    {
+      "script_name": "test_mf_headfull.py",
+      "journal": "MF",
+      "extracts_manuscripts": true,
+      "extracts_referees": true,
+      "has_authentication": false,
+      "description": "Test MF extraction in headfull mode to see navigation issues"
+    },
+    {
+      "script_name": "test_mf_mor_login.py",
+      "journal": "MF",
+      "extracts_manuscripts": true,
+      "extracts_referees": false,
+      "has_authentication": true,
+      "description": "Test MF and MOR login systems to understand their authentication  import os import sys import time from pathlib import Path from dotenv import load_dotenv from selenium import webdriver from selenium."
+    },
+    {
+      "script_name": "test_mf_simple_direct.py",
+      "journal": "MF",
+      "extracts_manuscripts": true,
+      "extracts_referees": true,
+      "has_authentication": false,
+      "description": "Simple direct MF test using ONLY the proven working methods  import os import sys import time from pathlib import Path from dotenv import load_dotenv  load_dotenv('.env.production') sys.path.insert(0,"
+    },
+    {
+      "script_name": "test_mf_device_verification_flow.py",
+      "journal": "MF",
+      "extracts_manuscripts": true,
+      "extracts_referees": true,
+      "has_authentication": true,
+      "description": "Test the complete MF device verification flow step by step"
+    },
+    {
+      "script_name": "test_mf_parsing_fixes.py",
+      "journal": "MF",
+      "extracts_manuscripts": true,
+      "extracts_referees": true,
+      "has_authentication": false,
+      "description": "Test the fixed MF parsing implementation"
+    },
+    {
+      "script_name": "test_mf_headful_now.py",
+      "journal": "MF",
+      "extracts_manuscripts": true,
+      "extracts_referees": true,
+      "has_authentication": false,
+      "description": "Test MF extraction in headful mode RIGHT NOW  import os import sys from pathlib import Path from dotenv import load_dotenv  load_dotenv('.env.production') sys.path.insert(0, str(Path(__file__).parent)"
+    },
+    {
+      "script_name": "test_mf_headful.py",
+      "journal": "MF",
+      "extracts_manuscripts": true,
+      "extracts_referees": true,
+      "has_authentication": false,
+      "description": "Test MF extraction in headful mode to see Take Action clicking  import os import sys from pathlib import Path from dotenv import load_dotenv  load_dotenv('.env.production') sys.path.insert(0, str(Path"
+    },
+    {
+      "script_name": "test_mf_mor_login_verification.py",
+      "journal": "MF",
+      "extracts_manuscripts": true,
+      "extracts_referees": false,
+      "has_authentication": true,
+      "description": "Verify MF and MOR login is actually working  import os import sys import time from pathlib import Path from dotenv import load_dotenv from selenium import webdriver from selenium.webdriver.common.by i"
+    }
+  ],
+  "recent_data_files": [
+    {
+      "filename": "data_extraction_test_report_20250720_160923.json",
+      "path": "data_extraction_test_report_20250720_160923.json",
+      "size_bytes": 8830,
+      "age_days": 0.003479785692912561
+    },
+    {
+      "filename": "data_extraction_test_report_20250720_160923.json",
+      "path": "data_extraction_test_report_20250720_160923.json",
+      "size_bytes": 8830,
+      "age_days": 0.003479785692912561
+    },
+    {
+      "filename": "fixed_mf_data_20250719_192659.json",
+      "path": "data/exports/legacy/fixed_mf_data_20250719_192659.json",
+      "size_bytes": 1230,
+      "age_days": 0.6162560137582046
+    },
+    {
+      "filename": "simple_mf_data_20250719_183952.json",
+      "path": "data/exports/legacy/simple_mf_data_20250719_183952.json",
+      "size_bytes": 1584,
+      "age_days": 0.6489682828690166
+    },
+    {
+      "filename": "mf_improved_parsing_results_20250719_182737.json",
+      "path": "data/exports/legacy/mf_improved_parsing_results_20250719_182737.json",
+      "size_bytes": 1576390,
+      "age_days": 0.6574839871873458
+    },
+    {
+      "filename": "mf_improved_parsing_results_20250719_182737.json",
+      "path": "data/exports/legacy/mf_improved_parsing_results_20250719_182737.json",
+      "size_bytes": 1576390,
+      "age_days": 0.6574839871873458
+    },
+    {
+      "filename": "results_20250719_182732.json",
+      "path": "data/exports/mf/results_20250719_182732.json",
+      "size_bytes": 14077927,
+      "age_days": 0.6575329706652296
+    },
+    {
+      "filename": "real_mf_extraction_summary.json",
+      "path": "data/exports/legacy/real_mf_extraction_summary.json",
+      "size_bytes": 1657,
+      "age_days": 0.9148771762433979
+    },
+    {
+      "filename": "mf_robust_results_20250719_100829.json",
+      "path": "data/exports/legacy/mf_robust_results_20250719_100829.json",
+      "size_bytes": 105,
+      "age_days": 1.0040998615600445
+    },
+    {
+      "filename": "mf_robust_results_20250719_100829.json",
+      "path": "data/exports/legacy/mf_robust_results_20250719_100829.json",
+      "size_bytes": 105,
+      "age_days": 1.0040998615600445
+    }
+  ],
+  "execution_results": [
+    {
+      "script_name": "test_mf_complete_working.py",
+      "journal": "MF",
+      "success": false,
+      "output_length": 0,
+      "error": null,
+      "stdout_preview": null
+    },
+    {
+      "script_name": "test_mf_working_flow.py",
+      "journal": "MF",
+      "success": false,
+      "output_length": 0,
+      "error": null,
+      "stdout_preview": null
+    },
+    {
+      "script_name": "show_mf_extraction_details.py",
+      "journal": "MF",
+      "success": false,
+      "output_length": 0,
+      "error": null,
+      "stdout_preview": null
+    }
+  ]
+}

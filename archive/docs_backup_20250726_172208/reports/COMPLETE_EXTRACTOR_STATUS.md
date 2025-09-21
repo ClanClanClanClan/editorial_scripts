@@ -1,6 +1,6 @@
 # ✅ COMPLETE EXTRACTOR STATUS
 
-**Date**: July 15, 2025  
+**Date**: July 15, 2025
 **Status**: ✅ **ALL BEST EXTRACTORS SALVAGED**
 
 ---
@@ -9,7 +9,7 @@
 
 ### **✅ SIAM Journals (ORCID Auth)**
 - **SICON** - SIAM Journal on Control and Optimization ✅
-- **SIFIN** - SIAM Journal on Financial Mathematics ✅  
+- **SIFIN** - SIAM Journal on Financial Mathematics ✅
 - **NACO** - North American Congress on Optimization ✅
 
 ### **✅ ScholarOne Journals**
@@ -32,7 +32,7 @@
 ### **Ready to Use (Have Credentials)**
 ```bash
 python run_extraction.py sicon   # ORCID credentials ready
-python run_extraction.py sifin   # ORCID credentials ready  
+python run_extraction.py sifin   # ORCID credentials ready
 python run_extraction.py mf      # ScholarOne credentials ready
 python run_extraction.py mor     # ScholarOne credentials ready
 python run_extraction.py naco    # ORCID credentials ready
@@ -44,7 +44,7 @@ python run_extraction.py naco    # ORCID credentials ready
 FS_EMAIL="your.email@example.com"
 FS_PASSWORD="your_password"
 
-JOTA_EMAIL="your.email@example.com"  
+JOTA_EMAIL="your.email@example.com"
 JOTA_PASSWORD="your_password"
 
 MAFE_EMAIL="your.email@example.com"
@@ -62,7 +62,7 @@ GMAIL_USER="your.gmail@gmail.com"
 From `.env.production`:
 - **ORCID_EMAIL**: dylan.possamai@polytechnique.org
 - **ORCID_PASSWORD**: [ready]
-- **SCHOLARONE_EMAIL**: dylan.possamai@gmail.com  
+- **SCHOLARONE_EMAIL**: dylan.possamai@gmail.com
 - **SCHOLARONE_PASSWORD**: [ready]
 
 ### **⚠️ Missing Credentials**
@@ -86,7 +86,7 @@ You'll need to add for Editorial Manager journals:
 
 ### **Email Verification Manager**
 - ✅ **2FA email verification**
-- ✅ **Gmail API integration** 
+- ✅ **Gmail API integration**
 - ✅ **Legacy integration**
 - ✅ **Crosscheck functionality**
 
@@ -107,7 +107,7 @@ All extractors are from the **working implementation** that was functioning befo
 - Extracts manuscripts with referee data
 - Downloads PDFs with authentication
 
-### **ScholarOne Extractors (MF, MOR)**  
+### **ScholarOne Extractors (MF, MOR)**
 - Dedicated implementations in `implementations/` folder
 - Production-tested code
 - Complete manuscript and referee extraction

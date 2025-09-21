@@ -36,7 +36,7 @@ Academic journal manuscript extraction system for Dylan Possamaï's editorial wo
 ## 🚀 RECENT ACHIEVEMENTS (2025-08-27 Session)
 
 ### FS Extractor - COMPLETE Timeline Implementation ✅
-1. **Comprehensive Timeline Extraction**: 
+1. **Comprehensive Timeline Extraction**:
    - Extracts complete email history for each manuscript
    - Builds minute-by-minute event timeline
    - Tracks all referee communications
@@ -66,7 +66,7 @@ Academic journal manuscript extraction system for Dylan Possamaï's editorial wo
 editorial_scripts/
 ├── production/src/extractors/          # PRODUCTION EXTRACTORS (USE THESE!)
 │   ├── mf_extractor.py                # ✅ WORKING - 3,939 lines
-│   ├── mor_extractor.py               # ✅ WORKING - 2,847 lines  
+│   ├── mor_extractor.py               # ✅ WORKING - 2,847 lines
 │   ├── fs_extractor.py                # ✅ WORKING - 981 lines (email-based)
 │   ├── sicon_extractor.py            # ⚠️ Partial - basic only
 │   ├── sifin_extractor.py            # ⚠️ Partial - basic only
@@ -262,7 +262,7 @@ python3 verify_all_credentials.py
 
 - [x] MF extractor working (needs login monitoring)
 - [x] MOR extractor working (last test: 2025-07-24)
-- [x] FS extractor working with timeline (2025-08-27) 
+- [x] FS extractor working with timeline (2025-08-27)
 - [x] Gmail integration functional (token refreshed)
 - [x] Credentials in keychain
 - [x] PDF downloads working

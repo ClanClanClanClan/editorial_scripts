@@ -1,0 +1,6 @@
+[
+  "aside a:has-text('{category}')",
+  "nav a:has-text('{category}')",
+  "text={category}"
+]
+

@@ -18,7 +18,7 @@ Last Updated: August 22, 2025
   "submission_date": "15-Jul-2025",
   "last_updated": "18-Jul-2025",
   "in_review_time": "38 days",
-  
+
   // ===== AUTHORS (WITH ENHANCED EXTRACTION) =====
   "authors": [
     {
@@ -31,7 +31,7 @@ Last Updated: August 22, 2025
       "orcid": "https://orcid.org/0000-0001-2345-6789"
     }
   ],
-  
+
   // ===== REFEREES (WITH EMAIL FIX) =====
   "referees": [
     {
@@ -57,7 +57,7 @@ Last Updated: August 22, 2025
       }
     }
   ],
-  
+
   // ===== EDITORS =====
   "editors": {
     "Editor-in-Chief": {
@@ -69,7 +69,7 @@ Last Updated: August 22, 2025
       "email": "associate@journal.edu"
     }
   },
-  
+
   // ===== DOCUMENTS =====
   "documents": {
     "pdf": true,
@@ -88,7 +88,7 @@ Last Updated: August 22, 2025
       }
     ]
   },
-  
+
   // ===== NEW MOR PARITY FIELDS (JUST ADDED) =====
   "funding_information": "NSF Grant DMS-2023456, Swiss National Science Foundation Grant 200021_175728",  // 🆕
   "conflict_of_interest": "No conflict of interest",  // 🆕
@@ -102,7 +102,7 @@ Last Updated: August 22, 2025
       {"name": "Prof. Competitor", "email": ""}
     ]
   },
-  
+
   // ===== MF UNIQUE: COMMUNICATION INTELLIGENCE =====
   "communication_timeline": [  // MF UNIQUE FEATURE
     {
@@ -134,7 +134,7 @@ Last Updated: August 22, 2025
     "peak_weekday": "Tuesday",
     "response_time_analysis": {...}
   },
-  
+
   // ===== MF UNIQUE: VERSION TRACKING =====
   "is_revision": false,
   "revision_number": 0,
@@ -145,7 +145,7 @@ Last Updated: August 22, 2025
       "decision": "Under Review"
     }
   ],
-  
+
   // ===== METADATA =====
   "article_type": "Original Article",
   "special_issue": "",
@@ -169,7 +169,7 @@ Last Updated: August 22, 2025
   "submission_date": "01-Jul-2025",
   "last_updated": "20-Jul-2025",
   "in_review_time": "51 days",
-  
+
   // ===== AUTHORS (SAME STRUCTURE) =====
   "authors": [
     {
@@ -182,7 +182,7 @@ Last Updated: August 22, 2025
       // Note: NO ORCID enrichment in MOR
     }
   ],
-  
+
   // ===== REFEREES (MORE REVIEW DATA) =====
   "referees": [
     {
@@ -209,7 +209,7 @@ Last Updated: August 22, 2025
       }
     }
   ],
-  
+
   // ===== MOR UNIQUE: COMPREHENSIVE REVIEW DATA =====
   "all_reviews_data": [  // MOR UNIQUE
     {
@@ -224,11 +224,11 @@ Last Updated: August 22, 2025
   "comprehensive_reviewer_comments": {...},  // MOR UNIQUE
   "comprehensive_ae_comments": {...},  // MOR UNIQUE
   "editorial_notes_metadata": {...},  // MOR UNIQUE
-  
+
   // ===== MOR UNIQUE: SUBMISSION METADATA =====
   "msc_codes": ["90C15", "90C27", "68W25"],  // MOR UNIQUE
   "topic_area": "Stochastic Programming",  // MOR UNIQUE
-  
+
   // ===== SHARED MOR PARITY FIELDS =====
   "funding_information": "NSF Grant CCF-2023789",
   "conflict_of_interest": "No conflict of interest",
@@ -239,7 +239,7 @@ Last Updated: August 22, 2025
     ],
     "opposed_referees": []
   },
-  
+
   // ===== MOR UNIQUE: EDITOR RECOMMENDATIONS =====
   "editor_recommendations": {  // MOR UNIQUE
     "recommended_editors": [
@@ -247,17 +247,17 @@ Last Updated: August 22, 2025
     ],
     "opposed_editors": []
   },
-  
+
   // ===== MOR UNIQUE: HISTORICAL DATA =====
   "historical_referees": [...],  // MOR UNIQUE - tracks all past referees
   "original_submission_referees": [...],  // MOR UNIQUE
-  
+
   // ===== MOR UNIQUE: REPORT MANAGEMENT =====
   "referee_reports_available": 3,  // MOR UNIQUE
   "referee_report_links": [...],  // MOR UNIQUE
   "extracted_reports": [...],  // MOR UNIQUE
   "report_extraction_enabled": true,  // MOR UNIQUE
-  
+
   // ===== VERSION TRACKING (DIFFERENT STRUCTURE) =====
   "is_revision": false,
   "revision_number": 0,

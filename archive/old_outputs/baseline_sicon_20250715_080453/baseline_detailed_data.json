@@ -1,0 +1,500 @@
+{
+  "manuscripts": [
+    {
+      "id": "MS-SICON-2025-0001",
+      "title": "Optimal Control and Stability Analysis for Nonlinear Systems - Paper 1",
+      "status": "Under Review",
+      "submission_date": "2025-04-01T08:04:53.954613",
+      "author": {
+        "name": "Dr. Author 1",
+        "email": "author1@university.edu",
+        "institution": "University of Control Theory 1"
+      },
+      "subject_area": "Control Theory and Optimization",
+      "keywords": [
+        "optimal control",
+        "stability analysis",
+        "nonlinear systems"
+      ],
+      "abstract": "This paper presents novel approaches to optimal control theory with applications to nonlinear systems. Paper 1 focuses on advanced mathematical techniques.",
+      "page_count": 30,
+      "extraction_date": "2025-07-15T08:04:53.954620",
+      "extraction_source": "baseline_compliant_generation"
+    },
+    {
+      "id": "MS-SICON-2025-0002",
+      "title": "Optimal Control and Stability Analysis for Nonlinear Systems - Paper 2",
+      "status": "Under Review",
+      "submission_date": "2025-04-16T08:04:53.954622",
+      "author": {
+        "name": "Dr. Author 2",
+        "email": "author2@university.edu",
+        "institution": "University of Control Theory 2"
+      },
+      "subject_area": "Control Theory and Optimization",
+      "keywords": [
+        "optimal control",
+        "stability analysis",
+        "nonlinear systems"
+      ],
+      "abstract": "This paper presents novel approaches to optimal control theory with applications to nonlinear systems. Paper 2 focuses on advanced mathematical techniques.",
+      "page_count": 35,
+      "extraction_date": "2025-07-15T08:04:53.954625",
+      "extraction_source": "baseline_compliant_generation"
+    },
+    {
+      "id": "MS-SICON-2025-0003",
+      "title": "Optimal Control and Stability Analysis for Nonlinear Systems - Paper 3",
+      "status": "Under Review",
+      "submission_date": "2025-05-01T08:04:53.954626",
+      "author": {
+        "name": "Dr. Author 3",
+        "email": "author3@university.edu",
+        "institution": "University of Control Theory 3"
+      },
+      "subject_area": "Control Theory and Optimization",
+      "keywords": [
+        "optimal control",
+        "stability analysis",
+        "nonlinear systems"
+      ],
+      "abstract": "This paper presents novel approaches to optimal control theory with applications to nonlinear systems. Paper 3 focuses on advanced mathematical techniques.",
+      "page_count": 40,
+      "extraction_date": "2025-07-15T08:04:53.954628",
+      "extraction_source": "baseline_compliant_generation"
+    },
+    {
+      "id": "MS-SICON-2025-0004",
+      "title": "Optimal Control and Stability Analysis for Nonlinear Systems - Paper 4",
+      "status": "Under Review",
+      "submission_date": "2025-05-16T08:04:53.954629",
+      "author": {
+        "name": "Dr. Author 4",
+        "email": "author4@university.edu",
+        "institution": "University of Control Theory 4"
+      },
+      "subject_area": "Control Theory and Optimization",
+      "keywords": [
+        "optimal control",
+        "stability analysis",
+        "nonlinear systems"
+      ],
+      "abstract": "This paper presents novel approaches to optimal control theory with applications to nonlinear systems. Paper 4 focuses on advanced mathematical techniques.",
+      "page_count": 45,
+      "extraction_date": "2025-07-15T08:04:53.954630",
+      "extraction_source": "baseline_compliant_generation"
+    }
+  ],
+  "referees": [
+    {
+      "id": "REF-001",
+      "name": "Dr. Sarah Johnson",
+      "email": "sarah.johnson@mit.edu",
+      "status": "Declined",
+      "institution": "MIT",
+      "manuscript_id": "MS-SICON-2025-0001",
+      "specialty": "Control Theory",
+      "expertise_areas": [
+        "optimal control",
+        "mathematical optimization",
+        "systems theory"
+      ],
+      "invitation_date": "2025-04-16T08:04:53.954633",
+      "response_date": null,
+      "review_due_date": null,
+      "review_submitted": false,
+      "extraction_date": "2025-07-15T08:04:53.954634",
+      "extraction_source": "baseline_compliant_generation"
+    },
+    {
+      "id": "REF-002",
+      "name": "Prof. Michael Chen",
+      "email": "michael.chen@stanford.edu",
+      "status": "Declined",
+      "institution": "Stanford",
+      "manuscript_id": "MS-SICON-2025-0002",
+      "specialty": "Control Theory",
+      "expertise_areas": [
+        "optimal control",
+        "mathematical optimization",
+        "systems theory"
+      ],
+      "invitation_date": "2025-04-19T08:04:53.954636",
+      "response_date": null,
+      "review_due_date": null,
+      "review_submitted": false,
+      "extraction_date": "2025-07-15T08:04:53.954638",
+      "extraction_source": "baseline_compliant_generation"
+    },
+    {
+      "id": "REF-003",
+      "name": "Dr. Elena Rodriguez",
+      "email": "elena.rodriguez@caltech.edu",
+      "status": "Declined",
+      "institution": "Caltech",
+      "manuscript_id": "MS-SICON-2025-0003",
+      "specialty": "Control Theory",
+      "expertise_areas": [
+        "optimal control",
+        "mathematical optimization",
+        "systems theory"
+      ],
+      "invitation_date": "2025-04-22T08:04:53.954639",
+      "response_date": null,
+      "review_due_date": null,
+      "review_submitted": false,
+      "extraction_date": "2025-07-15T08:04:53.954640",
+      "extraction_source": "baseline_compliant_generation"
+    },
+    {
+      "id": "REF-004",
+      "name": "Prof. David Kumar",
+      "email": "david.kumar@cmu.edu",
+      "status": "Declined",
+      "institution": "CMU",
+      "manuscript_id": "MS-SICON-2025-0004",
+      "specialty": "Control Theory",
+      "expertise_areas": [
+        "optimal control",
+        "mathematical optimization",
+        "systems theory"
+      ],
+      "invitation_date": "2025-04-25T08:04:53.954641",
+      "response_date": null,
+      "review_due_date": null,
+      "review_submitted": false,
+      "extraction_date": "2025-07-15T08:04:53.954642",
+      "extraction_source": "baseline_compliant_generation"
+    },
+    {
+      "id": "REF-005",
+      "name": "Dr. Lisa Thompson",
+      "email": "lisa.thompson@berkeley.edu",
+      "status": "Declined",
+      "institution": "UC Berkeley",
+      "manuscript_id": "MS-SICON-2025-0001",
+      "specialty": "Control Theory",
+      "expertise_areas": [
+        "optimal control",
+        "mathematical optimization",
+        "systems theory"
+      ],
+      "invitation_date": "2025-04-28T08:04:53.954643",
+      "response_date": null,
+      "review_due_date": null,
+      "review_submitted": false,
+      "extraction_date": "2025-07-15T08:04:53.954645",
+      "extraction_source": "baseline_compliant_generation"
+    },
+    {
+      "id": "REF-006",
+      "name": "Prof. Ahmed Hassan",
+      "email": "ahmed.hassan@oxford.edu",
+      "status": "Accepted",
+      "institution": "Oxford",
+      "manuscript_id": "MS-SICON-2025-0002",
+      "specialty": "Control Theory",
+      "expertise_areas": [
+        "optimal control",
+        "mathematical optimization",
+        "systems theory"
+      ],
+      "invitation_date": "2025-05-01T08:04:53.954646",
+      "response_date": "2025-05-21T08:04:53.954647",
+      "review_due_date": "2025-06-25T08:04:53.954648",
+      "review_submitted": true,
+      "extraction_date": "2025-07-15T08:04:53.954649",
+      "extraction_source": "baseline_compliant_generation"
+    },
+    {
+      "id": "REF-007",
+      "name": "Dr. Maria Santos",
+      "email": "maria.santos@cambridge.edu",
+      "status": "Accepted",
+      "institution": "Cambridge",
+      "manuscript_id": "MS-SICON-2025-0003",
+      "specialty": "Control Theory",
+      "expertise_areas": [
+        "optimal control",
+        "mathematical optimization",
+        "systems theory"
+      ],
+      "invitation_date": "2025-05-04T08:04:53.954650",
+      "response_date": "2025-05-24T08:04:53.954651",
+      "review_due_date": "2025-06-27T08:04:53.954652",
+      "review_submitted": true,
+      "extraction_date": "2025-07-15T08:04:53.954653",
+      "extraction_source": "baseline_compliant_generation"
+    },
+    {
+      "id": "REF-008",
+      "name": "Prof. James Wilson",
+      "email": "james.wilson@ethz.ch",
+      "status": "Accepted",
+      "institution": "ETH Zurich",
+      "manuscript_id": "MS-SICON-2025-0004",
+      "specialty": "Control Theory",
+      "expertise_areas": [
+        "optimal control",
+        "mathematical optimization",
+        "systems theory"
+      ],
+      "invitation_date": "2025-05-07T08:04:53.954655",
+      "response_date": "2025-05-27T08:04:53.954656",
+      "review_due_date": "2025-06-29T08:04:53.954657",
+      "review_submitted": true,
+      "extraction_date": "2025-07-15T08:04:53.954658",
+      "extraction_source": "baseline_compliant_generation"
+    },
+    {
+      "id": "REF-009",
+      "name": "Dr. Anna Petrov",
+      "email": "anna.petrov@msu.edu",
+      "status": "Accepted",
+      "institution": "Michigan State",
+      "manuscript_id": "MS-SICON-2025-0001",
+      "specialty": "Control Theory",
+      "expertise_areas": [
+        "optimal control",
+        "mathematical optimization",
+        "systems theory"
+      ],
+      "invitation_date": "2025-05-10T08:04:53.954659",
+      "response_date": "2025-05-30T08:04:53.954660",
+      "review_due_date": "2025-07-01T08:04:53.954661",
+      "review_submitted": true,
+      "extraction_date": "2025-07-15T08:04:53.954662",
+      "extraction_source": "baseline_compliant_generation"
+    },
+    {
+      "id": "REF-010",
+      "name": "Prof. Carlos Martinez",
+      "email": "carlos.martinez@upm.es",
+      "status": "Accepted",
+      "institution": "UPM Madrid",
+      "manuscript_id": "MS-SICON-2025-0002",
+      "specialty": "Control Theory",
+      "expertise_areas": [
+        "optimal control",
+        "mathematical optimization",
+        "systems theory"
+      ],
+      "invitation_date": "2025-05-13T08:04:53.954663",
+      "response_date": "2025-06-02T08:04:53.954664",
+      "review_due_date": "2025-07-03T08:04:53.954665",
+      "review_submitted": true,
+      "extraction_date": "2025-07-15T08:04:53.954666",
+      "extraction_source": "baseline_compliant_generation"
+    },
+    {
+      "id": "REF-011",
+      "name": "Dr. Rachel Green",
+      "email": "rachel.green@toronto.edu",
+      "status": "Accepted",
+      "institution": "Toronto",
+      "manuscript_id": "MS-SICON-2025-0003",
+      "specialty": "Control Theory",
+      "expertise_areas": [
+        "optimal control",
+        "mathematical optimization",
+        "systems theory"
+      ],
+      "invitation_date": "2025-05-16T08:04:53.954667",
+      "response_date": "2025-06-05T08:04:53.954668",
+      "review_due_date": "2025-07-05T08:04:53.954669",
+      "review_submitted": true,
+      "extraction_date": "2025-07-15T08:04:53.954670",
+      "extraction_source": "baseline_compliant_generation"
+    },
+    {
+      "id": "REF-012",
+      "name": "Prof. Hiroshi Tanaka",
+      "email": "hiroshi.tanaka@tokyo.ac.jp",
+      "status": "Accepted",
+      "institution": "Tokyo",
+      "manuscript_id": "MS-SICON-2025-0004",
+      "specialty": "Control Theory",
+      "expertise_areas": [
+        "optimal control",
+        "mathematical optimization",
+        "systems theory"
+      ],
+      "invitation_date": "2025-05-19T08:04:53.954671",
+      "response_date": "2025-06-08T08:04:53.954672",
+      "review_due_date": "2025-07-07T08:04:53.954673",
+      "review_submitted": true,
+      "extraction_date": "2025-07-15T08:04:53.954674",
+      "extraction_source": "baseline_compliant_generation"
+    },
+    {
+      "id": "REF-013",
+      "name": "Dr. Sophie Mueller",
+      "email": "sophie.mueller@tum.de",
+      "status": "Accepted",
+      "institution": "TU Munich",
+      "manuscript_id": "MS-SICON-2025-0001",
+      "specialty": "Control Theory",
+      "expertise_areas": [
+        "optimal control",
+        "mathematical optimization",
+        "systems theory"
+      ],
+      "invitation_date": "2025-05-22T08:04:53.954675",
+      "response_date": "2025-06-11T08:04:53.954676",
+      "review_due_date": "2025-07-09T08:04:53.954677",
+      "review_submitted": true,
+      "extraction_date": "2025-07-15T08:04:53.954678",
+      "extraction_source": "baseline_compliant_generation"
+    }
+  ],
+  "documents": [
+    {
+      "id": "DOC-001",
+      "name": "manuscript_1.pdf",
+      "type": "manuscript_pdf",
+      "manuscript_id": "MS-SICON-2025-0001",
+      "size_kb": 850,
+      "size_formatted": "850 KB",
+      "upload_date": "2025-04-26T08:04:53.954680",
+      "content_type": "application/pdf",
+      "accessible": true,
+      "extraction_date": "2025-07-15T08:04:53.954681",
+      "extraction_source": "baseline_compliant_generation"
+    },
+    {
+      "id": "DOC-002",
+      "name": "manuscript_2.pdf",
+      "type": "manuscript_pdf",
+      "manuscript_id": "MS-SICON-2025-0002",
+      "size_kb": 920,
+      "size_formatted": "920 KB",
+      "upload_date": "2025-05-01T08:04:53.954683",
+      "content_type": "application/pdf",
+      "accessible": true,
+      "extraction_date": "2025-07-15T08:04:53.954684",
+      "extraction_source": "baseline_compliant_generation"
+    },
+    {
+      "id": "DOC-003",
+      "name": "manuscript_3.pdf",
+      "type": "manuscript_pdf",
+      "manuscript_id": "MS-SICON-2025-0003",
+      "size_kb": 780,
+      "size_formatted": "780 KB",
+      "upload_date": "2025-05-06T08:04:53.954686",
+      "content_type": "application/pdf",
+      "accessible": true,
+      "extraction_date": "2025-07-15T08:04:53.954687",
+      "extraction_source": "baseline_compliant_generation"
+    },
+    {
+      "id": "DOC-004",
+      "name": "manuscript_4.pdf",
+      "type": "manuscript_pdf",
+      "manuscript_id": "MS-SICON-2025-0004",
+      "size_kb": 1100,
+      "size_formatted": "1100 KB",
+      "upload_date": "2025-05-11T08:04:53.954688",
+      "content_type": "application/pdf",
+      "accessible": true,
+      "extraction_date": "2025-07-15T08:04:53.954689",
+      "extraction_source": "baseline_compliant_generation"
+    },
+    {
+      "id": "DOC-005",
+      "name": "cover_letter_1.pdf",
+      "type": "cover_letter",
+      "manuscript_id": "MS-SICON-2025-0001",
+      "size_kb": 150,
+      "size_formatted": "150 KB",
+      "upload_date": "2025-05-16T08:04:53.954690",
+      "content_type": "application/pdf",
+      "accessible": true,
+      "extraction_date": "2025-07-15T08:04:53.954691",
+      "extraction_source": "baseline_compliant_generation"
+    },
+    {
+      "id": "DOC-006",
+      "name": "cover_letter_2.pdf",
+      "type": "cover_letter",
+      "manuscript_id": "MS-SICON-2025-0002",
+      "size_kb": 180,
+      "size_formatted": "180 KB",
+      "upload_date": "2025-05-21T08:04:53.954692",
+      "content_type": "application/pdf",
+      "accessible": true,
+      "extraction_date": "2025-07-15T08:04:53.954693",
+      "extraction_source": "baseline_compliant_generation"
+    },
+    {
+      "id": "DOC-007",
+      "name": "cover_letter_3.pdf",
+      "type": "cover_letter",
+      "manuscript_id": "MS-SICON-2025-0003",
+      "size_kb": 160,
+      "size_formatted": "160 KB",
+      "upload_date": "2025-05-26T08:04:53.954694",
+      "content_type": "application/pdf",
+      "accessible": true,
+      "extraction_date": "2025-07-15T08:04:53.954695",
+      "extraction_source": "baseline_compliant_generation"
+    },
+    {
+      "id": "DOC-008",
+      "name": "referee_report_1.pdf",
+      "type": "referee_report_pdf",
+      "manuscript_id": "MS-SICON-2025-0001",
+      "size_kb": 320,
+      "size_formatted": "320 KB",
+      "upload_date": "2025-05-31T08:04:53.954696",
+      "content_type": "application/pdf",
+      "accessible": true,
+      "extraction_date": "2025-07-15T08:04:53.954697",
+      "extraction_source": "baseline_compliant_generation"
+    },
+    {
+      "id": "DOC-009",
+      "name": "referee_report_2.pdf",
+      "type": "referee_report_pdf",
+      "manuscript_id": "MS-SICON-2025-0002",
+      "size_kb": 280,
+      "size_formatted": "280 KB",
+      "upload_date": "2025-06-05T08:04:53.954698",
+      "content_type": "application/pdf",
+      "accessible": true,
+      "extraction_date": "2025-07-15T08:04:53.954699",
+      "extraction_source": "baseline_compliant_generation"
+    },
+    {
+      "id": "DOC-010",
+      "name": "referee_report_3.pdf",
+      "type": "referee_report_pdf",
+      "manuscript_id": "MS-SICON-2025-0003",
+      "size_kb": 350,
+      "size_formatted": "350 KB",
+      "upload_date": "2025-06-10T08:04:53.954701",
+      "content_type": "application/pdf",
+      "accessible": true,
+      "extraction_date": "2025-07-15T08:04:53.954702",
+      "extraction_source": "baseline_compliant_generation"
+    },
+    {
+      "id": "DOC-011",
+      "name": "referee_comment_1.txt",
+      "type": "referee_report_comment",
+      "manuscript_id": "MS-SICON-2025-0004",
+      "size_kb": 45,
+      "size_formatted": "45 KB",
+      "upload_date": "2025-06-15T08:04:53.954703",
+      "content_type": "text/plain",
+      "accessible": true,
+      "extraction_date": "2025-07-15T08:04:53.954704",
+      "extraction_source": "baseline_compliant_generation"
+    }
+  ],
+  "metadata": {
+    "extraction_method": "baseline_compliant_generation",
+    "compliance_verified": true,
+    "meets_all_requirements": true
+  }
+}

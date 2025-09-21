@@ -22,7 +22,7 @@
 ```
 Platform Distribution:
 - ScholarOne:  MF, MOR
-- SIAM:        SICON, SIFIN  
+- SIAM:        SICON, SIFIN
 - Springer:    JOTA, MAFE
 - Email-based: FS (Finance & Stochastics)
 - Unknown:     NACO
@@ -110,19 +110,19 @@ class ScholarOneExtractor(ABC):
     def __init__(self, journal_code: str):
         self.browser = BrowserManager()
         self.credentials = CredentialManager()
-        
+
     def login(self) -> bool:
         # Email/password + 2FA via Gmail
-        
+
     def navigate_to_ae_center(self):
         # Standard AE navigation
-        
+
     def get_manuscript_categories(self) -> List[dict]:
         # Category extraction
-        
+
     def extract_popup_email(self, popup_url) -> str:
         # JavaScript popup email extraction
-        
+
     @abstractmethod
     def get_login_url(self) -> str:
         pass
@@ -136,16 +136,16 @@ class SIAMExtractor(ABC):
     def __init__(self, journal_code: str):
         self.browser = BrowserManager()
         self.orcid_auth = ORCIDAuthManager()
-        
+
     def login(self) -> bool:
         # ORCID OAuth flow
-        
+
     def navigate_to_dashboard(self):
         # SIAM-specific navigation
-        
+
     def extract_submission_data(self) -> List[dict]:
         # SIAM data structure
-        
+
     @abstractmethod
     def get_journal_url(self) -> str:
         pass
@@ -159,13 +159,13 @@ class SpringerExtractor(ABC):
     def __init__(self, journal_code: str):
         self.browser = BrowserManager()
         self.credentials = CredentialManager()
-        
+
     def login(self) -> bool:
         # Springer authentication
-        
+
     def navigate_to_editor_main(self):
         # Editorial Manager navigation
-        
+
     def extract_manuscript_table(self) -> List[dict]:
         # Table-based data extraction
 ```
@@ -178,13 +178,13 @@ class EmailBasedExtractor(ABC):
     def __init__(self, journal_code: str):
         self.gmail = GmailManager()
         self.parser = EmailParser()
-        
+
     def connect_gmail(self) -> bool:
         # Gmail API connection
-        
+
     def fetch_editorial_emails(self) -> List[Message]:
         # Query editorial emails
-        
+
     def parse_submission_from_email(self, email) -> dict:
         # Extract data from email content
 ```
@@ -197,10 +197,10 @@ class GenericExtractor(ABC):
     def __init__(self, config: dict):
         self.config = config
         self.browser = BrowserManager() if config.get('web_based') else None
-        
+
     def authenticate(self) -> bool:
         # Configurable auth
-        
+
     def extract_data(self) -> List[dict]:
         # Flexible extraction based on config
 ```
@@ -214,13 +214,13 @@ class GenericExtractor(ABC):
 class EmailExtractor:
     def __init__(self, browser_manager):
         self.browser = browser_manager
-        
+
     def extract_from_popup(self, popup_url) -> str:
         # Consolidated popup email logic
-        
+
     def extract_from_mailto(self, element) -> str:
         # Mailto link extraction
-        
+
     def validate_email(self, email) -> bool:
         # Email validation
 ```
@@ -232,10 +232,10 @@ class RefereeExtractor:
     def __init__(self, browser_manager, email_extractor):
         self.browser = browser_manager
         self.email_extractor = email_extractor
-        
+
     def extract_referees(self, manuscript_id) -> List[dict]:
         # Referee extraction logic
-        
+
     def extract_referee_reports(self, referee) -> dict:
         # Report extraction
 ```
@@ -251,10 +251,10 @@ from src.platforms.scholarone import ScholarOneExtractor
 class MFExtractorV2(ScholarOneExtractor):
     def __init__(self):
         super().__init__(journal_code='MF')
-        
+
     def get_login_url(self) -> str:
         return "https://mc.manuscriptcentral.com/mafi"
-        
+
     def extract_all(self):
         # Use base class methods
         self.login()
@@ -268,10 +268,10 @@ class MFExtractorV2(ScholarOneExtractor):
 def validate_extraction_parity():
     old_extractor = ComprehensiveMFExtractor()
     new_extractor = MFExtractorV2()
-    
+
     old_results = old_extractor.extract_all()
     new_results = new_extractor.extract_all()
-    
+
     assert_data_parity(old_results, new_results)
 ```
 
@@ -328,7 +328,7 @@ tests/
 
 #### Week 1: Core Infrastructure
 - [ ] Extract BrowserManager
-- [ ] Extract CredentialManager  
+- [ ] Extract CredentialManager
 - [ ] Extract DownloadManager
 - [ ] Create test framework
 
@@ -401,7 +401,7 @@ tests/
 1. **MF** - Fix referee emails, migrate to framework
 2. **MOR** - Migrate to framework, maintain functionality
 
-### Priority 2: SIAM Journals (Weeks 5-6)  
+### Priority 2: SIAM Journals (Weeks 5-6)
 3. **SICON** - SIAM Control and Optimization
 4. **SIFIN** - SIAM Financial Mathematics
 
@@ -486,7 +486,7 @@ After Refactoring:
 ---
 
 **Estimated Effort:** 10 weeks (1 developer) for all 8 extractors
-**Complexity Reduction:** 85% 
+**Complexity Reduction:** 85%
 **Code Reduction:** 70% (16,000 → 5,000 lines)
 **Maintainability Increase:** 10x
 **Risk Level:** Low (parallel development, incremental migration)

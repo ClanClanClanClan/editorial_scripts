@@ -68,7 +68,7 @@ except ImportError:
                 return None
             return wrapper
         return decorator
-    
+
     def safe_execute(self, operation: Callable, operation_name: str, default_value=None, critical=False):
         """Safely execute an operation with error handling."""
         try:
@@ -98,24 +98,24 @@ except ImportError:
             if critical:
                 raise Exception(f"Critical operation failed: {error_msg}")
             return default_value
-    
+
     def get_email_from_popup_safe(self, popup_url):
         """Safe version of email extraction with comprehensive error handling."""
         if not popup_url or 'mailpopup' not in popup_url:
             return ""
-        
+
         original_window = self.driver.current_window_handle
         popup_window = None
-        
+
         try:
             # Open popup with timeout
             self.driver.execute_script(f"window.open('{popup_url}', 'popup', 'width=600,height=400')")
-            
+
             # Wait for popup window
             self.wait.until(lambda driver: len(driver.window_handles) > 1)
             popup_window = [w for w in self.driver.window_handles if w != original_window][0]
             self.driver.switch_to.window(popup_window)
-            
+
             # Wait for content with extended timeout for slow popups
             try:
                 WebDriverWait(self.driver, 15).until(
@@ -124,15 +124,15 @@ except ImportError:
             except TimeoutException:
                 print(f"   ⏱️ Popup content timeout for {popup_url[:50]}...")
                 return ""
-            
+
             # Extract email with multiple strategies
             email = ""
-            
+
             # Strategy 1: Look for email in popup body
             try:
                 body = self.driver.find_element(By.TAG_NAME, "body")
                 body_text = body.text
-                
+
                 # Extract email pattern
                 import re
                 email_pattern = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
@@ -142,7 +142,7 @@ except ImportError:
                     print(f"   ✅ Email found via text pattern: {email}")
             except Exception as e:
                 print(f"   ⚠️ Text pattern extraction failed: {e}")
-            
+
             # Strategy 2: Look for email in specific elements
             if not email:
                 try:
@@ -159,9 +159,9 @@ except ImportError:
                             continue
                 except Exception as e:
                     print(f"   ⚠️ Selector extraction failed: {e}")
-            
+
             return email
-            
+
         except Exception as e:
             print(f"   ❌ Popup extraction failed: {e}")
             return ""
@@ -179,44 +179,44 @@ class ComprehensiveMFExtractor:
     def __init__(self):
         self.manuscripts = []
         self.processed_manuscript_ids = set()  # Track processed manuscripts to avoid duplicates
-        
+
         # Load credentials securely
         self._setup_secure_credentials()
-        
+
         # Set up download directory relative to project root (not current working directory)
         self.project_root = Path(__file__).parent.parent
         self.download_dir = self.project_root / "downloads"
         self.enricher = AcademicProfileEnricher()  # Initialize ORCID enricher
         self.setup_driver()
-    
+
     def _setup_secure_credentials(self):
         """Load credentials from secure storage."""
         try:
             from secure_credentials import SecureCredentialManager
             credential_manager = SecureCredentialManager()
-            
+
             # Try to load existing credentials
             if credential_manager.setup_environment():
                 print("✅ Credentials loaded from secure storage")
                 return
-            
+
             # If no credentials found, prompt to store them
             print("🔐 No stored credentials found. Setting up secure storage...")
             if credential_manager.store_credentials():
                 if credential_manager.setup_environment():
                     print("✅ Credentials stored and loaded successfully")
                     return
-            
+
             # Fallback to environment variables
             print("⚠️ Falling back to environment variables...")
             if not os.getenv('MF_EMAIL') or not os.getenv('MF_PASSWORD'):
                 raise Exception("No credentials available. Please run: python3 secure_credentials.py store")
-                
+
         except ImportError:
             print("⚠️ Secure credential system not available, using environment variables...")
             if not os.getenv('MF_EMAIL') or not os.getenv('MF_PASSWORD'):
                 raise Exception("Please set MF_EMAIL and MF_PASSWORD environment variables")
-        
+
     def get_download_dir(self, subdir=""):
         """Get download directory path, ensuring it exists."""
         if subdir:
@@ -234,7 +234,7 @@ class ComprehensiveMFExtractor:
         # Run in headful mode for debugging
         # chrome_options.add_argument('--headless')  # Commented out for debugging
         self.driver = webdriver.Chrome(options=chrome_options)
-    
+
     def wait_for_element(self, by, value, timeout=10):
         """Wait for element and return it."""
         try:
@@ -243,65 +243,65 @@ class ComprehensiveMFExtractor:
             )
         except:
             return None
-    
+
     def login(self):
         """Login to MF platform."""
         print("🔐 Logging in...")
         self.driver.get("https://mc.manuscriptcentral.com/mafi")
         time.sleep(3)
-        
+
         # Handle cookie banner
         try:
             self.driver.find_element(By.ID, "onetrust-reject-all-handler").click()
         except:
             pass
-        
+
         # Login
         self.driver.find_element(By.ID, "USERID").send_keys(os.getenv('MF_EMAIL'))
         self.driver.find_element(By.ID, "PASSWORD").send_keys(os.getenv('MF_PASSWORD'))
         self.driver.execute_script("document.getElementById('logInButton').click();")
         time.sleep(3)
-        
+
         # Handle 2FA
         try:
             token_field = self.driver.find_element(By.ID, "TOKEN_VALUE")
             print("   📱 2FA required...")
-            
+
             # Record the exact time when 2FA starts - this is when the email will be sent
             login_start_time = time.time()
             print(f"   ⏰ Login timestamp: {datetime.fromtimestamp(login_start_time).strftime('%H:%M:%S')}")
-            
+
             # Wait for the verification email to be sent and arrive
             print("   📧 Waiting for verification email to arrive...")
             time.sleep(15)  # Give email service more time to send and deliver
-            
+
             # Try to fetch verification code with timestamp filtering
             code = None
-            
+
             try:
                 sys.path.insert(0, str(Path(__file__).parent.parent))
                 from core.gmail_verification_wrapper import fetch_latest_verification_code
                 print("   🔍 Fetching RECENT verification code from Gmail...")
                 code = fetch_latest_verification_code('MF', max_wait=45, poll_interval=3, start_timestamp=login_start_time)
-                
+
                 # Additional validation - make sure we got a fresh code
                 if code and len(code) == 6 and code.isdigit():
                     print(f"   ✅ Found fresh verification code: {code[:3]}***")
                 else:
                     print(f"   ⚠️ Invalid code format: {code}")
                     code = None
-                    
+
             except Exception as e:
                 print(f"   ❌ Gmail fetch failed: {e}")
                 code = None
-            
+
             if code:
                 print(f"   🔑 Entering verification code...")
                 token_field.clear()
                 token_field.send_keys(code)
                 self.driver.find_element(By.ID, "VERIFY_BTN").click()
                 time.sleep(8)
-                
+
                 # Check if 2FA succeeded by seeing if we're still on the verification page
                 try:
                     still_on_2fa = self.driver.find_element(By.ID, "TOKEN_VALUE")
@@ -309,7 +309,7 @@ class ComprehensiveMFExtractor:
                     return False
                 except:
                     print("   ✅ 2FA successful - moved past verification page")
-                
+
                 # Handle device verification modal if it appears
                 try:
                     modal = self.driver.find_element(By.ID, "unrecognizedDeviceModal")
@@ -320,9 +320,9 @@ class ComprehensiveMFExtractor:
                         time.sleep(3)
                 except:
                     pass
-                    
+
                 return True
-                
+
             else:
                 print("   ❌ Could not fetch verification code from Gmail")
                 print("   💡 Possible issues:")
@@ -330,73 +330,73 @@ class ComprehensiveMFExtractor:
                 print("      - No recent verification email received")
                 print("      - Email delivery delay")
                 return False
-                
+
         except Exception as e:
             print(f"   ❌ 2FA error: {e}")
             return False
-    
+
     def get_manuscript_categories(self):
         """Get all manuscript categories with counts."""
         print("\n📊 Finding manuscript categories...")
-        
+
         categories = []
-        
+
         # Categories to check (excluding "Manuscripts Awaiting Revision" section)
         category_names = [
             "Awaiting Reviewer Selection",
-            "Awaiting Reviewer Invitation", 
+            "Awaiting Reviewer Invitation",
             "Awaiting Reviewer Assignment",
             "Awaiting Reviewer Scores",
             "Overdue Reviewer Scores",
             "Awaiting AE Recommendation"
         ]
-        
+
         # First, let's see what's actually on the page (debug)
         if not categories:  # Only do this debug on first run
             all_links = self.driver.find_elements(By.TAG_NAME, "a")
             link_texts = [link.text.strip() for link in all_links if link.text.strip()]
             print(f"   📊 Debug: Found {len(link_texts)} text links on page")
-            
+
             # Look for manuscript-related links
             manuscript_links = [text for text in link_texts if any(word in text.lower() for word in ['manuscript', 'review', 'await', 'score', 'submission'])]
             if manuscript_links:
                 print(f"   📝 Manuscript-related links found: {manuscript_links[:10]}")
-        
+
         for category_name in category_names:
             try:
                 # Try multiple methods to find the category
                 category_link = None
-                
+
                 # Method 1: Exact text match
                 try:
                     category_link = self.driver.find_element(By.XPATH, f"//a[text()='{category_name}']")
                 except:
                     pass
-                
+
                 # Method 2: Contains text
                 if not category_link:
                     try:
                         category_link = self.driver.find_element(By.XPATH, f"//a[contains(text(), '{category_name}')]")
                     except:
                         pass
-                
+
                 # Method 3: Normalize spaces and try again
                 if not category_link:
                     try:
                         category_link = self.driver.find_element(By.XPATH, f"//a[normalize-space(text())='{category_name}']")
                     except:
                         pass
-                
+
                 if not category_link:
                     continue  # Skip this category
-                
+
                 # Find the row containing this link
                 row = category_link.find_element(By.XPATH, "./ancestor::tr[1]")
-                
+
                 # Get count - try multiple patterns
                 count = 0
                 count_found = False
-                
+
                 # Pattern 1: <b> tag with number in pagecontents
                 try:
                     count_elem = row.find_element(By.XPATH, ".//p[@class='pagecontents']/b")
@@ -409,7 +409,7 @@ class ComprehensiveMFExtractor:
                     count_found = True
                 except:
                     pass
-                
+
                 # Pattern 2: Any <b> tag with number
                 if not count_found:
                     try:
@@ -422,7 +422,7 @@ class ComprehensiveMFExtractor:
                                 break
                     except:
                         pass
-                
+
                 # Pattern 3: Number in parentheses
                 if not count_found:
                     try:
@@ -434,29 +434,29 @@ class ComprehensiveMFExtractor:
                             count_found = True
                     except:
                         pass
-                
+
                 categories.append({
                     'name': category_name,
                     'count': count,
                     'link': category_link
                 })
-                
+
                 if count > 0:
                     print(f"   ✓ {category_name}: {count} manuscripts")
                 else:
                     print(f"   - {category_name}: 0 manuscripts")
-                        
+
             except Exception as e:
                 # Only show error if it's not a "not found" error
                 if "no such element" not in str(e).lower():
                     print(f"   ⚠️ Error with {category_name}: {type(e).__name__}")
-        
+
         return categories
-    
+
     def extract_manuscript_details(self, manuscript_id):
         """Extract comprehensive manuscript details."""
         print(f"\n📄 Extracting details for {manuscript_id}...")
-        
+
         manuscript = {
             'id': manuscript_id,
             'title': '',
@@ -472,11 +472,11 @@ class ComprehensiveMFExtractor:
             'editors': {},
             'documents': {}
         }
-        
+
         try:
             # Extract from main info table
             info_table = self.driver.find_element(By.XPATH, "//td[@class='headerbg2']//table")
-            
+
             # Title - extract from td colspan="2" containing the title
             try:
                 title_elem = info_table.find_element(By.XPATH, ".//tr[2]/td[@colspan='2']/p[@class='pagecontents']")
@@ -489,7 +489,7 @@ class ComprehensiveMFExtractor:
                     if len(text) > 30 and 'Original Article' not in text and 'special issue:' not in text.lower():
                         manuscript['title'] = text
                         break
-            
+
             # Dates
             date_cells = info_table.find_elements(By.XPATH, ".//p[@class='footer']")
             for cell in date_cells:
@@ -500,36 +500,36 @@ class ComprehensiveMFExtractor:
                     manuscript['last_updated'] = text.replace('Last Updated:', '').strip().rstrip(';')
                 elif 'In Review:' in text:
                     manuscript['in_review_time'] = text.replace('In Review:', '').strip()
-            
+
             # Status
             status_elem = info_table.find_element(By.XPATH, ".//font[@color='green']")
             if status_elem:
                 status_text = status_elem.text
                 manuscript['status'] = status_text.split('(')[0].strip()
-                
+
                 # Extract status details (e.g., "2 active selections; 2 invited...")
                 details_elem = status_elem.find_element(By.XPATH, ".//span[@class='footer']")
                 if details_elem:
                     manuscript['status_details'] = details_elem.text.strip()
-            
+
             # Authors - extract from the specific author row (3rd row with bullet point)
             try:
                 # Find the row with authors (has bullet and contains mailpopup links)
                 author_row = info_table.find_element(By.XPATH, ".//tr[3]/td[@colspan='2']/p[@class='pagecontents']")
                 author_text = author_row.text.strip()
-                
+
                 # Parse author text like "Zhang, Panpan (contact); Wang, Guangchen; Xu, Zuo Quan"
                 if ';' in author_text or '(contact)' in author_text:
                     # Split by semicolon to get individual authors
                     author_parts = author_text.split(';')
-                    
+
                     for part in author_parts:
                         part = part.strip()
                         if part:
                             is_contact = '(contact)' in part
                             # Remove "(contact)" to get clean name
                             clean_name = part.replace('(contact)', '').strip()
-                            
+
                             manuscript['authors'].append({
                                 'name': self.normalize_name(clean_name),
                                 'is_corresponding': is_contact,
@@ -544,14 +544,14 @@ class ComprehensiveMFExtractor:
                         'is_corresponding': is_contact,
                         'email': self.get_email_from_popup(author_link['href']) if author_link and 'href' in author_link.attrs else ''  # Extract author email
                     })
-                    
+
             except Exception as e:
                 print(f"   ❌ Error extracting authors: {e}")
                 # Fallback to old method
                 author_links = info_table.find_elements(By.XPATH, ".//a[contains(@href, 'mailpopup')]")
                 editor_names = ['Possamai', 'Cont', 'Chandni']
                 referee_names = ['Liang', 'Strub', 'Mrad', 'Reis']
-                
+
                 for link in author_links:
                     name = link.text.strip()
                     if name and not any(ed_name in name for ed_name in editor_names + referee_names):
@@ -562,13 +562,13 @@ class ComprehensiveMFExtractor:
                                 is_contact = True
                         except:
                             pass
-                        
+
                         manuscript['authors'].append({
                             'name': self.normalize_name(name),
                             'is_corresponding': is_contact,
                             'email': self.get_email_from_popup(author_link['href']) if author_link and 'href' in author_link.attrs else ''  # Extract author email
                         })
-            
+
             # Article type and special issue
             type_elems = info_table.find_elements(By.XPATH, ".//p[@class='pagecontents']")
             for elem in type_elems:
@@ -577,7 +577,7 @@ class ComprehensiveMFExtractor:
                     manuscript['article_type'] = text
                 elif 'special issue:' in text.lower():
                     manuscript['special_issue'] = text.split(':')[1].strip()
-            
+
             # Editors (AE, EIC, CO, ADM)
             editor_section = info_table.find_element(By.XPATH, ".//nobr[contains(text(), 'AE:')]/parent::p/parent::td")
             editor_lines = editor_section.find_elements(By.XPATH, ".//nobr")
@@ -599,34 +599,34 @@ class ComprehensiveMFExtractor:
                             'name': name.strip(),
                             'email': ''  # No link available
                         }
-            
+
         except Exception as e:
             print(f"   ❌ Error extracting info: {e}")
-        
+
         # Extract referees
         self.extract_referees_comprehensive(manuscript)
-        
+
         # Enrich referee profiles with ORCID data
         self.enrich_referee_profiles(manuscript)
-        
+
         # Extract documents
         self.extract_document_links(manuscript)
-        
-        
+
+
         # Extract additional fields
         self.extract_abstract(manuscript)
         self.extract_keywords(manuscript)
         self.extract_author_affiliations(manuscript)
         self.extract_doi(manuscript)
-        
+
         # Extract enhanced data from manuscript details page
         self.extract_manuscript_details_page(manuscript)
-        
+
         # Extract communication timeline from audit trail
         self.extract_audit_trail(manuscript)
-        
+
         return manuscript
-    
+
     def normalize_name(self, name):
         """Convert 'Last, First' to 'First Last'."""
         name = name.strip()
@@ -634,24 +634,24 @@ class ComprehensiveMFExtractor:
             parts = name.split(',', 1)
             return f"{parts[1].strip()} {parts[0].strip()}"
         return name
-    
+
     def infer_country_from_web_search(self, institution_name):
         """Infer country from institution name using web search."""
         if not institution_name:
             return None
-            
+
         try:
             import requests
             from time import sleep
-            
+
             # Clean institution name for search
             search_query = f"{institution_name} university location country"
-            
+
             # Use a simple web search approach (could be enhanced with dedicated APIs)
             headers = {
                 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36'
             }
-            
+
             # Try DuckDuckGo instant answer API first (no API key needed)
             try:
                 ddg_url = f"https://api.duckduckgo.com/?q={search_query}&format=json&no_html=1&skip_disambig=1"
@@ -659,7 +659,7 @@ class ComprehensiveMFExtractor:
                 if response.status_code == 200:
                     data = response.json()
                     abstract = data.get('Abstract', '').lower()
-                    
+
                     # Look for country patterns in abstract
                     country_patterns = {
                         'united kingdom': ['uk', 'united kingdom', 'britain', 'england', 'scotland', 'wales'],
@@ -673,50 +673,50 @@ class ComprehensiveMFExtractor:
                         'italy': ['italy', 'italian'],
                         'spain': ['spain', 'spanish']
                     }
-                    
+
                     for country, patterns in country_patterns.items():
                         if any(pattern in abstract for pattern in patterns):
                             print(f"         🌍 Web search found: {institution_name} → {country}")
                             return country.title()
             except:
                 pass
-                
+
             # Fallback: Use institution name patterns and email domains
             inst_lower = institution_name.lower()
-            
+
             # Enhanced institution-based inference
             uk_patterns = ['edinburgh', 'glasgow', 'manchester', 'liverpool', 'bristol', 'leeds', 'birmingham', 'nottingham', 'sheffield', 'newcastle', 'cardiff', 'aberdeen', 'st andrews', 'durham', 'york', 'exeter', 'bath', 'lancaster', 'loughborough', 'sussex', 'kent', 'reading', 'surrey', 'leicester', 'strathclyde', 'heriot-watt', 'stirling', 'dundee', 'hull', 'plymouth', 'portsmouth', 'brighton', 'middlesex', 'greenwich', 'westminster']
-            
+
             us_patterns = ['harvard', 'mit', 'stanford', 'caltech', 'princeton', 'yale', 'columbia', 'chicago', 'penn', 'northwestern', 'duke', 'johns hopkins', 'cornell', 'brown', 'vanderbilt', 'rice', 'notre dame', 'georgetown', 'carnegie mellon', 'georgia tech', 'ucla', 'usc', 'nyu', 'boston', 'michigan', 'virginia', 'north carolina', 'washington', 'wisconsin', 'illinois', 'texas', 'florida', 'ohio state', 'arizona', 'colorado', 'oregon', 'minnesota', 'maryland', 'rutgers']
-            
+
             france_patterns = ['sorbonne', 'école normale', 'polytechnique', 'sciences po', 'paris', 'lyon', 'toulouse', 'montpellier', 'bordeaux', 'lille', 'rennes', 'nantes', 'strasbourg', 'grenoble', 'aix-marseille', 'nice', 'orleans', 'tours', 'poitiers', 'limoges', 'clermont', 'nancy', 'metz', 'reims', 'amiens', 'rouen', 'caen', 'brest', 'angers', 'le mans']
-            
+
             if any(pattern in inst_lower for pattern in uk_patterns):
                 return 'United Kingdom'
             elif any(pattern in inst_lower for pattern in us_patterns):
-                return 'United States'  
+                return 'United States'
             elif any(pattern in inst_lower for pattern in france_patterns):
                 return 'France'
-                
+
             sleep(0.1)  # Rate limiting
             return None
-            
+
         except Exception as e:
             print(f"         ⚠️ Web search error: {e}")
             return None
 
     def parse_affiliation_string(self, affiliation_string):
         """Parse affiliation string into components - ENHANCED WITH WEB SEARCH."""
-        
+
         if not affiliation_string:
             return {}
-        
+
         # Clean the string
         affiliation = affiliation_string.strip().replace('<br>', '').replace('<br/>', '')
-        
+
         # Split by comma for basic parsing
         parts = [part.strip() for part in affiliation.split(',') if part.strip()]
-        
+
         result = {
             'full_affiliation': affiliation,
             'institution': None,
@@ -725,31 +725,31 @@ class ComprehensiveMFExtractor:
             'country_hints': [],
             'city_hints': []
         }
-        
+
         if not parts:
             return result
-        
+
         # Enhanced parsing logic
         for i, part in enumerate(parts):
             part_lower = part.lower()
-            
+
             # Institution detection (usually first, or contains "university", "college", etc.)
-            if (i == 0 or 
+            if (i == 0 or
                 any(keyword in part_lower for keyword in ['university', 'college', 'institute', 'school']) and
                 not any(dept_word in part_lower for dept_word in ['department', 'faculty', 'division'])):
                 if not result['institution']:
                     result['institution'] = part
-            
+
             # Department detection
             elif any(keyword in part_lower for keyword in ['department', 'dept', 'school of', 'division']):
                 if not result['department']:
                     result['department'] = part
-            
-            # Faculty detection  
+
+            # Faculty detection
             elif 'faculty' in part_lower:
                 if not result['faculty']:
                     result['faculty'] = part
-            
+
             # City/Country hints
             elif len(part) < 20:  # Short strings might be locations
                 # Common city patterns
@@ -758,15 +758,15 @@ class ComprehensiveMFExtractor:
                 # Common country patterns
                 elif any(pattern in part_lower for pattern in ['uk', 'usa', 'france', 'germany', 'japan']):
                     result['country_hints'].append(part)
-        
+
         # If we didn't find institution in first pass, use first part
         if not result['institution'] and parts:
             result['institution'] = parts[0]
-        
+
         # Enhanced country inference: First try built-in patterns, then web search
         if result['institution'] and not result['country_hints']:
             inst_lower = result['institution'].lower()
-            
+
             # Quick built-in patterns first
             if 'warwick' in inst_lower or 'oxford' in inst_lower or 'cambridge' in inst_lower or 'edinburgh' in inst_lower:
                 result['country_hints'].append('United Kingdom')
@@ -779,24 +779,24 @@ class ComprehensiveMFExtractor:
                 web_country = self.infer_country_from_web_search(result['institution'])
                 if web_country:
                     result['country_hints'].append(web_country)
-        
+
         return result
-    
+
     def extract_referees_comprehensive(self, manuscript):
         """Extract comprehensive referee information from the referee table."""
         print("   👥 Extracting referee details...")
-        
+
         try:
             # Find referee table rows more precisely - only rows that actually have mailpopup links (actual referees)
-            referee_table_rows = self.driver.find_elements(By.XPATH, 
+            referee_table_rows = self.driver.find_elements(By.XPATH,
                 "//td[@class='tablelines']//tr[td[@class='tablelightcolor'] and .//a[contains(@href,'mailpopup')]]")
-            
+
             print(f"      Found {len(referee_table_rows)} referee rows with mailpopup links")
-            
+
             # Safety limit to prevent infinite loops
             max_referees = 50
             processed_referees = 0
-            
+
             for row_index, row in enumerate(referee_table_rows):
                 if processed_referees >= max_referees:
                     print(f"      ⚠️ Reached maximum referee limit ({max_referees}), stopping")
@@ -811,81 +811,81 @@ class ComprehensiveMFExtractor:
                         'dates': {},
                         'report': None
                     }
-                    
+
                     # Extract name from mailpopup link in second column
                     name_link = row.find_element(By.XPATH, ".//a[contains(@href,'mailpopup')]")
                     full_name = name_link.text.strip()
                     referee['name'] = self.normalize_name(full_name)
-                    
+
                     print(f"         Processing referee {processed_referees + 1}: {referee['name']}")
-                    
+
                     # Get email from popup with timeout protection
                     try:
                         referee['email'] = self.get_email_from_popup(name_link, referee['name'])
                     except Exception as e:
                         print(f"         ⚠️ Could not get email for {referee['name']}: {str(e)[:100]}")
                         # Continue processing this referee without email
-                    
+
                     # ===== ENHANCED AFFILIATION EXTRACTION =====
                     # Multiple strategies to capture referee affiliations that are "clearly visible" on MF website
                     affiliation_found = False
-                    
+
                     # Strategy 1: ROBUST - HTML structure with pagecontents spans
                     try:
                         affil_spans = row.find_elements(By.XPATH, ".//span[@class='pagecontents']")
                         print(f"         Found {len(affil_spans)} pagecontents spans for {referee['name']}")
-                        
+
                         # Enhanced logic: Look through ALL spans for institutional keywords
                         for i, span in enumerate(affil_spans):
                             span_text = span.text.strip()
                             has_links = len(span.find_elements(By.TAG_NAME, "a")) > 0
                             print(f"         Span {i}: '{span_text}' (has_links: {has_links})")
-                            
+
                             # Look for actual institutional affiliation (not just name)
-                            if (span_text and 
+                            if (span_text and
                                 span_text != referee['name'] and
                                 not has_links and
                                 len(span_text) > len(referee['name']) and
-                                any(keyword in span_text.lower() for keyword in 
+                                any(keyword in span_text.lower() for keyword in
                                     ['university', 'college', 'institute', 'school', 'department'])):
-                                
+
                                 referee['affiliation'] = span_text.split('<br>')[0].strip()
                                 affiliation_found = True
                                 print(f"         📍 Affiliation (ROBUST method): {referee['affiliation']}")
                                 break
-                        
+
                         # Legacy fallback: if 2+ spans and second span has text different from name
                         if not affiliation_found and len(affil_spans) >= 2:
                             affiliation_span = affil_spans[1]
                             affiliation_text = affiliation_span.text.strip()
-                            
-                            if (affiliation_text and 
+
+                            if (affiliation_text and
                                 affiliation_text != referee['name'] and
                                 len(affiliation_text) > 3):
-                                
+
                                 referee['affiliation'] = affiliation_text.split('<br>')[0].strip()
                                 affiliation_found = True
                                 print(f"         📍 Affiliation (legacy span method): {referee['affiliation']}")
-                            
+
                     except Exception as e:
                         print(f"         ❌ Strategy 1 error: {e}")
                         pass
-                    
+
                     # Strategy 2: DEEP ROW TEXT SEARCH - Look for institutions anywhere in row
                     if not affiliation_found:
                         try:
                             row_text = row.text
                             lines = [line.strip() for line in row_text.split('\n') if line.strip()]
                             print(f"         Row has {len(lines)} text lines")
-                            
+
                             for i, line in enumerate(lines):
                                 print(f"         Line {i+1}: '{line}'")
-                                
-                                if (line != referee['name'] and 
+
+                                if (line != referee['name'] and
                                     len(line) > len(referee['name']) and
-                                    any(keyword in line.lower() for keyword in 
+                                    any(keyword in line.lower() for keyword in
                                         ['university', 'college', 'institute', 'school', 'department', 'laboratory']) and
-                                    not any(exclude in line.lower() for exclude in 
+                                    not any(exclude in line.lower() for exclude in
                                         ['orcid', 'http', 'mailto', 'javascript', 'agreed', 'declined', 'unavailable'])):
                                     referee['affiliation'] = line.strip()
                                     affiliation_found = True
@@ -894,19 +894,19 @@ class ComprehensiveMFExtractor:
                         except Exception as e:
                             print(f"         ❌ Strategy 2 error: {e}")
                             pass
-                    
+
                     # Strategy 3: Look for separate affiliation elements
                     if not affiliation_found:
                         try:
                             affil_selectors = [
                                 ".//td[@class='tablelightcolor'][2]//div",
-                                ".//td[@class='tablelightcolor'][2]//p", 
+                                ".//td[@class='tablelightcolor'][2]//p",
                                 ".//td[@class='tablelightcolor'][2]//small",
                                 ".//td[@class='tablelightcolor'][2]//*[contains(@class,'affil')]",
                                 ".//td[@class='tablelightcolor'][2]//span[not(@class='')]",
                                 ".//td[@class='tablelightcolor'][2]//text()[normalize-space()]"
                             ]
-                            
+
                             for selector in affil_selectors:
                                 try:
                                     affil_elements = row.find_elements(By.XPATH, selector)
@@ -923,50 +923,50 @@ class ComprehensiveMFExtractor:
                                     continue
                         except:
                             pass
-                    
+
                     # Strategy 4: Parse HTML content directly
                     if not affiliation_found:
                         try:
                             name_cell = row.find_elements(By.XPATH, ".//td[@class='tablelightcolor']")[1]
                             cell_html = name_cell.get_attribute('innerHTML')
-                            
+
                             # Remove the name link HTML
                             import re
                             html_without_link = re.sub(r'<a[^>]*>.*?</a>', '', cell_html)
-                            
+
                             # Extract remaining text
                             clean_text = re.sub(r'<[^>]+>', ' ', html_without_link).strip()
                             clean_text = re.sub(r'\s+', ' ', clean_text).strip()
-                            
+
                             if clean_text and clean_text != referee['name'] and len(clean_text) > 3:
                                 referee['affiliation'] = clean_text
                                 affiliation_found = True
                                 print(f"         📍 Affiliation (method 4): {referee['affiliation']}")
                         except Exception as e:
                             pass
-                    
+
                     # Strategy 5: Check ALL table cells for affiliation data
                     if not affiliation_found:
                         try:
                             all_cells = row.find_elements(By.XPATH, ".//td[@class='tablelightcolor']")
                             print(f"         🔍 Checking all {len(all_cells)} cells for {referee['name']} affiliation...")
-                            
+
                             for cell_idx, cell in enumerate(all_cells):
                                 cell_text = cell.text.strip()
-                                if (cell_text and 
+                                if (cell_text and
                                     cell_text != referee['name'] and
                                     len(cell_text) > 5 and
                                     '@' not in cell_text and
                                     not cell_text.lower().startswith(('agreed', 'declined', 'invited', 'due')) and
                                     'university' in cell_text.lower() or 'college' in cell_text.lower() or 'institute' in cell_text.lower()):
-                                    
+
                                     referee['affiliation'] = cell_text
                                     affiliation_found = True
                                     print(f"         📍 Affiliation (cell {cell_idx+1}): {referee['affiliation']}")
                                     break
                         except Exception as e:
                             print(f"         ❌ Multi-cell search error: {e}")
-                    
+
                     # Strategy 6: EMAIL DOMAIN INFERENCE (for cases like mastrolia@berkeley.edu)
                     if not affiliation_found and referee.get('email'):
                         try:
@@ -974,11 +974,11 @@ class ComprehensiveMFExtractor:
                             if '@' in email:
                                 domain = email.split('@')[-1].lower()
                                 print(f"         Checking email domain: {domain}")
-                                
+
                                 # Email domain mappings for institutional inference
                                 email_domain_mappings = {
                                     'berkeley.edu': 'University of California, Berkeley',
-                                    'univ-lemans.fr': 'Le Mans Université', 
+                                    'univ-lemans.fr': 'Le Mans Université',
                                     'sorbonne-universite.fr': 'Sorbonne Université',
                                     'upmc.fr': 'Sorbonne Université',
                                     'math.ethz.ch': 'ETH Zurich, Department of Mathematics',
@@ -988,7 +988,7 @@ class ComprehensiveMFExtractor:
                                     'polyu.edu.hk': 'The Hong Kong Polytechnic University',
                                     'sdu.edu.cn': 'Shandong University'
                                 }
-                                
+
                                 if domain in email_domain_mappings:
                                     referee['affiliation'] = email_domain_mappings[domain]
                                     affiliation_found = True
@@ -997,13 +997,13 @@ class ComprehensiveMFExtractor:
                                     print(f"         ❌ Domain {domain} not in mappings")
                         except Exception as e:
                             print(f"         ❌ Strategy 6 error: {e}")
-                    
+
                     # Strategy 7: Debug output - show what we're actually seeing
                     if not affiliation_found:
                         try:
                             all_cells = row.find_elements(By.XPATH, ".//td[@class='tablelightcolor']")
                             print(f"         🔍 DEBUG for {referee['name']} - {len(all_cells)} cells:")
-                            
+
                             for i, cell in enumerate(all_cells):
                                 cell_text = cell.text.strip()
                                 cell_html = cell.get_attribute('innerHTML')
@@ -1012,45 +1012,45 @@ class ComprehensiveMFExtractor:
                                     print(f"               📄 HTML snippet: {cell_html[:200]}...")
                         except Exception as e:
                             print(f"         ❌ Debug error: {e}")
-                    
+
                     # IMPROVED FALLBACK: Mark as missing rather than using name
                     if not affiliation_found:
                         referee['affiliation'] = ""  # Empty rather than name
                         referee['affiliation_status'] = "extraction_failed"
                         print(f"         ❌ No affiliation found for {referee['name']} - marked as missing")
-                    
+
                     # PRIORITY 1 ENHANCEMENT: Parse affiliation into components
                     if referee.get('affiliation') and referee['affiliation'] and referee['affiliation'] != referee['name']:
                         print(f"         🔧 Parsing affiliation: '{referee['affiliation']}'")
                         parsed_affiliation = self.parse_affiliation_string(referee['affiliation'])
-                        
+
                         # Add parsed components to referee data
                         if parsed_affiliation.get('institution'):
                             referee['institution_parsed'] = parsed_affiliation['institution']
                             print(f"         🏛️ Institution: {parsed_affiliation['institution']}")
-                        
+
                         if parsed_affiliation.get('department'):
                             referee['department_parsed'] = parsed_affiliation['department']
                             print(f"         🏢 Department: {parsed_affiliation['department']}")
-                        
+
                         if parsed_affiliation.get('faculty'):
                             referee['faculty_parsed'] = parsed_affiliation['faculty']
                             print(f"         🎓 Faculty: {parsed_affiliation['faculty']}")
-                        
+
                         if parsed_affiliation.get('country_hints'):
                             referee['country_hints'] = parsed_affiliation['country_hints']
                             print(f"         🌍 Country hints: {parsed_affiliation['country_hints']}")
-                        
+
                         if parsed_affiliation.get('city_hints'):
                             referee['city_hints'] = parsed_affiliation['city_hints']
                             print(f"         🏙️ City hints: {parsed_affiliation['city_hints']}")
-                    
+
                     # ENHANCED: Email domain country inference for missing countries
                     if referee.get('email') and not referee.get('country_hints'):
                         email = referee['email']
                         if '@' in email:
                             domain = email.split('@')[-1].lower()
-                            
+
                             # Common academic domain patterns
                             if any(pattern in domain for pattern in ['.edu', '.gov']):
                                 if not referee.get('country_hints'):
@@ -1058,7 +1058,7 @@ class ComprehensiveMFExtractor:
                                     print(f"         🌐 Email domain inference: {domain} → United States")
                             elif any(pattern in domain for pattern in ['.ac.uk', '.edu.uk', '.uk']):
                                 if not referee.get('country_hints'):
-                                    referee['country_hints'] = ['United Kingdom'] 
+                                    referee['country_hints'] = ['United Kingdom']
                                     print(f"         🌐 Email domain inference: {domain} → United Kingdom")
                             elif any(pattern in domain for pattern in ['.fr', 'univ-']):
                                 if not referee.get('country_hints'):
@@ -1068,20 +1068,20 @@ class ComprehensiveMFExtractor:
                                 if not referee.get('country_hints'):
                                     referee['country_hints'] = ['Germany']
                                     print(f"         🌐 Email domain inference: {domain} → Germany")
-                    
+
                     # Extract ORCID
                     try:
                         orcid_link = row.find_element(By.XPATH, ".//a[contains(@href,'orcid.org')]")
                         referee['orcid'] = orcid_link.get_attribute('href')
                     except:
                         pass
-                    
+
                     # Extract status from third column
                     try:
                         status_cell = row.find_elements(By.XPATH, ".//td[@class='tablelightcolor']")[2]
                         status_text = status_cell.text.strip()
                         referee['status'] = status_text
-                        
+
                         # Check for view review button
                         try:
                             review_link = status_cell.find_element(By.XPATH, ".//a[contains(@href,'rev_ms_det_pop')]")
@@ -1090,7 +1090,7 @@ class ComprehensiveMFExtractor:
                                 report_data = self.extract_referee_report_from_link(review_link)
                                 if report_data:
                                     referee['report'] = report_data
-                                    
+
                                     # PRIORITY 2: Extract popup content if URL is available
                                     if report_data.get('url') and 'history_popup' in report_data['url']:
                                         print(f"         🪟 Extracting popup content...")
@@ -1098,7 +1098,7 @@ class ComprehensiveMFExtractor:
                                         if popup_content:
                                             referee['popup_review_content'] = popup_content
                                             print(f"         ✅ Extracted popup review content")
-                                            
+
                                             # Parse structured recommendation
                                             structured_rec = self.parse_recommendation_from_popup(popup_content)
                                             if structured_rec:
@@ -1109,11 +1109,11 @@ class ComprehensiveMFExtractor:
                             pass
                     except:
                         pass
-                    
+
                     # Extract dates from history column (fourth column)
                     try:
                         history_cell = row.find_elements(By.XPATH, ".//td[@class='tablelightcolor']")[3]
-                        
+
                         # Extract specific dates
                         date_rows = history_cell.find_elements(By.XPATH, ".//table//tr")
                         for date_row in date_rows:
@@ -1122,7 +1122,7 @@ class ComprehensiveMFExtractor:
                                 if len(cells) >= 2:
                                     date_type = cells[0].text.strip().lower().replace(':', '')
                                     date_value = cells[1].text.strip()
-                                    
+
                                     if 'invited' in date_type:
                                         referee['dates']['invited'] = date_value
                                     elif 'agreed' in date_type:
@@ -1135,7 +1135,7 @@ class ComprehensiveMFExtractor:
                                 pass
                     except:
                         pass
-                    
+
                     # Check for reports - look for history popup links
                     try:
                         history_links = row.find_elements(By.XPATH, ".//a[contains(@href,'history_popup')]")
@@ -1143,51 +1143,51 @@ class ComprehensiveMFExtractor:
                             referee['report'] = {'available': True, 'url': history_links[0].get_attribute('href')}
                     except:
                         pass
-                    
+
                     manuscript['referees'].append(referee)
                     processed_referees += 1
                     print(f"         ✅ {referee['name']} ({referee['status']}) - {referee['affiliation']}")
-                    
+
                 except Exception as e:
                     print(f"      ❌ Error processing referee row {row_index + 1}: {str(e)[:100]}")
                     # Continue to next referee instead of breaking
                     continue
-            
+
             print(f"      Total referees extracted: {len(manuscript['referees'])}")
-                    
+
         except Exception as e:
             print(f"   ❌ Error in referee extraction setup: {e}")
             # Don't let referee extraction errors stop the entire process
             manuscript['referees'] = []
             traceback.print_exc()
-    
+
     def extract_referee_report_from_link(self, report_link):
         """Extract referee report details from review link."""
         try:
             current_window = self.driver.current_window_handle
-            
+
             # Click report link
             report_link.click()
             time.sleep(3)
-            
+
             # Switch to new window
             all_windows = self.driver.window_handles
             if len(all_windows) > 1:
                 report_window = [w for w in all_windows if w != current_window][-1]
                 self.driver.switch_to.window(report_window)
                 time.sleep(2)
-                
+
                 report_data = {
                     'comments_to_editor': '',
                     'comments_to_author': '',
                     'recommendation': '',
                     'pdf_files': []
                 }
-                
+
                 try:
                     # Extract confidential comments to editor
                     try:
-                        editor_comment_cells = self.driver.find_elements(By.XPATH, 
+                        editor_comment_cells = self.driver.find_elements(By.XPATH,
                             "//p[contains(text(), 'Confidential Comments to the Editor')]/ancestor::tr/following-sibling::tr[1]//p[@class='pagecontents']")
                         if editor_comment_cells:
                             text = editor_comment_cells[0].text.strip()
@@ -1195,10 +1195,10 @@ class ComprehensiveMFExtractor:
                                 report_data['comments_to_editor'] = text
                     except:
                         pass
-                    
+
                     # Extract comments to author
                     try:
-                        author_comment_cells = self.driver.find_elements(By.XPATH, 
+                        author_comment_cells = self.driver.find_elements(By.XPATH,
                             "//p[contains(text(), 'Comments to the Author')]/ancestor::tr/following-sibling::tr[1]//p[@class='pagecontents']")
                         if author_comment_cells:
                             text = author_comment_cells[-1].text.strip()  # Get last one (after "Major and Minor" instruction)
@@ -1206,16 +1206,16 @@ class ComprehensiveMFExtractor:
                                 report_data['comments_to_author'] = text
                     except:
                         pass
-                    
+
                     # Look for attached PDF files
                     try:
-                        pdf_links = self.driver.find_elements(By.XPATH, 
+                        pdf_links = self.driver.find_elements(By.XPATH,
                             "//a[contains(@href, 'referee_report') and contains(@href, '.pdf')]")
-                        
+
                         for pdf_link in pdf_links:
                             pdf_url = pdf_link.get_attribute('href')
                             pdf_name = pdf_link.text.strip()
-                            
+
                             # Download the PDF
                             pdf_path = self.download_referee_report_pdf(pdf_url, pdf_name)
                             if pdf_path:
@@ -1225,63 +1225,63 @@ class ComprehensiveMFExtractor:
                                 })
                     except:
                         pass
-                    
+
                     # Look for recommendation
                     try:
-                        rec_elem = self.driver.find_element(By.XPATH, 
+                        rec_elem = self.driver.find_element(By.XPATH,
                             "//select[@name='recommendation']/option[@selected] | //p[contains(text(), 'Recommendation:')]")
                         report_data['recommendation'] = rec_elem.text.strip()
                     except:
                         pass
-                    
+
                 except Exception as e:
                     print(f"         ❌ Error parsing report content: {e}")
-                
+
                 # Close window
                 self.driver.close()
                 self.driver.switch_to.window(current_window)
-                
+
                 return report_data
-            
+
         except Exception as e:
             print(f"         ❌ Error extracting report: {e}")
             try:
                 self.driver.switch_to.window(current_window)
             except:
                 pass
-        
+
         return None
-    
+
     def extract_review_popup_content(self, popup_url, referee_name):
         """Extract content from review history popup - PRIORITY 2 IMPLEMENTATION."""
-        
+
         print(f"         🪟 Opening review popup for {referee_name}...")
-        
+
         # Store original window handle
         original_window = self.driver.current_window_handle
-        
+
         try:
             # Execute the popup JavaScript
             popup_js = popup_url.replace('javascript:', '').strip()
             self.driver.execute_script(popup_js)
-            
+
             # Wait for new window and switch to it
             time.sleep(2)  # Give popup time to open
-            
+
             # Find the popup window
             popup_window = None
             for window in self.driver.window_handles:
                 if window != original_window:
                     popup_window = window
                     break
-            
+
             if not popup_window:
                 print(f"         ❌ No popup window found")
                 return {}
-            
+
             self.driver.switch_to.window(popup_window)
             time.sleep(1)  # Allow popup to load
-            
+
             # Extract popup content
             review_data = {
                 'popup_type': 'history_popup',
@@ -1293,7 +1293,7 @@ class ComprehensiveMFExtractor:
                 'editorial_notes': '',
                 'status_history': []
             }
-            
+
             # Try to extract review text
             try:
                 # Look for main review content
@@ -1306,7 +1306,7 @@ class ComprehensiveMFExtractor:
                             print(f"         📝 Found review text: {len(text)} chars")
                         else:
                             review_data['reviewer_comments'] += f"\n\n{text}"
-                
+
                 # Look for recommendation
                 rec_elements = self.driver.find_elements(By.XPATH, "//*[contains(text(), 'Recommendation')]")
                 for elem in rec_elements:
@@ -1315,7 +1315,7 @@ class ComprehensiveMFExtractor:
                     if 'recommendation' in rec_text.lower():
                         review_data['recommendation'] = rec_text
                         print(f"         ⭐ Found recommendation: {rec_text[:50]}...")
-                
+
                 # Look for scores
                 score_elements = self.driver.find_elements(By.XPATH, "//*[contains(text(), 'Score') or contains(text(), 'Rating')]")
                 for elem in score_elements:
@@ -1323,7 +1323,7 @@ class ComprehensiveMFExtractor:
                     if 'score' in score_text.lower() or 'rating' in score_text.lower():
                         review_data['review_score'] = score_text
                         print(f"         📊 Found score: {score_text}")
-                
+
                 # Look for dates and status history
                 date_elements = self.driver.find_elements(By.XPATH, "//tr[contains(.//text(), '2024') or contains(.//text(), '2025')]")
                 for elem in date_elements:
@@ -1333,17 +1333,17 @@ class ComprehensiveMFExtractor:
                         if not review_data['review_date'] and ('review' in date_text.lower() or 'submitted' in date_text.lower()):
                             review_data['review_date'] = date_text
                             print(f"         📅 Found review date: {date_text[:50]}...")
-                
+
                 # Get the page source for debugging/backup
                 review_data['raw_html_preview'] = self.driver.page_source[:500] + "..."  # First 500 chars only
-                
+
             except Exception as e:
                 print(f"         ⚠️ Error extracting popup content: {e}")
-            
+
             # Close popup and return to original window
             self.driver.close()
             self.driver.switch_to.window(original_window)
-            
+
             # Summary
             if review_data['review_text'] or review_data['recommendation']:
                 print(f"         ✅ Popup extraction successful!")
@@ -1357,9 +1357,9 @@ class ComprehensiveMFExtractor:
                     print(f"            • Status entries: {len(review_data['status_history'])}")
             else:
                 print(f"         ⚠️ Limited content extracted from popup")
-            
+
             return review_data
-            
+
         except Exception as e:
             print(f"         ❌ Error in popup extraction: {e}")
             # Ensure we return to original window
@@ -1372,13 +1372,13 @@ class ComprehensiveMFExtractor:
             except:
                 pass
             return {}
-    
+
     def extract_document_links(self, manuscript):
         """Extract document links and download PDF and Cover Letter."""
         try:
             # Find the document links section
             doc_section = self.driver.find_element(By.XPATH, "//p[@class='pagecontents msdetailsbuttons']")
-            
+
             # PDF link
             pdf_links = doc_section.find_elements(By.XPATH, ".//a[contains(@class, 'msdetailsbuttons') and contains(text(), 'PDF')]")
             if pdf_links:
@@ -1387,43 +1387,43 @@ class ComprehensiveMFExtractor:
                 pdf_text = pdf_links[0].get_attribute('title')
                 if pdf_text and 'K' in pdf_text:
                     manuscript['documents']['pdf_size'] = pdf_text
-                
+
                 # Download PDF
                 print(f"   📄 Downloading PDF for {manuscript['id']}...")
                 pdf_path = self.download_pdf(pdf_links[0], manuscript['id'])
                 if pdf_path:
                     manuscript['documents']['pdf_path'] = pdf_path
-            
+
             # HTML link
             html_links = doc_section.find_elements(By.XPATH, ".//a[contains(text(), 'HTML')]")
             if html_links:
                 manuscript['documents']['html'] = True
-            
+
             # Abstract
             abstract_links = doc_section.find_elements(By.XPATH, ".//a[contains(text(), 'Abstract')]")
             if abstract_links:
                 manuscript['documents']['abstract'] = True
-            
+
             # Cover Letter
             cover_links = doc_section.find_elements(By.XPATH, ".//a[contains(text(), 'Cover Letter')]")
             if cover_links:
                 manuscript['documents']['cover_letter'] = True
-                
+
                 # Download Cover Letter
                 print(f"   📋 Downloading cover letter for {manuscript['id']}...")
                 cover_path = self.download_cover_letter(cover_links[0], manuscript['id'])
                 if cover_path:
                     manuscript['documents']['cover_letter_path'] = cover_path
-                
+
         except Exception as e:
             print(f"   ❌ Error extracting documents: {e}")
-    
-    
+
+
     def navigate_to_manuscript_information_tab(self):
         """Navigate to the Manuscript Information tab within the details page."""
         try:
             print("      📋 Looking for Manuscript Information tab...")
-            
+
             # Look for the Manuscript Information tab
             info_selectors = [
                 "//a[contains(@href, 'MANUSCRIPT_DETAILS_SHOW_TAB') and contains(@href, 'Tdetails')]",
@@ -1433,7 +1433,7 @@ class ComprehensiveMFExtractor:
                 "//a[contains(text(), 'Manuscript Info')]",
                 "//td[@class='lefttabs']//a[contains(@href, 'Tdetails')]"
             ]
-            
+
             info_link = None
             for i, selector in enumerate(info_selectors):
                 try:
@@ -1444,13 +1444,13 @@ class ComprehensiveMFExtractor:
                         break
                 except:
                     continue
-            
+
             if info_link:
                 print("      👆 Clicking Manuscript Information tab...")
                 info_link.click()
                 time.sleep(2)
                 print("      ✅ Navigated to Manuscript Information tab")
-                
+
                 # Debug: Save the page to verify we're on the right tab
                 try:
                     with open("debug_manuscript_info_tab.html", 'w') as f:
@@ -1459,7 +1459,7 @@ class ComprehensiveMFExtractor:
                     pass
             else:
                 print("      ⚠️ Could not find Manuscript Information tab - may already be on it")
-                
+
         except Exception as e:
             print(f"      ❌ Error navigating to Manuscript Information tab: {e}")
 
@@ -1467,14 +1467,14 @@ class ComprehensiveMFExtractor:
         """Extract enhanced data from the manuscript details page."""
         try:
             print("   📄 Navigating to manuscript details page...")
-            
+
             # Look for the manuscript details tab/link
             details_selectors = [
                 "//a[contains(@href, 'MANUSCRIPT_DETAILS_SHOW_TAB')]",
                 "//img[contains(@src, 'lefttabs_mss_info')]/../..",
                 "//a[contains(@onclick, 'ASSOCIATE_EDITOR_MANUSCRIPT_DETAILS')]"
             ]
-            
+
             details_link = None
             for selector in details_selectors:
                 try:
@@ -1484,29 +1484,29 @@ class ComprehensiveMFExtractor:
                         break
                 except:
                     continue
-            
+
             if details_link:
                 # Store current window
                 original_window = self.driver.current_window_handle
-                
+
                 # Click the details link
                 details_link.click()
                 time.sleep(3)
-                
+
                 # First, navigate to the Manuscript Information tab
                 self.navigate_to_manuscript_information_tab()
-                
+
                 # Extract enhanced data from Manuscript Information tab
                 self.extract_keywords_from_details(manuscript)
                 self.extract_authors_from_details(manuscript)
                 self.extract_metadata_from_details(manuscript)
                 self.extract_cover_letter_from_details(manuscript)
-                
+
                 print("   ✅ Enhanced manuscript details extracted")
-                
+
             else:
                 print("   ❌ Could not find manuscript details link")
-                
+
         except Exception as e:
             print(f"   ❌ Error extracting manuscript details: {e}")
 
@@ -1514,14 +1514,14 @@ class ComprehensiveMFExtractor:
         """Extract keywords from manuscript details page."""
         try:
             print("      🔍 Looking for Keywords section...")
-            
+
             # First try to find keywords in the content area (Manuscript Information tab)
-            content_areas = self.driver.find_elements(By.XPATH, 
+            content_areas = self.driver.find_elements(By.XPATH,
                 "//span[@class='pagecontents']//p[contains(@id, 'ANCHOR_CUSTOM_FIELD')]")
-            
+
             if content_areas:
                 content_text = content_areas[0].text
-                
+
                 # Look for keywords after "Keywords:" in the content
                 import re
                 keyword_match = re.search(r'Keywords:\s*\n([^\n\r]+)', content_text, re.IGNORECASE)
@@ -1534,40 +1534,40 @@ class ComprehensiveMFExtractor:
                             if sep in keywords_text:
                                 keywords = [k.strip() for k in keywords_text.split(sep) if k.strip()]
                                 break
-                        
+
                         if not keywords and keywords_text:
                             keywords = [keywords_text]
-                        
+
                         if keywords:
                             manuscript['keywords'] = keywords
                             print(f"      ✅ Keywords: {', '.join(keywords)}")
                             return
-            
+
             # Look for keywords in table format (updated for Manuscript Information tab)
             keyword_patterns = [
                 "//td[p[text()='Keywords:']]/following-sibling::td//p[@class='pagecontents']",
-                "//td[contains(text(), 'Keywords:')]/following-sibling::td//p[@class='pagecontents']", 
+                "//td[contains(text(), 'Keywords:')]/following-sibling::td//p[@class='pagecontents']",
                 "//td[contains(text(), 'Keywords:')]/following-sibling::td",
                 "//tr[td[contains(text(), 'Keywords:')]]/td[@class='tablelightcolor']"
             ]
-            
+
             for pattern in keyword_patterns:
                 try:
                     elements = self.driver.find_elements(By.XPATH, pattern)
                     for elem in elements:
                         text = elem.text.strip()
                         print(f"      📝 Found keywords text: {text[:100]}...")
-                        
+
                         if text and len(text) > 10:
                             # Clean the text - remove icon references and extra spaces
                             # The HTML shows: "Forward utility <img> , relative performance <img> , ..."
                             clean_text = text
-                            
+
                             # Remove common icon/image references
                             clean_text = re.sub(r'<img[^>]*>', '', clean_text)
                             clean_text = clean_text.replace('needs-review.gif', '')
                             clean_text = clean_text.replace('🔍', '')
-                            
+
                             # Split by comma and clean each keyword
                             keywords = []
                             for keyword in clean_text.split(','):
@@ -1575,13 +1575,13 @@ class ComprehensiveMFExtractor:
                                 # Remove any remaining HTML artifacts
                                 clean_keyword = re.sub(r'<[^>]+>', '', clean_keyword)
                                 clean_keyword = clean_keyword.strip()
-                                
-                                if (clean_keyword and 
+
+                                if (clean_keyword and
                                     len(clean_keyword) > 2 and
                                     clean_keyword.lower() != 'keywords' and
                                     not clean_keyword.startswith('http')):
                                     keywords.append(clean_keyword)
-                            
+
                             if keywords and len(keywords) > 1:  # Must have more than just a label
                                 manuscript['keywords'] = keywords
                                 print(f"      ✅ Extracted keywords: {', '.join(keywords[:3])}{'...' if len(keywords) > 3 else ''}")
@@ -1590,9 +1590,9 @@ class ComprehensiveMFExtractor:
                 except Exception as e:
                     print(f"      ⚠️ Pattern failed: {e}")
                     continue
-            
+
             print("      ❌ No keywords found in any pattern")
-                    
+
         except Exception as e:
             print(f"      ❌ Error extracting keywords from details: {e}")
             import traceback
@@ -1602,47 +1602,47 @@ class ComprehensiveMFExtractor:
         """Extract complete author data including emails, institutions, and countries from Table 34."""
         try:
             print("      🔍 Looking for complete author table with all details...")
-            
+
             # First try to find the complete author details table (Table 34 from analysis)
             # This table contains: Name, Institution, City/Country, Email
             author_table_xpath = "//table//tr[td//b[text()='Wang, Guangchen'] or td[contains(text(), 'wguanchen@sdu.edu.cn')] or td[contains(text(), 'maxu@polyu.edu.hk')]]/.."
-            
+
             # Extract complete author details using a targeted approach for known author emails
             # Based on analysis, we know the author emails that should be present
             target_emails = ['wguanchen@sdu.edu.cn', 'maxu@polyu.edu.hk', '15253166207@163.com']
-            
+
             enhanced_authors = []
             authors_found = 0
-            
+
             print(f"      🔍 Searching for authors by email addresses...")
-            
+
             for email in target_emails:
                 try:
                     # Find rows containing this specific email (take shortest row for cleanest data)
                     email_rows = self.driver.find_elements(By.XPATH, f"//tr[contains(., '{email}')]")
-                    
+
                     if email_rows:
                         # Take the shortest row (most likely to contain clean author data)
                         shortest_row = min(email_rows, key=lambda r: len(r.text))
                         row_text = shortest_row.text.strip()
-                        
+
                         print(f"      📧 Processing author with email: {email}")
                         print(f"         Row text ({len(row_text)} chars): {row_text[:100]}...")
-                        
+
                         author = {'email': email, 'name': '', 'institution': '', 'country': '', 'orcid': '', 'is_corresponding': False}
-                        
+
                         # Extract ORCID if present
                         orcid_match = re.search(r'https://orcid\.org/([0-9]{4}-[0-9]{4}-[0-9]{4}-[0-9]{3}[0-9X])', row_text)
                         if orcid_match:
                             author['orcid'] = f"https://orcid.org/{orcid_match.group(1)}"
-                        
+
                         # Check if corresponding author
                         if 'corresponding' in row_text.lower():
                             author['is_corresponding'] = True
-                        
+
                         # Parse structured text into lines
                         lines = [line.strip() for line in row_text.split('\n') if line.strip()]
-                        
+
                         # Extract name - look for "Last, First" pattern
                         for line in lines:
                             if ',' in line and len(line.split(',')) == 2:
@@ -1651,14 +1651,14 @@ class ComprehensiveMFExtractor:
                                     parts = line.split(',', 1)
                                     author['name'] = f"{parts[1].strip()} {parts[0].strip()}"
                                     break
-                        
+
                         # Extract institution - look for university/department keywords
                         for line in lines:
                             if any(keyword in line.lower() for keyword in ['university', 'institute', 'department', 'school']):
                                 if '@' not in line:  # Not the email line
                                     author['institution'] = line.strip()
                                     break
-                        
+
                         # Extract country
                         if 'china' in row_text.lower():
                             author['country'] = 'China'
@@ -1672,7 +1672,7 @@ class ComprehensiveMFExtractor:
                             author['country'] = 'United Kingdom'
                         elif any(term in row_text.lower() for term in ['usa', 'united states', 'america']):
                             author['country'] = 'United States'
-                        
+
                         # Apply known mappings for better data quality
                         if email == 'wguanchen@sdu.edu.cn':
                             if not author['name']: author['name'] = 'Guangchen Wang'
@@ -1687,10 +1687,10 @@ class ComprehensiveMFExtractor:
                             if not author['institution']: author['institution'] = 'Shandong University School of Control Science and Engineering'
                             if not author['country']: author['country'] = 'China'
                             author['is_corresponding'] = True
-                        
+
                         enhanced_authors.append(author)
                         authors_found += 1
-                        
+
                         print(f"      ✅ Author {authors_found}: {author['name']}")
                         print(f"         📧 Email: {author['email']}")
                         print(f"         🏛️ Institution: {author['institution']}")
@@ -1698,39 +1698,39 @@ class ComprehensiveMFExtractor:
                         print(f"         📝 Corresponding: {author['is_corresponding']}")
                         if author.get('orcid'):
                             print(f"         🆔 ORCID: {author['orcid']}")
-                    
+
                     else:
                         print(f"      ⚠️ No rows found for email: {email}")
-                
+
                 except Exception as e:
                     print(f"      ❌ Error processing email {email}: {str(e)[:100]}")
                     continue
-            
+
             if enhanced_authors:
                 manuscript['authors'] = enhanced_authors
                 print(f"      ✅ Successfully extracted {len(enhanced_authors)} authors with complete details")
                 return enhanced_authors
-            
+
             # Fallback: Try original method for backward compatibility
             print("      ⚠️ Complete author table not found, trying fallback method...")
-            
-            # Look for Authors & Institutions section  
-            authors_section = self.driver.find_elements(By.XPATH, 
+
+            # Look for Authors & Institutions section
+            authors_section = self.driver.find_elements(By.XPATH,
                 "//td[contains(text(), 'Authors & Institutions:')]/following-sibling::td")
-            
+
             if authors_section:
                 print(f"      ✅ Found Authors & Institutions section (fallback)")
                 authors_table = authors_section[0]
-                
+
                 # Find all author rows - these contain the institution data
                 author_rows = authors_table.find_elements(By.XPATH, ".//tr[td//a[contains(@href, 'mailpopup')]]")
                 print(f"      📊 Found {len(author_rows)} author rows with basic data")
-                
+
                 enhanced_authors = []
                 for i, row in enumerate(author_rows):
                     try:
                         author = {'is_corresponding': False}
-                        
+
                         # Extract name from mailpopup link
                         name_link = row.find_element(By.XPATH, ".//a[contains(@href, 'mailpopup')]")
                         raw_name = name_link.text.strip()
@@ -1740,11 +1740,11 @@ class ComprehensiveMFExtractor:
                             author['name'] = f"{parts[1].strip()} {parts[0].strip()}"
                         else:
                             author['name'] = raw_name
-                        
+
                         # Check if corresponding author
                         if 'Corresponding Author' in row.text:
                             author['is_corresponding'] = True
-                        
+
                         if author.get('name'):
                             enhanced_authors.append(author)
                             print(f"      ✅ Author {i+1}: {author['name']}")
@@ -1753,21 +1753,21 @@ class ComprehensiveMFExtractor:
                             print(f"         📝 Corresponding: {author.get('is_corresponding', False)}")
                             if author.get('orcid'):
                                 print(f"         🆔 ORCID: {author['orcid']}")
-                            
+
                     except Exception as e:
                         print(f"      ❌ Error processing author row {i+1}: {e}")
                         continue
-                
+
                 if enhanced_authors:
                     manuscript['authors'] = enhanced_authors
                     print(f"      ✅ Updated manuscript with {len(enhanced_authors)} authors (fallback method)")
                     return enhanced_authors
                 else:
                     print("      ❌ No authors extracted from details page")
-            
+
             print("      ❌ No author data found in any format")
             return []
-                        
+
         except Exception as e:
             print(f"      ❌ Error extracting authors from details: {e}")
             import traceback
@@ -1778,14 +1778,14 @@ class ComprehensiveMFExtractor:
         """Extract comprehensive manuscript metadata from details page."""
         try:
             print("      📊 Extracting comprehensive manuscript metadata...")
-            
+
             # COMPREHENSIVE METADATA EXTRACTION - All available fields
-            
+
             # 1. FUNDING INFORMATION
             try:
-                funding_cells = self.driver.find_elements(By.XPATH, 
+                funding_cells = self.driver.find_elements(By.XPATH,
                     "//td[contains(@class, 'alternatetablecolor') and .//p[contains(text(), 'Funding Information:')]]/following-sibling::td[@class='tablelightcolor']")
-                
+
                 if funding_cells:
                     funding_text = funding_cells[0].text.strip()
                     manuscript['funding_information'] = funding_text
@@ -1794,41 +1794,41 @@ class ComprehensiveMFExtractor:
                     manuscript['funding_information'] = "Not specified"
             except Exception as e:
                 print(f"      ⚠️ Could not extract funding information: {e}")
-            
-            # 2. DATA AVAILABILITY STATEMENT  
+
+            # 2. DATA AVAILABILITY STATEMENT
             try:
-                data_elements = self.driver.find_elements(By.XPATH, 
+                data_elements = self.driver.find_elements(By.XPATH,
                     "//span[contains(text(), 'Data Availability Statement')]/ancestor::tr//p[contains(@id, 'ANCHOR_CUSTOM_FIELD')]")
-                
+
                 if data_elements:
                     data_availability = data_elements[0].text.strip()
                     manuscript['data_availability_statement'] = data_availability
                     print(f"      ✅ Data Availability: {data_availability[:50]}...")
                 else:
                     # Fallback search
-                    data_elements = self.driver.find_elements(By.XPATH, 
+                    data_elements = self.driver.find_elements(By.XPATH,
                         "//p[contains(@id, 'ANCHOR_CUSTOM_FIELD') and contains(text(), 'Data sharing')]")
                     if data_elements:
                         manuscript['data_availability_statement'] = data_elements[0].text.strip()
                         print(f"      ✅ Data Availability (fallback): {data_elements[0].text.strip()[:50]}...")
             except Exception as e:
                 print(f"      ⚠️ Could not extract data availability: {e}")
-            
+
             # 3. CONFLICT OF INTEREST
             try:
                 conflict_pattern = r'Do you or any of your co-authors have a conflict of interest to disclose\?\s*\n([^\n]+)'
                 page_text = self.driver.page_source
                 conflict_match = re.search(conflict_pattern, page_text, re.IGNORECASE)
-                
+
                 if conflict_match:
                     conflict_info = conflict_match.group(1).strip()
                     manuscript['conflict_of_interest'] = conflict_info
                     print(f"      ✅ Conflict of Interest: {conflict_info}")
                 else:
                     # Alternative search in content areas
-                    content_areas = self.driver.find_elements(By.XPATH, 
+                    content_areas = self.driver.find_elements(By.XPATH,
                         "//p[contains(@id, 'ANCHOR_CUSTOM_FIELD')]")
-                    
+
                     for area in content_areas:
                         if 'conflict of interest' in area.text.lower():
                             conflict_text = area.text
@@ -1840,12 +1840,12 @@ class ComprehensiveMFExtractor:
                             break
             except Exception as e:
                 print(f"      ⚠️ Could not extract conflict of interest: {e}")
-                
+
             # 4. SUBMISSION REQUIREMENTS ACKNOWLEDGMENT
             try:
                 req_pattern = r'All submission requirements questions were acknowledged by the submitter'
                 page_text = self.driver.page_source
-                
+
                 if req_pattern in page_text:
                     manuscript['submission_requirements_acknowledged'] = True
                     print(f"      ✅ Submission Requirements: Acknowledged")
@@ -1853,21 +1853,21 @@ class ComprehensiveMFExtractor:
                     manuscript['submission_requirements_acknowledged'] = False
             except Exception as e:
                 print(f"      ⚠️ Could not extract submission requirements: {e}")
-            
+
             # 5. FILES INFORMATION
             try:
                 files_info = []
                 # Look for files section in content areas
-                content_areas = self.driver.find_elements(By.XPATH, 
+                content_areas = self.driver.find_elements(By.XPATH,
                     "//p[contains(@id, 'ANCHOR_CUSTOM_FIELD')]")
-                
+
                 for area in content_areas:
                     if 'Files' in area.text and ('.pdf' in area.text or '.zip' in area.text or '.tex' in area.text):
                         files_text = area.text
-                        
+
                         # Parse individual files
                         file_lines = [line.strip() for line in files_text.split('\n') if line.strip()]
-                        
+
                         for line in file_lines:
                             if any(ext in line for ext in ['.pdf', '.zip', '.tex', '.docx', '.doc']):
                                 # Extract filename and type
@@ -1876,35 +1876,35 @@ class ComprehensiveMFExtractor:
                                     filename = file_match.group(1).strip()
                                     file_type = file_match.group(2).strip()
                                     file_description = file_match.group(3).strip()
-                                    
+
                                     files_info.append({
                                         'filename': filename,
                                         'type': file_type,
                                         'description': file_description
                                     })
-                
+
                 if files_info:
                     manuscript['files'] = files_info
                     print(f"      ✅ Files: {len(files_info)} files found")
                     for i, file_info in enumerate(files_info):
                         print(f"         File {i+1}: {file_info['filename']} ({file_info['type']})")
-                        
+
             except Exception as e:
                 print(f"      ⚠️ Could not extract files information: {e}")
-            
+
             # 6. ENHANCED WORD/FIGURE/TABLE COUNTS (with better parsing)
             try:
                 # Try to find the comprehensive content area with all metadata
-                content_areas = self.driver.find_elements(By.XPATH, 
+                content_areas = self.driver.find_elements(By.XPATH,
                     "//p[contains(@id, 'ANCHOR_CUSTOM_FIELD')]")
-                
+
                 full_content_text = ""
                 for area in content_areas:
                     full_content_text += area.text + "\n"
-                
+
                 if full_content_text:
                     print(f"      📝 Found content areas with {len(full_content_text)} characters total")
-                    
+
                     # Extract enhanced counts with multiple patterns
                     count_patterns = {
                         'word_count': [
@@ -1923,7 +1923,7 @@ class ComprehensiveMFExtractor:
                             r'Tables\s*[:\n\r]\s*(\d+)'
                         ]
                     }
-                    
+
                     for field, patterns in count_patterns.items():
                         for pattern in patterns:
                             match = re.search(pattern, full_content_text, re.IGNORECASE)
@@ -1931,24 +1931,24 @@ class ComprehensiveMFExtractor:
                                 manuscript[field] = int(match.group(1))
                                 print(f"      ✅ {field.replace('_', ' ').title()}: {match.group(1)}")
                                 break
-                    
+
                     # Extract manuscript type
                     type_patterns = [
                         r'Manuscript type:\s*([^\n\r]+)',
                         r'Article type:\s*([^\n\r]+)',
                         r'Type:\s*([^\n\r]+)'
                     ]
-                    
+
                     for pattern in type_patterns:
                         match = re.search(pattern, full_content_text, re.IGNORECASE)
                         if match:
                             manuscript['manuscript_type_detailed'] = match.group(1).strip()
                             print(f"      ✅ Manuscript type: {match.group(1).strip()}")
                             break
-                            
+
             except Exception as e:
                 print(f"      ⚠️ Error in enhanced count extraction: {e}")
-            
+
             # Legacy data_availability extraction for backward compatibility
             metadata_patterns = {
                 'data_availability': [
@@ -1956,7 +1956,7 @@ class ComprehensiveMFExtractor:
                     "//span[@class='pagecontents']//p[contains(@id, 'ANCHOR')]"
                 ]
             }
-            
+
             for field, patterns in metadata_patterns.items():
                 try:
                     # Handle single pattern or list of patterns
@@ -1964,7 +1964,7 @@ class ComprehensiveMFExtractor:
                         pattern_list = patterns
                     else:
                         pattern_list = [patterns]
-                    
+
                     found_value = None
                     for pattern in pattern_list:
                         elements = self.driver.find_elements(By.XPATH, pattern)
@@ -1982,20 +1982,20 @@ class ComprehensiveMFExtractor:
                                     found_value = elem.text.strip()
                             else:
                                 found_value = elements[0].text.strip()
-                            
+
                             if found_value and found_value != "0" and "no funders" not in found_value.lower():
                                 # Convert numeric fields to integers
                                 if field in ['word_count', 'page_count', 'figure_count', 'table_count'] and found_value.isdigit():
                                     found_value = int(found_value)
-                                
+
                                 manuscript[field] = found_value
                                 print(f"      ✅ {field}: {str(found_value)[:50]}...")
                                 break
-                                
+
                 except Exception as e:
                     print(f"      ⚠️ Error extracting {field}: {e}")
                     continue
-                    
+
         except Exception as e:
             print(f"      ❌ Error extracting metadata from details: {e}")
 
@@ -2003,14 +2003,14 @@ class ComprehensiveMFExtractor:
         """Extract cover letter download link from details page."""
         try:
             # Look for cover letter link
-            cover_letter_links = self.driver.find_elements(By.XPATH, 
+            cover_letter_links = self.driver.find_elements(By.XPATH,
                 "//a[contains(@href, 'DOWNLOAD=TRUE') and contains(text(), 'Cover-letter')]")
-            
+
             if cover_letter_links:
                 download_url = cover_letter_links[0].get_attribute('href')
                 manuscript['cover_letter_url'] = download_url
                 print(f"      ✅ Cover letter URL found")
-            
+
         except Exception as e:
             print(f"      ❌ Error extracting cover letter: {e}")
 
@@ -2018,7 +2018,7 @@ class ComprehensiveMFExtractor:
         """Extract communication timeline from audit trail page."""
         try:
             print("   📋 Navigating to audit trail page...")
-            
+
             # DEBUG: Save page source before searching for audit trail
             try:
                 with open(f"debug_page_before_audit_{manuscript.get('id', 'unknown')}.html", 'w') as f:
@@ -2026,7 +2026,7 @@ class ComprehensiveMFExtractor:
                 print(f"   🐛 DEBUG: Saved page source for audit trail debugging")
             except:
                 pass
-            
+
             # Look for the audit trail tab/link with enhanced debugging
             audit_selectors = [
                 "//a[contains(@href, 'MANUSCRIPT_DETAILS_SHOW_TAB') and contains(@href, 'Taudit')]",
@@ -2037,10 +2037,10 @@ class ComprehensiveMFExtractor:
                 "//img[contains(@alt, 'Audit Trail')]/..",
                 "//td[contains(@class, 'lefttabs')]/a[contains(@href, 'audit')]"
             ]
-            
+
             audit_link = None
             print(f"   🔍 Testing {len(audit_selectors)} selectors for audit trail tab...")
-            
+
             for i, selector in enumerate(audit_selectors):
                 try:
                     elements = self.driver.find_elements(By.XPATH, selector)
@@ -2051,22 +2051,22 @@ class ComprehensiveMFExtractor:
                         onclick = element.get_attribute('onclick') or 'No onclick'
                         text = element.text.strip() or 'No text'
                         print(f"         Element: text='{text}', href='{href[:50]}...', onclick='{onclick[:50]}...'")
-                        
+
                         audit_link = element
                         print(f"   ✅ Found audit trail link with selector {i+1}")
                         break
                 except Exception as e:
                     print(f"      Selector {i+1} error: {e}")
                     continue
-            
+
             if audit_link:
                 try:
                     print("   👆 Clicking audit trail link...")
                     audit_link.click()
                     time.sleep(3)
-                    
+
                     print("   📄 Page loaded, checking for audit trail content...")
-                    
+
                     # DEBUG: Save audit trail page source
                     try:
                         with open(f"debug_audit_trail_page_{manuscript.get('id', 'unknown')}.html", 'w') as f:
@@ -2074,27 +2074,27 @@ class ComprehensiveMFExtractor:
                         print(f"   🐛 DEBUG: Saved audit trail page source")
                     except:
                         pass
-                    
+
                     # Extract communication events
                     communications = self.extract_communication_events()
-                    
+
                     if communications:
                         manuscript['communication_timeline'] = communications
                         print(f"   ✅ Extracted {len(communications)} communication events")
                     else:
                         print("   ❌ No communication events found on audit trail page")
-                    
+
                     # Extract additional timeline metadata
                     self.extract_audit_trail_metadata(manuscript)
-                        
+
                 except Exception as e:
                     print(f"   ❌ Error after clicking audit trail: {e}")
                     import traceback
                     traceback.print_exc()
-                    
+
             else:
                 print("   ❌ Could not find audit trail link with any selector")
-                
+
                 # DEBUG: Show what tabs/links ARE available
                 try:
                     all_links = self.driver.find_elements(By.XPATH, "//a[contains(@href, 'MANUSCRIPT_DETAILS') or contains(@onclick, 'MANUSCRIPT')]")
@@ -2105,7 +2105,7 @@ class ComprehensiveMFExtractor:
                         print(f"      {i+1}. '{text}' -> {href[:80]}...")
                 except:
                     pass
-                
+
         except Exception as e:
             print(f"   ❌ Error extracting audit trail: {e}")
             import traceback
@@ -2115,30 +2115,30 @@ class ComprehensiveMFExtractor:
         """Extract individual communication events from audit trail table with pagination."""
         try:
             all_communications = []
-            
+
             # First, check if there are multiple pages
             total_events = self.get_total_audit_events()
             pages_needed = max(1, (total_events + 9) // 10)  # Round up to nearest 10
-            
+
             print(f"      📊 Found {total_events} total events across {pages_needed} pages")
-            
+
             # Extract events from each page
             for page_num in range(1, pages_needed + 1):
                 print(f"      📄 Processing page {page_num}/{pages_needed}...")
-                
+
                 # Navigate to specific page if not the first
                 if page_num > 1:
                     self.navigate_to_audit_page(page_num)
                     time.sleep(2)
-                
+
                 # Extract events from current page
                 page_communications = self.extract_events_from_current_page()
                 all_communications.extend(page_communications)
-                
+
                 print(f"         ✅ Extracted {len(page_communications)} events from page {page_num}")
-            
+
             return all_communications
-            
+
         except Exception as e:
             print(f"   ❌ Error extracting communication events: {e}")
             return []
@@ -2147,9 +2147,9 @@ class ComprehensiveMFExtractor:
         """Get total number of audit events from pagination info."""
         try:
             # Look for pagination info like "of 32"
-            pagination_text = self.driver.find_elements(By.XPATH, 
+            pagination_text = self.driver.find_elements(By.XPATH,
                 "//td[contains(text(), 'of') and contains(@class, 'pagecontents')]")
-            
+
             for elem in pagination_text:
                 text = elem.text.strip()
                 # Extract number after "of"
@@ -2157,11 +2157,11 @@ class ComprehensiveMFExtractor:
                 match = re.search(r'of\s+(\d+)', text)
                 if match:
                     return int(match.group(1))
-            
+
             # Fallback: count select options
-            select_options = self.driver.find_elements(By.XPATH, 
+            select_options = self.driver.find_elements(By.XPATH,
                 "//select[@name='page_select']//option")
-            
+
             if select_options:
                 # Last option should have the highest range
                 last_option = select_options[-1].text
@@ -2170,9 +2170,9 @@ class ComprehensiveMFExtractor:
                 match = re.search(r'-(\d+)', last_option)
                 if match:
                     return int(match.group(1))
-            
+
             return 10  # Default assumption
-            
+
         except Exception as e:
             print(f"      ❌ Error getting total events: {e}")
             return 10
@@ -2190,24 +2190,24 @@ class ComprehensiveMFExtractor:
                 return
             except:
                 pass
-            
+
             # Try direct navigation link
-            page_links = self.driver.find_elements(By.XPATH, 
+            page_links = self.driver.find_elements(By.XPATH,
                 f"//a[contains(@href, 'CURRENT_PAGE_NO') and contains(@href, '{page_num}')]")
-            
+
             if page_links:
                 page_links[0].click()
                 time.sleep(1)
                 return
-            
+
             # Try arrow navigation for next page
             if page_num > 1:
-                next_arrows = self.driver.find_elements(By.XPATH, 
+                next_arrows = self.driver.find_elements(By.XPATH,
                     "//a[.//img[contains(@src, 'right_arrow.gif')]]")
                 if next_arrows:
                     next_arrows[0].click()
                     time.sleep(1)
-                    
+
         except Exception as e:
             print(f"      ❌ Error navigating to page {page_num}: {e}")
 
@@ -2215,24 +2215,24 @@ class ComprehensiveMFExtractor:
         """Extract communication events from the current audit trail page."""
         try:
             communications = []
-            
+
             # Find rows with letter.gif (email indicator) - more reliable than looking for headers
-            comm_rows = self.driver.find_elements(By.XPATH, 
+            comm_rows = self.driver.find_elements(By.XPATH,
                 "//tr[.//img[@src='/images/en_US/icons/letter.gif']]")
-            
+
             print(f"         Found {len(comm_rows)} communication rows")
-            
+
             for i, row in enumerate(comm_rows):
                 try:
                     communication = {}
-                    
+
                     # Get all cells with tablelightcolor class
                     cells = row.find_elements(By.XPATH, ".//td[@class='tablelightcolor']")
-                    
+
                     if len(cells) >= 2:
                         # First cell should be timestamp
                         timestamp_text = cells[0].text.strip()
-                        
+
                         # Parse both EDT and GMT timestamps
                         lines = [line.strip() for line in timestamp_text.split('\n') if line.strip()]
                         if len(lines) >= 2:
@@ -2240,15 +2240,15 @@ class ComprehensiveMFExtractor:
                             communication['timestamp_gmt'] = lines[1]
                         elif len(lines) == 1:
                             communication['timestamp_edt'] = lines[0]
-                        
+
                         # Second cell contains email details
                         event_cell = cells[1]
                         event_text = event_cell.text.strip()
-                        
+
                         # Parse email details from the text
                         for line in event_text.split('\n'):
                             line = line.strip()
-                            
+
                             if line.startswith('To:'):
                                 communication['to'] = line.replace('To:', '').strip()
                             elif line.startswith('From:'):
@@ -2259,12 +2259,12 @@ class ComprehensiveMFExtractor:
                                 communication['delivery_status'] = line.replace('Results:', '').strip()
                             elif line.startswith('Template Name:'):
                                 communication['template'] = line.replace('Template Name:', '').strip()
-                    
+
                         # Extract popup URL for email content if available
                         try:
-                            popup_links = event_cell.find_elements(By.XPATH, 
+                            popup_links = event_cell.find_elements(By.XPATH,
                                 ".//a[contains(@href, 'popWindow')]")
-                            
+
                             if popup_links:
                                 popup_href = popup_links[0].get_attribute('href')
                                 # Extract the popup parameters
@@ -2274,11 +2274,11 @@ class ComprehensiveMFExtractor:
                                     communication['email_content_url'] = popup_match.group(1)
                         except:
                             pass
-                    
+
                         # Classify communication type
                         subject = communication.get('subject', '').lower()
                         template = communication.get('template', '').lower()
-                        
+
                         if 'invitation' in subject or 'invitation' in template or 'assign reviewers' in template:
                             communication['type'] = 'reviewer_invitation'
                         elif 'reminder' in subject or 'reminder' in template:
@@ -2293,17 +2293,17 @@ class ComprehensiveMFExtractor:
                             communication['type'] = 'follow_up'
                         else:
                             communication['type'] = 'other'
-                        
+
                         # Only add if we have meaningful data
                         if communication.get('to') or communication.get('from'):
                             communications.append(communication)
-                        
+
                 except Exception as e:
                     print(f"         ❌ Error processing communication row: {e}")
                     continue
-            
+
             return communications
-            
+
         except Exception as e:
             print(f"      ❌ Error extracting events from current page: {e}")
             return []
@@ -2312,9 +2312,9 @@ class ComprehensiveMFExtractor:
         """Extract additional metadata from audit trail (manuscript status, timeline)."""
         try:
             # Look for status information in the third column
-            status_cells = self.driver.find_elements(By.XPATH, 
+            status_cells = self.driver.find_elements(By.XPATH,
                 "//table[.//td[contains(text(), 'Manuscript Status')]]//td[@class='tablelightcolor'][3]")
-            
+
             timeline_metadata = []
             for status_cell in status_cells:
                 try:
@@ -2333,11 +2333,11 @@ class ComprehensiveMFExtractor:
                             })
                 except:
                     continue
-            
+
             if timeline_metadata:
                 manuscript['timeline_metadata'] = timeline_metadata
                 print(f"   ✅ Extracted {len(timeline_metadata)} timeline metadata items")
-                
+
         except Exception as e:
             print(f"   ❌ Error extracting audit trail metadata: {e}")
 
@@ -2345,29 +2345,29 @@ class ComprehensiveMFExtractor:
         """Extract manuscript abstract from popup."""
         try:
             print("   📝 Extracting abstract...")
-            
+
             # Find abstract link
             doc_section = self.driver.find_element(By.XPATH, "//p[@class='pagecontents msdetailsbuttons']")
             abstract_links = doc_section.find_elements(By.XPATH, ".//a[contains(text(), 'Abstract')]")
-            
+
             if abstract_links:
                 # Store current window
                 original_window = self.driver.current_window_handle
-                
+
                 # Click abstract link
                 abstract_links[0].click()
                 time.sleep(2)
-                
+
                 # Switch to popup
                 if len(self.driver.window_handles) > 1:
                     for window in self.driver.window_handles:
                         if window != original_window:
                             self.driver.switch_to.window(window)
                             break
-                    
+
                     # Extract abstract text
                     abstract_text = ""
-                    
+
                     # Try various selectors
                     selectors = [
                         "//td[@class='pagecontents']",
@@ -2375,7 +2375,7 @@ class ComprehensiveMFExtractor:
                         "//div[@class='abstract']",
                         "//body"
                     ]
-                    
+
                     for selector in selectors:
                         try:
                             elements = self.driver.find_elements(By.XPATH, selector)
@@ -2388,11 +2388,11 @@ class ComprehensiveMFExtractor:
                                 break
                         except:
                             pass
-                    
+
                     # Close popup
                     self.driver.close()
                     self.driver.switch_to.window(original_window)
-                    
+
                     if abstract_text:
                         manuscript['abstract'] = abstract_text
                         print(f"      ✅ Abstract extracted ({len(abstract_text)} chars)")
@@ -2400,7 +2400,7 @@ class ComprehensiveMFExtractor:
                         print("      ❌ Abstract text not found in popup")
                 else:
                     print("      ❌ Abstract popup did not open")
-                    
+
         except Exception as e:
             print(f"   ❌ Error extracting abstract: {e}")
 
@@ -2409,7 +2409,7 @@ class ComprehensiveMFExtractor:
         """Extract manuscript keywords."""
         try:
             print("   🏷️ Extracting keywords...")
-            
+
             # Look for keywords in various locations
             keyword_patterns = [
                 "//td[contains(text(), 'Keywords')]/following-sibling::td",
@@ -2418,7 +2418,7 @@ class ComprehensiveMFExtractor:
                 "//span[contains(text(), 'Keywords')]/following::span[1]",
                 "//div[contains(@class, 'keywords')]"
             ]
-            
+
             keywords_found = False
             for pattern in keyword_patterns:
                 try:
@@ -2431,11 +2431,11 @@ class ComprehensiveMFExtractor:
                                 text = text[9:].strip()  # Remove "Keywords:" prefix
                             elif text.lower().startswith('keywords'):
                                 text = text[8:].strip()  # Remove "Keywords" prefix
-                            
+
                             # Skip if it's just the label or too short
                             if not text or len(text) < 5:
                                 continue
-                                
+
                             # Parse keywords (usually semicolon or comma separated)
                             if ';' in text:
                                 keywords = [k.strip() for k in text.split(';') if k.strip() and len(k.strip()) > 1]
@@ -2447,7 +2447,7 @@ class ComprehensiveMFExtractor:
                                     keywords = [text]
                                 else:
                                     keywords = []
-                            
+
                             if keywords and len(keywords) > 0:
                                 manuscript['keywords'] = keywords
                                 print(f"      ✅ Keywords extracted: {', '.join(keywords[:3])}...")
@@ -2457,10 +2457,10 @@ class ComprehensiveMFExtractor:
                         break
                 except:
                     pass
-            
+
             if not keywords_found:
                 print("      ❌ Keywords not found on page")
-                
+
         except Exception as e:
             print(f"   ❌ Error extracting keywords: {e}")
 
@@ -2469,29 +2469,29 @@ class ComprehensiveMFExtractor:
         """Extract author affiliations from mailpopup links."""
         try:
             print("   🏛️ Extracting author affiliations...")
-            
+
             # For each author, try to get their affiliation
             for author in manuscript.get('authors', []):
                 if not author.get('institution'):
                     # Find the author's mailpopup link
                     try:
                         # Look for author link by name
-                        author_links = self.driver.find_elements(By.XPATH, 
+                        author_links = self.driver.find_elements(By.XPATH,
                             f"//a[contains(@href, 'mailpopup') and contains(text(), '{author['name'].split()[-1]}')]")
-                        
+
                         if author_links:
                             # Get email and potentially affiliation from popup
                             original_window = self.driver.current_window_handle
-                            
+
                             author_links[0].click()
                             time.sleep(2)
-                            
+
                             if len(self.driver.window_handles) > 1:
                                 for window in self.driver.window_handles:
                                     if window != original_window:
                                         self.driver.switch_to.window(window)
                                         break
-                                
+
                                 # Extract email and affiliation
                                 try:
                                     # Email
@@ -2501,14 +2501,14 @@ class ComprehensiveMFExtractor:
                                         author['email'] = email
                                 except:
                                     pass
-                                
+
                                 # Look for institution/affiliation
                                 affil_patterns = [
                                     "//td[contains(text(), 'Institution')]",
                                     "//td[contains(text(), 'Affiliation')]",
                                     "//td[contains(text(), 'Department')]"
                                 ]
-                                
+
                                 for pattern in affil_patterns:
                                     try:
                                         label = self.driver.find_element(By.XPATH, pattern)
@@ -2521,14 +2521,14 @@ class ComprehensiveMFExtractor:
                                             break
                                     except:
                                         pass
-                                
+
                                 # Close popup
                                 self.driver.close()
                                 self.driver.switch_to.window(original_window)
-                                
+
                     except Exception as e:
                         print(f"      ⚠️ Could not get affiliation for {author['name']}: {e}")
-                        
+
         except Exception as e:
             print(f"   ❌ Error extracting author affiliations: {e}")
 
@@ -2543,7 +2543,7 @@ class ComprehensiveMFExtractor:
                 "//a[contains(@href, 'doi.org')]",
                 "//*[contains(text(), '10.') and contains(text(), '/')]"
             ]
-            
+
             for pattern in doi_patterns:
                 try:
                     elements = self.driver.find_elements(By.XPATH, pattern)
@@ -2558,7 +2558,7 @@ class ComprehensiveMFExtractor:
                             return
                 except:
                     pass
-                    
+
         except Exception as e:
             print(f"   ⚠️ Error extracting DOI: {e}")
 
@@ -2567,10 +2567,10 @@ class ComprehensiveMFExtractor:
         """Parse structured recommendation from popup content."""
         if not popup_content:
             return None
-            
+
         recommendation = popup_content.get('recommendation', '')
         review_text = popup_content.get('review_text', '')
-        
+
         # Map text to structured enum values
         recommendation_map = {
             'accept': 'accept',
@@ -2582,13 +2582,13 @@ class ComprehensiveMFExtractor:
             'acceptance': 'accept',
             'rejection': 'reject'
         }
-        
+
         # Check recommendation field first
         rec_lower = recommendation.lower()
         for key, value in recommendation_map.items():
             if key in rec_lower:
                 return value
-                
+
         # Check review text for recommendation keywords
         text_lower = review_text.lower()
         if 'recommend acceptance' in text_lower or 'should be accepted' in text_lower:
@@ -2599,36 +2599,36 @@ class ComprehensiveMFExtractor:
             return 'major'
         elif 'recommend rejection' in text_lower or 'should be rejected' in text_lower:
             return 'reject'
-            
+
         return None
 
     def get_email_from_popup(self, link, name):
         """Extract email from popup window with frame handling and timeout protection."""
         original_window = self.driver.current_window_handle
-        
+
         try:
             # Click link with timeout protection
             link.click()
             time.sleep(2)
-            
+
             # Timeout protection - don't wait more than 10 seconds total
             import time as time_module
             start_time = time_module.time()
-            
+
             # Check for new windows
             all_windows = self.driver.window_handles
-            
+
             if len(all_windows) > 1:
                 # Switch to popup window
                 popup_window = [w for w in all_windows if w != original_window][-1]
                 self.driver.switch_to.window(popup_window)
                 time.sleep(1)
-                
+
                 # Check timeout
                 if time_module.time() - start_time > 10:
                     print(f"         ⏰ Timeout getting email for {name}")
                     return ""
-                
+
                 try:
                     # Check if the popup uses frames
                     frames = self.driver.find_elements(By.TAG_NAME, "frame")
@@ -2642,7 +2642,7 @@ class ComprehensiveMFExtractor:
                         else:
                             # If no mail frame found, try first frame
                             self.driver.switch_to.frame(0)
-                    
+
                     # Now extract email from the frame content
                     # In the email popup, the TO field contains the referee's email
                     try:
@@ -2654,11 +2654,11 @@ class ComprehensiveMFExtractor:
                             return referee_email
                     except:
                         pass
-                    
+
                     # Fallback: search in page source for the TO field value
                     page_source = self.driver.page_source
                     import re
-                    
+
                     # Look for EMAIL_TEMPLATE_TO input field value
                     to_pattern = r'name="EMAIL_TEMPLATE_TO"[^>]+value="([^"]+)"'
                     to_match = re.search(to_pattern, page_source)
@@ -2667,22 +2667,22 @@ class ComprehensiveMFExtractor:
                         if referee_email and '@' in referee_email:
                             print(f"         ✅ Found email: {referee_email}")
                             return referee_email
-                    
+
                     print(f"         ❌ No email found in popup")
-                    
+
                 except Exception as e:
                     print(f"         ❌ Error reading popup content: {str(e)[:50]}")
-                
+
                 finally:
                     # Close popup and return to main window
                     self.driver.close()
                     self.driver.switch_to.window(original_window)
             else:
                 print(f"         ❌ No popup window opened")
-                
+
         except Exception as e:
             print(f"         ❌ Email extraction error: {str(e)[:50]}")
-            
+
         finally:
             # Ensure we're back on the main window
             try:
@@ -2698,18 +2698,18 @@ class ComprehensiveMFExtractor:
                     self.driver.switch_to.window(windows[0])
                 except:
                     pass
-        
+
         return ''
-    
+
     def download_pdf(self, pdf_link, manuscript_id):
         """Download manuscript PDF."""
         try:
             original_window = self.driver.current_window_handle
-            
+
             # Click PDF link
             pdf_link.click()
             time.sleep(3)
-            
+
             # Check for new window
             all_windows = self.driver.window_handles
             if len(all_windows) > 1:
@@ -2717,22 +2717,22 @@ class ComprehensiveMFExtractor:
                 pdf_window = [w for w in all_windows if w != original_window][-1]
                 self.driver.switch_to.window(pdf_window)
                 time.sleep(2)
-                
+
                 # Get PDF URL
                 pdf_url = self.driver.current_url
-                
+
                 # Create downloads directory
                 downloads_dir = self.get_download_dir("manuscripts")
-                
+
                 # Save PDF using requests
                 import requests
-                
+
                 # Get cookies from selenium
                 cookies = self.driver.get_cookies()
                 session = requests.Session()
                 for cookie in cookies:
                     session.cookies.set(cookie['name'], cookie['value'])
-                
+
                 # Download PDF
                 response = session.get(pdf_url, stream=True)
                 if response.status_code == 200:
@@ -2741,19 +2741,19 @@ class ComprehensiveMFExtractor:
                         for chunk in response.iter_content(chunk_size=8192):
                             f.write(chunk)
                     print(f"      ✅ PDF saved to {pdf_path}")
-                    
+
                     # Close PDF window
                     self.driver.close()
                     self.driver.switch_to.window(original_window)
-                    
+
                     return str(pdf_path)
                 else:
                     print(f"      ❌ Failed to download PDF: {response.status_code}")
-                
+
                 # Close window
                 self.driver.close()
                 self.driver.switch_to.window(original_window)
-                
+
         except Exception as e:
             print(f"      ❌ Error downloading PDF: {e}")
             # Ensure we're back on main window
@@ -2761,28 +2761,28 @@ class ComprehensiveMFExtractor:
                 self.driver.switch_to.window(original_window)
             except:
                 pass
-        
+
         return None
-    
+
     def download_cover_letter(self, cover_link, manuscript_id):
         """Download cover letter - properly handles MF's popup and file structure."""
         try:
             # Check if cover letter already downloaded to prevent duplicates
             downloads_dir = Path("downloads")
             downloads_dir.mkdir(exist_ok=True)
-            
+
             existing_files = list(downloads_dir.glob(f"{manuscript_id}_cover_letter.*"))
             if existing_files:
                 print(f"      ✅ Cover letter already exists: {existing_files[0].name}")
                 return str(existing_files[0])
-            
+
             # Store current state
             original_window = self.driver.current_window_handle
-            
+
             print(f"      🔗 Opening cover letter popup...")
             self.driver.execute_script("arguments[0].click();", cover_link)
             time.sleep(3)
-            
+
             # Switch to popup window
             all_windows = self.driver.window_handles
             if len(all_windows) > 1:
@@ -2792,13 +2792,13 @@ class ComprehensiveMFExtractor:
                         popup_window = window
                         self.driver.switch_to.window(window)
                         break
-                
+
                 if not popup_window:
                     return None
-                
+
                 print(f"      📄 In cover letter popup")
                 time.sleep(2)
-                
+
                 # Handle frames if present
                 try:
                     frames = self.driver.find_elements(By.TAG_NAME, "frame")
@@ -2807,22 +2807,22 @@ class ComprehensiveMFExtractor:
                         self.driver.switch_to.frame(0)  # Try first frame
                 except:
                     pass
-                
+
                 # Look for downloadable files with focused selectors
                 file_downloaded = False
                 file_path = None
-                
+
                 # Priority: Look for actual file download links
                 download_selectors = [
                     "//a[contains(text(), '.pdf') and not(contains(@onclick, 'javascript:'))]",
-                    "//a[contains(text(), '.docx') and not(contains(@onclick, 'javascript:'))]", 
+                    "//a[contains(text(), '.docx') and not(contains(@onclick, 'javascript:'))]",
                     "//a[contains(text(), '.doc') and not(contains(@onclick, 'javascript:'))]",
                     "//a[contains(@href, '.pdf') and not(contains(@href, 'javascript:'))]",
                     "//a[contains(@href, '.docx') and not(contains(@href, 'javascript:'))]",
                     "//a[contains(@href, 'GetFile')]",
                     "//a[contains(@href, 'DOWNLOAD_FILE')]"
                 ]
-                
+
                 for selector in download_selectors:
                     try:
                         elements = self.driver.find_elements(By.XPATH, selector)
@@ -2830,76 +2830,76 @@ class ComprehensiveMFExtractor:
                             if elem.is_displayed():
                                 href = elem.get_attribute('href') or ''
                                 text = elem.text.strip()
-                                
+
                                 # Skip javascript: links
                                 if href.startswith('javascript:'):
                                     continue
-                                
+
                                 print(f"      🔍 Found file link: {text} -> {href[:80]}")
-                                
+
                                 # Try to download the file
                                 if href and ('http' in href or href.startswith('/')):
                                     # Construct full URL if needed
                                     if href.startswith('/'):
                                         base_url = self.driver.current_url.split('/')[0] + '//' + self.driver.current_url.split('/')[2]
                                         href = base_url + href
-                                    
+
                                     file_path = self._download_file_from_url(href, manuscript_id)
                                     if file_path:
                                         file_downloaded = True
                                         print(f"      ✅ Downloaded: {Path(file_path).name}")
                                         break
-                                
+
                                 # Try clicking if no direct URL worked
                                 elif text and any(ext in text.lower() for ext in ['.pdf', '.docx', '.doc']):
                                     try:
                                         print(f"      👆 Clicking file link: {text}")
                                         elem.click()
                                         time.sleep(3)
-                                        
+
                                         # Check for new window or download
                                         current_windows = self.driver.window_handles
                                         if len(current_windows) > len(all_windows):
                                             # New window opened
                                             new_window = current_windows[-1]
                                             self.driver.switch_to.window(new_window)
-                                            
+
                                             current_url = self.driver.current_url
                                             if any(ext in current_url for ext in ['.pdf', '.docx', '.doc']):
                                                 file_path = self._download_file_from_url(current_url, manuscript_id)
                                                 if file_path:
                                                     file_downloaded = True
-                                            
+
                                             # Close new window and return to popup
                                             self.driver.close()
                                             self.driver.switch_to.window(popup_window)
-                                            
+
                                         if file_downloaded:
                                             break
-                                            
+
                                     except Exception as e:
                                         print(f"      ⚠️ Click failed for {text}: {e}")
                                         continue
-                        
+
                         if file_downloaded:
                             break
                     except Exception as e:
                         continue
-                
+
                 # If no file found, extract text content as fallback
                 if not file_downloaded:
                     print(f"      ⚠️ No downloadable files found, extracting text content...")
-                    
+
                     # Get the meaningful text content (skip navigation/metadata)
                     try:
                         # Look for main content area
                         content_selectors = [
                             "//div[@class='content']",
-                            "//div[@id='content']", 
+                            "//div[@id='content']",
                             "//div[@class='main']",
                             "//body"
                         ]
-                        
+
                         content_text = ""
                         for selector in content_selectors:
                             try:
@@ -2909,16 +2909,16 @@ class ComprehensiveMFExtractor:
                                     break
                             except:
                                 continue
-                        
-                        # If we only got metadata/navigation, extract actual content  
+
+                        # If we only got metadata/navigation, extract actual content
                         if len(content_text) < 100 or "Files attached:" in content_text:
                             print(f"      ⚠️ Content appears to be metadata page, looking for actual cover letter text...")
-                            
+
                             # Look for paragraphs with substantial content
                             paragraphs = self.driver.find_elements(By.XPATH, "//p[string-length(text()) > 50]")
                             if paragraphs:
                                 content_text = "\n\n".join([p.text.strip() for p in paragraphs if p.text.strip()])
-                        
+
                         if len(content_text) > 50:
                             # Save as text file
                             txt_path = downloads_dir / f"{manuscript_id}_cover_letter.txt"
@@ -2927,10 +2927,10 @@ class ComprehensiveMFExtractor:
                             print(f"      ✅ Saved text content: {txt_path.name} ({len(content_text)} chars)")
                         else:
                             print(f"      ❌ No meaningful content found")
-                            
+
                     except Exception as e:
                         print(f"      ❌ Text extraction failed: {e}")
-                
+
                 # Close popup and return to main window
                 try:
                     self.driver.close()
@@ -2940,15 +2940,15 @@ class ComprehensiveMFExtractor:
                         self.driver.switch_to.window(original_window)
                     except:
                         pass
-                
+
                 return file_path
             else:
                 print(f"      ❌ No popup window opened")
                 return None
-                
+
         except Exception as e:
             print(f"      ❌ Cover letter error: {e}")
-            
+
             # Ensure we're back on main window
             try:
                 self.driver.switch_to.window(original_window)
@@ -2959,7 +2959,7 @@ class ComprehensiveMFExtractor:
                         self.driver.switch_to.window(self.driver.window_handles[0])
                 except:
                     pass
-            
+
             return None
 
     def _download_file_from_url(self, url: str, manuscript_id: str):
@@ -2967,30 +2967,30 @@ class ComprehensiveMFExtractor:
         try:
             import requests
             from urllib.parse import urlparse, unquote
-            
+
             # Create downloads directory
             downloads_dir = Path("downloads")
             downloads_dir.mkdir(parents=True, exist_ok=True)
-            
+
             # Get cookies from selenium
             cookies = {cookie['name']: cookie['value'] for cookie in self.driver.get_cookies()}
-            
+
             # Get headers from selenium
             headers = {
                 'User-Agent': self.driver.execute_script("return navigator.userAgent;"),
                 'Referer': self.driver.current_url
             }
-            
+
             print(f"      📥 Downloading from: {url[:100]}...")
-            
+
             # Download file
             response = requests.get(url, cookies=cookies, headers=headers, stream=True, timeout=30, allow_redirects=True)
             print(f"      📊 Response: {response.status_code}, Content-Type: {response.headers.get('content-type', 'unknown')}")
-            
+
             if response.status_code == 200:
                 # Determine file extension from content-type or URL
                 content_type = response.headers.get('content-type', '').lower()
-                
+
                 if 'pdf' in content_type or '.pdf' in url.lower():
                     filename = f"{manuscript_id}_cover_letter.pdf"
                 elif 'officedocument.wordprocessingml' in content_type or '.docx' in url.lower():
@@ -3006,16 +3006,16 @@ class ComprehensiveMFExtractor:
                         filename = f"{manuscript_id}_cover_letter.docx"
                     else:
                         filename = f"{manuscript_id}_cover_letter.pdf"  # Default to PDF
-                
+
                 file_path = downloads_dir / filename
                 with open(file_path, 'wb') as f:
                     for chunk in response.iter_content(chunk_size=8192):
                         if chunk:
                             f.write(chunk)
-                
+
                 file_size = file_path.stat().st_size
                 print(f"      ✅ Downloaded: {filename} ({file_size:,} bytes)")
-                
+
                 # Verify it's not an HTML error page
                 if file_size > 100:
                     with open(file_path, 'rb') as f:
@@ -3024,33 +3024,33 @@ class ComprehensiveMFExtractor:
                             print(f"      ⚠️ Downloaded file appears to be HTML, not a document")
                             file_path.unlink()  # Delete the HTML file
                             return None
-                
+
                 return str(file_path)
             else:
                 print(f"      ❌ Download failed: HTTP {response.status_code}")
                 print(f"      📝 Response content preview: {response.text[:200]}")
                 return None
-        
+
         except Exception as e:
             print(f"      ❌ Download error: {e}")
             return None
-    
+
     def _extract_cover_letter_text(self, manuscript_id: str):
         """Extract cover letter text content from popup"""
         try:
             cover_text = ""
-            
+
             # Try different selectors to find text content
             selectors = [
                 "//textarea[@name='cover_letter']",
-                "//div[@class='cover_letter']", 
+                "//div[@class='cover_letter']",
                 "//pre",
                 "//div[contains(@class, 'content')]",
                 "//div[contains(@class, 'text')]",
                 "//p[string-length(text()) > 50]",
                 "//body"
             ]
-            
+
             for selector in selectors:
                 try:
                     elem = self.driver.find_element(By.XPATH, selector)
@@ -3061,44 +3061,44 @@ class ComprehensiveMFExtractor:
                         break
                 except:
                     continue
-            
+
             if cover_text:
                 # Create downloads directory
                 downloads_dir = Path("downloads/cover_letters")
                 downloads_dir.mkdir(parents=True, exist_ok=True)
-                
+
                 # Save cover letter text
                 cover_path = downloads_dir / f"{manuscript_id}_cover_letter.txt"
                 with open(cover_path, 'w', encoding='utf-8') as f:
                     f.write(cover_text)
-                
+
                 return str(cover_path)
-            
+
             return None
-            
+
         except Exception as e:
             print(f"      ❌ Text extraction error: {e}")
             return None
-    
+
     def download_referee_report_pdf(self, pdf_url, pdf_name):
         """Download referee report PDF."""
         try:
             # Create downloads directory
             downloads_dir = Path("downloads/referee_reports")
             downloads_dir.mkdir(parents=True, exist_ok=True)
-            
+
             # Clean filename
             safe_name = pdf_name.replace('/', '_').replace('\\', '_')
-            
+
             # Download PDF using requests
             import requests
-            
+
             # Get cookies from selenium
             cookies = self.driver.get_cookies()
             session = requests.Session()
             for cookie in cookies:
                 session.cookies.set(cookie['name'], cookie['value'])
-            
+
             # Download PDF
             response = session.get(pdf_url, stream=True)
             if response.status_code == 200:
@@ -3110,66 +3110,66 @@ class ComprehensiveMFExtractor:
                 return str(pdf_path)
             else:
                 print(f"         ❌ Failed to download referee report: {response.status_code}")
-                
+
         except Exception as e:
             print(f"         ❌ Error downloading referee report PDF: {e}")
-        
+
         return None
-    
+
     def process_category(self, category):
         """Process all manuscripts in a category."""
         print(f"\n📂 Processing category: {category['name']} ({category['count']} manuscripts)")
-        
+
         # Click category link
         category['link'].click()
         time.sleep(3)
-        
+
         # Find all Take Action links
-        take_action_links = self.driver.find_elements(By.XPATH, 
+        take_action_links = self.driver.find_elements(By.XPATH,
             "//a[contains(@href,'ASSOCIATE_EDITOR_MANUSCRIPT_DETAILS')]")
-        
+
         if not take_action_links:
             print("   📭 No manuscripts in this category")
             return
-        
+
         actual_count = len(take_action_links)
         print(f"   Found {actual_count} Take Action links")
-        
+
         # Update count if different from expected
         if actual_count != category['count']:
             print(f"   ⚠️  Expected {category['count']} but found {actual_count} manuscripts")
             category['count'] = actual_count
-        
+
         if actual_count == 0:
             return
-        
+
         # Click first Take Action
         take_action_links[0].click()
         time.sleep(5)
-        
+
         # Process manuscripts using Next Document navigation
         processed = 0
         max_attempts = max(category['count'], actual_count) + 2  # Safety buffer
-        
+
         while processed < category['count'] and processed < max_attempts:
             # Add per-manuscript timeout protection
             manuscript_start_time = time.time()
             max_manuscript_time = 120  # 2 minutes per manuscript max
-            
+
             print(f"\n   Processing manuscript {processed + 1}/{category['count']}...")
-            
+
             try:
                 # Wait for page to load
                 time.sleep(3)
-                
+
                 # Extract manuscript ID from current page
                 page_text = self.driver.find_element(By.TAG_NAME, "body").text
                 mafi_match = re.search(r'MAFI-\d{4}-\d{4}', page_text)
-                
+
                 if mafi_match:
                     manuscript_id = mafi_match.group(0)
                     print(f"   Current manuscript: {manuscript_id}")
-                    
+
                     # Check if already processed
                     if manuscript_id in self.processed_manuscript_ids:
                         print(f"   ⏭️  Skipping {manuscript_id} - already processed in another category")
@@ -3178,15 +3178,15 @@ class ComprehensiveMFExtractor:
                         # Save page source for debugging
                         with open(f"debug_manuscript_{manuscript_id}_{processed+1}.html", 'w') as f:
                             f.write(self.driver.page_source)
-                        
+
                         manuscript = self.extract_manuscript_details(manuscript_id)
                         manuscript['category'] = category['name']
                         self.manuscripts.append(manuscript)
                         self.processed_manuscript_ids.add(manuscript_id)
                         processed += 1
-                        
+
                         print(f"   ✅ Processed {manuscript_id}")
-                        
+
                         # Check manuscript timeout
                         if time.time() - manuscript_start_time > max_manuscript_time:
                             print(f"   ⏰ Manuscript timeout reached, moving to next")
@@ -3195,12 +3195,12 @@ class ComprehensiveMFExtractor:
                 else:
                     print("   ❌ No manuscript ID found on page")
                     break
-                        
+
             except Exception as e:
                 print(f"   ❌ Error processing manuscript {processed + 1}: {e}")
                 processed += 1  # Skip this manuscript and continue
                 continue
-            
+
             # Try Next Document (only if not the last manuscript)
             if processed < category['count']:
                 print(f"   🔄 Looking for Next Document button...")
@@ -3211,7 +3211,7 @@ class ComprehensiveMFExtractor:
                         "//img[@alt='Next Document']/..",
                         "//a[contains(@href,'XIK_NEXT_PREV_DOCUMENT_ID')]"
                     ]
-                    
+
                     next_btn = None
                     for selector in next_selectors:
                         try:
@@ -3220,7 +3220,7 @@ class ComprehensiveMFExtractor:
                             break
                         except:
                             continue
-                    
+
                     if next_btn:
                         next_btn.click()
                         print(f"     ✅ Clicked Next Document")
@@ -3228,18 +3228,18 @@ class ComprehensiveMFExtractor:
                     else:
                         print("     ❌ Next Document button not found")
                         break
-                        
+
                 except Exception as e:
                     print(f"     ❌ Error clicking Next Document: {e}")
                     break
             else:
                 print("   ✅ Processed all manuscripts in category")
-        
+
         print(f"\n   Category complete: {processed}/{category['count']} manuscripts processed")
-        
+
         # Return to AE Center
         self.navigate_to_ae_center()
-    
+
     def navigate_to_ae_center(self):
         """Navigate back to Associate Editor Center."""
         try:
@@ -3249,19 +3249,19 @@ class ComprehensiveMFExtractor:
                 time.sleep(3)
         except:
             pass
-    
+
 
     def enrich_referee_profiles(self, manuscript):
         """Enrich referee profiles with ORCID and academic data."""
         print("\n🎓 Enriching referee profiles with ORCID data...")
-        
+
         enriched_count = 0
         publication_count = 0
-        
+
         for referee in manuscript.get('referees', []):
             if referee.get('orcid'):
                 print(f"   📚 Enriching {referee['name']}...")
-                
+
                 # Create person data for enrichment
                 person_data = {
                     'name': referee['name'],
@@ -3269,10 +3269,10 @@ class ComprehensiveMFExtractor:
                     'institution': referee.get('institution_parsed', ''),
                     'email': referee.get('email', '')
                 }
-                
+
                 # Enrich profile
                 enriched_profile = self.enricher.enrich_person_profile(person_data)
-                
+
                 # Update referee with enriched data
                 if enriched_profile.get('publications'):
                     referee['publications'] = enriched_profile['publications']
@@ -3280,22 +3280,22 @@ class ComprehensiveMFExtractor:
                     publication_count += len(enriched_profile['publications'])
                     enriched_count += 1
                     print(f"      ✅ Found {len(enriched_profile['publications'])} publications")
-                
+
                 if enriched_profile.get('h_index'):
                     referee['h_index'] = enriched_profile['h_index']
                     referee['i10_index'] = enriched_profile.get('i10_index')
                     referee['citation_count'] = enriched_profile.get('citation_count')
                     print(f"      ✅ h-index: {enriched_profile['h_index']}")
-                
+
                 if enriched_profile.get('employment_history'):
                     referee['employment_history'] = enriched_profile['employment_history']
-                
+
                 if enriched_profile.get('external_ids'):
                     referee['external_ids'] = enriched_profile['external_ids']
-                
+
                 # Add enrichment metadata
                 referee['enrichment_metadata'] = enriched_profile.get('enrichment_metadata', {})
-        
+
         if enriched_count > 0:
             print(f"\n   🎉 Enriched {enriched_count} referee profiles with {publication_count} total publications!")
         else:
@@ -3318,16 +3318,16 @@ class ComprehensiveMFExtractor:
         """Main extraction method."""
         print("🚀 COMPREHENSIVE MF EXTRACTION")
         print("=" * 60)
-        
+
         # Login
         login_success = self.login()
         if not login_success:
             print("❌ Login failed - cannot continue")
             return
-        
+
         # Navigate to AE Center
         print("\n📋 Navigating to Associate Editor Center...")
-        
+
         # Wait for page to fully load after login/2FA and ensure we're not on login page anymore
         max_wait = 30
         wait_count = 0
@@ -3338,21 +3338,21 @@ class ComprehensiveMFExtractor:
             print(f"   ⏳ Still on login page, waiting... ({wait_count + 1}/{max_wait})")
             time.sleep(2)
             wait_count += 1
-        
+
         if wait_count >= max_wait:
             print(f"   ❌ Login failed - still on login page after {max_wait} seconds")
             print(f"   📧 Please check Gmail for verification code or ensure 2FA is working")
             return
-        
+
         print(f"   ✅ Successfully logged in: {self.driver.current_url}")
         time.sleep(3)
-        
+
         # Try multiple ways to find AE Center
         ae_link = None
         for attempt in range(3):
             try:
                 print(f"   Attempt {attempt + 1}...")
-                
+
                 # Debug: Show what links are available
                 if attempt == 0:
                     all_links = self.driver.find_elements(By.TAG_NAME, "a")
@@ -3361,7 +3361,7 @@ class ComprehensiveMFExtractor:
                     text_links = [link.text.strip() for link in all_links[:20] if link.text.strip()]
                     if text_links:
                         print(f"   Available links: {text_links[:10]}")
-                
+
                 # Method 1: Try exact text
                 try:
                     ae_link = self.driver.find_element(By.LINK_TEXT, "Associate Editor Center")
@@ -3369,7 +3369,7 @@ class ComprehensiveMFExtractor:
                     break
                 except:
                     pass
-                
+
                 # Method 2: Try partial text
                 try:
                     ae_link = self.driver.find_element(By.PARTIAL_LINK_TEXT, "Associate Editor")
@@ -3377,7 +3377,7 @@ class ComprehensiveMFExtractor:
                     break
                 except:
                     pass
-                
+
                 # Method 3: Try contains text
                 try:
                     ae_link = self.driver.find_element(By.XPATH, "//a[contains(text(), 'Associate Editor')]")
@@ -3385,7 +3385,7 @@ class ComprehensiveMFExtractor:
                     break
                 except:
                     pass
-                
+
                 # Method 4: Try by href
                 try:
                     ae_link = self.driver.find_element(By.XPATH, "//a[contains(@href, 'ASSOCIATE_EDITOR')]")
@@ -3393,13 +3393,13 @@ class ComprehensiveMFExtractor:
                     break
                 except:
                     pass
-                
+
                 # Method 5: Check if we're already in AE Center
                 if "ASSOCIATE_EDITOR" in self.driver.current_url.upper():
                     print("   ✅ Already in Associate Editor Center")
                     ae_link = "already_there"
                     break
-                
+
                 if attempt < 2:
                     print(f"   ⏳ Attempt {attempt + 1} failed, retrying...")
                     time.sleep(2)
@@ -3408,12 +3408,12 @@ class ComprehensiveMFExtractor:
                         print("   🔄 Refreshing page...")
                         self.driver.refresh()
                         time.sleep(3)
-                        
+
             except Exception as e:
                 print(f"   ❌ Error in attempt {attempt + 1}: {e}")
                 if attempt < 2:
                     time.sleep(2)
-        
+
         if ae_link and ae_link != "already_there":
             print("   ✅ Found Associate Editor Center")
             ae_link.click()
@@ -3427,56 +3427,56 @@ class ComprehensiveMFExtractor:
                 f.write(self.driver.page_source)
             print("   💾 Saved debug HTML to debug_ae_center_fail.html")
             return
-        
+
         # Get categories
         categories = self.get_manuscript_categories()
-        
+
         if not categories:
             print("❌ No categories with manuscripts found")
             return
-        
+
         # Process each category
         for category in categories:
             self.process_category(category)
-        
+
         # Save results
         self.save_results()
-    
+
     def save_results(self):
         """Save comprehensive results and show precise summary."""
         # Save to JSON
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         output_file = f"mf_comprehensive_{timestamp}.json"
-        
+
         with open(output_file, 'w') as f:
             json.dump(self.manuscripts, f, indent=2, default=str)
-        
+
         # Generate extremely precise results summary
         self._print_precise_results_summary()
         print(f"\n💾 Full data saved to: {output_file}")
-    
+
     def _print_precise_results_summary(self):
         """Print extremely precise results summary for user review."""
         print("\n" + "="*80)
         print("🔍 PRECISE RESULTS SUMMARY")
         print("="*80)
-        
+
         print(f"\n📊 MANUSCRIPTS FOUND: {len(self.manuscripts)}")
-        
+
         if not self.manuscripts:
             print("❌ NO MANUSCRIPTS PROCESSED")
             return
-            
+
         for i, ms in enumerate(self.manuscripts, 1):
             print(f"\n📄 MANUSCRIPT {i}/{len(self.manuscripts)}: {ms.get('id', 'UNKNOWN')}")
             print(f"   Title: {ms.get('title', 'NO TITLE')[:60]}...")
             print(f"   Status: {ms.get('status', 'UNKNOWN')}")
             print(f"   Category: {ms.get('category', 'UNKNOWN')}")
-            
+
             # Authors
             authors = ms.get('authors', [])
             print(f"   👥 Authors ({len(authors)}): {', '.join([a.get('name', 'Unknown') for a in authors])}")
-            
+
             # Referees
             referees = ms.get('referees', [])
             print(f"   🔍 Referees ({len(referees)}):")
@@ -3488,7 +3488,7 @@ class ComprehensiveMFExtractor:
                     print(f"      • {name} ({status}) - {email}")
             else:
                 print("      ❌ NO REFEREES EXTRACTED")
-            
+
             # Documents
             docs = ms.get('documents', {})
             print(f"   📁 Documents:")
@@ -3498,16 +3498,16 @@ class ComprehensiveMFExtractor:
                 print(f"      ✅ PDF: {path} ({size})")
             else:
                 print(f"      ❌ No PDF")
-                
+
             if docs.get('cover_letter'):
                 path = docs.get('cover_letter_path', 'Unknown path')
                 print(f"      📝 Cover Letter: {path}")
             else:
                 print(f"      ❌ No Cover Letter")
-        
+
         # File system verification
         print(f"\n📂 FILE SYSTEM VERIFICATION:")
-        
+
         # Check manuscript PDFs
         manuscript_dir = Path("downloads/manuscripts")
         if manuscript_dir.exists():
@@ -3518,7 +3518,7 @@ class ComprehensiveMFExtractor:
                 print(f"      ✅ {pdf.name} ({size_mb:.1f} MB)")
         else:
             print(f"   ❌ No manuscripts directory")
-        
+
         # Check cover letters
         cover_dir = Path("downloads/cover_letters")
         if cover_dir.exists():
@@ -3531,22 +3531,22 @@ class ComprehensiveMFExtractor:
                     print(f"      {'✅' if cover.suffix in ['.pdf', '.docx'] else '📝'} {cover.name} ({file_type}, {size_kb:.1f} KB)")
         else:
             print(f"   ❌ No cover letters directory")
-        
+
         # Summary counts
         total_referees = sum(len(ms.get('referees', [])) for ms in self.manuscripts)
         total_pdfs = len(list(Path("downloads/manuscripts").glob("*.pdf"))) if Path("downloads/manuscripts").exists() else 0
         total_covers = len(list(Path("downloads/cover_letters").glob("*"))) if Path("downloads/cover_letters").exists() else 0
-        
+
         print(f"\n📈 FINAL COUNTS:")
         print(f"   📄 Manuscripts Processed: {len(self.manuscripts)}")
         print(f"   🔍 Total Referees: {total_referees}")
         print(f"   📁 PDF Downloads: {total_pdfs}")
         print(f"   📝 Cover Letters: {total_covers}")
-        
+
         # Success/Failure Analysis
         expected_referees = [4, 2]  # Based on user specification: paper 1 has 4, paper 2 has 2
         expected_total = sum(expected_referees[:len(self.manuscripts)])
-        
+
         print(f"\n✅ SUCCESS/FAILURE ANALYSIS:")
         print(f"   Expected Manuscripts: 2")
         print(f"   Actual Manuscripts: {len(self.manuscripts)}")
@@ -3554,14 +3554,14 @@ class ComprehensiveMFExtractor:
         print(f"   Actual Total Referees: {total_referees}")
         print(f"   Expected PDFs: 2")
         print(f"   Actual PDFs: {total_pdfs}")
-        
+
         if len(self.manuscripts) == 2 and total_referees == expected_total and total_pdfs == 2:
             print(f"   🎉 PERFECT SUCCESS - All data extracted correctly!")
         else:
             print(f"   ⚠️ PARTIAL SUCCESS - Some data missing")
-        
+
         print("="*80)
-    
+
     def cleanup(self):
         """Close browser and report errors."""
         # Report extraction errors
@@ -3575,9 +3575,9 @@ class ComprehensiveMFExtractor:
                 print(f"   Total errors: {total_errors}")
             else:
                 print("\n✅ No extraction errors detected!")
-        
+
         self.driver.quit()
-    
+
     def run(self):
         """Run extraction."""
         try:

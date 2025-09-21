@@ -34,7 +34,7 @@ export ORCID_PASSWORD="your_password"
 ### 2. ScholarOne Credentials (for MF/MOR)
 
 ```bash
-export SCHOLARONE_EMAIL="your@email.com" 
+export SCHOLARONE_EMAIL="your@email.com"
 export SCHOLARONE_PASSWORD="your_password"
 ```
 

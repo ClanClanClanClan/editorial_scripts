@@ -10,7 +10,7 @@ cd production/src/extractors
 python3 mf_extractor.py
 ```
 
-### Mathematics of Operations Research (MOR) Extractor  
+### Mathematics of Operations Research (MOR) Extractor
 ```bash
 cd production/src/extractors
 python3 mor_extractor.py
@@ -36,7 +36,7 @@ python3 mor_extractor.py
   - ✅ Extensive audit trails
   - ✅ Document downloads (PDFs, cover letters)
 
-### MOR Extractor (`mor_extractor.py`)  
+### MOR Extractor (`mor_extractor.py`)
 - **Size:** 604KB (comprehensive)
 - **Capabilities:**
   - ✅ Full manuscript data extraction
@@ -104,5 +104,5 @@ production/src/extractors/
 
 ---
 
-**Last Updated:** August 22, 2025  
+**Last Updated:** August 22, 2025
 **Status:** Production Ready (with noted issues)

@@ -40,7 +40,7 @@ All journal scrapers have been updated to work robustly in headless mode with fu
 - Referee status tracking
 - Metadata storage
 
-### 3. MOR (Mathematics of Operations Research) Scraper  
+### 3. MOR (Mathematics of Operations Research) Scraper
 **Status**: ✅ COMPLETE
 
 **Implementation**:

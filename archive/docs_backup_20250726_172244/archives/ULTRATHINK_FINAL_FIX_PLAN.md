@@ -1,6 +1,6 @@
 # 🧠 ULTRATHINK: Final Fix Strategy - Once and For All
 
-**Date**: July 14, 2025  
+**Date**: July 14, 2025
 **Objective**: Create ONE working implementation that matches July 11 performance
 
 ---
@@ -101,7 +101,7 @@ await self.page.goto(url, timeout=DEFAULT_TIMEOUT)
 # Restore from July 11
 async def verify_with_gmail(self, referee: Referee):
     emails = await self.gmail_service.search_referee_emails(
-        referee.name, 
+        referee.name,
         self.manuscript.id
     )
     referee.email_verification = {
@@ -167,32 +167,32 @@ python main.py sicon --test
 ```python
 class SICONExtractor:
     """The ONE TRUE SICON implementation"""
-    
+
     def __init__(self):
         self.timeout = 120000  # 2 minutes
         self.gmail = GmailService()  # Restored
-        
+
     async def extract(self) -> ExtractionResult:
         # 1. Authenticate (working)
         await self._authenticate_orcid()
-        
+
         # 2. Get manuscripts (fix: look in right place)
         manuscripts = await self._get_all_manuscripts()
-        
+
         # 3. For each manuscript
         for ms in manuscripts:
             # Parse BEFORE creating (fix applied)
             ms_data = await self._parse_manuscript_page(ms.id)
-            
+
             # Get referees with emails (fix: click bio links)
             await self._extract_referee_emails(ms)
-            
+
             # Download PDFs (fix: simple method)
             await self._download_all_pdfs(ms)
-            
+
             # Verify with Gmail (restored)
             await self._verify_with_gmail(ms)
-        
+
         return ExtractionResult(manuscripts)
 ```
 

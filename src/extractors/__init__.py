@@ -1,21 +1,10 @@
-"""Journal-specific extractor implementations."""
+"""
+Future journal-specific extractor implementations.
 
-from .mf import MFExtractor
-# from .mor import MORExtractor
-# from .sicon import SICONExtractor
-# from .sifin import SIFINExtractor
-# from .naco import NACOExtractor
-# from .jota import JOTAExtractor
-# from .mafe import MAFEExtractor
-# from .fs import FSExtractor
+Production extractors are in production/src/extractors/ (canonical source).
+"""
 
-__all__ = [
-    'MFExtractor',
-    # 'MORExtractor',
-    # 'SICONExtractor',
-    # 'SIFINExtractor',
-    # 'NACOExtractor',
-    # 'JOTAExtractor',
-    # 'MAFEExtractor',
-    # 'FSExtractor'
-]
+# Future clean architecture extractors will go here
+# Current production extractors are in production/src/extractors/
+
+__all__ = []

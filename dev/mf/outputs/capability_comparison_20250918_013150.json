@@ -1,0 +1,9 @@
+{
+  "timestamp": "2025-09-18T01:31:50.054083",
+  "mf_score": 21,
+  "mor_score": 12,
+  "coverage_percentage": 57.142857142857146,
+  "total_capabilities_checked": 21,
+  "mf_unique_methods": 94,
+  "mor_unique_methods": 17
+}

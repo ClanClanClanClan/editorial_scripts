@@ -40,14 +40,14 @@
 ### Recently Added (Theoretical)
 These were added in code but **need verification**:
 - MOR parity fields in MF extractor
-- Comprehensive review data extraction  
+- Comprehensive review data extraction
 - Enhanced version tracking
 - Editor recommendation extraction
 
 ### Shared ScholarOne Features
 **Both extractors should support** (same platform):
 - Manuscript metadata extraction
-- Author/referee information  
+- Author/referee information
 - Document downloads
 - Audit trail data
 - Funding information
@@ -63,7 +63,7 @@ These were added in code but **need verification**:
 2. **Code Deployment Gap:** Recent theoretical improvements may not be active
    - Need verification of actual current functionality
 
-### Minor Issues  
+### Minor Issues
 - Occasional timeout during 2FA
 - Some popup windows fail to load
 - Download path handling edge cases
@@ -76,9 +76,9 @@ These were added in code but **need verification**:
 - **Data Fields:** 135+ unique fields extracted
 - **Success Rate:** 85% overall (limited by referee email issue)
 
-### MOR Extractor  
+### MOR Extractor
 - **File Size:** 604KB (also comprehensive)
-- **Processing Time:** ~25 seconds per manuscript  
+- **Processing Time:** ~25 seconds per manuscript
 - **Data Fields:** 83+ unique fields extracted
 - **Success Rate:** ~95% overall (was working yesterday)
 
@@ -89,7 +89,7 @@ These were added in code but **need verification**:
 2. **Verify recent MOR parity additions are actually working**
 3. **Confirm MOR extractor current status**
 
-### Medium Priority  
+### Medium Priority
 - Improve popup handling reliability
 - Add better error recovery
 - Enhance timeout handling
@@ -110,6 +110,6 @@ To get accurate current capabilities, need fresh extractions from both:
 
 ---
 
-**Status:** Code Analysis Based  
-**Last Update:** August 22, 2025  
+**Status:** Code Analysis Based
+**Last Update:** August 22, 2025
 **Verification:** Fresh runs needed

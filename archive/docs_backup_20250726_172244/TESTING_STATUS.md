@@ -31,7 +31,7 @@
 
 ### Ready to Test:
 - ✅ `test_auth_only.py` - Authentication flow only
-- ✅ `test_unified_system.py` - Full extraction 
+- ✅ `test_unified_system.py` - Full extraction
 - ✅ `test_pdf_downloads.py` - PDF download verification
 
 ### Blockers:
@@ -85,7 +85,7 @@ Based on full audit:
 2. **Verify selectors** still work on real pages
 3. **Check table/link parsing** logic
 
-### Phase 3: Document Extraction (HIGH)  
+### Phase 3: Document Extraction (HIGH)
 1. **Test PDF URL finding**
 2. **Verify authenticated downloads**
 3. **Check document categorization**

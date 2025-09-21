@@ -45,6 +45,7 @@ jobs:
         with:
           name: bandit-security
           path: artifacts/security/bandit.json
+          retention-days: 14
   - name: pip-audit (dependency vulnerabilities)
         continue-on-error: true
         run: |
@@ -55,6 +56,7 @@ jobs:
         with:
           name: pip-audit
           path: artifacts/security/pip-audit.json
+          retention-days: 14
   test:
     runs-on: ubuntu-latest
     steps:
@@ -124,6 +126,7 @@ jobs:
         with:
           name: bandit-security
           path: artifacts/security/bandit.json
+          retention-days: 14
       - name: pip-audit (fail on vulnerabilities; allowlist supported)
         run: |
           mkdir -p artifacts/security
@@ -134,3 +137,4 @@ jobs:
         with:
           name: pip-audit
           path: artifacts/security/pip-audit.json
+          retention-days: 14

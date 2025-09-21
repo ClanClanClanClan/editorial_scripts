@@ -36,14 +36,25 @@ jobs:
       - name: Detect secrets (baseline)
         run: |
           poetry run detect-secrets-hook --baseline .secrets.baseline $(git ls-files)
-      - name: Bandit (security scan)
+  - name: Bandit (security scan)
         run: |
-          poetry run bandit -q -r src -x tests,dev,archive,production
-      - name: pip-audit (dependency vulnerabilities)
+          mkdir -p artifacts/security
+          poetry run bandit -q -r src -x tests,dev,archive,production -f json -o artifacts/security/bandit.json || true
+      - name: Upload bandit artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: bandit-security
+          path: artifacts/security/bandit.json
+  - name: pip-audit (dependency vulnerabilities)
         continue-on-error: true
         run: |
-          # audit installed env under poetry
-          poetry run pip-audit -s -q
+          mkdir -p artifacts/security
+          poetry run pip-audit -s -q -f json -o artifacts/security/pip-audit.json || true
+      - name: Upload pip-audit artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: pip-audit
+          path: artifacts/security/pip-audit.json
   test:
     runs-on: ubuntu-latest
     steps:
@@ -101,13 +112,25 @@ jobs:
           poetry run pip install bandit pip-audit
       - name: Bandit (fail on high severity; allowlist supported)
         run: |
+          mkdir -p artifacts/security
           SKIPS=$(grep -v '^#' .security/bandit-allowlist.txt 2>/dev/null | tr '\n' ',' | sed 's/,$//')
           if [ -n "$SKIPS" ]; then
-            poetry run bandit -r src -x tests,dev,archive,production -ll -s "$SKIPS"
+            poetry run bandit -r src -x tests,dev,archive,production -ll -s "$SKIPS" -f json -o artifacts/security/bandit.json
           else
-            poetry run bandit -r src -x tests,dev,archive,production -ll
+            poetry run bandit -r src -x tests,dev,archive,production -ll -f json -o artifacts/security/bandit.json
           fi
+      - name: Upload bandit artifacts (security job)
+        uses: actions/upload-artifact@v4
+        with:
+          name: bandit-security
+          path: artifacts/security/bandit.json
       - name: pip-audit (fail on vulnerabilities; allowlist supported)
         run: |
+          mkdir -p artifacts/security
           IGN=$(grep -v '^#' .security/pip-audit-allowlist.txt 2>/dev/null | xargs -I{} printf -- '--ignore-vuln %s ' '{}')
-          poetry run pip-audit -s $IGN
+          poetry run pip-audit -s $IGN -f json -o artifacts/security/pip-audit.json
+      - name: Upload pip-audit artifacts (security job)
+        uses: actions/upload-artifact@v4
+        with:
+          name: pip-audit
+          path: artifacts/security/pip-audit.json

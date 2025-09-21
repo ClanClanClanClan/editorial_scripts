@@ -40,18 +40,15 @@ repos:
           - '^(archive/|docs/|docker-compose\\.dev\\.yml|docker-compose\\.yml|config/journals\\.yaml|config/corrected_journals\\.yaml|config/.+\\.example|alembic\\.ini|verify_all_credentials\\.py)'
         files: ^src/
 
-  - repo: https://github.com/PyCQA/bandit
-    rev: 1.7.5
+  - repo: local
     hooks:
-      - id: bandit
-        name: bandit (manual)
-        args: ["-q", "-r", "src", "-x", "tests,dev,archive,production"]
-        stages: [manual]
-
-  - repo: https://github.com/pypa/pip-audit
-    rev: v2.7.2
-    hooks:
-      - id: pip-audit
-        name: pip-audit (manual)
-        args: ["-s"]
-        stages: [manual]
+      - id: security-commit
+        name: security-scan (commit)
+        entry: bash scripts/hooks/security_scan.sh commit
+        language: system
+        stages: [commit]
+      - id: security-push
+        name: security-scan (push)
+        entry: bash scripts/hooks/security_scan.sh push
+        language: system
+        stages: [push]

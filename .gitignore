@@ -1,172 +1,56 @@
-# Byte-compiled / optimized / DLL files
+# Core Python
 __pycache__/
 *.py[cod]
-*$py.class
-
-# C extensions
-*.so
-
-# Distribution / packaging
-.Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-pip-wheel-metadata/
-share/python-wheels/
 *.egg-info/
-.installed.cfg
-*.egg
-MANIFEST
-
-# PyInstaller
-*.manifest
-*.spec
-
-# Installer logs
-pip-log.txt
-pip-delete-this-directory.txt
-
-# Unit test / coverage reports
-htmlcov/
-.tox/
-.nox/
-.coverage
-.coverage.*
-.cache
-nosetests.xml
-coverage.xml
-*.cover
-*.py,cover
-.hypothesis/
 .pytest_cache/
-
-# Environments
-.env
-.env.*
-!.env.example
-.env.local
-.env.*.local
-.venv
-venv/
-venv_*/
-.venv*/
-env/
-ENV/
-env.bak/
-venv.bak/
-
-# mypy
 .mypy_cache/
-.dmypy.json
-dmypy.json
+.ruff_cache/
 
-# IDEs
-.vscode/
+# Virtualenvs
+.venv/
+venv/
+
+# IDE
 .idea/
-*.swp
-*.swo
-*~
+.vscode/
+
+# Local AI tooling
+.claude/
 
 # OS
 .DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
 
-# Credentials and sensitive data
-config/credentials.yaml
-config/gmail_credentials.json
-config/gmail_token.pickle
-credentials.json
-token.json
-token.pickle
-*.pickle
-.credentials/
-.credentials.json
-*.pem
-*.key
+# Coverage
+.coverage
+htmlcov/
 
-# Development environment - ISOLATED & IGNORED
-dev/*/outputs/
-dev/*/logs/  
-dev/*/debug/
-dev/*/tests/test_*.py
-dev/*/temp/
-
-# Production outputs - ALLOWED
-production/outputs/
-production/logs/
-
-# Data and results (legacy)
-data/
-!data/.gitkeep
-logs/
-!logs/.gitkeep
-checkpoints/
-!checkpoints/.gitkeep
-*.pdf
-*.xlsx
-*.csv
-*.json
-!config/*.json
-!config/**/*.json
-
-# Chrome profiles
-my_jota_profile/
-my_jota_profile_backup/
-.mor_chrome_profile/
-.mf_chrome_profile/
-.naco_chrome_profile/
-*_chrome_profile/
-*_profile/
-playwright_*/
-
-# Legacy and temporary files
-legacy/
-temp/
-tmp/
-*.tmp
-*.bak
-*.old
-*~
-
-# Database
-*.db
-*.sqlite
-*.sqlite3
-data/referees.db
-
-# Output files
-*_results/
-*_results_*/
-*_digest.html
-*_report_*.md
-digests/
-drafts/
-# reports/ - Allow documentation reports in docs/reports/
-*.html
-screenshots/
-*.png
-
-# Cache
+# Local caches
 .cache/
-*.cache
 
-# ML models
-models/
-*.pkl
-*.h5
-*.pt
-*.pth
+# Local config/secrets (do not commit)
+config/credentials.json
+config/gmail_token.json
+config/gmail_credentials.json
+config/gmail_config.json
+config/gmail_token.pickle
+config/env/
+*.env
+
+# Downloads and generated artifacts
+downloads/
+production/src/extractors/downloads/
+results/
+production/src/extractors/results/
+
+# Debug artifacts
+debug_*.html
+*debug*.html
+*timeline_report_*.txt
+*comprehensive_*.json
+ULTRATHINK_*.json
+ULTRAFIX_*.json
+EXTRACTOR_TEST_RESULTS_*.md
+FS_*_ANALYSIS_*.md
+
+# Logs
+logs/

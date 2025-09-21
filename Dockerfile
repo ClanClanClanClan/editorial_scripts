@@ -7,18 +7,13 @@ RUN groupadd -r editorial && useradd -r -g editorial editorial
 # Install system dependencies for build
 RUN apt-get update && apt-get install -y \
     build-essential \
-    curl \
     git \
     libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Poetry
-ENV POETRY_HOME="/opt/poetry" \
-    POETRY_CACHE_DIR="/opt/poetry-cache" \
-    POETRY_VERSION="1.7.1"
-    
-RUN curl -sSL https://install.python-poetry.org | python3 -
-ENV PATH="$POETRY_HOME/bin:$PATH"
+# Install Poetry (pinned)
+ENV POETRY_VERSION="1.7.1"
+RUN python -m pip install --no-cache-dir "poetry==${POETRY_VERSION}"
 
 # Copy dependency files
 WORKDIR /app
@@ -89,4 +84,5 @@ LABEL org.opencontainers.image.title="Editorial System V3" \
       org.opencontainers.image.source="https://github.com/editorial-system/editorial-scripts-v3"
 
 # Production entrypoint
-CMD ["python", "-m", "infrastructure.web.main"]
+# Run FastAPI app with uvicorn
+CMD ["uvicorn", "ecc.main:app", "--host", "0.0.0.0", "--port", "8000"]

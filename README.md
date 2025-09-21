@@ -8,7 +8,8 @@ A comprehensive system for extracting manuscript and referee data from 8 academi
 ## 🚀 Quick Start
 
 ### Prerequisites
-- Python 3.8+
+- Python 3.11+
+- Poetry 1.7+
 - Chrome/Chromium browser
 - macOS (for keychain storage)
 
@@ -18,25 +19,23 @@ A comprehensive system for extracting manuscript and referee data from 8 academi
 git clone <repository>
 cd editorial_scripts
 
-# Create virtual environment
-python3 -m venv venv
-source venv/bin/activate
+# Install dependencies with Poetry
+poetry install
 
-# Install dependencies
-pip install -r requirements.txt
+# Activate the venv for local runs
+poetry shell
 ```
 
-### Running Extractors
+### Running ECC
 ```bash
-# Production extractor (works perfectly)
-python3 production/src/extractors/mf_extractor.py
+# API (FastAPI)
+uvicorn src.ecc.main:app --host 0.0.0.0 --port 8000 --reload
 
-# New architecture (in progress)
-python3 test_mf_with_env.py
-
-# Legacy extractors
-python3 editorial_assistant/extractors/sicon.py
+# CLI
+ecc --help
 ```
+
+Note: Legacy extractors under `production/` and `editorial_assistant/` are preserved for reference only. They are not security‑hardened and should not be used for new runs.
 
 ### Verify Credentials
 ```bash
@@ -123,6 +122,8 @@ BaseExtractor (abstract)
 - ✅ Automatic loading from secure storage
 - ✅ Git-ignored sensitive directories
 - ✅ Masked password output in logs
+
+See SECURITY.md for vulnerability reporting and deployment hardening guidance.
 
 ## 📖 Documentation
 

@@ -57,6 +57,45 @@ jobs:
           name: pip-audit
           path: artifacts/security/pip-audit.json
           retention-days: 14
+      - name: Security summary
+        if: always()
+        run: |
+          python - << 'PY'
+          import json, os
+          summary = os.environ.get('GITHUB_STEP_SUMMARY')
+          def append(line):
+              if summary:
+                  with open(summary, 'a') as f:
+                      f.write(str(line)+'\n')
+          def count_bandit(p):
+              try:
+                  with open(p) as f:
+                      data = json.load(f)
+                  results = data.get('results', [])
+                  sev = {}
+                  for r in results:
+                      s = str(r.get('issue_severity', 'LOW')).upper()
+                      sev[s] = sev.get(s, 0) + 1
+                  return len(results), sev
+              except Exception:
+                  return 0, {}
+          def count_pip(p):
+              try:
+                  with open(p) as f:
+                      data = json.load(f)
+                  if isinstance(data, dict) and 'dependencies' in data:
+                      return sum(len(d.get('vulns', [])) for d in data['dependencies'])
+                  elif isinstance(data, list):
+                      return len(data)
+                  return 0
+              except Exception:
+                  return 0
+          b_total, b_sev = count_bandit('artifacts/security/bandit.json')
+          p_total = count_pip('artifacts/security/pip-audit.json')
+          append('## Security Summary')
+          append(f'- Bandit findings: {b_total} (by severity: {b_sev})')
+          append(f'- pip-audit vulnerabilities: {p_total}')
+          PY
   test:
     runs-on: ubuntu-latest
     steps:

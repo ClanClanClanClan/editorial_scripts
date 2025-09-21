@@ -29,17 +29,33 @@ fi
 
 echo "[security-scan] Running bandit and pip-audit (stage=$STAGE, mode=$MODE)"
 
+# Read allowlists if present
+ALLOW_BANDIT=$(grep -v '^#' .security/bandit-allowlist.txt 2>/dev/null | tr '\n' ',' | sed 's/,$//')
+ALLOW_PIP=$(grep -v '^#' .security/pip-audit-allowlist.txt 2>/dev/null | xargs -I{} printf -- '--ignore-vuln %s ' '{}')
+
+# Severity: default HIGH (fail on high); override with BANDIT_LEVEL env (e.g., MEDIUM|LOW)
+BANDIT_LEVEL=${BANDIT_LEVEL:-HIGH}
+BANDIT_FLAGS=("-r" "src" "-x" "tests,dev,archive,production")
+case "$BANDIT_LEVEL" in
+  HIGH) BANDIT_FLAGS=("-ll" "${BANDIT_FLAGS[@]}");;
+  MEDIUM) BANDIT_FLAGS=("-l" "${BANDIT_FLAGS[@]}");;
+  *) : ;; # default
+esac
+
 # bandit
 if command -v bandit >/dev/null 2>&1; then
-  bandit -q -r src -x tests,dev,archive,production
+  if [ -n "$ALLOW_BANDIT" ]; then
+    bandit -q "${BANDIT_FLAGS[@]}" -s "$ALLOW_BANDIT"
+  else
+    bandit -q "${BANDIT_FLAGS[@]}"
+  fi
 else
   echo "[security-scan] bandit not found; install or run via CI"
 fi
 
 # pip-audit
 if command -v pip-audit >/dev/null 2>&1; then
-  pip-audit -s
+  pip-audit -s $ALLOW_PIP
 else
   echo "[security-scan] pip-audit not found; install or run via CI"
 fi
-

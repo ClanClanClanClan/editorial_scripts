@@ -1377,19 +1377,22 @@ class MORExtractor(CachedExtractorMixin):
                     if referee_data:
                         referees.append(referee_data)
 
-            # Strategy 3: Any table row with status keywords
+            # Strategy 3: Limited status keyword search (with safety limit)
             if not referees:
-                print("      ⚠️ Trying status keyword search")
+                print("      ⚠️ Trying status keyword search (limited)")
                 referee_rows = self.driver.find_elements(
                     By.XPATH,
-                    "//tr[contains(., 'Declined') or contains(., 'Agreed') or contains(., 'Invited') or contains(., 'Pending')]",
+                    "//table//tr[contains(., 'Declined') or contains(., 'Agreed') or contains(., 'Invited') or contains(., 'Pending')]",
                 )
 
-                for row in referee_rows:
+                # Safety limit: only process first 20 rows
+                print(f"      📊 Found {len(referee_rows)} potential rows, processing first 20...")
+                for row in referee_rows[:20]:
                     # Skip if it's a header row
+                    row_text = self.safe_get_text(row).lower()
                     if any(
-                        x in self.safe_get_text(row).lower()
-                        for x in ["referee name", "status", "date invited"]
+                        x in row_text
+                        for x in ["referee name", "status", "date invited", "audit", "history", "action"]
                     ):
                         continue
                     referee_data = self._parse_referee_row(row)

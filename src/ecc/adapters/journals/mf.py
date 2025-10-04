@@ -1,12 +1,12 @@
-"""Mathematical Finance (MF) journal adapter - ScholarOne implementation."""
+"""Mathematical Finance (MF) journal adapter - ScholarOne Selenium implementation."""
 
 from src.ecc.adapters.journals.base import JournalConfig
-from src.ecc.adapters.journals.scholarone import ScholarOneAdapter
+from src.ecc.adapters.journals.scholarone_selenium import ScholarOneSeleniumAdapter
 from src.ecc.core.domain.models import Manuscript
 
 
-class MFAdapter(ScholarOneAdapter):
-    """Mathematical Finance journal adapter."""
+class MFAdapter(ScholarOneSeleniumAdapter):
+    """Mathematical Finance journal adapter (uses Selenium to bypass anti-bot)."""
 
     def __init__(self, headless: bool = True):
         config = JournalConfig(

@@ -1,12 +1,12 @@
-"""Mathematics of Operations Research (MOR) journal adapter - ScholarOne implementation."""
+"""Mathematics of Operations Research (MOR) journal adapter - ScholarOne Selenium implementation."""
 
 from src.ecc.adapters.journals.base import JournalConfig
-from src.ecc.adapters.journals.scholarone import ScholarOneAdapter
+from src.ecc.adapters.journals.scholarone_selenium import ScholarOneSeleniumAdapter
 from src.ecc.core.domain.models import Manuscript
 
 
-class MORAdapter(ScholarOneAdapter):
-    """MOR journal adapter built on ScholarOne adapter."""
+class MORAdapter(ScholarOneSeleniumAdapter):
+    """MOR journal adapter (uses Selenium to bypass anti-bot)."""
 
     def __init__(self, headless: bool = True):
         config = JournalConfig(

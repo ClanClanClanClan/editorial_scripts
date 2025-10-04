@@ -27,7 +27,7 @@ services:
     container_name: ecc_redis
     command: redis-server --appendonly yes
     ports:
-      - "6379:6379"
+      - "6380:6379"
     volumes:
       - redis_data:/data
     healthcheck:
@@ -65,7 +65,7 @@ services:
       - '--config.file=/etc/prometheus/prometheus.yml'
       - '--storage.tsdb.path=/prometheus'
     ports:
-      - "9090:9090"
+      - "9092:9090"
     networks:
       - ecc_network
 
@@ -78,7 +78,7 @@ services:
       GF_SECURITY_ADMIN_PASSWORD: admin
       GF_INSTALL_PLUGINS:
     ports:
-      - "3000:3000"
+      - "3002:3000"
     volumes:
       - grafana_data:/var/lib/grafana
       - ./config/grafana/dashboards:/etc/grafana/provisioning/dashboards

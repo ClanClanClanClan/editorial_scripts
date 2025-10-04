@@ -1,0 +1,52 @@
+{
+  "timestamp": "2025-10-04T00:34:07.856309",
+  "duration_seconds": 78.628085,
+  "results": {
+    "MF": {
+      "status": "failed",
+      "error": "Authentication failed",
+      "timestamp": "2025-10-04T00:33:14.322447"
+    },
+    "MOR": {
+      "status": "failed",
+      "error": "Authentication failed",
+      "timestamp": "2025-10-04T00:33:39.108444"
+    },
+    "FS": {
+      "status": "failed",
+      "error": "Failed to initialize Gmail client for FS",
+      "timestamp": "2025-10-04T00:33:39.174677"
+    },
+    "JOTA": {
+      "status": "success_no_data",
+      "manuscripts_found": 0,
+      "timestamp": "2025-10-04T00:33:43.104115"
+    },
+    "MAFE": {
+      "status": "success_no_data",
+      "manuscripts_found": 0,
+      "timestamp": "2025-10-04T00:33:46.862269"
+    },
+    "SICON": {
+      "status": "success_no_data",
+      "manuscripts_found": 0,
+      "timestamp": "2025-10-04T00:33:55.336243"
+    },
+    "SIFIN": {
+      "status": "success_no_data",
+      "manuscripts_found": 0,
+      "timestamp": "2025-10-04T00:34:03.695015"
+    },
+    "NACO": {
+      "status": "success_no_data",
+      "manuscripts_found": 0,
+      "timestamp": "2025-10-04T00:34:07.809171"
+    }
+  },
+  "summary": {
+    "total": 8,
+    "success": 5,
+    "failed": 3,
+    "skipped": 0
+  }
+}

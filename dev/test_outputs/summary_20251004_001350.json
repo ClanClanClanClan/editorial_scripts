@@ -1,0 +1,52 @@
+{
+  "timestamp": "2025-10-04T00:13:50.183353",
+  "duration_seconds": 110.186844,
+  "results": {
+    "MF": {
+      "status": "failed",
+      "error": "Authentication failed",
+      "timestamp": "2025-10-04T00:12:34.716704"
+    },
+    "MOR": {
+      "status": "failed",
+      "error": "Authentication failed",
+      "timestamp": "2025-10-04T00:13:06.817394"
+    },
+    "FS": {
+      "status": "failed",
+      "error": "'ExtractorLogger' object has no attribute 'log_error'",
+      "timestamp": "2025-10-04T00:13:06.887247"
+    },
+    "JOTA": {
+      "status": "success_no_data",
+      "manuscripts_found": 0,
+      "timestamp": "2025-10-04T00:13:10.966470"
+    },
+    "MAFE": {
+      "status": "success_no_data",
+      "manuscripts_found": 0,
+      "timestamp": "2025-10-04T00:13:14.879988"
+    },
+    "SICON": {
+      "status": "success_no_data",
+      "manuscripts_found": 0,
+      "timestamp": "2025-10-04T00:13:31.244645"
+    },
+    "SIFIN": {
+      "status": "success_no_data",
+      "manuscripts_found": 0,
+      "timestamp": "2025-10-04T00:13:45.939000"
+    },
+    "NACO": {
+      "status": "success_no_data",
+      "manuscripts_found": 0,
+      "timestamp": "2025-10-04T00:13:50.126875"
+    }
+  },
+  "summary": {
+    "total": 8,
+    "success": 5,
+    "failed": 3,
+    "skipped": 0
+  }
+}

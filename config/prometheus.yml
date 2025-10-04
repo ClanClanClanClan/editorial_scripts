@@ -1,0 +1,12 @@
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: ecc-api
+    static_configs:
+      - targets:
+          - ecc_api:8000
+  - job_name: ecc-celery
+    static_configs:
+      - targets:
+          - ecc_worker:9090

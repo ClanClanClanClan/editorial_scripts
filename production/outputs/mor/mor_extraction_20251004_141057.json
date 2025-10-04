@@ -1,0 +1,212 @@
+{
+  "extraction_timestamp": "2025-10-04T14:07:25.057448",
+  "journal": "MOR",
+  "extractor_version": "2.0.0-MF-Level-Robust",
+  "manuscripts": [
+    {
+      "id": "MOR-2025-1190",
+      "title": "Geometric BSDEs",
+      "authors": [
+        {
+          "name": "Roger Laeven",
+          "is_corresponding": true,
+          "email": ""
+        },
+        {
+          "name": "Emanuela Rosazza Gianin",
+          "is_corresponding": false,
+          "email": ""
+        },
+        {
+          "name": "Marco Zullino",
+          "is_corresponding": false,
+          "email": ""
+        }
+      ],
+      "submission_date": "09-Sep-2025",
+      "last_updated": "30-Sep-2025",
+      "in_review_time": "25d 1h 27min 23sec",
+      "status": "Assign Reviewers",
+      "status_details": "2 active selections; 2 invited; 1 agreed; 2 declined; 0 returned",
+      "article_type": "",
+      "special_issue": "",
+      "referees": [
+        {
+          "name": "ludovic tangpi",
+          "email": "",
+          "affiliation": "Princeton University, ORFE",
+          "orcid": "https://orcid.org/0000-0003-3830-1418",
+          "status": "Declined\ninvite again",
+          "dates": {
+            "invited": "23-Sep-2025"
+          },
+          "report": null
+        },
+        {
+          "name": "Michael Kupper",
+          "email": "",
+          "affiliation": "University of Konstanz, Department of Mathematics",
+          "orcid": "https://orcid.org/0000-0001-9643-0811",
+          "status": "Agreed",
+          "dates": {
+            "invited": "23-Sep-2025",
+            "agreed": "30-Sep-2025",
+            "due": "29-Dec-2025"
+          },
+          "report": null
+        },
+        {
+          "name": "Khaled Bahlali",
+          "email": "",
+          "affiliation": "",
+          "orcid": "",
+          "status": "Declined\ninvite again",
+          "dates": {
+            "invited": "23-Sep-2025"
+          },
+          "report": null
+        },
+        {
+          "name": "Mohammed Hassani",
+          "email": "",
+          "affiliation": "",
+          "orcid": "",
+          "status": "Invited\nResponse\n      Select...\n    \n           Agreed\n         \n           Declined\n         \n           No Response\n         \n           Unavailable\n         \n           Auto-declined",
+          "dates": {
+            "invited": "01-Oct-2025"
+          },
+          "report": null
+        }
+      ],
+      "editors": {
+        "AE": {
+          "name": "Possamaï, Dylan",
+          "email": ""
+        },
+        "AreaED": {
+          "name": "Srikant, R.",
+          "email": ""
+        },
+        "EIC": {
+          "name": "Scheinberg, Katya",
+          "email": ""
+        },
+        "ME": {
+          "name": "Elmore (Editorial Office), Jeff",
+          "email": ""
+        }
+      },
+      "category": "Awaiting Reviewer Reports"
+    },
+    {
+      "id": "MOR-2025-1037",
+      "title": "The Value of Partial Information",
+      "authors": [
+        {
+          "name": "Oleksii Mostovyi",
+          "is_corresponding": true,
+          "email": ""
+        },
+        {
+          "name": "Philip Ernst",
+          "is_corresponding": false,
+          "email": ""
+        }
+      ],
+      "submission_date": "11-May-2025",
+      "last_updated": "12-May-2025",
+      "in_review_time": "145d 9h 37min 10sec",
+      "status": "Awaiting Reviewer Scores",
+      "status_details": "2 active selections; 2 invited; 2 agreed; 1 declined; 1 returned",
+      "article_type": "",
+      "special_issue": "",
+      "referees": [
+        {
+          "name": "Anna Aksamit",
+          "email": "",
+          "affiliation": "The University of Sydney, School of Mathematics and Statistics",
+          "orcid": "",
+          "status": "Declined\ninvite again",
+          "dates": {
+            "invited": "04-Jun-2025"
+          },
+          "report": null
+        },
+        {
+          "name": "Bahman Angoshtari",
+          "email": "",
+          "affiliation": "University of Miami, Mathematics",
+          "orcid": "https://orcid.org/0000-0003-1415-4062",
+          "status": "Major Revision\n\nrescind",
+          "dates": {
+            "invited": "04-Jun-2025",
+            "agreed": "04-Jun-2025",
+            "due": "02-Sep-2025",
+            "returned": "02-Sep-2025"
+          },
+          "report": {
+            "comments_to_editor": "",
+            "comments_to_author": "Clearly label your Major and Minor Comments to Author in the field provided below. Please be sure to retain anonymity in your comments.",
+            "recommendation": "",
+            "pdf_files": []
+          }
+        },
+        {
+          "name": "Umut Cetin",
+          "email": "",
+          "affiliation": "",
+          "orcid": "",
+          "status": "Overdue",
+          "dates": {
+            "invited": "06-Jun-2025",
+            "agreed": "11-Jun-2025",
+            "due": "01-Oct-2025"
+          },
+          "report": null
+        }
+      ],
+      "editors": {
+        "AE": {
+          "name": "Possamaï, Dylan",
+          "email": ""
+        },
+        "AreaED": {
+          "name": "Blanchet, Jose",
+          "email": ""
+        },
+        "EIC": {
+          "name": "Scheinberg, Katya",
+          "email": ""
+        },
+        "ME": {
+          "name": "Elmore (Editorial Office), Jeff",
+          "email": ""
+        }
+      },
+      "category": "Overdue Reviewer Reports"
+    }
+  ],
+  "summary": {
+    "total_manuscripts": 2,
+    "by_category": {
+      "Awaiting Reviewer Reports": 1,
+      "Overdue Reviewer Reports": 1
+    },
+    "revision_manuscripts": 0,
+    "referee_emails_extracted": 0,
+    "total_referees": 7,
+    "documents_downloaded": 0,
+    "total_audit_events": 0,
+    "orcid_coverage": {
+      "authors_with_orcid": 0,
+      "total_authors": 5,
+      "referees_with_orcid": 3,
+      "author_coverage_percent": 0.0,
+      "referee_coverage_percent": 42.9
+    },
+    "cache_hits": 0,
+    "extraction_time": "2025-10-04T14:10:57.478828",
+    "email_extraction_rate": 0.0
+  },
+  "errors": []
+}

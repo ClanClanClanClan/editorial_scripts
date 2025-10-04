@@ -1,0 +1,10 @@
+{
+  "extraction_timestamp": "2025-10-04T13:15:11.989567",
+  "journal": "MOR",
+  "extractor_version": "2.0.0-MF-Level-Robust",
+  "manuscripts": [],
+  "summary": {},
+  "errors": [
+    "Fatal: Login failed after retries"
+  ]
+}

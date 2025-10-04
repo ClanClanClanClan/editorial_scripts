@@ -13,7 +13,7 @@ class SICONAdapter(AsyncJournalAdapter):
             JournalConfig(
                 journal_id="SICON",
                 name="SIAM Journal on Control and Optimization",
-                url="https://www.siam.org/journals/sicon",
+                url="https://www.siam.org/journals/sicon",  # SIAM (stub - real URL TBD)
                 platform="SIAM",
                 headless=headless,
             )

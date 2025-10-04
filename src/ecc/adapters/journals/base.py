@@ -23,7 +23,7 @@ class JournalConfig:
     name: str
     url: str
     platform: str
-    user_agent: str = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)"
+    user_agent: str = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
     headless: bool = True
     download_dir: Path | None = None
     timeout: int = 30000  # 30 seconds default
@@ -77,7 +77,7 @@ class AsyncJournalAdapter(ABC):
 
         self.playwright = await async_playwright().start()
 
-        # Launch browser with optimized settings
+        # Launch browser with anti-detection settings
         self.browser = await self.playwright.chromium.launch(
             headless=self.config.headless,
             args=[
@@ -85,6 +85,10 @@ class AsyncJournalAdapter(ABC):
                 "--disable-setuid-sandbox",
                 "--disable-dev-shm-usage",
                 "--disable-blink-features=AutomationControlled",
+                "--disable-web-security",
+                "--disable-features=IsolateOrigins,site-per-process",
+                "--window-size=1920,1080",
+                "--start-maximized",
             ],
         )
 
@@ -97,6 +101,16 @@ class AsyncJournalAdapter(ABC):
             accept_downloads=True,
             ignore_https_errors=True,
             locale="en-US",
+            timezone_id="America/New_York",
+            permissions=["geolocation", "notifications"],
+            extra_http_headers={
+                "Accept-Language": "en-US,en;q=0.9",
+                "Accept-Encoding": "gzip, deflate, br",
+                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+                "DNT": "1",
+                "Connection": "keep-alive",
+                "Upgrade-Insecure-Requests": "1",
+            },
         )
 
         # Set default timeout
@@ -104,6 +118,18 @@ class AsyncJournalAdapter(ABC):
 
         # Create main page
         self.page = await self.context.new_page()
+
+        # Apply stealth mode to avoid bot detection
+        try:
+            from playwright_stealth import Stealth
+
+            stealth_config = Stealth()
+            await stealth_config.apply_stealth_async(self.page)
+            self.logger.info("Stealth mode applied successfully")
+        except ImportError:
+            self.logger.warning("playwright-stealth not available, skipping stealth mode")
+        except Exception as e:
+            self.logger.warning(f"Failed to apply stealth mode: {e}")
 
         # Enable request/response logging for debugging
         self.page.on("request", self._on_request)

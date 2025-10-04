@@ -59,7 +59,8 @@ Two options:
 
 1) File-based (ignored by git; recommended for local dev)
 
-- Place Google OAuth client credentials at `config/gmail_credentials.json`.
+- Copy `config/gmail_config.json.example` to `config/gmail_config.json` and update the email address.
+- Place Google OAuth client credentials at `config/gmail_credentials.json` (not tracked).
 - The first OAuth flow will create `config/gmail_token.json`.
 
 2) Secrets-injected JSON
@@ -124,4 +125,6 @@ ORCID_CLIENT_SECRET=...
 - Git ignores credentials and token files under `config/`.
 - Production startup fails if `ECC_ENV=production` and `ECC_SECRET_KEY` is not set to a strong value.
 - For 2FA during automation, the app looks for `ECC_GMAIL_2FA_CODE`; otherwise it will fetch from Gmail if configured.
-
+- Docker Compose scaffolding:
+  - `prometheus.yml` – basic scrape config; update with real service names or mount your own
+  - `grafana/dashboards/` & `grafana/datasources/` – empty placeholders so volume mounts succeed

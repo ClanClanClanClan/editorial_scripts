@@ -10,7 +10,7 @@ class SIFINAdapter(AsyncJournalAdapter):
             JournalConfig(
                 journal_id="SIFIN",
                 name="SIAM Journal on Financial Mathematics",
-                url="https://www.siam.org/journals/sifin",
+                url="https://www.siam.org/journals/sifin",  # SIAM (stub - real URL TBD)
                 platform="SIAM",
                 headless=headless,
             )

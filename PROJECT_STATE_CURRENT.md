@@ -1,7 +1,25 @@
 # 📊 EDITORIAL SCRIPTS PROJECT - CURRENT STATE
+
+> **⚠️ IMPORTANT: This file is outdated (last updated 2025-01-27)**
+>
+> **For current status, see:**
+> - **[PROJECT_STATUS_CONSOLIDATED_20251004.md](./PROJECT_STATUS_CONSOLIDATED_20251004.md)** ← Authoritative status
+> - **[IMPLEMENTATION_PLAN_20251004.md](./IMPLEMENTATION_PLAN_20251004.md)** ← Actionable plan
+> - **[COMPREHENSIVE_AUDIT_20251004.md](./COMPREHENSIVE_AUDIT_20251004.md)** ← Complete audit
+>
+> **Key updates (Oct 4, 2025):**
+> - ✅ MOR syntax errors fixed (4 empty functions)
+> - ❌ MF blocked by Gmail OAuth (needs setup)
+> - ⚠️ ECC implementation only 5% complete (authentication only)
+> - 📋 Clear implementation plan created (Track A: restore production, Track B: complete ECC)
+
+---
+
+# 📊 EDITORIAL SCRIPTS PROJECT - CURRENT STATE (LEGACY)
 **Date: 2025-01-27**
 **Purpose: Definitive documentation of actual project state - NO contradictions**
 **Last Verified**: 2025-01-27 with real data
+**Status**: OUTDATED - See files linked above
 
 ---
 
@@ -39,9 +57,10 @@
 
 ```
 editorial_scripts/
-├── production/                    # ⭐ ALL WORKING CODE HERE
+├── archive/                    # Historical material (now includes data_snapshots/, logs/)
+├── production/                 # ⭐ ALL WORKING CODE HERE
 │   └── src/
-│       ├── extractors/           # ALL 8 EXTRACTORS (1 verified, 7 need testing)
+│       ├── extractors/         # ALL 8 EXTRACTORS (1 verified, 7 need testing)
 │       │   ├── fs_extractor.py   # ✅ VERIFIED WORKING - Gmail (2,691 lines)
 │       │   ├── mf_extractor.py   # ⚠️ NEEDS TESTING - ScholarOne (3,939 lines)
 │       │   ├── mor_extractor.py  # ⚠️ NEEDS TESTING - ScholarOne (11,454 lines)
@@ -60,39 +79,27 @@ editorial_scripts/
 │           ├── gmail_utils.py
 │           └── secure_credentials.py
 │
-├── dev/                          # 🧪 DEVELOPMENT ENVIRONMENT (ISOLATED)
+├── dev/                         # 🧪 DEVELOPMENT ENVIRONMENT (ISOLATED)
 │   ├── mf/                      # MF development sandbox
 │   │   ├── run_mf_dev.py       # Development runner
-│   │   ├── tests/              # Test scripts (27 files)
+│   │   ├── scripts/            # One-off fix utilities (moved from repo root)
+│   │   ├── tests/              # Dev-only harnesses
+│   │   │   └── manual_runs/    # Former root-level manual extraction tests
 │   │   ├── outputs/            # Test outputs
 │   │   ├── logs/               # Debug logs
 │   │   └── debug/              # Debug HTML captures
 │   ├── fs/                     # FS development area
 │   └── README.md               # Dev guidelines
 │
-├── src/                         # 🚧 NEW ARCHITECTURE (IN PROGRESS)
+├── src/                        # 🚧 NEW ARCHITECTURE (IN PROGRESS)
 │   ├── core/                   # Base components (9 files)
-│   │   ├── base_extractor.py
-│   │   ├── browser_manager.py
-│   │   ├── credential_manager.py
-│   │   ├── data_models.py
-│   │   └── gmail_manager.py
 │   ├── platforms/              # Platform base classes
-│   │   └── scholarone.py      # ScholarOne base (for MF/MOR)
-│   ├── extractors/             # Empty - future home
 │   └── ecc/                    # Event-driven architecture experiment
-│       ├── core/               # ECC core (14 files)
-│       ├── adapters/           # Various adapters
-│       └── main.py            # ECC main entry
 │
-├── config/                      # Configuration
-│   ├── gmail_token.json       # Gmail OAuth token
-│   └── credentials.json       # Gmail API credentials
-│
-├── docs/                        # Documentation
-│   ├── workflows/              # How-to guides
-│   └── specifications/         # System specs
-│
+├── config/                     # Configuration (now includes grafana/, prometheus.yml, gmail_config.json.example)
+├── docs/                       # Documentation
+├── scripts/                    # CLI/admin/security helpers (init_db.sql added for docker-compose)
+├── tests/                      # Automated unit/integration suite (pytest collects only here)
 └── Root Files:
     ├── verify_all_credentials.py  # ✅ Credential checker
     ├── run_extractors.py          # Batch runner

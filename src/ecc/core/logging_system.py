@@ -168,6 +168,10 @@ class ExtractorLogger:
         """Log popup error."""
         self.error(message, LogCategory.POPUP, *args)
 
+    def log_error(self, message: str, *args):
+        """Alias for error() for compatibility."""
+        self.error(message, LogCategory.EXTRACTION, *args)
+
     # Info operations
     def info(self, message: str, category: LogCategory = LogCategory.EXTRACTION, *args):
         """Log info."""
@@ -188,6 +192,10 @@ class ExtractorLogger:
     def frame_info(self, message: str, *args):
         """Log frame information."""
         self.info(message, LogCategory.FRAME, *args)
+
+    def log_success(self, message: str, *args):
+        """Alias for info() for success messages - compatibility."""
+        self.info(message, LogCategory.EXTRACTION, *args)
 
     # Debug operations
     def debug(self, message: str, category: LogCategory = LogCategory.EXTRACTION, *args):

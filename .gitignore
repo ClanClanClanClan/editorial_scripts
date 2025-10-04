@@ -41,6 +41,7 @@ downloads/
 production/src/extractors/downloads/
 results/
 production/src/extractors/results/
+artifacts/
 
 # Debug artifacts
 debug_*.html
@@ -54,3 +55,5 @@ FS_*_ANALYSIS_*.md
 
 # Logs
 logs/
+archive/*.tar.gz
+editorial_scripts_backup.git/

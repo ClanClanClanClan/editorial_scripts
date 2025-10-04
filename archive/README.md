@@ -1,34 +1,15 @@
 # Archive Directory
 
-This directory contains historical and deprecated code that has been removed from the main system.
+This directory contains historical and deprecated assets that should remain out of the active codebase. Anything that is no longer needed for day-to-day development should be moved here (or deleted) to keep the repository root small.
 
-## Contents
+## Notable folders
 
-### `archive_compressed_20250715.tar.gz`
-- Compressed archive containing all historical cleanup folders
-- Includes: aggressive_dedup, cleanup_20250711, debug_files, legacy_implementations, etc.
-- Created during the July 15, 2025 major cleanup
+- `broken_implementations/` – experiments that never shipped
+- `legacy_implementations_20250726/` – the pre-cleanup production tree
+- `data_snapshots/` – frozen JSON/CSV exports moved out of the repository root (contains PII; keep private)
+- `logs/` – historical extraction logs
+- `docs_backup_*` – point-in-time copies of documentation
 
-### `broken_implementations/`
-- Contains implementations that were attempted but didn't work properly
-- `editorial_scripts_ultimate/` - The "ultimate" system that was moved from root
-  - Contains optimized extractors and models
-  - Moved here because the main `editorial_assistant/` system is the working implementation
+Feel free to add sub-folders, but keep a short README alongside large drops so future audits can see what changed and why.
 
-## Purpose
-
-This archive preserves the development history while keeping the main project clean and organized. The working system is now in the `editorial_assistant/` directory with `run_extraction.py` as the main entry point.
-
-## Clean System Structure
-
-The main project now has a clean structure:
-- `editorial_assistant/` - Main working implementation
-- `run_extraction.py` - Primary entry point
-- `scripts/` - Organized utility scripts
-- `tests/` - All test files
-- `docs/` - Documentation
-- `config/` - Configuration files
-- `data/` - Data outputs
-
----
-*Archive created during July 15, 2025 cleanup*
+The working production pipeline continues to live under `production/src/extractors`; the `archive/` tree is strictly for reference.

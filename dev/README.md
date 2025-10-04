@@ -10,9 +10,11 @@
 dev/
 ├── mf/                    # MF extractor development
 │   ├── tests/            # All MF test files
+│   │   └── manual_runs/  # Manual E2E harnesses (moved from repo root)
 │   ├── outputs/          # All MF extraction results
 │   ├── logs/             # All MF debug logs
 │   ├── debug/            # Debug HTML files, screenshots
+│   ├── scripts/          # One-off fix utilities
 │   └── run_mf_dev.py     # Development runner
 ├── sicon/                # SICON development (future)
 ├── mor/                  # MOR development (future)
@@ -23,6 +25,7 @@ dev/
 
 ### ✅ DO:
 - Create all test files in `dev/{journal}/tests/`
+- Keep long-running/manual harnesses inside `dev/{journal}/tests/manual_runs/`
 - Save all results to `dev/{journal}/outputs/`
 - Store all logs in `dev/{journal}/logs/`
 - Use development runners in `dev/{journal}/`

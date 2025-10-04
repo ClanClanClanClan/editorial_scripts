@@ -2,6 +2,18 @@
 
 A comprehensive system for extracting manuscript and referee data from 8 academic journal editorial platforms.
 
+## 📊 Current Status (October 4, 2025)
+
+**For detailed status and implementation plans, see:**
+- **[PROJECT_STATUS_CONSOLIDATED_20251004.md](./PROJECT_STATUS_CONSOLIDATED_20251004.md)** - Complete status
+- **[IMPLEMENTATION_PLAN_20251004.md](./IMPLEMENTATION_PLAN_20251004.md)** - Fix plan
+- **[COMPREHENSIVE_AUDIT_20251004.md](./COMPREHENSIVE_AUDIT_20251004.md)** - Full audit
+
+**Quick Status**:
+- ✅ MOR extractor: Syntax fixed, ready to test
+- ❌ MF extractor: Blocked by Gmail OAuth setup (see implementation plan)
+- ⚠️ ECC: 5% complete (authentication only)
+
 ## ⚠️ IMPORTANT: Credentials Already Stored!
 **All journal credentials are permanently stored in macOS Keychain. Never ask for them again.**
 
@@ -24,6 +36,10 @@ poetry install
 
 # Activate the venv for local runs
 poetry shell
+
+# Optional: scaffold Gmail config for local OAuth credentials
+cp config/gmail_config.json.example config/gmail_config.json
+# Update the copied file with your Gmail address before running automation
 ```
 
 ### Running ECC
@@ -35,7 +51,7 @@ uvicorn ecc.main:app --host 0.0.0.0 --port 8000 --reload
 ecc --help
 ```
 
-Note: Legacy extractors under `production/` and `editorial_assistant/` are preserved for reference only. They are not security‑hardened and should not be used for new runs.
+Note: Legacy extractors under `production/` are preserved for reference only. They are not security-hardened and should not be used for new runs.
 
 ### Verify Credentials
 ```bash
@@ -50,11 +66,19 @@ source ~/.editorial_scripts/load_all_credentials.sh
 
 ```
 editorial_scripts/
-├── production/                   # WORKING extractors (messy but functional)
+├── archive/                     # Historical artifacts (see data_snapshots/, logs/)
+├── config/                      # Configuration files & templates
+│   ├── gmail_config.json.example # Copy to gmail_config.json for local runs
+│   ├── grafana/                 # docker-compose dashboard placeholders
+│   └── selectors/               # Platform-specific CSS/XPath selectors
+├── dev/                         # Sandbox development area (isolated from prod)
+│   └── mf/
+│       ├── scripts/            # One-off MF fix utilities
+│       └── tests/manual_runs/  # Manual end-to-end extraction harnesses
+├── production/                  # WORKING extractors (messy but functional)
 │   └── src/
 │       └── extractors/
 │           └── mf_extractor.py  # 3,698 lines, DO NOT BREAK
-│
 ├── src/                         # NEW clean architecture (IN PROGRESS)
 │   ├── core/                    # Base components
 │   │   ├── base_extractor.py    # Abstract base
@@ -64,15 +88,13 @@ editorial_scripts/
 │   │   └── gmail_manager.py     # 2FA support
 │   ├── platforms/               # Platform base classes
 │   │   └── scholarone.py        # Base for MF, MOR
-│   └── extractors/              # Journal implementations
-│       └── mf.py                # Clean MF (418 lines!)
-│
-├── editorial_assistant/         # Legacy implementations
-├── config/                      # Configuration files
+│   └── ecc/                     # FastAPI app + adapters
 ├── scripts/                     # Utility scripts
-├── tests/                       # Test suite
+├── tests/                       # Automated unit/integration suite
 └── docs/                        # Documentation
 ```
+
+Manual end-to-end MF scripts live under `dev/mf/tests/manual_runs` so the automated `pytest` run stays deterministic.
 
 ## 🔑 Supported Journals
 

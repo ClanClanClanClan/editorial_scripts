@@ -6,6 +6,8 @@ ULTRATHINK_*.json
 ULTRAFIX_*.json
 EXTRACTOR_TEST_RESULTS_*.md
 FS_*_ANALYSIS_*.md
+archive/data_snapshots/
+dev/mf/tests/manual_runs/
 .ruff_cache/
 .pytest_cache/
 **/__pycache__/

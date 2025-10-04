@@ -85,15 +85,20 @@ def fetch_latest_verification_code(
                 # Get message internal date for logging
                 internal_date = int(message.get("internalDate", 0)) // 1000
 
-                # Extract code from message (get any recent code)
+                # Extract code from message
                 code = _extract_code_from_message(message)
                 if code:
                     age_seconds = time.time() - internal_date
                     age_mins = int(age_seconds / 60)
-                    print(f"✅ Found verification code: {code} (from {age_mins} minutes ago)")
-                    # Return if code is less than 30 mins old
-                    if age_seconds < 1800:  # 30 minutes
+
+                    # Check if email is AFTER the start_timestamp (with 5s buffer for timing)
+                    if internal_date >= (start_timestamp - 5):
+                        print(f"✅ Found verification code: {code} (from {age_mins} minutes ago)")
                         return code
+                    else:
+                        print(
+                            f"⏭️  Skipping old code: {code} (from {age_mins} minutes ago, before login attempt)"
+                        )
 
             # Wait before next check
             time.sleep(poll_interval)

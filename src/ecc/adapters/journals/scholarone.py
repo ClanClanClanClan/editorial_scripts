@@ -7,8 +7,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-from core.orcid_client import ORCIDClient
-
+from src.core.orcid_client import ORCIDClient
 from src.ecc.adapters.journals.base import AsyncJournalAdapter, JournalConfig
 from src.ecc.core.domain.models import (
     Author,
@@ -40,10 +39,54 @@ class ScholarOneAdapter(AsyncJournalAdapter):
         try:
             self.logger.info("Starting ScholarOne authentication")
 
-            # Navigate to login page
-            await self.navigate_with_retry(self.config.url)
+            # Navigate to login page with more reliable wait strategy
+            self.logger.info(f"Navigating to {self.config.url}")
+            try:
+                await self.page.goto(self.config.url, wait_until="domcontentloaded", timeout=30000)
+            except Exception as e:
+                self.logger.error(f"Navigation failed: {e}")
+                # Try once more with commit
+                await self.page.goto(self.config.url, wait_until="commit", timeout=30000)
 
-            # Get credentials from secure storage (TODO: integrate with Vault)
+            # Wait for page to stabilize
+            await self.page.wait_for_timeout(3000)  # 3s for JS initialization
+
+            # Aggressively dismiss any popups/overlays
+            await self._dismiss_scholarone_popups()
+
+            # Wait for login form to be visible and ready
+            self.logger.info("Waiting for login form...")
+
+            # Check if page actually loaded
+            try:
+                url = self.page.url
+                self.logger.info(f"Current URL: {url}")
+            except Exception:
+                pass
+
+            try:
+                await self.page.wait_for_selector("#USERID", state="visible", timeout=15000)
+                self.logger.info("Login form found!")
+            except Exception as e:
+                self.logger.error(
+                    f"Login form not found after 15s, attempting popup dismissal: {e}"
+                )
+                await self._dismiss_scholarone_popups()
+
+                # Try one more time with longer timeout
+                try:
+                    await self.page.wait_for_selector("#USERID", state="visible", timeout=15000)
+                    self.logger.info("Login form found after popup dismissal!")
+                except Exception as final_e:
+                    # Log page state for debugging
+                    try:
+                        title = await self.page.title()
+                        self.logger.error(f"Page title: {title}")
+                    except Exception:
+                        pass
+                    raise final_e
+
+            # Get credentials from secure storage
             credentials = await self._get_credentials()
 
             # Fill login form
@@ -182,6 +225,52 @@ class ScholarOneAdapter(AsyncJournalAdapter):
             "username": os.environ.get(f"{self.config.journal_id}_EMAIL", ""),
             "password": os.environ.get(f"{self.config.journal_id}_PASSWORD", ""),
         }
+
+    async def _dismiss_scholarone_popups(self):
+        """Aggressively dismiss ScholarOne-specific popups and overlays."""
+        popup_selectors = [
+            # Cookie consent
+            "button:has-text('Accept')",
+            "button:has-text('Accept All')",
+            "button:has-text('Accept Cookies')",
+            "button:has-text('I Accept')",
+            "button:has-text('OK')",
+            "#onetrust-accept-btn-handler",
+            ".accept-cookies",
+            ".cookie-accept",
+            # Close/dismiss buttons
+            "button:has-text('Close')",
+            "button:has-text('×')",
+            "button[aria-label='Close']",
+            ".close-button",
+            ".modal-close",
+            # Privacy/GDPR banners
+            "#privacy-accept",
+            ".privacy-accept",
+            ".gdpr-accept",
+            # Overlays
+            ".overlay-close",
+            ".popup-close",
+        ]
+
+        for selector in popup_selectors:
+            try:
+                button = await self.page.query_selector(selector)
+                if button:
+                    visible = await button.is_visible()
+                    if visible:
+                        await button.click()
+                        await self.page.wait_for_timeout(500)
+                        self.logger.info(f"Dismissed popup: {selector}")
+            except Exception:
+                continue
+
+        # Also try ESC key to close modals
+        try:
+            await self.page.keyboard.press("Escape")
+            await self.page.wait_for_timeout(300)
+        except Exception:
+            pass
 
     async def fetch_manuscripts(self, categories: list[str]) -> list[Manuscript]:
         """Fetch manuscripts from specified categories."""

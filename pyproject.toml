@@ -15,7 +15,7 @@ python = "^3.11"
 # FastAPI and web framework
 fastapi = "^0.109.0"
 uvicorn = {extras = ["standard"], version = "^0.25.0"}
-pydantic = "^2.5.3"
+pydantic = {extras = ["email"], version = "^2.11.9"}
 
 # Database
 sqlalchemy = "^2.0.25"
@@ -112,7 +112,6 @@ addopts = [
     "--strict-markers",
     "--tb=short",
     "--cov=src",
-    "--cov=analytics",
     "--cov-report=term-missing",
     "--cov-report=html",
 ]

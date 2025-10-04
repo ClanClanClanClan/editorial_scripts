@@ -21,6 +21,8 @@ import json
 import re
 import requests
 import random
+import atexit
+import signal
 from pathlib import Path
 from datetime import datetime, timedelta
 from functools import wraps
@@ -125,6 +127,9 @@ class MORExtractor(CachedExtractorMixin):
         self.wait = None
         self.original_window = None
         self.manuscripts_data = []
+
+        # Register cleanup on exit
+        atexit.register(self.cleanup_driver)
 
     def setup_chrome_options(self):
         """Configure Chrome options for production use"""
@@ -986,12 +991,13 @@ class MORExtractor(CachedExtractorMixin):
                     try:
                         next_elem = self.driver.find_element(By.XPATH, xpath)
                         if next_elem.is_enabled() and next_elem.is_displayed():
+                            old_source = self.driver.page_source
                             self.safe_click(next_elem)
                             self.smart_wait(2)
 
                             # Verify page changed
-                            new_soup = BeautifulSoup(self.driver.page_source, "html.parser")
-                            if new_soup != soup:  # Page content changed
+                            new_source = self.driver.page_source
+                            if new_source != old_source:  # Page content changed
                                 page_num += 1
                                 next_found = True
                                 break
@@ -1228,6 +1234,11 @@ class MORExtractor(CachedExtractorMixin):
     @with_retry(max_attempts=2)
     def extract_manuscript_comprehensive(self, manuscript_id: str) -> Dict[str, Any]:
         """Extract comprehensive manuscript data with all MF-level features"""
+        import time
+
+        extraction_start = time.time()
+        max_extraction_time = 300  # 5 minutes per manuscript
+
         print(f"\n{'='*60}")
         print(f"📋 EXTRACTING: {manuscript_id}")
         print("=" * 60)
@@ -1264,6 +1275,10 @@ class MORExtractor(CachedExtractorMixin):
                 manuscript_data["revision_number"] = int(revision_match.group(1))
 
         # PASS 1: REFEREES WITH ENHANCED EXTRACTION
+        if time.time() - extraction_start > max_extraction_time:
+            print(f"      ⏱️ Extraction timeout, returning partial data")
+            return manuscript_data
+
         print("\n   🔄 PASS 1: REFEREES WITH ENHANCED EXTRACTION")
         print("   " + "-" * 45)
 
@@ -1283,6 +1298,10 @@ class MORExtractor(CachedExtractorMixin):
             print(f"      ❌ Referee extraction error: {str(e)[:50]}")
 
         # PASS 2: MANUSCRIPT INFORMATION
+        if time.time() - extraction_start > max_extraction_time:
+            print(f"      ⏱️ Extraction timeout, returning partial data")
+            return manuscript_data
+
         print("\n   🔄 PASS 2: MANUSCRIPT INFORMATION")
         print("   " + "-" * 35)
 
@@ -1296,6 +1315,10 @@ class MORExtractor(CachedExtractorMixin):
             print(f"      ❌ Manuscript info error: {str(e)[:50]}")
 
         # PASS 3: DOCUMENTS
+        if time.time() - extraction_start > max_extraction_time:
+            print(f"      ⏱️ Extraction timeout, returning partial data")
+            return manuscript_data
+
         print("\n   🔄 PASS 3: DOCUMENTS")
         print("   " + "-" * 25)
 
@@ -1306,18 +1329,24 @@ class MORExtractor(CachedExtractorMixin):
             manuscript_data["documents"] = {}
 
         # PASS 4: VERSION HISTORY
+        if time.time() - extraction_start > max_extraction_time:
+            print(f"      ⏱️ Extraction timeout, returning partial data")
+            return manuscript_data
+
         if manuscript_data["is_revision"]:
             print("\n   🔄 PASS 4: VERSION HISTORY")
             print("   " + "-" * 30)
             try:
-                manuscript_data["version_history"] = self.extract_version_history(
-                    manuscript_id
-                )
+                manuscript_data["version_history"] = self.extract_version_history(manuscript_id)
             except Exception as e:
                 print(f"      ❌ Version history error: {str(e)[:50]}")
                 manuscript_data["version_history"] = []
 
         # PASS 5: AUDIT TRAIL
+        if time.time() - extraction_start > max_extraction_time:
+            print(f"      ⏱️ Extraction timeout, returning partial data")
+            return manuscript_data
+
         print("\n   🔄 PASS 5: AUDIT TRAIL")
         print("   " + "-" * 25)
 
@@ -1328,6 +1357,10 @@ class MORExtractor(CachedExtractorMixin):
             manuscript_data["audit_trail"] = []
 
         # PASS 6: ENHANCED STATUS
+        if time.time() - extraction_start > max_extraction_time:
+            print(f"      ⏱️ Extraction timeout, returning partial data")
+            return manuscript_data
+
         print("\n   🔄 PASS 6: ENHANCED STATUS")
         print("   " + "-" * 30)
 
@@ -1354,9 +1387,7 @@ class MORExtractor(CachedExtractorMixin):
             )
 
             if order_selects:
-                print(
-                    f"      ✅ Using ORDER select strategy ({len(order_selects)} selects found)"
-                )
+                print(f"      ✅ Using ORDER select strategy ({len(order_selects)} selects found)")
 
                 for i, select in enumerate(order_selects):
                     try:
@@ -1364,9 +1395,7 @@ class MORExtractor(CachedExtractorMixin):
                         row = select.find_element(By.XPATH, "./ancestor::tr[1]")
                         referee_data = self._parse_referee_row(row)
                         if referee_data:
-                            print(
-                                f"         • ORDER{i}: {referee_data.get('name', 'Unknown')}"
-                            )
+                            print(f"         • ORDER{i}: {referee_data.get('name', 'Unknown')}")
                             referees.append(referee_data)
                         else:
                             print(f"         ⚠️ ORDER{i}: _parse_referee_row returned None")
@@ -1403,7 +1432,14 @@ class MORExtractor(CachedExtractorMixin):
                     row_text = self.safe_get_text(row).lower()
                     if any(
                         x in row_text
-                        for x in ["referee name", "status", "date invited", "audit", "history", "action"]
+                        for x in [
+                            "referee name",
+                            "status",
+                            "date invited",
+                            "audit",
+                            "history",
+                            "action",
+                        ]
                     ):
                         continue
                     referee_data = self._parse_referee_row(row)
@@ -1425,9 +1461,7 @@ class MORExtractor(CachedExtractorMixin):
             # Extract name from mailpopup link (NOT history_popup)
             name = ""
             # Look specifically for mailpopup links (referee names)
-            name_links = row.find_elements(
-                By.XPATH, ".//a[contains(@href,'mailpopup')]"
-            )
+            name_links = row.find_elements(By.XPATH, ".//a[contains(@href,'mailpopup')]")
 
             # Check if we found any mail popup links
             if not name_links:
@@ -1484,7 +1518,10 @@ class MORExtractor(CachedExtractorMixin):
                 ):
                     # Clean up: remove "recommended", "opposed", etc.
                     institution = re.sub(
-                        r"(recommended|opposed|green|font color)", "", span_text, flags=re.IGNORECASE
+                        r"(recommended|opposed|green|font color)",
+                        "",
+                        span_text,
+                        flags=re.IGNORECASE,
                     ).strip()
                     institution = re.sub(r"\s+", " ", institution)
                     break
@@ -3618,10 +3655,13 @@ class MORExtractor(CachedExtractorMixin):
 
             # Process all categories
             categories = [
+                "Awaiting Reviewer Selection",
+                "Awaiting Reviewer Invitation",
+                "Overdue Reviewer Response",
+                "Awaiting Reviewer Assignment",
                 "Awaiting Reviewer Reports",
                 "Overdue Reviewer Reports",
                 "Awaiting AE Recommendation",
-                "Awaiting Editor Decision",
             ]
 
             for category in categories:
@@ -3666,10 +3706,26 @@ class MORExtractor(CachedExtractorMixin):
             return results
 
         finally:
+            self.cleanup_driver()
+
+    def cleanup_driver(self):
+        """Cleanup Chrome driver and processes"""
+        if self.driver:
             try:
                 self.driver.quit()
             except:
                 pass
+            self.driver = None
+
+        # Kill any lingering Chrome processes (aggressive cleanup)
+        try:
+            import subprocess
+
+            subprocess.run(
+                ["pkill", "-9", "-f", "Chrome.*--test-type"], capture_output=True, timeout=5
+            )
+        except:
+            pass
 
     def process_category(self, category: str) -> List[Dict]:
         """Process all manuscripts in a category"""

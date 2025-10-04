@@ -3588,10 +3588,12 @@ class MORExtractor(CachedExtractorMixin):
 
                     self.smart_wait(1)
 
-                    # Extract data
-                    print(f"      5️⃣ Extracting details...")
-                    manuscript_data = self.extract_manuscript_details(manuscript_id)
+                    # Extract comprehensive data (all tabs + audit trail)
+                    print(f"      5️⃣ Extracting comprehensive details...")
+                    manuscript_data = self.extract_manuscript_comprehensive(manuscript_id)
                     manuscript_data["category"] = category
+                    # Add ID field for compatibility
+                    manuscript_data["id"] = manuscript_id
                     manuscripts.append(manuscript_data)
                     print(f"      ✅ Extracted {manuscript_id}")
 

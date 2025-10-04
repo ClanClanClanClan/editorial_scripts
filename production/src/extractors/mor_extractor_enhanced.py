@@ -1027,12 +1027,12 @@ class MORExtractor(CachedExtractorMixin):
         if not name:
             return ""
 
-        # Check cache first
-        if self.use_cache:
-            cache_key = f"orcid_{name}"
-            cached_orcid = self.get_cached_data(cache_key)
-            if cached_orcid:
-                return cached_orcid.get("orcid", "")
+        # TODO: Re-enable caching after fixing get_cached_data method
+        # if self.use_cache:
+        #     cache_key = f"orcid_{name}"
+        #     cached_orcid = self.get_cached_data(cache_key)
+        #     if cached_orcid:
+        #         return cached_orcid.get("orcid", "")
 
         strategies = [
             f'"{name}"',
@@ -1429,9 +1429,19 @@ class MORExtractor(CachedExtractorMixin):
                 By.XPATH, ".//a[contains(@href,'mailpopup')]"
             )
 
+            # DEBUG: Show what links we found
+            if not name_links:
+                print(
+                    f"         🔍 DEBUG: No mailpopup links found in row (row has {len(row_text)} chars)"
+                )
+                return None
+
             # Filter out non-name links like "view full history"
-            for link in name_links:
+            for i, link in enumerate(name_links):
                 link_text = self.safe_get_text(link).strip()
+                # DEBUG: Show each link
+                print(f"         🔍 DEBUG: Link {i}: '{link_text[:50]}'")
+
                 # Skip links that are clearly not names
                 if any(
                     x in link_text.lower()
@@ -1444,19 +1454,32 @@ class MORExtractor(CachedExtractorMixin):
                         "extension",
                     ]
                 ):
+                    print(f"            ⏭️  Skipped (matches exclude pattern)")
                     continue
                 # Look for name pattern: "Last, First" or has comma
                 if "," in link_text and len(link_text) < 50:
                     name = link_text
+                    print(f"            ✅ Selected as name")
                     break
+                else:
+                    print(
+                        f"            ⏭️  Skipped (no comma or too long: {len(link_text)} chars)"
+                    )
 
             # Clean up name
             name = re.sub(r"\s+", " ", name).strip()
 
             # Validate name format (must have comma for "Last, First" format)
-            if not name or len(name) < 3 or len(name) > 100:
+            if not name:
+                print(f"         ❌ DEBUG: No valid name found after filtering")
+                return None
+            if len(name) < 3 or len(name) > 100:
+                print(
+                    f"         ❌ DEBUG: Name length invalid: {len(name)} ('{name[:30]}')"
+                )
                 return None
             if "," not in name:
+                print(f"         ❌ DEBUG: Name has no comma: '{name[:30]}'")
                 return None
 
             # Extract institution (usually in a span after the name)
@@ -1532,6 +1555,10 @@ class MORExtractor(CachedExtractorMixin):
             return referee_data
 
         except Exception as e:
+            print(f"         ❌ DEBUG: Exception in _parse_referee_row: {str(e)[:100]}")
+            import traceback
+
+            traceback.print_exc()
             return None
 
     @with_retry(max_attempts=2)

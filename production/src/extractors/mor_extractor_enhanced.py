@@ -204,6 +204,26 @@ class MORExtractor(CachedExtractorMixin):
         wait_time = seconds + random.uniform(-0.2, 0.5)
         time.sleep(max(0.5, wait_time))
 
+    def is_session_alive(self) -> bool:
+        """Check if ChromeDriver session is still alive"""
+        try:
+            _ = self.driver.current_url
+            return True
+        except Exception as e:
+            error_str = str(e).lower()
+            if any(
+                x in error_str
+                for x in [
+                    "connection refused",
+                    "invalid session",
+                    "no such window",
+                    "chrome not reachable",
+                ]
+            ):
+                print(f"         ❌ ChromeDriver session died: {str(e)[:80]}")
+                return False
+            return True
+
     def extract_email_from_popup_window(self):
         """Extract email from popup frameset window.
 
@@ -587,22 +607,35 @@ class MORExtractor(CachedExtractorMixin):
     def download_document(self, link_element, doc_type: str, manuscript_id: str) -> Optional[str]:
         """Download document with retry and verification"""
         try:
+            if not self.is_session_alive():
+                print(f"            ❌ Session dead, skipping download")
+                return None
+
             print(f"         📥 Downloading {doc_type}...")
 
-            # Configure download behavior
-            self.driver.execute_cdp_cmd(
-                "Page.setDownloadBehavior",
-                {"behavior": "allow", "downloadPath": str(self.download_dir)},
-            )
+            # Try to configure download behavior (skip if CDP fails)
+            try:
+                self.driver.execute_cdp_cmd(
+                    "Page.setDownloadBehavior",
+                    {"behavior": "allow", "downloadPath": str(self.download_dir)},
+                )
+            except Exception as cdp_err:
+                print(f"            ⚠️ CDP config skipped: {str(cdp_err)[:40]}")
 
             # Click download link
-            self.safe_click(link_element)
+            if not self.safe_click(link_element):
+                print(f"            ❌ Click failed")
+                return None
 
             # Wait for download to complete
             max_wait = 30
             start_time = time.time()
 
             while time.time() - start_time < max_wait:
+                if not self.is_session_alive():
+                    print(f"            ❌ Session died during download")
+                    return None
+
                 # Check for downloaded files
                 files = list(self.download_dir.glob(f"*{manuscript_id}*"))
                 if not files:
@@ -637,7 +670,7 @@ class MORExtractor(CachedExtractorMixin):
 
         except Exception as e:
             print(f"            ❌ Download error: {str(e)[:50]}")
-            raise
+            return None
 
     def download_all_documents(self, manuscript_id: str) -> Dict[str, str]:
         """Download all available documents for manuscript"""
@@ -840,6 +873,10 @@ class MORExtractor(CachedExtractorMixin):
         """Extract complete audit trail with robust pagination"""
         print("      📜 Extracting complete audit trail...")
 
+        if not self.is_session_alive():
+            print("         ❌ Session dead, skipping audit trail")
+            return []
+
         all_events = []
         seen_events = set()
 
@@ -867,6 +904,10 @@ class MORExtractor(CachedExtractorMixin):
             consecutive_empty = 0
 
             while page_num <= max_pages and consecutive_empty < 3:
+                if not self.is_session_alive():
+                    print(f"         ❌ Session died during audit trail extraction")
+                    break
+
                 # Parse current page
                 soup = BeautifulSoup(self.driver.page_source, "html.parser")
                 new_events = 0
@@ -977,7 +1018,7 @@ class MORExtractor(CachedExtractorMixin):
 
         except Exception as e:
             print(f"         ❌ Audit trail error: {str(e)[:50]}")
-            raise
+            return []
 
         return all_events
 
@@ -1304,16 +1345,35 @@ class MORExtractor(CachedExtractorMixin):
                     except:
                         continue
 
-            # Strategy 2: Referee table with specific markers
+            # Strategy 2: Broader table-based search
             if not referees:
+                print("      ⚠️ ORDER select not found, using table search")
+                # Look for rows with email links (referee names)
                 referee_rows = self.driver.find_elements(
                     By.XPATH,
-                    "//tr[contains(@class,'referee') or "
-                    "(contains(., 'Declined') or contains(., 'Agreed') or contains(., 'Invited')) and "
-                    "(.//a[contains(@href,'mailpopup') or contains(@href,'history_popup')])]",
+                    "//tr[.//a[contains(@href,'mailpopup') or contains(@href,'history_popup')]]",
                 )
 
                 for row in referee_rows:
+                    referee_data = self._parse_referee_row(row)
+                    if referee_data:
+                        referees.append(referee_data)
+
+            # Strategy 3: Any table row with status keywords
+            if not referees:
+                print("      ⚠️ Trying status keyword search")
+                referee_rows = self.driver.find_elements(
+                    By.XPATH,
+                    "//tr[contains(., 'Declined') or contains(., 'Agreed') or contains(., 'Invited') or contains(., 'Pending')]",
+                )
+
+                for row in referee_rows:
+                    # Skip if it's a header row
+                    if any(
+                        x in self.safe_get_text(row).lower()
+                        for x in ["referee name", "status", "date invited"]
+                    ):
+                        continue
                     referee_data = self._parse_referee_row(row)
                     if referee_data:
                         referees.append(referee_data)
@@ -1448,11 +1508,8 @@ class MORExtractor(CachedExtractorMixin):
         try:
             print("      👥 Extracting authors...")
 
-            # Look for author links
-            author_links = self.driver.find_elements(
-                By.XPATH,
-                "//a[contains(@href, 'mailpopup') and not(contains(ancestor::*, 'Editor'))]",
-            )
+            # Strategy 1: Look for author links (broader search)
+            author_links = self.driver.find_elements(By.XPATH, "//a[contains(@href, 'mailpopup')]")
 
             for link in author_links:
                 try:
@@ -1462,10 +1519,22 @@ class MORExtractor(CachedExtractorMixin):
                     if "," not in name or len(name) < 3 or len(name) > 100:
                         continue
 
-                    # Check if not an editor
-                    parent_text = link.find_element(By.XPATH, "./ancestor::table[1]").text.lower()
-                    if any(x in parent_text for x in ["editor", "admin", "staff"]):
-                        continue
+                    # Check if it's an editor/admin by looking at parent context
+                    try:
+                        parent_text = link.find_element(By.XPATH, "./ancestor::tr[1]").text.lower()
+                        if any(
+                            x in parent_text
+                            for x in [
+                                "editor",
+                                "managing editor",
+                                "admin",
+                                "staff",
+                                "editor-in-chief",
+                            ]
+                        ):
+                            continue
+                    except:
+                        pass
 
                     # Extract institution if available
                     institution = ""
@@ -1503,6 +1572,7 @@ class MORExtractor(CachedExtractorMixin):
 
             # Fallback: look for author section
             if not authors:
+                print("      ⚠️ No author links found, trying author section search")
                 author_sections = self.driver.find_elements(
                     By.XPATH, "//*[contains(text(), 'Authors') or contains(text(), 'By:')]"
                 )
@@ -2983,7 +3053,9 @@ class MORExtractor(CachedExtractorMixin):
 
                                         try:
                                             # JavaScript click on the email link
-                                            self.driver.execute_script("arguments[0].click();", link)
+                                            self.driver.execute_script(
+                                                "arguments[0].click();", link
+                                            )
 
                                             # Wait for popup window to open
                                             try:
@@ -2996,7 +3068,9 @@ class MORExtractor(CachedExtractorMixin):
 
                                             # Switch to popup window
                                             all_windows = self.driver.window_handles
-                                            popup_window = [w for w in all_windows if w != current_window][0]
+                                            popup_window = [
+                                                w for w in all_windows if w != current_window
+                                            ][0]
                                             self.driver.switch_to.window(popup_window)
 
                                             # Extract email from frameset popup

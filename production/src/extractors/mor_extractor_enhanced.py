@@ -1348,19 +1348,30 @@ class MORExtractor(CachedExtractorMixin):
         referees = []
 
         try:
-            # Strategy 1: ORDER select elements (MF-style)
-            order_selects = self.driver.find_elements(By.XPATH, "//select[contains(@name,'ORDER')]")
+            # Strategy 1: ORDER select elements (named ORDER0, ORDER1, etc.)
+            order_selects = self.driver.find_elements(
+                By.XPATH, "//select[starts-with(@name,'ORDER')]"
+            )
 
             if order_selects:
-                print("      ✅ Using ORDER select strategy")
+                print(
+                    f"      ✅ Using ORDER select strategy ({len(order_selects)} selects found)"
+                )
 
-                for select in order_selects:
+                for i, select in enumerate(order_selects):
                     try:
+                        # Get the parent row containing all referee data
                         row = select.find_element(By.XPATH, "./ancestor::tr[1]")
                         referee_data = self._parse_referee_row(row)
                         if referee_data:
+                            print(
+                                f"         • ORDER{i}: {referee_data.get('name', 'Unknown')}"
+                            )
                             referees.append(referee_data)
-                    except:
+                        else:
+                            print(f"         ⚠️ ORDER{i}: _parse_referee_row returned None")
+                    except Exception as e:
+                        print(f"         ⚠️ ORDER{i} error: {str(e)[:40]}")
                         continue
 
             # Strategy 2: Broader table-based search
@@ -1411,38 +1422,68 @@ class MORExtractor(CachedExtractorMixin):
         try:
             row_text = self.safe_get_text(row)
 
-            # Extract name
+            # Extract name from mailpopup link (NOT history_popup)
             name = ""
+            # Look specifically for mailpopup links (referee names)
             name_links = row.find_elements(
-                By.XPATH, ".//a[contains(@href,'mailpopup') or contains(@href,'history_popup')]"
+                By.XPATH, ".//a[contains(@href,'mailpopup')]"
             )
-            if name_links:
-                name = self.safe_get_text(name_links[0])
-            else:
-                # Try to extract from first cell
-                cells = row.find_elements(By.XPATH, ".//td")
-                if cells:
-                    name = self.safe_get_text(cells[0])
+
+            # Filter out non-name links like "view full history"
+            for link in name_links:
+                link_text = self.safe_get_text(link).strip()
+                # Skip links that are clearly not names
+                if any(
+                    x in link_text.lower()
+                    for x in [
+                        "view",
+                        "edit",
+                        "history",
+                        "invite",
+                        "remind",
+                        "extension",
+                    ]
+                ):
+                    continue
+                # Look for name pattern: "Last, First" or has comma
+                if "," in link_text and len(link_text) < 50:
+                    name = link_text
+                    break
 
             # Clean up name
             name = re.sub(r"\s+", " ", name).strip()
 
-            # Validate name format
+            # Validate name format (must have comma for "Last, First" format)
             if not name or len(name) < 3 or len(name) > 100:
                 return None
-            if not ("," in name or " " in name):
+            if "," not in name:
                 return None
 
-            # Extract institution
+            # Extract institution (usually in a span after the name)
             institution = ""
-            inst_cells = row.find_elements(By.XPATH, ".//td")
-            for cell in inst_cells[1:]:  # Skip first cell (name)
-                cell_text = self.safe_get_text(cell)
+            # Try to find span elements with institution keywords
+            inst_spans = row.find_elements(By.XPATH, ".//span[@class='pagecontents']")
+            for span in inst_spans:
+                span_text = self.safe_get_text(span).strip()
+                # Skip the span containing the name
+                if name and name in span_text:
+                    continue
+                # Look for institution keywords
                 if any(
-                    x in cell_text
-                    for x in ["University", "Institute", "School", "College", "Department"]
+                    x in span_text
+                    for x in [
+                        "University",
+                        "Institute",
+                        "School",
+                        "College",
+                        "Department",
+                    ]
                 ):
-                    institution = cell_text
+                    # Clean up: remove "recommended", "opposed", etc.
+                    institution = re.sub(
+                        r"(recommended|opposed|green|font color)", "", span_text, flags=re.IGNORECASE
+                    ).strip()
+                    institution = re.sub(r"\s+", " ", institution)
                     break
 
             # Extract status

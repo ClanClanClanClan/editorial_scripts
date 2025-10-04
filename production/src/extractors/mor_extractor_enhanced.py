@@ -205,64 +205,58 @@ class MORExtractor(CachedExtractorMixin):
         time.sleep(max(0.5, wait_time))
 
     def extract_email_from_popup_window(self):
-        """Extract email from popup window (already switched to it)."""
+        """Extract email from popup frameset window.
+
+        The popup has a frameset with:
+        - mainemailwindow: contains email form with TO_EMAIL input
+        - bottombuttons: contains buttons
+        """
         import re
 
         try:
-            time.sleep(2)
+            time.sleep(1)
 
+            # Strategy 1: Switch to mainemailwindow frame by name
+            try:
+                self.driver.switch_to.frame("mainemailwindow")
+
+                # Look for TO_EMAIL input
+                email_inputs = self.driver.find_elements(By.XPATH, "//input[@name='TO_EMAIL']")
+                if email_inputs:
+                    value = email_inputs[0].get_attribute("value")
+                    if value and "@" in value:
+                        self.driver.switch_to.default_content()
+                        return value
+
+                self.driver.switch_to.default_content()
+            except:
+                try:
+                    self.driver.switch_to.default_content()
+                except:
+                    pass
+
+            # Strategy 2: Try all frames by index
             frames = self.driver.find_elements(By.TAG_NAME, "frame")
-            if frames:
-                for i in range(len(frames)):
+            for i in range(len(frames)):
+                try:
+                    self.driver.switch_to.frame(i)
+
+                    # Check for TO_EMAIL input
+                    email_inputs = self.driver.find_elements(By.XPATH, "//input[@name='TO_EMAIL']")
+                    if email_inputs:
+                        value = email_inputs[0].get_attribute("value")
+                        if value and "@" in value:
+                            self.driver.switch_to.default_content()
+                            return value
+
+                    self.driver.switch_to.default_content()
+                except:
                     try:
-                        self.driver.switch_to.frame(i)
-
-                        email_inputs = self.driver.find_elements(
-                            By.XPATH, "//input[@name='TO_EMAIL']"
-                        )
-                        if email_inputs:
-                            value = email_inputs[0].get_attribute("value")
-                            if value and "@" in value:
-                                self.driver.switch_to.default_content()
-                                return value
-
-                        frame_text = self.driver.page_source
-                        if "@" in frame_text:
-                            email_pattern = r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b"
-                            emails = re.findall(email_pattern, frame_text)
-                            for email in emails:
-                                if not any(
-                                    skip in email.lower()
-                                    for skip in ["noreply", "donotreply", "manuscriptcentral"]
-                                ):
-                                    self.driver.switch_to.default_content()
-                                    return email
-
                         self.driver.switch_to.default_content()
                     except:
-                        try:
-                            self.driver.switch_to.default_content()
-                        except:
-                            pass
-                        continue
+                        pass
 
-            input_selectors = [
-                "//input[@name='TO_EMAIL']",
-                "//input[@id='TO_EMAIL']",
-                "//input[contains(@name,'email')]",
-                "//input[@type='email']",
-            ]
-
-            for selector in input_selectors:
-                try:
-                    elements = self.driver.find_elements(By.XPATH, selector)
-                    for elem in elements:
-                        value = elem.get_attribute("value")
-                        if value and "@" in value:
-                            return value
-                except:
-                    continue
-
+            # Strategy 3: Parse page source for emails (fallback)
             page_text = self.driver.page_source
             if "@" in page_text:
                 email_pattern = r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b"
@@ -2983,9 +2977,49 @@ class MORExtractor(CachedExtractorMixin):
                                             print(f"         ✅ Email from URL: {email}")
                                             break
                                     else:
-                                        # Popup extraction disabled temporarily
-                                        print(f"         ⏭️  Popup extraction skipped")
-                                        pass
+                                        # Try popup extraction with frameset handling
+                                        print(f"         📧 Opening email popup...")
+                                        current_window = self.driver.current_window_handle
+
+                                        try:
+                                            # JavaScript click on the email link
+                                            self.driver.execute_script("arguments[0].click();", link)
+
+                                            # Wait for popup window to open
+                                            try:
+                                                WebDriverWait(self.driver, 5).until(
+                                                    lambda d: len(d.window_handles) > 1
+                                                )
+                                            except:
+                                                print(f"         ⏭️  No popup opened")
+                                                continue
+
+                                            # Switch to popup window
+                                            all_windows = self.driver.window_handles
+                                            popup_window = [w for w in all_windows if w != current_window][0]
+                                            self.driver.switch_to.window(popup_window)
+
+                                            # Extract email from frameset popup
+                                            email = self.extract_email_from_popup_window()
+                                            if email and self.is_valid_referee_email(email):
+                                                print(f"         ✅ Email from popup: {email}")
+
+                                            # Close popup and return to main window
+                                            try:
+                                                self.driver.close()
+                                            except:
+                                                pass
+                                            self.driver.switch_to.window(current_window)
+
+                                            if email:
+                                                break
+
+                                        except Exception as e:
+                                            print(f"         ⚠️  Popup failed: {str(e)[:40]}")
+                                            try:
+                                                self.driver.switch_to.window(current_window)
+                                            except:
+                                                pass
                         except:
                             pass
 

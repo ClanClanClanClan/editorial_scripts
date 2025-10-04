@@ -1299,25 +1299,43 @@ class MORExtractor(CachedExtractorMixin):
         print("\n   🔄 PASS 3: DOCUMENTS")
         print("   " + "-" * 25)
 
-        manuscript_data["documents"] = self.download_all_documents(manuscript_id)
+        try:
+            manuscript_data["documents"] = self.download_all_documents(manuscript_id)
+        except Exception as e:
+            print(f"      ❌ Document download error: {str(e)[:50]}")
+            manuscript_data["documents"] = {}
 
         # PASS 4: VERSION HISTORY
         if manuscript_data["is_revision"]:
             print("\n   🔄 PASS 4: VERSION HISTORY")
             print("   " + "-" * 30)
-            manuscript_data["version_history"] = self.extract_version_history(manuscript_id)
+            try:
+                manuscript_data["version_history"] = self.extract_version_history(
+                    manuscript_id
+                )
+            except Exception as e:
+                print(f"      ❌ Version history error: {str(e)[:50]}")
+                manuscript_data["version_history"] = []
 
         # PASS 5: AUDIT TRAIL
         print("\n   🔄 PASS 5: AUDIT TRAIL")
         print("   " + "-" * 25)
 
-        manuscript_data["audit_trail"] = self.extract_complete_audit_trail()
+        try:
+            manuscript_data["audit_trail"] = self.extract_complete_audit_trail()
+        except Exception as e:
+            print(f"      ❌ Audit trail error: {str(e)[:50]}")
+            manuscript_data["audit_trail"] = []
 
         # PASS 6: ENHANCED STATUS
         print("\n   🔄 PASS 6: ENHANCED STATUS")
         print("   " + "-" * 30)
 
-        manuscript_data["status_details"] = self.extract_enhanced_status_details()
+        try:
+            manuscript_data["status_details"] = self.extract_enhanced_status_details()
+        except Exception as e:
+            print(f"      ❌ Status extraction error: {str(e)[:50]}")
+            manuscript_data["status_details"] = {}
 
         # Cache the result (disabled for Phase 1 testing)
         # if self.use_cache:

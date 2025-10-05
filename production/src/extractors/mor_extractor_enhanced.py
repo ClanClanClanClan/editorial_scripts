@@ -519,42 +519,82 @@ class MORExtractor(CachedExtractorMixin):
             source = self.driver.page_source
             import re
 
-            # Find all email addresses in the page
-            all_emails = re.findall(r"[\w\.-]+@[\w\.-]+\.\w+", source)
+            # Find all email addresses and deduplicate
+            all_emails = list(set(re.findall(r"[\w\.-]+@[\w\.-]+\.\w+", source)))
+
+            # Filter out system emails
+            all_emails = [
+                e
+                for e in all_emails
+                if not any(
+                    x in e.lower()
+                    for x in ["support", "admin", "noreply", "system", "editorialmanager"]
+                )
+            ]
 
             if all_emails:
-                print(f"         ✅ Found {len(all_emails)} emails in page source")
+                print(f"         ✅ Found {len(all_emails)} unique emails in page source")
 
-                # Try to match emails to referees by name or institution
-                for i, referee in enumerate(referees):
-                    name = referee.get("name", "").lower()
-                    institution = referee.get("institution", "").lower()
+                # Track used emails to avoid duplicates
+                used_emails = set()
 
-                    # Look for emails that match the referee's name or institution
+                # Scored matching: try ALL emails against ALL referees
+                for referee in referees:
+                    if referee.get("email"):  # Already has email
+                        used_emails.add(referee["email"])
+                        continue
+
+                    name = referee.get("name", "").lower().strip()
+                    institution = referee.get("institution", "").lower().strip()
+                    best_match = None
+                    best_score = 0
+
+                    # Parse name
+                    name_parts = name.replace(",", " ").split()
+                    last_name = name_parts[0].lower() if name_parts else ""
+                    first_name = name_parts[1].lower() if len(name_parts) > 1 else ""
+
                     for email in all_emails:
-                        email_lower = email.lower()
-
-                        # Skip common non-referee emails
-                        if any(x in email_lower for x in ["support", "admin", "noreply", "system"]):
+                        if email in used_emails:
                             continue
 
-                        # Try to match by domain
-                        domain = email.split("@")[1] if "@" in email else ""
-                        if referee.get("email_domain") and domain in referee.get(
-                            "email_domain", ""
-                        ):
-                            referee["email"] = email
-                            print(f"            ✅ {referee['name']}: {email}")
-                            break
+                        email_lower = email.lower()
+                        score = 0
 
-                        # Try to match by name parts
-                        name_parts = name.replace(",", " ").split()
-                        if len(name_parts) >= 2:
-                            last_name = name_parts[0].lower()
-                            if last_name in email_lower and len(last_name) > 3:
-                                referee["email"] = email
-                                print(f"            ✅ {referee['name']}: {email}")
-                                break
+                        # Match by last name (strong)
+                        if last_name and len(last_name) > 3 and last_name in email_lower:
+                            score += 10
+
+                        # Match by first name
+                        if first_name and len(first_name) > 3 and first_name in email_lower:
+                            score += 5
+
+                        # Match by institution in domain
+                        if institution and "@" in email:
+                            domain = email.split("@")[1].lower()
+                            for inst_part in institution.split():
+                                if len(inst_part) > 4 and inst_part.lower() in domain:
+                                    score += 8
+
+                        # Match by email_domain field
+                        if referee.get("email_domain"):
+                            domain = email.split("@")[1] if "@" in email else ""
+                            if domain in referee.get("email_domain", "").replace("@", ""):
+                                score += 15
+
+                        if score > best_score:
+                            best_score = score
+                            best_match = email
+
+                    # Assign if score >= 5
+                    if best_match and best_score >= 5:
+                        referee["email"] = best_match
+                        used_emails.add(best_match)
+                        print(
+                            f"            ✅ {referee['name']}: {best_match} (score: {best_score})"
+                        )
+                    else:
+                        print(f"            ⚠️ {referee['name']}: No match found")
             else:
                 print("         ⚠️ No emails found in page source")
 

@@ -1744,32 +1744,55 @@ class MORExtractor(CachedExtractorMixin):
                     except:
                         pass
 
-                    # Extract institution from <p class="pagecontents"> in same row
+                    # Extract institution from <p class="pagecontents"> in same row (but NOT the one with author names)
                     institution = ""
                     department = ""
                     city = ""
                     country = ""
                     try:
-                        inst_p = parent_row.find_element(By.XPATH, ".//p[@class='pagecontents']")
-                        inst_html = inst_p.get_attribute("innerHTML")
+                        # Get all <p class="pagecontents"> in the row
+                        inst_paragraphs = parent_row.find_elements(
+                            By.XPATH, ".//p[@class='pagecontents']"
+                        )
 
-                        # Parse institution HTML: "University - Department<br>City<br>Country<br>"
-                        parts = [p.strip() for p in inst_html.split("<br>") if p.strip()]
+                        # Find the one that contains institution (not author names)
+                        for inst_p in inst_paragraphs:
+                            # Skip if this <p> contains mailpopup links (those are author names)
+                            try:
+                                if inst_p.find_elements(
+                                    By.XPATH, ".//a[contains(@href, 'mailpopup')]"
+                                ):
+                                    continue
+                            except:
+                                pass
 
-                        if len(parts) > 0:
-                            # First part: "University - Department" or just "University"
-                            first_part = parts[0]
-                            if " - " in first_part:
-                                institution = first_part.split(" - ")[0].strip()
-                                department = first_part.split(" - ")[1].strip()
-                            else:
-                                institution = first_part.strip()
+                            # Get HTML and parse it
+                            inst_html = inst_p.get_attribute("innerHTML")
 
-                        if len(parts) > 1:
-                            city = parts[1].strip()
+                            # Parse institution HTML: "University - Department<br>City<br>Country<br>"
+                            parts = [p.strip() for p in inst_html.split("<br>") if p.strip()]
 
-                        if len(parts) > 2:
-                            country = parts[2].strip()
+                            if len(parts) > 0:
+                                # First part: "University - Department" or just "University"
+                                first_part = parts[0]
+                                # Strip any remaining HTML tags
+                                first_part = re.sub(r"<[^>]+>", "", first_part).strip()
+
+                                if " - " in first_part:
+                                    institution = first_part.split(" - ")[0].strip()
+                                    department = first_part.split(" - ")[1].strip()
+                                else:
+                                    institution = first_part.strip()
+
+                            if len(parts) > 1:
+                                city = re.sub(r"<[^>]+>", "", parts[1]).strip()
+
+                            if len(parts) > 2:
+                                country = re.sub(r"<[^>]+>", "", parts[2]).strip()
+
+                            # If we found institution data, stop looking
+                            if institution:
+                                break
                     except:
                         pass
 

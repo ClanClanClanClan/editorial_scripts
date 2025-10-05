@@ -1822,8 +1822,16 @@ class MORExtractor(CachedExtractorMixin):
                         if best_match and best_score >= 8:
                             email = best_match
 
-                    # Enrich institution for domain
-                    _, domain = self.enrich_institution(institution)
+                    # Extract domain from institution (simplified, no enrichment to avoid slowness)
+                    domain = ""
+                    if institution:
+                        # Simple domain extraction from institution name
+                        inst_lower = institution.lower().replace(" ", "")
+                        if "university" in inst_lower or "college" in inst_lower:
+                            # Try to extract key word
+                            words = institution.split()
+                            if len(words) > 0:
+                                domain = words[0].lower()  # First word as approximation
 
                     author_data = {
                         "name": name,
@@ -1845,6 +1853,7 @@ class MORExtractor(CachedExtractorMixin):
                     print(f"         • {name} ({institution or 'No institution'})")
 
                 except Exception as e:
+                    print(f"         ⚠️ Error processing author link: {str(e)[:100]}")
                     continue
 
             # Fallback: look for author section if no links found

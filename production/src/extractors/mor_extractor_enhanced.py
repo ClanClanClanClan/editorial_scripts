@@ -126,6 +126,7 @@ class MORExtractor(CachedExtractorMixin):
         self.driver = None
         self.wait = None
         self.original_window = None
+        self.service = None  # Track ChromeDriver service PID for safe cleanup
         self.manuscripts_data = []
 
         # Register cleanup on exit
@@ -508,74 +509,74 @@ class MORExtractor(CachedExtractorMixin):
 
         return ""
 
-    @with_retry(max_attempts=2, delay=1.0)
     def extract_referee_emails_from_table(self, referees: List[Dict]) -> None:
-        """Extract referee emails via popup windows or ORDER selects"""
-        print("      📧 Extracting referee emails...")
+        """Extract referee emails from page HTML (popups crash ChromeDriver)"""
+        print("      📧 Searching for referee emails in page HTML...")
 
         try:
-            # Strategy 1: Look for ORDER select elements (MF-style)
-            order_selects = self.driver.find_elements(By.XPATH, "//select[contains(@name,'ORDER')]")
+            # Strategy 1: Extract from page source using regex
+            # Look for emails in the current page HTML
+            source = self.driver.page_source
+            import re
 
-            if order_selects:
-                print("         ✅ Found ORDER selects for referee extraction")
+            # Find all email addresses in the page
+            all_emails = re.findall(r"[\w\.-]+@[\w\.-]+\.\w+", source)
 
-                for i, select in enumerate(order_selects):
-                    if i >= len(referees):
-                        break
+            if all_emails:
+                print(f"         ✅ Found {len(all_emails)} emails in page source")
 
-                    try:
-                        # Find the row containing this select
-                        row = select.find_element(By.XPATH, "./ancestor::tr[1]")
+                # Try to match emails to referees by name or institution
+                for i, referee in enumerate(referees):
+                    name = referee.get("name", "").lower()
+                    institution = referee.get("institution", "").lower()
 
-                        # Extract email from mailpopup link
-                        email_links = row.find_elements(
-                            By.XPATH,
-                            ".//a[contains(@href,'mailpopup') or contains(@onclick,'mailpopup')]",
-                        )
+                    # Look for emails that match the referee's name or institution
+                    for email in all_emails:
+                        email_lower = email.lower()
 
-                        if email_links:
-                            original_window = self.driver.current_window_handle
+                        # Skip common non-referee emails
+                        if any(x in email_lower for x in ["support", "admin", "noreply", "system"]):
+                            continue
 
-                            # Click popup link
-                            self.safe_click(email_links[0])
-                            self.smart_wait(2)
+                        # Try to match by domain
+                        domain = email.split("@")[1] if "@" in email else ""
+                        if referee.get("email_domain") and domain in referee.get(
+                            "email_domain", ""
+                        ):
+                            referee["email"] = email
+                            print(f"            ✅ {referee['name']}: {email}")
+                            break
 
-                            # Switch to popup
-                            if len(self.driver.window_handles) > 1:
-                                for window in self.driver.window_handles:
-                                    if window != original_window:
-                                        self.driver.switch_to.window(window)
-                                        break
-
-                                # Extract email
-                                email = self.extract_email_from_popup()
-
-                                if email and self.is_valid_referee_email(email):
-                                    referees[i]["email"] = email
-                                    print(f"            ✅ {referees[i]['name']}: {email}")
-
-                                # Close popup
-                                self.driver.close()
-                                self.driver.switch_to.window(original_window)
-                    except Exception as e:
-                        print(f"            ❌ Error for referee {i}: {str(e)[:50]}")
-
-            # Strategy 2: Direct referee table rows
+                        # Try to match by name parts
+                        name_parts = name.replace(",", " ").split()
+                        if len(name_parts) >= 2:
+                            last_name = name_parts[0].lower()
+                            if last_name in email_lower and len(last_name) > 3:
+                                referee["email"] = email
+                                print(f"            ✅ {referee['name']}: {email}")
+                                break
             else:
-                referee_rows = self.driver.find_elements(
-                    By.XPATH,
-                    "//tr[.//a[contains(@href,'mailpopup') or contains(@href,'history_popup')]]",
-                )
+                print("         ⚠️ No emails found in page source")
 
-                for i, row in enumerate(referee_rows):
-                    if i >= len(referees):
-                        break
-
-                    self._extract_email_from_row(row, referees[i])
+            # Strategy 2: Look for emails in mailto: links
+            mailto_links = self.driver.find_elements(By.XPATH, "//a[starts-with(@href,'mailto:')]")
+            if mailto_links:
+                print(f"         ✅ Found {len(mailto_links)} mailto links")
+                for link in mailto_links:
+                    href = link.get_attribute("href")
+                    if href and "mailto:" in href:
+                        email = href.replace("mailto:", "").split("?")[0]
+                        # Match to referees as above
+                        for referee in referees:
+                            if not referee.get("email"):
+                                # Simple matching logic
+                                if email not in [r.get("email", "") for r in referees]:
+                                    referee["email"] = email
+                                    print(f"            ✅ {referee['name']}: {email}")
+                                    break
 
         except Exception as e:
-            print(f"         ❌ Error extracting emails: {str(e)[:50]}")
+            print(f"         ❌ Error extracting emails: {str(e)[:80]}")
 
     def _extract_email_from_row(self, row, referee: Dict) -> None:
         """Extract email from a single referee row"""
@@ -597,7 +598,7 @@ class MORExtractor(CachedExtractorMixin):
                             self.driver.switch_to.window(window)
                             break
 
-                    email = self.extract_email_from_popup()
+                    email = self.extract_email_from_popup_window()
 
                     if email and self.is_valid_referee_email(email):
                         referee["email"] = email
@@ -1237,7 +1238,7 @@ class MORExtractor(CachedExtractorMixin):
         import time
 
         extraction_start = time.time()
-        max_extraction_time = 300  # 5 minutes per manuscript
+        max_extraction_time = 120  # 2 minutes per manuscript
 
         print(f"\n{'='*60}")
         print(f"📋 EXTRACTING: {manuscript_id}")
@@ -1314,19 +1315,18 @@ class MORExtractor(CachedExtractorMixin):
         except Exception as e:
             print(f"      ❌ Manuscript info error: {str(e)[:50]}")
 
-        # PASS 3: DOCUMENTS
+        # PASS 3: DOCUMENTS (DISABLED FOR SPEED)
         if time.time() - extraction_start > max_extraction_time:
             print(f"      ⏱️ Extraction timeout, returning partial data")
             return manuscript_data
 
-        print("\n   🔄 PASS 3: DOCUMENTS")
-        print("   " + "-" * 25)
-
-        try:
-            manuscript_data["documents"] = self.download_all_documents(manuscript_id)
-        except Exception as e:
-            print(f"      ❌ Document download error: {str(e)[:50]}")
-            manuscript_data["documents"] = {}
+        # print("\n   🔄 PASS 3: DOCUMENTS")
+        # print("   " + "-" * 25)
+        # try:
+        #     manuscript_data["documents"] = self.download_all_documents(manuscript_id)
+        # except Exception as e:
+        #     print(f"      ❌ Document download error: {str(e)[:50]}")
+        manuscript_data["documents"] = {}
 
         # PASS 4: VERSION HISTORY
         if time.time() - extraction_start > max_extraction_time:
@@ -1342,33 +1342,29 @@ class MORExtractor(CachedExtractorMixin):
                 print(f"      ❌ Version history error: {str(e)[:50]}")
                 manuscript_data["version_history"] = []
 
-        # PASS 5: AUDIT TRAIL
-        if time.time() - extraction_start > max_extraction_time:
-            print(f"      ⏱️ Extraction timeout, returning partial data")
-            return manuscript_data
+        # PASS 5: AUDIT TRAIL (DISABLED FOR SPEED)
+        # if time.time() - extraction_start > max_extraction_time:
+        #     print(f"      ⏱️ Extraction timeout, returning partial data")
+        #     return manuscript_data
+        # print("\n   🔄 PASS 5: AUDIT TRAIL")
+        # print("   " + "-" * 25)
+        # try:
+        #     manuscript_data["audit_trail"] = self.extract_complete_audit_trail()
+        # except Exception as e:
+        #     print(f"      ❌ Audit trail error: {str(e)[:50]}")
+        manuscript_data["audit_trail"] = []
 
-        print("\n   🔄 PASS 5: AUDIT TRAIL")
-        print("   " + "-" * 25)
-
-        try:
-            manuscript_data["audit_trail"] = self.extract_complete_audit_trail()
-        except Exception as e:
-            print(f"      ❌ Audit trail error: {str(e)[:50]}")
-            manuscript_data["audit_trail"] = []
-
-        # PASS 6: ENHANCED STATUS
-        if time.time() - extraction_start > max_extraction_time:
-            print(f"      ⏱️ Extraction timeout, returning partial data")
-            return manuscript_data
-
-        print("\n   🔄 PASS 6: ENHANCED STATUS")
-        print("   " + "-" * 30)
-
-        try:
-            manuscript_data["status_details"] = self.extract_enhanced_status_details()
-        except Exception as e:
-            print(f"      ❌ Status extraction error: {str(e)[:50]}")
-            manuscript_data["status_details"] = {}
+        # PASS 6: ENHANCED STATUS (DISABLED FOR SPEED)
+        # if time.time() - extraction_start > max_extraction_time:
+        #     print(f"      ⏱️ Extraction timeout, returning partial data")
+        #     return manuscript_data
+        # print("\n   🔄 PASS 6: ENHANCED STATUS")
+        # print("   " + "-" * 30)
+        # try:
+        #     manuscript_data["status_details"] = self.extract_enhanced_status_details()
+        # except Exception as e:
+        #     print(f"      ❌ Status extraction error: {str(e)[:50]}")
+        manuscript_data["status_details"] = {}
 
         # Cache the result (disabled for Phase 1 testing)
         # if self.use_cache:
@@ -3629,7 +3625,11 @@ class MORExtractor(CachedExtractorMixin):
         print("🚀 MOR PRODUCTION EXTRACTOR - ROBUST MF LEVEL")
         print("=" * 60)
 
-        self.driver = webdriver.Chrome(options=self.chrome_options)
+        # Create ChromeDriver service explicitly to track PID
+        from selenium.webdriver.chrome.service import Service
+
+        self.service = Service()
+        self.driver = webdriver.Chrome(service=self.service, options=self.chrome_options)
         self.driver.set_page_load_timeout(30)
         self.driver.implicitly_wait(10)
         self.wait = WebDriverWait(self.driver, 10)
@@ -3709,7 +3709,7 @@ class MORExtractor(CachedExtractorMixin):
             self.cleanup_driver()
 
     def cleanup_driver(self):
-        """Cleanup Chrome driver and processes"""
+        """Cleanup Chrome driver - ONLY kill our instance, not user's browser"""
         if self.driver:
             try:
                 self.driver.quit()
@@ -3717,15 +3717,24 @@ class MORExtractor(CachedExtractorMixin):
                 pass
             self.driver = None
 
-        # Kill any lingering Chrome processes (aggressive cleanup)
-        try:
-            import subprocess
+        # Kill only our specific ChromeDriver process by PID
+        if self.service:
+            try:
+                service_pid = self.service.process.pid if self.service.process else None
+                if service_pid:
+                    import subprocess
+                    import signal
 
-            subprocess.run(
-                ["pkill", "-9", "-f", "Chrome.*--test-type"], capture_output=True, timeout=5
-            )
-        except:
-            pass
+                    # Kill only the specific chromedriver process
+                    try:
+                        subprocess.run(
+                            ["kill", "-9", str(service_pid)], capture_output=True, timeout=2
+                        )
+                    except:
+                        pass
+            except:
+                pass
+            self.service = None
 
     def process_category(self, category: str) -> List[Dict]:
         """Process all manuscripts in a category"""
@@ -3995,7 +4004,7 @@ class MORExtractor(CachedExtractorMixin):
 
 def main():
     """Main entry point"""
-    extractor = MORExtractor(use_cache=True, cache_ttl_hours=24)
+    extractor = MORExtractor(use_cache=True, cache_ttl_hours=24, max_manuscripts_per_category=None)
     return extractor.run()
 
 

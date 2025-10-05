@@ -1684,8 +1684,7 @@ class MORExtractor(CachedExtractorMixin):
 
     def extract_authors(self) -> List[Dict]:
         """Extract author information from Manuscript Information tab with comprehensive data"""
-        authors = []
-        seen_names = set()  # Deduplicate authors
+        authors_dict = {}  # name -> author_data (merge duplicates)
 
         try:
             print("      👥 Extracting authors from Manuscript Info tab...")
@@ -1737,11 +1736,6 @@ class MORExtractor(CachedExtractorMixin):
                             continue
                     except:
                         parent_text = ""
-
-                    # Deduplicate - skip if already processed
-                    if name in seen_names:
-                        continue
-                    seen_names.add(name)
 
                     # Extract ORCID if available (look for orcid.org link in same row)
                     orcid = ""
@@ -1883,15 +1877,24 @@ class MORExtractor(CachedExtractorMixin):
                     if "*" in link.text or "corresponding" in parent_text:
                         author_data["corresponding_author"] = True
 
-                    authors.append(author_data)
-                    print(f"         • {name} ({institution or 'No institution'})")
+                    # Merge with existing data if duplicate name
+                    if name in authors_dict:
+                        existing = authors_dict[name]
+                        # Fill in missing fields from new data
+                        for key, value in author_data.items():
+                            if value and not existing.get(key):
+                                existing[key] = value
+                        print(f"         • {name} (merged duplicate)")
+                    else:
+                        authors_dict[name] = author_data
+                        print(f"         • {name} ({institution or 'No institution'})")
 
                 except Exception as e:
                     print(f"         ⚠️ Error processing author link: {str(e)[:100]}")
                     continue
 
             # Fallback: look for author section if no links found
-            if not authors:
+            if not authors_dict:
                 print("      ⚠️ No author links found, trying author section search")
                 author_sections = self.driver.find_elements(
                     By.XPATH, "//*[contains(text(), 'Authors') or contains(text(), 'By:')]"
@@ -1905,28 +1908,29 @@ class MORExtractor(CachedExtractorMixin):
                         names = re.split(r"[;,]", text)
                         for name in names:
                             name = name.strip()
-                            if name and len(name) > 3:
-                                authors.append(
-                                    {
-                                        "name": name,
-                                        "email": "",
-                                        "institution": "",
-                                        "department": "",
-                                        "city": "",
-                                        "country": "",
-                                        "orcid": "",
-                                        "email_domain": "",
-                                        "corresponding_author": False,
-                                    }
-                                )
+                            if name and len(name) > 3 and name not in authors_dict:
+                                authors_dict[name] = {
+                                    "name": name,
+                                    "email": "",
+                                    "institution": "",
+                                    "department": "",
+                                    "city": "",
+                                    "country": "",
+                                    "orcid": "",
+                                    "email_domain": "",
+                                    "corresponding_author": False,
+                                }
                                 print(f"         • {name}")
                     except:
                         continue
 
+            # Convert dict to list
+            authors = list(authors_dict.values())
             print(f"      📊 Found {len(authors)} authors")
 
         except Exception as e:
             print(f"      ❌ Author extraction error: {str(e)[:50]}")
+            authors = []
 
         return authors
 

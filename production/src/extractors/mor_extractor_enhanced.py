@@ -886,9 +886,9 @@ class MORExtractor(CachedExtractorMixin):
                             {
                                 "version": version_name,
                                 "date": "",
-                                "decision": "Under Review"
-                                if v == revision_num
-                                else "Revision Requested",
+                                "decision": (
+                                    "Under Review" if v == revision_num else "Revision Requested"
+                                ),
                                 "editor": "",
                                 "comments": "",
                             }
@@ -1685,6 +1685,7 @@ class MORExtractor(CachedExtractorMixin):
     def extract_authors(self) -> List[Dict]:
         """Extract author information from Manuscript Information tab with comprehensive data"""
         authors = []
+        seen_names = set()  # Deduplicate authors
 
         try:
             print("      👥 Extracting authors from Manuscript Info tab...")
@@ -1701,8 +1702,11 @@ class MORExtractor(CachedExtractorMixin):
                 )
             ]
 
-            # Strategy 1: Find author rows with mailpopup links (primary)
-            author_links = self.driver.find_elements(By.XPATH, "//a[contains(@href, 'mailpopup')]")
+            # Strategy 1: Find author rows - only those with ORCID links (to avoid editors)
+            author_links = self.driver.find_elements(
+                By.XPATH,
+                "//tr[.//a[contains(@href, 'orcid.org')]]//a[contains(@href, 'mailpopup')]",
+            )
 
             for link in author_links:
                 try:
@@ -1712,9 +1716,14 @@ class MORExtractor(CachedExtractorMixin):
                     if "," not in name or len(name) < 3 or len(name) > 100:
                         continue
 
+                    # Deduplicate - skip if already processed
+                    if name in seen_names:
+                        continue
+                    seen_names.add(name)
+
                     # Check if it's an editor/admin by parent context
                     try:
-                        parent_text = link.find_element(By.XPATH, "./ancestor::tr[1]").text.lower()
+                        parent_text = parent_row.text.lower()
                         if any(
                             x in parent_text
                             for x in [
@@ -1728,9 +1737,6 @@ class MORExtractor(CachedExtractorMixin):
                             continue
                     except:
                         pass
-
-                    # Find parent row to extract all author data
-                    parent_row = link.find_element(By.XPATH, "./ancestor::tr[1]")
 
                     # Extract ORCID if available (look for orcid.org link in same row)
                     orcid = ""

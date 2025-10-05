@@ -1238,7 +1238,7 @@ class MORExtractor(CachedExtractorMixin):
         import time
 
         extraction_start = time.time()
-        max_extraction_time = 120  # 2 minutes per manuscript
+        max_extraction_time = 30  # 30 seconds per manuscript for speed
 
         print(f"\n{'='*60}")
         print(f"📋 EXTRACTING: {manuscript_id}")
@@ -3747,10 +3747,12 @@ class MORExtractor(CachedExtractorMixin):
             wait_short = WebDriverWait(self.driver, 5)
             category_link = wait_short.until(EC.element_to_be_clickable((By.LINK_TEXT, category)))
             self.safe_click(category_link)
-            self.smart_wait(3)
+            self.smart_wait(1.5)  # Reduced from 3s
 
-            # Count manuscripts first
-            manuscript_rows = self.driver.find_elements(By.XPATH, "//tr[contains(., 'MOR-')]")
+            # Count manuscripts - use specific XPath to ONLY match manuscript rows with check icons
+            manuscript_rows = self.driver.find_elements(
+                By.XPATH, "//tr[.//img[contains(@src, 'check.gif')]]"
+            )
             total_manuscripts = len(manuscript_rows)
 
             print(f"   📊 Found {total_manuscripts} manuscripts")
@@ -3776,9 +3778,11 @@ class MORExtractor(CachedExtractorMixin):
                 )
 
                 try:
-                    # Re-find manuscripts each iteration to avoid stale elements
+                    # Re-find manuscripts each iteration - ONLY rows with check icons (actual manuscripts)
                     print(f"      1️⃣ Finding manuscript rows...")
-                    current_rows = self.driver.find_elements(By.XPATH, "//tr[contains(., 'MOR-')]")
+                    current_rows = self.driver.find_elements(
+                        By.XPATH, "//tr[.//img[contains(@src, 'check.gif')]]"
+                    )
                     print(f"      ✅ Found {len(current_rows)} rows")
 
                     if processed_count >= len(current_rows):

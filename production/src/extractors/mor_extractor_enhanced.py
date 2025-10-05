@@ -1683,7 +1683,7 @@ class MORExtractor(CachedExtractorMixin):
             raise
 
     def extract_authors(self) -> List[Dict]:
-        """Extract author information from Manuscript Information tab with comprehensive data"""
+        """Extract author information using same row-based approach as referees"""
         authors_dict = {}  # name -> author_data (merge duplicates)
 
         try:
@@ -1701,228 +1701,58 @@ class MORExtractor(CachedExtractorMixin):
                 )
             ]
 
-            # Strategy 1: Find ALL author mailpopup links, filter editors early
-            author_links = self.driver.find_elements(
+            # SAME APPROACH AS REFEREES: Find rows with mailpopup links
+            author_rows = self.driver.find_elements(
                 By.XPATH,
-                "//a[contains(@href, 'mailpopup')]",
+                "//tr[.//a[contains(@href,'mailpopup')]]",
             )
 
-            for link in author_links:
+            for row in author_rows:
                 try:
-                    name = self.safe_get_text(link).strip()
-
-                    # Validate author name (Last, First format)
-                    if "," not in name or len(name) < 3 or len(name) > 100:
+                    # Parse author row (same pattern as referees)
+                    author_data = self._parse_author_row(row, all_emails)
+                    if not author_data:
                         continue
 
-                    # Get parent row FIRST to check if it's an editor
-                    parent_row = link.find_element(By.XPATH, "./ancestor::tr[1]")
+                    # Filter out editors
+                    row_text = self.safe_get_text(row).lower()
+                    if any(
+                        x in row_text
+                        for x in [
+                            "editor",
+                            "managing editor",
+                            "admin",
+                            "staff",
+                            "editor-in-chief",
+                            "area editor",
+                            "associate editor",
+                        ]
+                    ):
+                        continue
 
-                    # Check if it's an editor/admin by parent context - SKIP EARLY
-                    try:
-                        parent_text = parent_row.text.lower()
-                        if any(
-                            x in parent_text
-                            for x in [
-                                "editor",
-                                "managing editor",
-                                "admin",
-                                "staff",
-                                "editor-in-chief",
-                                "area editor",
-                                "associate editor",
-                            ]
-                        ):
-                            continue
-                    except:
-                        parent_text = ""
+                    name = author_data["name"]
 
-                    # Extract ORCID if available (look for orcid.org link in same row)
-                    orcid = ""
-                    try:
-                        orcid_link = parent_row.find_element(
-                            By.XPATH, ".//a[contains(@href, 'orcid.org')]"
-                        )
-                        orcid_url = orcid_link.get_attribute("href")
-                        if orcid_url:
-                            orcid = orcid_url.split("/")[-1]
-                    except:
-                        pass
-
-                    # Extract institution from <p class="pagecontents"> in same row (but NOT the one with author names)
-                    institution = ""
-                    department = ""
-                    city = ""
-                    country = ""
-                    try:
-                        # Get all <p class="pagecontents"> in the row
-                        inst_paragraphs = parent_row.find_elements(
-                            By.XPATH, ".//p[@class='pagecontents']"
-                        )
-
-                        # Find the one that contains institution (not author names)
-                        for inst_p in inst_paragraphs:
-                            # Skip if this <p> contains mailpopup links (those are author names)
-                            try:
-                                if inst_p.find_elements(
-                                    By.XPATH, ".//a[contains(@href, 'mailpopup')]"
-                                ):
-                                    continue
-                            except:
-                                pass
-
-                            # Get HTML and parse it
-                            inst_html = inst_p.get_attribute("innerHTML")
-
-                            # Parse institution HTML: "University - Department<br>City<br>Country<br>"
-                            parts = [p.strip() for p in inst_html.split("<br>") if p.strip()]
-
-                            if len(parts) > 0:
-                                # First part: "University - Department" or just "University"
-                                first_part = parts[0]
-                                # Strip any remaining HTML tags
-                                first_part = re.sub(r"<[^>]+>", "", first_part).strip()
-
-                                if " - " in first_part:
-                                    institution = first_part.split(" - ")[0].strip()
-                                    department = first_part.split(" - ")[1].strip()
-                                else:
-                                    institution = first_part.strip()
-
-                            if len(parts) > 1:
-                                city = re.sub(r"<[^>]+>", "", parts[1]).strip()
-
-                            if len(parts) > 2:
-                                country = re.sub(r"<[^>]+>", "", parts[2]).strip()
-
-                            # If we found institution data, stop looking
-                            if institution:
-                                break
-                    except:
-                        pass
-
-                    # Extract email - try multiple strategies
-                    email = ""
-
-                    # Strategy 1: From mailpopup href parameter
-                    try:
-                        href = link.get_attribute("href")
-                        if "mailpopup" in href:
-                            # Extract email from JavaScript parameters
-                            import urllib.parse
-
-                            if "'" in href or '"' in href:
-                                parts = re.findall(r"['\"]([^'\"]+)['\"]", href)
-                                for part in parts:
-                                    if "@" in part and "." in part:
-                                        email = part
-                                        break
-                    except:
-                        pass
-
-                    # Strategy 2: Match from page emails by name
-                    if not email:
-                        name_parts = name.replace(",", " ").split()
-                        last_name = name_parts[0].lower() if name_parts else ""
-                        first_name = name_parts[1].lower() if len(name_parts) > 1 else ""
-
-                        best_match = None
-                        best_score = 0
-
-                        for candidate_email in all_emails:
-                            score = 0
-                            email_lower = candidate_email.lower()
-
-                            if last_name and len(last_name) > 3 and last_name in email_lower:
-                                score += 10
-                            if first_name and len(first_name) > 3 and first_name in email_lower:
-                                score += 5
-                            if institution and "@" in candidate_email:
-                                domain = candidate_email.split("@")[1].lower()
-                                for inst_word in institution.lower().split():
-                                    if len(inst_word) > 4 and inst_word in domain:
-                                        score += 8
-
-                            if score > best_score:
-                                best_score = score
-                                best_match = candidate_email
-
-                        if best_match and best_score >= 8:
-                            email = best_match
-
-                    # Extract domain from institution (simplified, no enrichment to avoid slowness)
-                    domain = ""
-                    if institution:
-                        # Simple domain extraction from institution name
-                        inst_lower = institution.lower().replace(" ", "")
-                        if "university" in inst_lower or "college" in inst_lower:
-                            # Try to extract key word
-                            words = institution.split()
-                            if len(words) > 0:
-                                domain = words[0].lower()  # First word as approximation
-
-                    author_data = {
-                        "name": name,
-                        "email": email,
-                        "institution": institution,
-                        "department": department,
-                        "city": city,
-                        "country": country,
-                        "orcid": orcid,
-                        "email_domain": f"@{domain}" if domain else "",
-                        "corresponding_author": False,
-                    }
-
-                    # Check if corresponding author
-                    if "*" in link.text or "corresponding" in parent_text:
-                        author_data["corresponding_author"] = True
-
-                    # Merge with existing data if duplicate name
+                    # Merge with existing data if duplicate
                     if name in authors_dict:
                         existing = authors_dict[name]
-                        # Fill in missing fields from new data
                         for key, value in author_data.items():
                             if value and not existing.get(key):
                                 existing[key] = value
                         print(f"         • {name} (merged duplicate)")
                     else:
                         authors_dict[name] = author_data
-                        print(f"         • {name} ({institution or 'No institution'})")
+                        institution = author_data.get("institution", "")
+                        orcid = author_data.get("orcid", "")
+                        orcid_str = f"https://orcid.org/{orcid}" if orcid else "No institution"
+                        print(f"         • {name} ({orcid_str or institution or 'No institution'})")
 
                 except Exception as e:
-                    print(f"         ⚠️ Error processing author link: {str(e)[:100]}")
+                    print(f"         ⚠️ Error processing author row: {str(e)[:100]}")
                     continue
 
-            # Fallback: look for author section if no links found
-            if not authors_dict:
-                print("      ⚠️ No author links found, trying author section search")
-                author_sections = self.driver.find_elements(
-                    By.XPATH, "//*[contains(text(), 'Authors') or contains(text(), 'By:')]"
-                )
-
-                for section in author_sections:
-                    try:
-                        parent = section.find_element(By.XPATH, "./following-sibling::*[1]")
-                        text = self.safe_get_text(parent)
-
-                        names = re.split(r"[;,]", text)
-                        for name in names:
-                            name = name.strip()
-                            if name and len(name) > 3 and name not in authors_dict:
-                                authors_dict[name] = {
-                                    "name": name,
-                                    "email": "",
-                                    "institution": "",
-                                    "department": "",
-                                    "city": "",
-                                    "country": "",
-                                    "orcid": "",
-                                    "email_domain": "",
-                                    "corresponding_author": False,
-                                }
-                                print(f"         • {name}")
-                    except:
-                        continue
+            # Fallback - left empty since we're using comprehensive row search now
+            if False:  # Disabled fallback
+                pass
 
             # Convert dict to list
             authors = list(authors_dict.values())
@@ -1933,6 +1763,163 @@ class MORExtractor(CachedExtractorMixin):
             authors = []
 
         return authors
+
+    def _parse_author_row(self, row, all_emails: List[str]) -> Optional[Dict]:
+        """Parse author row using same pattern as _parse_referee_row"""
+        try:
+            row_text = self.safe_get_text(row)
+
+            # Extract name from mailpopup link (SAME AS REFEREES)
+            name = ""
+            name_links = row.find_elements(By.XPATH, ".//a[contains(@href,'mailpopup')]")
+
+            if not name_links:
+                return None
+
+            for link in name_links:
+                link_text = self.safe_get_text(link).strip()
+
+                # Skip non-name links
+                if any(
+                    x in link_text.lower()
+                    for x in [
+                        "view",
+                        "edit",
+                        "history",
+                        "invite",
+                        "remind",
+                        "extension",
+                    ]
+                ):
+                    continue
+
+                # Look for name pattern: "Last, First"
+                if "," in link_text and len(link_text) < 100:
+                    name = link_text
+                    break
+
+            name = re.sub(r"\s+", " ", name).strip()
+
+            if not name or len(name) < 3 or "," not in name:
+                return None
+
+            # Extract ORCID (authors have this, referees don't)
+            orcid = ""
+            try:
+                orcid_link = row.find_element(By.XPATH, ".//a[contains(@href, 'orcid.org')]")
+                orcid_url = orcid_link.get_attribute("href")
+                if orcid_url:
+                    orcid = orcid_url.split("/")[-1]
+            except:
+                pass
+
+            # Extract institution (SAME AS REFEREES: use span OR p)
+            institution = ""
+            department = ""
+            city = ""
+            country = ""
+
+            # Try spans first (like referees)
+            inst_spans = row.find_elements(By.XPATH, ".//span[@class='pagecontents']")
+            for span in inst_spans:
+                span_text = self.safe_get_text(span).strip()
+                if name and name in span_text:
+                    continue
+                if any(
+                    x in span_text
+                    for x in [
+                        "University",
+                        "Institute",
+                        "School",
+                        "College",
+                        "Department",
+                    ]
+                ):
+                    institution = re.sub(r"\s+", " ", span_text).strip()
+                    break
+
+            # Try paragraphs if span didn't work
+            if not institution:
+                inst_paragraphs = row.find_elements(By.XPATH, ".//p[@class='pagecontents']")
+                for inst_p in inst_paragraphs:
+                    if inst_p.find_elements(By.XPATH, ".//a[contains(@href, 'mailpopup')]"):
+                        continue
+
+                    inst_html = inst_p.get_attribute("innerHTML")
+                    parts = [p.strip() for p in inst_html.split("<br>") if p.strip()]
+
+                    if len(parts) > 0:
+                        first_part = re.sub(r"<[^>]+>", "", parts[0]).strip()
+                        if " - " in first_part:
+                            institution = first_part.split(" - ")[0].strip()
+                            department = first_part.split(" - ")[1].strip()
+                        else:
+                            institution = first_part.strip()
+
+                    if len(parts) > 1:
+                        city = re.sub(r"<[^>]+>", "", parts[1]).strip()
+
+                    if len(parts) > 2:
+                        country = re.sub(r"<[^>]+>", "", parts[2]).strip()
+
+                    if institution:
+                        break
+
+            # Extract email using SAME SCORED MATCHING as referees
+            email = ""
+            name_parts = name.replace(",", " ").split()
+            last_name = name_parts[0].lower() if name_parts else ""
+            first_name = name_parts[1].lower() if len(name_parts) > 1 else ""
+
+            best_match = None
+            best_score = 0
+
+            for candidate_email in all_emails:
+                score = 0
+                email_lower = candidate_email.lower()
+
+                if last_name and len(last_name) > 3 and last_name in email_lower:
+                    score += 10
+                if first_name and len(first_name) > 3 and first_name in email_lower:
+                    score += 5
+                if institution and "@" in candidate_email:
+                    domain = candidate_email.split("@")[1].lower()
+                    for inst_word in institution.lower().split():
+                        if len(inst_word) > 4 and inst_word in domain:
+                            score += 8
+
+                if score > best_score:
+                    best_score = score
+                    best_match = candidate_email
+
+            if best_match and best_score >= 8:
+                email = best_match
+
+            # Extract department from institution if not separate
+            if not department and institution and "," in institution:
+                department = institution.split(",")[1].strip()
+
+            # Get country and domain (like referees)
+            country_enriched, domain = self.enrich_institution(institution)
+            if not country:
+                country = country_enriched
+
+            author_data = {
+                "name": name,
+                "email": email,
+                "institution": institution,
+                "department": department,
+                "city": city,
+                "country": country,
+                "orcid": orcid,
+                "email_domain": f"@{domain}" if domain else "",
+                "corresponding_author": "*" in row_text or "corresponding" in row_text.lower(),
+            }
+
+            return author_data
+
+        except Exception as e:
+            return None
 
     def extract_metadata(self) -> Dict[str, Any]:
         """Extract comprehensive manuscript metadata"""

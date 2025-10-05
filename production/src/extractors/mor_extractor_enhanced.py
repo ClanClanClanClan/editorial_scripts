@@ -1721,6 +1721,9 @@ class MORExtractor(CachedExtractorMixin):
                         continue
                     seen_names.add(name)
 
+                    # Get parent row for extracting institution, ORCID, etc.
+                    parent_row = link.find_element(By.XPATH, "./ancestor::tr[1]")
+
                     # Check if it's an editor/admin by parent context
                     try:
                         parent_text = parent_row.text.lower()
@@ -1736,7 +1739,7 @@ class MORExtractor(CachedExtractorMixin):
                         ):
                             continue
                     except:
-                        pass
+                        parent_text = ""  # Set default if extraction fails
 
                     # Extract ORCID if available (look for orcid.org link in same row)
                     orcid = ""

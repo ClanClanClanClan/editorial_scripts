@@ -3749,10 +3749,9 @@ class MORExtractor(CachedExtractorMixin):
             self.safe_click(category_link)
             self.smart_wait(1.5)  # Reduced from 3s
 
-            # Count manuscripts - find rows with manuscript IDs + clickable check icons
-            # Use td containing manuscript ID to ensure we're in data rows, not headers
+            # Count manuscripts - rows containing MOR- AND having a check icon (actual manuscript rows)
             manuscript_rows = self.driver.find_elements(
-                By.XPATH, "//tr[.//td[contains(text(),'MOR-') and string-length(text())< 30]]"
+                By.XPATH, "//tr[contains(., 'MOR-') and .//img[contains(@src, 'check')]]"
             )
             total_manuscripts = len(manuscript_rows)
 
@@ -3782,11 +3781,11 @@ class MORExtractor(CachedExtractorMixin):
                 )
 
                 try:
-                    # Re-find manuscripts each iteration - rows with manuscript IDs in td elements
+                    # Re-find manuscripts each iteration - rows with MOR- AND check icon
                     print(f"      1️⃣ Finding manuscript rows...")
                     current_rows = self.driver.find_elements(
                         By.XPATH,
-                        "//tr[.//td[contains(text(),'MOR-') and string-length(text())<30]]",
+                        "//tr[contains(., 'MOR-') and .//img[contains(@src, 'check')]]",
                     )
                     print(f"      ✅ Found {len(current_rows)} rows")
 

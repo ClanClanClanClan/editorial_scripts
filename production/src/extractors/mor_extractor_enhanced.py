@@ -3749,13 +3749,17 @@ class MORExtractor(CachedExtractorMixin):
             self.safe_click(category_link)
             self.smart_wait(1.5)  # Reduced from 3s
 
-            # Count manuscripts - use specific XPath to ONLY match manuscript rows with check icons
+            # Count manuscripts - find rows with manuscript IDs + clickable check icons
+            # Use td containing manuscript ID to ensure we're in data rows, not headers
             manuscript_rows = self.driver.find_elements(
-                By.XPATH, "//tr[.//img[contains(@src, 'check.gif')]]"
+                By.XPATH, "//tr[.//td[contains(text(),'MOR-') and string-length(text())< 30]]"
             )
             total_manuscripts = len(manuscript_rows)
 
             print(f"   📊 Found {total_manuscripts} manuscripts")
+
+            # Track processed manuscript IDs to avoid duplicates
+            processed_ids = set()
 
             # Process by index to avoid stale element issues
             processed_count = 0
@@ -3778,10 +3782,11 @@ class MORExtractor(CachedExtractorMixin):
                 )
 
                 try:
-                    # Re-find manuscripts each iteration - ONLY rows with check icons (actual manuscripts)
+                    # Re-find manuscripts each iteration - rows with manuscript IDs in td elements
                     print(f"      1️⃣ Finding manuscript rows...")
                     current_rows = self.driver.find_elements(
-                        By.XPATH, "//tr[.//img[contains(@src, 'check.gif')]]"
+                        By.XPATH,
+                        "//tr[.//td[contains(text(),'MOR-') and string-length(text())<30]]",
                     )
                     print(f"      ✅ Found {len(current_rows)} rows")
 
@@ -3800,6 +3805,13 @@ class MORExtractor(CachedExtractorMixin):
                         continue
 
                     manuscript_id = match.group()
+
+                    # Skip if already processed
+                    if manuscript_id in processed_ids:
+                        print(f"      ⏭️ Skipping {manuscript_id} (already processed)")
+                        processed_count += 1
+                        continue
+
                     print(f"      3️⃣ [{processed_count+1}/{limit}] Processing {manuscript_id}...")
 
                     # Click on manuscript with explicit page load verification
@@ -3838,6 +3850,7 @@ class MORExtractor(CachedExtractorMixin):
                     # Add ID field for compatibility
                     manuscript_data["id"] = manuscript_id
                     manuscripts.append(manuscript_data)
+                    processed_ids.add(manuscript_id)  # Mark as processed
                     print(f"      ✅ Extracted {manuscript_id}")
 
                     # Navigate back with explicit verification

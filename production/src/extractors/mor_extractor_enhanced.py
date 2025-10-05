@@ -3749,10 +3749,9 @@ class MORExtractor(CachedExtractorMixin):
             self.safe_click(category_link)
             self.smart_wait(1.5)  # Reduced from 3s
 
-            # Count manuscripts - rows containing MOR- AND having a check icon (actual manuscript rows)
-            manuscript_rows = self.driver.find_elements(
-                By.XPATH, "//tr[contains(., 'MOR-') and .//img[contains(@src, 'check')]]"
-            )
+            # Count manuscripts - simple approach: any row containing MOR- text
+            # Will filter duplicates using processed_ids set
+            manuscript_rows = self.driver.find_elements(By.XPATH, "//tr[contains(., 'MOR-')]")
             total_manuscripts = len(manuscript_rows)
 
             print(f"   📊 Found {total_manuscripts} manuscripts")
@@ -3781,11 +3780,11 @@ class MORExtractor(CachedExtractorMixin):
                 )
 
                 try:
-                    # Re-find manuscripts each iteration - rows with MOR- AND check icon
+                    # Re-find manuscripts each iteration
                     print(f"      1️⃣ Finding manuscript rows...")
                     current_rows = self.driver.find_elements(
                         By.XPATH,
-                        "//tr[contains(., 'MOR-') and .//img[contains(@src, 'check')]]",
+                        "//tr[contains(., 'MOR-')]",
                     )
                     print(f"      ✅ Found {len(current_rows)} rows")
 

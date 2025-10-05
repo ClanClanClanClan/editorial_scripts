@@ -1702,10 +1702,10 @@ class MORExtractor(CachedExtractorMixin):
                 )
             ]
 
-            # Strategy 1: Find author rows - only those with ORCID links (to avoid editors)
+            # Strategy 1: Find ALL author mailpopup links, filter editors early
             author_links = self.driver.find_elements(
                 By.XPATH,
-                "//tr[.//a[contains(@href, 'orcid.org')]]//a[contains(@href, 'mailpopup')]",
+                "//a[contains(@href, 'mailpopup')]",
             )
 
             for link in author_links:
@@ -1716,15 +1716,10 @@ class MORExtractor(CachedExtractorMixin):
                     if "," not in name or len(name) < 3 or len(name) > 100:
                         continue
 
-                    # Deduplicate - skip if already processed
-                    if name in seen_names:
-                        continue
-                    seen_names.add(name)
-
-                    # Get parent row for extracting institution, ORCID, etc.
+                    # Get parent row FIRST to check if it's an editor
                     parent_row = link.find_element(By.XPATH, "./ancestor::tr[1]")
 
-                    # Check if it's an editor/admin by parent context
+                    # Check if it's an editor/admin by parent context - SKIP EARLY
                     try:
                         parent_text = parent_row.text.lower()
                         if any(
@@ -1735,11 +1730,18 @@ class MORExtractor(CachedExtractorMixin):
                                 "admin",
                                 "staff",
                                 "editor-in-chief",
+                                "area editor",
+                                "associate editor",
                             ]
                         ):
                             continue
                     except:
-                        parent_text = ""  # Set default if extraction fails
+                        parent_text = ""
+
+                    # Deduplicate - skip if already processed
+                    if name in seen_names:
+                        continue
+                    seen_names.add(name)
 
                     # Extract ORCID if available (look for orcid.org link in same row)
                     orcid = ""

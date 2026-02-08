@@ -1,15 +1,5 @@
 #!/usr/bin/env python3
 """
-PRODUCTION MF EXTRACTOR - SECURE CREDENTIAL VERSION
-==================================================
-
-Production-ready extractor for Mathematical Finance journals.
-Automatically loads credentials from secure storage.
-No need to set environment variables manually.
-"""
-
-#!/usr/bin/env python3
-"""
 COMPREHENSIVE MF EXTRACTOR
 ==========================
 
@@ -46,66 +36,7 @@ from core.cache_integration import CachedExtractorMixin
 
 # Enhanced credential loading
 sys.path.append(str(Path(__file__).parent.parent))
-try:
-    from ensure_credentials import load_credentials
-
-    load_credentials()
-except ImportError:
-    # Fallback to basic dotenv loading
-    load_dotenv(".env.production")
-
-    def with_retry(max_attempts=3, delay=1.0):
-        """Decorator to retry failed operations with exponential backoff."""
-
-        def decorator(func):
-            def wrapper(*args, **kwargs):
-                for attempt in range(max_attempts):
-                    try:
-                        return func(*args, **kwargs)
-                    except Exception as e:
-                        if attempt == max_attempts - 1:
-                            print(f"   ❌ {func.__name__} failed after {max_attempts} attempts: {e}")
-                            raise
-                        else:
-                            print(f"   ⚠️ {func.__name__} attempt {attempt + 1} failed: {e}")
-                            time.sleep(delay * (2**attempt))  # Exponential backoff
-                return None
-
-            return wrapper
-
-        return decorator
-
-    def safe_execute(
-        self, operation: Callable, operation_name: str, default_value=None, critical=False
-    ):
-        """Safely execute an operation with error handling."""
-        try:
-            result = operation()
-            return result
-        except TimeoutException:
-            error_msg = f"Timeout during {operation_name}"
-            print(f"   ⏱️ {error_msg}")
-            if critical:
-                raise Exception(f"Critical operation failed: {error_msg}")
-            return default_value
-        except NoSuchElementException:
-            error_msg = f"Element not found during {operation_name}"
-            print(f"   🔍 {error_msg}")
-            if critical:
-                raise Exception(f"Critical operation failed: {error_msg}")
-            return default_value
-        except WebDriverException as e:
-            error_msg = f"WebDriver error during {operation_name}: {str(e)[:100]}"
-            print(f"   🌐 {error_msg}")
-            if critical:
-                raise Exception(f"Critical operation failed: {error_msg}")
-            return default_value
-        except Exception as e:
-            error_msg = f"Unexpected error during {operation_name}: {str(e)[:100]}"
-            print(f"   ❌ {error_msg}")
-            if critical:
-                raise Exception(f"Critical operation failed: {error_msg}")
-            return default_value
+load_dotenv(".env.production")
 
 
 class ComprehensiveMFExtractor(CachedExtractorMixin):

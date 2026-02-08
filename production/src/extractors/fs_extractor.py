@@ -378,7 +378,6 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
         authors = []
         try:
             import PyPDF2
-            import re
 
             with open(pdf_path, "rb") as file:
                 reader = PyPDF2.PdfReader(file)
@@ -485,8 +484,6 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
 
     def _parse_author_section(self, lines: List[str]) -> List[Dict[str, Any]]:
         """Parse author section lines to extract names, emails, and affiliations."""
-        import re
-
         authors = []
         affiliations = {}
 
@@ -605,7 +602,6 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
         try:
             import requests
             from urllib.parse import quote
-            import re
 
             # Clean title for search
             clean_title = re.sub(r"[^\w\s]", " ", title).strip()
@@ -986,8 +982,6 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
             r"decision[:\s]+([^\n]+)",
         ]
 
-        import re
-
         for pattern in rec_section_patterns:
             match = re.search(pattern, text_lower)
             if match:
@@ -1019,8 +1013,6 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
 
         if not report_text:
             return scores
-
-        import re
 
         # Common score patterns
         score_patterns = [
@@ -1073,8 +1065,6 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
 
         if not report_text:
             return concerns
-
-        import re
 
         # Keywords that indicate concerns
         concern_keywords = [
@@ -1191,8 +1181,6 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
         # Main manuscript (default for PDFs with manuscript ID)
         if filename_lower.endswith(".pdf"):
             # Check if it's the main manuscript (has ID, no other keywords)
-            import re
-
             if re.search(r"FS-\d{2}-\d{3,4}", filename):
                 return "main_manuscript"
 
@@ -1250,8 +1238,6 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
 
     def detect_revision_round(self, manuscript_id: str) -> int:
         """Detect revision round from manuscript ID."""
-        import re
-
         match = re.search(r"\.R(\d+)$", manuscript_id)
         if match:
             return int(match.group(1))
@@ -1322,8 +1308,6 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
         # Look for revision submissions in timeline
         for event in manuscript.get("timeline", []):
             subject = event.get("subject", "")
-            import re
-
             revision_match = re.search(r"\.R(\d+)", subject)
             if revision_match:
                 round_num = self.safe_int(revision_match.group(1))
@@ -1354,7 +1338,6 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
         self, manuscript_id: str, emails: List[Dict[str, Any]], is_current: bool = False
     ) -> Dict[str, Any]:
         """Build complete manuscript timeline from all related emails."""
-        import re
 
         manuscript = {
             "id": manuscript_id,
@@ -1571,8 +1554,6 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
                 # Skip Editorial Digest processing entirely
                 if False:  # Disabled Editorial Digest processing
                     # Parse referee assignments from digest format
-                    import re
-
                     # Look for patterns like "Mastrogiacomo Elisa (ms FS-25-47-25) — Accepted"
                     # Note: The digest has typos like "47-25" for "4725"
                     digest_pattern = (
@@ -1712,9 +1693,11 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
                     )
 
                     if is_manuscript and not is_report:
-                        file_path = self.download_attachment(
-                            email["id"], attachment["attachment_id"], filename
-                        )
+                        file_path = None
+                        if is_current:
+                            file_path = self.download_attachment(
+                                email["id"], attachment["attachment_id"], filename
+                            )
                         if file_path:
                             manuscript["manuscript_pdfs"].append(file_path)
                             event["details"]["manuscript_pdf"] = filename
@@ -1748,9 +1731,11 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
                                     )
 
                     elif is_report:
-                        file_path = self.download_attachment(
-                            email["id"], attachment["attachment_id"], filename
-                        )
+                        file_path = None
+                        if is_current:
+                            file_path = self.download_attachment(
+                                email["id"], attachment["attachment_id"], filename
+                            )
                         if file_path:
                             # Try to match report to specific referee
                             report_referee = None
@@ -1928,8 +1913,6 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
             r"([A-Z][a-z]+(?:\s+[A-Z][a-z]+){1,3})\s+has\s+(?:accepted|agreed|declined)",
             r"([A-Z][a-z]+(?:\s+[A-Z][a-z]+){1,3})\s+from\s+([A-Za-z\s]+University|[A-Za-z\s]+Institute)",
         ]
-
-        import re
 
         for pattern in patterns:
             matches = re.findall(pattern, body)
@@ -2222,8 +2205,6 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
                 subject = next((h["value"] for h in headers if h["name"] == "Subject"), "")
 
                 # Extract manuscript IDs from starred emails
-                import re
-
                 fs_match = re.search(r"FS-\d{2}-\d{3,4}", subject)
                 if fs_match:
                     current_manuscript_ids.add(fs_match.group(0))
@@ -2267,11 +2248,15 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
 
                 print(f"   📧 Found {len(manuscript_emails)} emails for {manuscript_id}")
 
+                is_current = manuscript_id in current_manuscript_ids
+                if not is_current:
+                    print(f"   📄 Historical manuscript — skipping downloads")
+
                 # Build comprehensive manuscript data
                 manuscript = self.build_manuscript_timeline(
                     manuscript_id,
                     manuscript_emails,
-                    is_current=(manuscript_id in current_manuscript_ids),
+                    is_current=is_current,
                 )
 
                 if manuscript:
@@ -2284,18 +2269,27 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
                 key=lambda x: (not x["is_current"], x["submission_date"] or ""), reverse=True
             )
 
-            print(f"\n📊 Extracted {len(self.manuscripts)} manuscripts with complete timelines")
+            current_mss = [m for m in self.manuscripts if m["is_current"]]
+            historical_mss = [m for m in self.manuscripts if not m["is_current"]]
 
-            # Show summary
-            if self.manuscripts:
-                print("\n📋 MANUSCRIPT SUMMARY:")
-                for ms in self.manuscripts:
-                    status_icon = "⭐" if ms["is_current"] else "📄"
-                    print(f"{status_icon} {ms['id']}: {ms['title'][:50]}...")
+            print(
+                f"\n📊 Extracted {len(self.manuscripts)} manuscripts ({len(current_mss)} current, {len(historical_mss)} historical)"
+            )
+
+            if current_mss:
+                print("\n📋 CURRENT MANUSCRIPTS (starred):")
+                for ms in current_mss:
+                    print(f"⭐ {ms['id']}: {ms['title'][:50]}...")
                     print(f"   📧 {ms['total_emails']} emails | 👥 {ms['total_referees']} referees")
                     print(
                         f"   ✅ {ms['referees_accepted']} accepted | ❌ {ms['referees_declined']} declined | 📝 {ms['reports_received']} reports"
                     )
+
+            if historical_mss:
+                print("\n📋 HISTORICAL MANUSCRIPTS:")
+                for ms in historical_mss:
+                    print(f"📄 {ms['id']}: {ms['title'][:50]}...")
+                    print(f"   📧 {ms['total_emails']} emails | 👥 {ms['total_referees']} referees")
 
             return self.manuscripts
 
@@ -2784,7 +2778,6 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
 
         try:
             import PyPDF2
-            import re
 
             with open(pdf_path, "rb") as pdf_file:
                 pdf_reader = PyPDF2.PdfReader(pdf_file)
@@ -2939,7 +2932,6 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
         if pdf_path:
             try:
                 import PyPDF2
-                import re
 
                 with open(pdf_path, "rb") as pdf_file:
                     pdf_reader = PyPDF2.PdfReader(pdf_file)

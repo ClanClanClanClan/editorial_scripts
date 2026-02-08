@@ -1334,7 +1334,7 @@ class MORExtractor(CachedExtractorMixin):
         import time
 
         extraction_start = time.time()
-        max_extraction_time = 30  # 30 seconds per manuscript for speed
+        max_extraction_time = 120
 
         print(f"\n{'='*60}")
         print(f"📋 EXTRACTING: {manuscript_id}")
@@ -3978,16 +3978,38 @@ class MORExtractor(CachedExtractorMixin):
             return False
 
     def _collect_manuscript_ids(self) -> List[str]:
-        """Return deduplicated list of MOR manuscript IDs visible on current page."""
-        rows = self.driver.find_elements(By.XPATH, "//tr[contains(., 'MOR-')]")
+        """Return deduplicated list of MOR manuscript IDs visible on current page.
+
+        Uses Take Action check icons as 1:1 anchors per manuscript (proven MF pattern).
+        Falls back to <a> tag direct text matching if icons not found.
+        """
         seen = set()
         ids = []
-        for row in rows:
-            text = self.safe_get_text(row)
-            m = re.search(r"MOR-\d{4}-\d+(?:-R\d+)?", text)
-            if m and m.group() not in seen:
-                seen.add(m.group())
-                ids.append(m.group())
+
+        action_links = self.driver.find_elements(By.XPATH, "//a[.//img[contains(@src, 'check')]]")
+
+        if action_links:
+            for link in action_links:
+                try:
+                    row = link.find_element(By.XPATH, "./ancestor::tr[1]")
+                    text = self.safe_get_text(row)
+                    m = re.search(r"MOR-\d{4}-\d+(?:-R\d+)?", text)
+                    if m and m.group() not in seen:
+                        seen.add(m.group())
+                        ids.append(m.group())
+                except Exception:
+                    continue
+
+        if not ids:
+            for link in self.driver.find_elements(By.XPATH, "//a[contains(text(), 'MOR-')]"):
+                text = self.safe_get_text(link)
+                m = re.search(r"MOR-\d{4}-\d+(?:-R\d+)?", text)
+                if m and m.group() not in seen:
+                    seen.add(m.group())
+                    ids.append(m.group())
+
+        strategy = "Take Action icons" if action_links else "link text"
+        print(f"   📋 Found {len(ids)} manuscript IDs via {strategy}: {ids}")
         return ids
 
     def process_category(self, category: str) -> List[Dict]:
@@ -4042,33 +4064,32 @@ class MORExtractor(CachedExtractorMixin):
                             print(f"      ❌ Could not re-open category, stopping")
                             break
 
-                    # Find the row for this specific manuscript
+                    # Find the check icon whose innermost row contains this manuscript ID
                     print(f"      1️⃣ Finding row for {manuscript_id}...")
-                    current_rows = self.driver.find_elements(
-                        By.XPATH,
-                        f"//tr[contains(., '{manuscript_id}')]",
+                    click_target = None
+                    action_links = self.driver.find_elements(
+                        By.XPATH, "//a[.//img[contains(@src, 'check')]]"
                     )
+                    for link in action_links:
+                        try:
+                            row = link.find_element(By.XPATH, "./ancestor::tr[1]")
+                            text = self.safe_get_text(row)
+                            if manuscript_id in text:
+                                click_target = link
+                                break
+                        except Exception:
+                            continue
 
-                    if not current_rows:
+                    if not click_target:
                         print(f"      ⚠️ Row for {manuscript_id} not found, skipping")
                         continue
 
-                    row = current_rows[0]
                     print(f"      ✅ Found row")
-
-                    # Click on manuscript
                     print(f"      2️⃣ Clicking manuscript...")
-                    try:
-                        check_icon = row.find_element(
-                            By.XPATH, ".//img[contains(@src, 'check')]/parent::*"
-                        )
-                    except Exception as e:
-                        print(f"      ❌ Cannot find check icon: {str(e)[:50]}")
-                        continue
 
                     current_url = self.driver.current_url
                     try:
-                        self.driver.execute_script("arguments[0].click();", check_icon)
+                        self.driver.execute_script("arguments[0].click();", click_target)
                     except Exception as e:
                         print(f"      ❌ Click failed: {str(e)[:50]}")
                         continue

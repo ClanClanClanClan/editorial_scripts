@@ -2314,15 +2314,7 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
 
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
-        # Save using cache system
-        try:
-            for manuscript in self.manuscripts:
-                self.cache_manuscript(manuscript)
-            print(f"💾 Cached {len(self.manuscripts)} manuscripts")
-        except Exception as e:
-            print(f"⚠️ Cache save error: {e}")
-
-        # Save JSON file
+        # Save JSON file FIRST (primary output)
         try:
             output_dir = Path("results/fs")
             output_dir.mkdir(parents=True, exist_ok=True)
@@ -2345,6 +2337,25 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
 
         except Exception as e:
             print(f"⚠️ File save error: {e}")
+
+        # Save to cache system (secondary, with timeout)
+        try:
+            import signal
+
+            def _timeout_handler(signum, frame):
+                raise TimeoutError("Cache save timed out")
+
+            old_handler = signal.signal(signal.SIGALRM, _timeout_handler)
+            signal.alarm(30)
+            try:
+                for manuscript in self.manuscripts:
+                    self.cache_manuscript(manuscript)
+                print(f"💾 Cached {len(self.manuscripts)} manuscripts")
+            finally:
+                signal.alarm(0)
+                signal.signal(signal.SIGALRM, old_handler)
+        except (TimeoutError, Exception) as e:
+            print(f"⚠️ Cache save error: {e}")
 
     def calculate_timeline_metrics(self, manuscript: Dict) -> Dict[str, Any]:
         """Calculate timeline metrics for a manuscript.

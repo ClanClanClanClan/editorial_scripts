@@ -12,6 +12,7 @@ import time
 import json
 import re
 import requests
+from urllib.parse import unquote, urlparse
 from pathlib import Path
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
@@ -4707,9 +4708,6 @@ class ComprehensiveMFExtractor(CachedExtractorMixin):
 
                         # Try to extract email from the JavaScript parameters
                         if "mailpopup" in onclick or "mailpopup" in href:
-                            import re
-                            from urllib.parse import unquote
-
                             # Look for email patterns in the onclick/href
                             email_match = re.search(r"EMAIL_TO=([^&]+)", onclick + href)
                             if not email_match:

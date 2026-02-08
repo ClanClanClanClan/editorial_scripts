@@ -3965,8 +3965,33 @@ class MORExtractor(CachedExtractorMixin):
                 pass
             self.service = None
 
+    def _open_category(self, category: str) -> bool:
+        """Navigate to AE center and click open a category. Returns True on success."""
+        self.navigate_to_ae_center()
+        try:
+            wait_short = WebDriverWait(self.driver, 5)
+            category_link = wait_short.until(EC.element_to_be_clickable((By.LINK_TEXT, category)))
+            self.safe_click(category_link)
+            self.smart_wait(1.5)
+            return True
+        except TimeoutException:
+            return False
+
+    def _collect_manuscript_ids(self) -> List[str]:
+        """Return deduplicated list of MOR manuscript IDs visible on current page."""
+        rows = self.driver.find_elements(By.XPATH, "//tr[contains(., 'MOR-')]")
+        seen = set()
+        ids = []
+        for row in rows:
+            text = self.safe_get_text(row)
+            m = re.search(r"MOR-\d{4}-\d+(?:-R\d+)?", text)
+            if m and m.group() not in seen:
+                seen.add(m.group())
+                ids.append(m.group())
+        return ids
+
     def process_category(self, category: str) -> List[Dict]:
-        """Process all manuscripts in a category"""
+        """Process all manuscripts in a category."""
         manuscripts = []
 
         print(f"\n🔗 Processing category: {category}")
@@ -3976,23 +4001,19 @@ class MORExtractor(CachedExtractorMixin):
             wait_short = WebDriverWait(self.driver, 5)
             category_link = wait_short.until(EC.element_to_be_clickable((By.LINK_TEXT, category)))
             self.safe_click(category_link)
-            self.smart_wait(1.5)  # Reduced from 3s
+            self.smart_wait(1.5)
 
-            # Count manuscripts - simple approach: any row containing MOR- text
-            # Will filter duplicates using processed_ids set
-            manuscript_rows = self.driver.find_elements(By.XPATH, "//tr[contains(., 'MOR-')]")
-            total_manuscripts = len(manuscript_rows)
+            # Collect unique manuscript IDs up-front
+            all_ids = self._collect_manuscript_ids()
+            total_manuscripts = len(all_ids)
 
             print(f"   📊 Found {total_manuscripts} manuscripts")
 
-            # Track processed manuscript IDs to avoid duplicates
-            processed_ids = set()
+            if total_manuscripts == 0:
+                print(f"   ⚠️ Category '{category}' not found or empty")
+                self.navigate_to_ae_center()
+                return manuscripts
 
-            # Process by index to avoid stale element issues
-            processed_count = 0
-            max_attempts = total_manuscripts * 2
-
-            # Apply limit if set
             limit = (
                 self.max_manuscripts_per_category
                 if self.max_manuscripts_per_category
@@ -4000,68 +4021,58 @@ class MORExtractor(CachedExtractorMixin):
             )
             print(f"   📊 Processing limit: {limit} manuscripts")
 
-            while processed_count < limit and processed_count < max_attempts:
+            processed_ids = set()
+
+            for idx, manuscript_id in enumerate(all_ids[:limit]):
                 import time
 
                 loop_start = time.time()
                 print(
-                    f"\n   🔄 Loop iteration {processed_count + 1}, elapsed: {loop_start - time.time():.1f}s"
+                    f"\n   🔄 Processing {idx + 1}/{min(limit, total_manuscripts)}: {manuscript_id}"
                 )
 
+                if manuscript_id in processed_ids:
+                    print(f"      ⏭️ Skipping {manuscript_id} (already processed)")
+                    continue
+
                 try:
-                    # Re-find manuscripts each iteration
-                    print(f"      1️⃣ Finding manuscript rows...")
+                    # Re-open the category fresh each iteration (after the first)
+                    if idx > 0:
+                        if not self._open_category(category):
+                            print(f"      ❌ Could not re-open category, stopping")
+                            break
+
+                    # Find the row for this specific manuscript
+                    print(f"      1️⃣ Finding row for {manuscript_id}...")
                     current_rows = self.driver.find_elements(
                         By.XPATH,
-                        "//tr[contains(., 'MOR-')]",
+                        f"//tr[contains(., '{manuscript_id}')]",
                     )
-                    print(f"      ✅ Found {len(current_rows)} rows")
 
-                    if processed_count >= len(current_rows):
-                        print(f"      ⏹️ Processed all available rows, breaking")
-                        break
-
-                    print(f"      2️⃣ Getting row {processed_count}...")
-                    row = current_rows[processed_count]
-                    row_text = self.safe_get_text(row)
-                    match = re.search(r"MOR-\d{4}-\d+(?:-R\d+)?", row_text)
-
-                    if not match:
-                        print(f"      ⚠️ No manuscript ID in row, skipping")
-                        processed_count += 1
+                    if not current_rows:
+                        print(f"      ⚠️ Row for {manuscript_id} not found, skipping")
                         continue
 
-                    manuscript_id = match.group()
+                    row = current_rows[0]
+                    print(f"      ✅ Found row")
 
-                    # Skip if already processed
-                    if manuscript_id in processed_ids:
-                        print(f"      ⏭️ Skipping {manuscript_id} (already processed)")
-                        processed_count += 1
-                        continue
-
-                    print(f"      3️⃣ [{processed_count+1}/{limit}] Processing {manuscript_id}...")
-
-                    # Click on manuscript with explicit page load verification
-                    print(f"      4️⃣ Clicking manuscript...")
+                    # Click on manuscript
+                    print(f"      2️⃣ Clicking manuscript...")
                     try:
                         check_icon = row.find_element(
                             By.XPATH, ".//img[contains(@src, 'check')]/parent::*"
                         )
                     except Exception as e:
                         print(f"      ❌ Cannot find check icon: {str(e)[:50]}")
-                        processed_count += 1
                         continue
 
-                    # Use JavaScript click (non-blocking) and verify page loaded
                     current_url = self.driver.current_url
                     try:
                         self.driver.execute_script("arguments[0].click();", check_icon)
                     except Exception as e:
                         print(f"      ❌ Click failed: {str(e)[:50]}")
-                        processed_count += 1
                         continue
 
-                    # Wait for URL change (explicit verification of navigation)
                     try:
                         WebDriverWait(self.driver, 15).until(lambda d: d.current_url != current_url)
                         print(f"      ✅ Page loaded")
@@ -4070,48 +4081,26 @@ class MORExtractor(CachedExtractorMixin):
 
                     self.smart_wait(1)
 
-                    # Extract comprehensive data (all tabs + audit trail)
-                    print(f"      5️⃣ Extracting comprehensive details...")
+                    # Extract comprehensive data
+                    print(f"      3️⃣ Extracting comprehensive details...")
                     manuscript_data = self.extract_manuscript_comprehensive(manuscript_id)
                     manuscript_data["category"] = category
-                    # Add ID field for compatibility
                     manuscript_data["id"] = manuscript_id
                     manuscripts.append(manuscript_data)
-                    processed_ids.add(manuscript_id)  # Mark as processed
+                    processed_ids.add(manuscript_id)
                     print(f"      ✅ Extracted {manuscript_id}")
-
-                    # Navigate back with explicit verification
-                    print(f"      6️⃣ Navigating back...")
-                    detail_url = self.driver.current_url
-                    self.driver.back()
-
-                    # Wait for URL change back to category list
-                    try:
-                        WebDriverWait(self.driver, 15).until(lambda d: d.current_url != detail_url)
-                        print(f"      ✅ Back to category list")
-                    except:
-                        print(f"      ⚠️  Back navigation timeout, forcing refresh")
-                        self.driver.refresh()
-                        self.smart_wait(2)
-
-                    processed_count += 1
-                    print(f"      ✅ Iteration complete ({time.time() - loop_start:.1f}s)")
+                    print(f"      ✅ Complete ({time.time() - loop_start:.1f}s)")
 
                 except Exception as e:
-                    print(f"      ❌ Error: {str(e)[:100]}")
+                    print(f"      ❌ Error processing {manuscript_id}: {str(e)[:100]}")
                     import traceback
 
                     traceback.print_exc()
-                    processed_count += 1
-                    try:
-                        print(f"      🔙 Attempting recovery navigation...")
-                        self.driver.back()
-                        self.smart_wait(2)
-                    except:
-                        pass
                     continue
 
-            print(f"\n   ✅ Category processing complete: {processed_count} manuscripts processed")
+            print(
+                f"\n   ✅ Category complete: {len(processed_ids)}/{total_manuscripts} manuscripts extracted"
+            )
 
             # Return to AE center
             self.navigate_to_ae_center()

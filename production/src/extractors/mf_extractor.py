@@ -1169,7 +1169,15 @@ class ComprehensiveMFExtractor(CachedExtractorMixin):
         chrome_options.add_argument("--no-sandbox")
         chrome_options.add_argument("--disable-dev-shm-usage")
         chrome_options.add_argument("--window-size=1200,800")
-        self.driver = webdriver.Chrome(options=chrome_options)
+        try:
+            from webdriver_manager.chrome import ChromeDriverManager
+            from selenium.webdriver.chrome.service import Service
+
+            self.driver = webdriver.Chrome(
+                service=Service(ChromeDriverManager().install()), options=chrome_options
+            )
+        except ImportError:
+            self.driver = webdriver.Chrome(options=chrome_options)
         self.driver.set_window_size(1200, 800)
 
     def wait_for_element(self, by, value, timeout=10):

@@ -3849,10 +3849,15 @@ class MORExtractor(CachedExtractorMixin):
         print("🚀 MOR PRODUCTION EXTRACTOR - ROBUST MF LEVEL")
         print("=" * 60)
 
-        # Create ChromeDriver service explicitly to track PID
+        # Create ChromeDriver service with auto-matching version
         from selenium.webdriver.chrome.service import Service
 
-        self.service = Service()
+        try:
+            from webdriver_manager.chrome import ChromeDriverManager
+
+            self.service = Service(ChromeDriverManager().install())
+        except ImportError:
+            self.service = Service()
         self.driver = webdriver.Chrome(service=self.service, options=self.chrome_options)
         self.driver.set_page_load_timeout(30)
         self.driver.implicitly_wait(10)

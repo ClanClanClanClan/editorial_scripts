@@ -1,0 +1,111 @@
+{
+  "extraction_timestamp": "2025-10-05T21:02:45.364672",
+  "journal": "MOR",
+  "extractor_version": "2.0.0-MF-Level-Robust",
+  "manuscripts": [
+    {
+      "manuscript_id": "MOR-2025-1190",
+      "extraction_timestamp": "2025-10-05T21:03:59.972479",
+      "is_revision": false,
+      "revision_number": 0,
+      "authors": [],
+      "referees": [
+        {
+          "name": "tangpi, ludovic",
+          "institution": "Princeton University, ORFE",
+          "department": "ORFE",
+          "country": "USA",
+          "status": "Declined",
+          "invitation_date": "23-Sep-2025",
+          "response_date": "23-Sep-2025",
+          "orcid": "",
+          "email": "ludovic.tangpi@princeton.edu",
+          "email_domain": "@princeton.edu"
+        },
+        {
+          "name": "Kupper, Michael",
+          "institution": "University of Konstanz, Department of Mathematics",
+          "department": "Department of Mathematics",
+          "country": "",
+          "status": "Agreed",
+          "invitation_date": "23-Sep-2025",
+          "response_date": "30-Sep-2025",
+          "orcid": "",
+          "email": "kupper@uni-konstanz.de",
+          "email_domain": ""
+        },
+        {
+          "name": "Bahlali, Khaled",
+          "institution": "",
+          "department": "",
+          "country": "",
+          "status": "Declined",
+          "invitation_date": "23-Sep-2025",
+          "response_date": "01-Oct-2025",
+          "orcid": "",
+          "email": "",
+          "email_domain": ""
+        },
+        {
+          "name": "Hassani, Mohammed",
+          "institution": "",
+          "department": "",
+          "country": "",
+          "status": "Declined",
+          "invitation_date": "01-Oct-2025",
+          "response_date": "",
+          "orcid": "",
+          "email": "",
+          "email_domain": ""
+        }
+      ],
+      "editors": [
+        {
+          "name": "Possamaï, Dylan",
+          "role": "Editor-in-Chief",
+          "email": "",
+          "institution": ""
+        }
+      ],
+      "metadata": {
+        "title": "Geometric BSDEs",
+        "submission_date": "09-Sep-2025",
+        "last_updated": "30-Sep-2025",
+        "keywords": "Geometric BSDEs , Two-driver BSDEs , Logarithmic non-linearity and singularity at zero , Dynamic return and star-shaped risk measures , Dynamics of $L^{p}$-norms",
+        "manuscript_type": "Research Article",
+        "funding": "Ermenegildo Zegna Founder’s Scholarship",
+        "abstract": "09-Sep-2025 Managing Editor: Elmore (Editorial Office), Jeff AU REV AE AreaED EIC ME PROD Date to Managing Editor: 09-Sep-2025 Editor-in-Chief: Scheinberg, Katya AU REV AE AreaED EIC Date to Editor-in-Chief: 12-Sep-2025 Area Editor: Srikant, R. AU REV AE AreaED Date to Area Editor: 12-Sep-2025 Associate Editor: Possamaï, Dylan AU REV AE Date to Associate Editor: 22-Sep-2025 Version History Manuscript ID Manuscript Title Date Submitted Decision Letter & Response Switch Details MOR-2",
+        "figure_count": 0,
+        "days_since_submission": 26
+      },
+      "audit_trail": [],
+      "documents": {},
+      "version_history": [],
+      "status_details": {},
+      "emails_extracted": true,
+      "category": "Awaiting Reviewer Assignment",
+      "id": "MOR-2025-1190"
+    }
+  ],
+  "summary": {
+    "total_manuscripts": 1,
+    "by_category": {
+      "Awaiting Reviewer Assignment": 1
+    },
+    "revision_manuscripts": 0,
+    "referee_emails_extracted": 2,
+    "total_referees": 4,
+    "documents_downloaded": 0,
+    "total_audit_events": 0,
+    "orcid_coverage": {
+      "authors_with_orcid": 0,
+      "total_authors": 0,
+      "referees_with_orcid": 0,
+      "referee_coverage_percent": 0.0
+    },
+    "cache_hits": 0,
+    "extraction_time": "2025-10-05T21:06:11.628694",
+    "email_extraction_rate": 50.0
+  },
+  "errors": []
+}

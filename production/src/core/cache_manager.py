@@ -340,7 +340,7 @@ class CacheManager:
         """Compute hash of specific fields to detect changes."""
         hash_data = {k: data.get(k, "") for k in fields}
         hash_string = json.dumps(hash_data, sort_keys=True)
-        return hashlib.md5(hash_string.encode()).hexdigest()
+        return hashlib.md5(hash_string.encode(), usedforsecurity=False).hexdigest()
 
     # REFEREE CACHING METHODS
 

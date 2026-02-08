@@ -68,7 +68,7 @@ class MultiLayerCache:
     def _compute_cache_key(self, key_components: dict[str, Any]) -> str:
         """Generate consistent cache key from components."""
         key_string = json.dumps(key_components, sort_keys=True)
-        return hashlib.md5(key_string.encode()).hexdigest()
+        return hashlib.md5(key_string.encode(), usedforsecurity=False).hexdigest()
 
     # LAYER 1: IN-MEMORY CACHE
 

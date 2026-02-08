@@ -178,7 +178,9 @@ class APIResponseCache:
             ttl_seconds = self.default_ttl
 
         # Create cache key from endpoint and parameters
-        param_hash = hashlib.md5(json.dumps(params, sort_keys=True).encode()).hexdigest()
+        param_hash = hashlib.md5(
+            json.dumps(params, sort_keys=True).encode(), usedforsecurity=False
+        ).hexdigest()
         cache_key = f"api:{endpoint}:{param_hash}"
 
         # Add metadata
@@ -199,7 +201,9 @@ class APIResponseCache:
 
     def get_api_response(self, endpoint: str, params: dict[str, Any]) -> Any | None:
         """Get cached API response."""
-        param_hash = hashlib.md5(json.dumps(params, sort_keys=True).encode()).hexdigest()
+        param_hash = hashlib.md5(
+            json.dumps(params, sort_keys=True).encode(), usedforsecurity=False
+        ).hexdigest()
         cache_key = f"api:{endpoint}:{param_hash}"
 
         cached_response = self.redis_cache.get(cache_key)

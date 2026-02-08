@@ -30,12 +30,12 @@ fi
 echo "[security-scan] Running bandit and pip-audit (stage=$STAGE, mode=$MODE)"
 
 # Read allowlists if present
-ALLOW_BANDIT=$(grep -v '^#' .security/bandit-allowlist.txt 2>/dev/null | tr '\n' ',' | sed 's/,$//')
-ALLOW_PIP=$(grep -v '^#' .security/pip-audit-allowlist.txt 2>/dev/null | xargs -I{} printf -- '--ignore-vuln %s ' '{}')
+ALLOW_BANDIT=$(grep -v '^#' .security/bandit-allowlist.txt 2>/dev/null | grep -v '^$' | tr '\n' ',' | sed 's/,$//' || true)
+ALLOW_PIP=$(grep -v '^#' .security/pip-audit-allowlist.txt 2>/dev/null | grep -v '^$' | xargs -I{} printf -- '--ignore-vuln %s ' '{}' || true)
 
 # Severity: default HIGH (fail on high); override with BANDIT_LEVEL env (e.g., MEDIUM|LOW)
 BANDIT_LEVEL=${BANDIT_LEVEL:-HIGH}
-BANDIT_FLAGS=("-r" "src" "-x" "tests,dev,archive,production")
+BANDIT_FLAGS=("-r" "production/src" "-x" "tests,dev,archive")
 case "$BANDIT_LEVEL" in
   HIGH) BANDIT_FLAGS=("-ll" "${BANDIT_FLAGS[@]}");;
   MEDIUM) BANDIT_FLAGS=("-l" "${BANDIT_FLAGS[@]}");;

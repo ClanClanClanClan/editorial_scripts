@@ -205,6 +205,20 @@ class MORExtractor(CachedExtractorMixin):
             pass
         return default
 
+    def safe_int(self, value, default=0):
+        """Safely convert value to integer"""
+        try:
+            if value is None:
+                return default
+            if isinstance(value, (int, float)):
+                return int(value)
+            value = str(value).strip().replace(",", "")
+            if not value:
+                return default
+            return int(value)
+        except (ValueError, TypeError):
+            return default
+
     def smart_wait(self, seconds: float = 1.0):
         """Smart wait with random variation to avoid detection"""
         wait_time = seconds + random.uniform(-0.2, 0.5)
@@ -2022,7 +2036,7 @@ class MORExtractor(CachedExtractorMixin):
 
             # Check if popup opened
             if len(self.driver.window_handles) > 1:
-                popup_window = self.driver.self.safe_array_access(window_handles, -1)
+                popup_window = self.driver.window_handles[-1]
 
                 try:
                     # Switch to popup
@@ -2206,7 +2220,7 @@ class MORExtractor(CachedExtractorMixin):
                     try:
                         editor_comment_cells = self.driver.find_elements(
                             By.XPATH,
-                            "//p[contains(text(), 'Confidential Comments to the Editor')]/ancestor::tr/following-sibling::self.safe_array_access(tr, 1)//p[@class='pagecontents']",
+                            "//p[contains(text(), 'Confidential Comments to the Editor')]/ancestor::tr/following-sibling::tr[1]//p[@class='pagecontents']",
                         )
                         if editor_comment_cells:
                             text = self.safe_array_access(editor_comment_cells, 0).text.strip()
@@ -2219,7 +2233,7 @@ class MORExtractor(CachedExtractorMixin):
                     try:
                         author_comment_cells = self.driver.find_elements(
                             By.XPATH,
-                            "//p[contains(text(), 'Comments to the Author')]/ancestor::tr/following-sibling::self.safe_array_access(tr, 1)//p[@class='pagecontents']",
+                            "//p[contains(text(), 'Comments to the Author')]/ancestor::tr/following-sibling::tr[1]//p[@class='pagecontents']",
                         )
                         if author_comment_cells:
                             text = self.safe_array_access(
@@ -2566,7 +2580,7 @@ class MORExtractor(CachedExtractorMixin):
             # Check cache first
             cache_key = institution_name.lower().strip()
             if cache_key in self._institution_country_cache:
-                cached_country = self.self.safe_array_access(_institution_country_cache, cache_key)
+                cached_country = self._institution_country_cache.get(cache_key)
                 print(f"         📚 Using cached country: {cached_country}")
                 return cached_country
 
@@ -3133,7 +3147,7 @@ class MORExtractor(CachedExtractorMixin):
                     continue
 
             # Cache the result
-            _institution_country_cache[cache_key] = found_country
+            self._institution_country_cache[cache_key] = found_country
 
             if found_country:
                 print(
@@ -3585,9 +3599,7 @@ class MORExtractor(CachedExtractorMixin):
                     continue  # Skip this category
 
                 # Find the row containing this link
-                row = category_link.find_element(
-                    By.XPATH, "./ancestor::self.safe_array_access(tr, 1)"
-                )
+                row = category_link.find_element(By.XPATH, "./ancestor::tr[1]")
 
                 # Get count - try multiple patterns
                 count = 0

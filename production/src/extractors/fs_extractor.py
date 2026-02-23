@@ -14,11 +14,13 @@ import os
 import sys
 import json
 import re
+import time
 import base64
 from pathlib import Path
 from datetime import datetime, timedelta
 import traceback
-from typing import Optional, Dict, List, Any
+from typing import Optional, Dict, List, Any, Callable
+from functools import wraps
 
 # Add cache integration
 sys.path.append(str(Path(__file__).parent.parent))
@@ -35,9 +37,49 @@ try:
     GMAIL_AVAILABLE = True
 except ImportError:
     GMAIL_AVAILABLE = False
+    HttpError = Exception
     print(
         "⚠️ Gmail API not available. Install with: pip install google-auth google-auth-oauthlib google-auth-httplib2 google-api-python-client"
     )
+
+try:
+    import requests
+except ImportError:
+    requests = None
+
+
+def with_api_retry(max_attempts: int = 3, delay: float = 1.0, backoff: float = 2.0):
+    def decorator(func: Callable) -> Callable:
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            last_exception = None
+            for attempt in range(max_attempts):
+                try:
+                    return func(*args, **kwargs)
+                except (
+                    HttpError,
+                    ConnectionError,
+                    TimeoutError,
+                    OSError,
+                ) as e:
+                    last_exception = e
+                    if attempt < max_attempts - 1:
+                        wait_time = delay * (backoff**attempt)
+                        print(f"   ⚠️ {func.__name__} attempt {attempt + 1} failed: {str(e)[:50]}")
+                        print(f"      Retrying in {wait_time:.1f} seconds...")
+                        time.sleep(wait_time)
+                    else:
+                        print(f"   ❌ {func.__name__} failed after {max_attempts} attempts")
+                except Exception as e:
+                    print(f"   ❌ {func.__name__} failed with unrecoverable error: {str(e)[:100]}")
+                    raise
+            if last_exception:
+                raise last_exception
+            return None
+
+        return wrapper
+
+    return decorator
 
 
 class ComprehensiveFSExtractor(CachedExtractorMixin):
@@ -52,6 +94,12 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
         # Extraction state
         self.manuscripts = []
         self.service = None
+        self.errors = []
+
+        # Output directories (matching MF/MOR pattern)
+        self.base_dir = Path(__file__).resolve().parent.parent.parent
+        self.output_dir = self.base_dir / "outputs" / "fs"
+        self.output_dir.mkdir(parents=True, exist_ok=True)
 
         # Email patterns for FS
         self.email_patterns = {
@@ -207,40 +255,30 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
             traceback.print_exc()
             return False
 
+    @with_api_retry(max_attempts=3, delay=1.0, backoff=2.0)
     def search_emails(self, query: str, max_results: int = 100) -> List[Dict[str, Any]]:
         """Search Gmail for emails matching query."""
         emails = []
 
-        try:
-            # Search for emails
-            results = (
-                self.service.users()
-                .messages()
-                .list(userId="me", q=query, maxResults=max_results)
-                .execute()
-            )
+        results = (
+            self.service.users()
+            .messages()
+            .list(userId="me", q=query, maxResults=max_results)
+            .execute()
+        )
 
-            messages = results.get("messages", [])
+        messages = results.get("messages", [])
 
-            for msg in messages:
-                try:
-                    # Get full message
-                    message = (
-                        self.service.users().messages().get(userId="me", id=msg["id"]).execute()
-                    )
+        for msg in messages:
+            try:
+                message = self.service.users().messages().get(userId="me", id=msg["id"]).execute()
+                emails.append(message)
+            except Exception as e:
+                print(f"⚠️ Error fetching message {msg['id']}: {e}")
+                continue
 
-                    emails.append(message)
-
-                except Exception as e:
-                    print(f"⚠️ Error fetching message {msg['id']}: {e}")
-                    continue
-
-            print(f"📧 Found {len(emails)} emails matching query")
-            return emails
-
-        except Exception as e:
-            print(f"❌ Email search error: {e}")
-            return []
+        print(f"📧 Found {len(emails)} emails matching query")
+        return emails
 
     def get_email_attachments(self, email_message: Dict[str, Any]) -> List[Dict[str, Any]]:
         """Extract attachment information from email."""
@@ -266,105 +304,137 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
 
         return attachments
 
+    @with_api_retry(max_attempts=3, delay=1.0, backoff=2.0)
     def download_attachment(
-        self, message_id: str, attachment_id: str, filename: str
+        self, message_id: str, attachment_id: str, filename: str, manuscript_id: str = None
     ) -> Optional[str]:
-        """Download attachment and save to disk."""
-        try:
-            attachment = (
-                self.service.users()
-                .messages()
-                .attachments()
-                .get(userId="me", messageId=message_id, id=attachment_id)
-                .execute()
-            )
+        download_dir = self.base_dir / "downloads" / "fs"
+        download_dir.mkdir(parents=True, exist_ok=True)
 
-            file_data = base64.urlsafe_b64decode(attachment["data"])
+        safe_filename = re.sub(r"[^\w\s.-]", "_", filename)
+        if manuscript_id:
+            generic = {"report.pdf", "review.pdf", "comments.pdf", "manuscript.pdf"}
+            if safe_filename.lower() in generic:
+                safe_filename = f"{manuscript_id}-{safe_filename}"
+        file_path = download_dir / safe_filename
 
-            # Save to downloads directory
-            download_dir = Path("downloads/fs")
-            download_dir.mkdir(parents=True, exist_ok=True)
-
-            # Clean filename
-            safe_filename = re.sub(r"[^\w\s.-]", "_", filename)
-            file_path = download_dir / safe_filename
-
-            with open(file_path, "wb") as f:
-                f.write(file_data)
-
-            print(f"      📎 Downloaded: {safe_filename}")
+        if file_path.exists() and file_path.stat().st_size > 0:
+            print(f"      📎 Skipped (exists): {safe_filename}")
             return str(file_path)
 
-        except Exception as e:
-            print(f"      ⚠️ Failed to download {filename}: {e}")
-            return None
+        attachment = (
+            self.service.users()
+            .messages()
+            .attachments()
+            .get(userId="me", messageId=message_id, id=attachment_id)
+            .execute()
+        )
+
+        file_data = base64.urlsafe_b64decode(attachment["data"])
+
+        with open(file_path, "wb") as f:
+            f.write(file_data)
+
+        print(f"      📎 Downloaded: {safe_filename}")
+        return str(file_path)
 
     def extract_title_from_pdf(self, pdf_path: str) -> Optional[str]:
-        """Extract title from PDF manuscript."""
         try:
             import PyPDF2
 
             with open(pdf_path, "rb") as file:
                 reader = PyPDF2.PdfReader(file)
 
-                # Try metadata first
+                # Try metadata — but reject known junk
                 if reader.metadata and "/Title" in reader.metadata:
-                    title = reader.metadata["/Title"]
-                    if title and len(title.strip()) > 10:
-                        return title.strip()
+                    title = (reader.metadata["/Title"] or "").strip()
+                    if (
+                        title
+                        and len(title) > 20
+                        and not title.endswith((".dvi", ".tex", ".pdf", ".ps"))
+                        and "noname" not in title.lower()
+                        and "manuscript no" not in title.lower()
+                    ):
+                        return title
 
-                # Try first page text
-                if reader.pages:
-                    first_page = reader.pages[0]
-                    text = first_page.extract_text()
+                if not reader.pages:
+                    return None
 
-                    # Split into lines and clean up
-                    lines = [line.strip() for line in text.split("\n") if line.strip()]
+                text = reader.pages[0].extract_text()
+                lines = [l.strip() for l in text.split("\n") if l.strip()]
+                if not lines:
+                    return None
 
-                    # The title is usually one of the first non-empty lines
-                    # Skip author names (contain @ or are very short) and dates
-                    for line in lines[:15]:  # Check first 15 lines
-                        # Skip if it's too short or looks like metadata
-                        if len(line) < 15:
-                            continue
+                # Find abstract anchor — title must be above it
+                abstract_idx = len(lines)
+                for i, line in enumerate(lines[:25]):
+                    if re.match(r"^abstract\b", line, re.IGNORECASE):
+                        abstract_idx = i
+                        break
 
-                        # Skip author lines (names with symbols or short lines)
-                        if "@" in line or "∗" in line or "†" in line or "‡" in line:
-                            continue
+                junk_re = re.compile(
+                    r"noname manuscript|will be inserted by the editor|"
+                    r"manuscript no\b|^the date of|preprint submitted|"
+                    r"^\(.*\)$|working paper|draft version",
+                    re.IGNORECASE,
+                )
 
-                        # Skip dates (common date patterns)
-                        if any(
-                            month in line
-                            for month in [
-                                "January",
-                                "February",
-                                "March",
-                                "April",
-                                "May",
-                                "June",
-                                "July",
-                                "August",
-                                "September",
-                                "October",
-                                "November",
-                                "December",
-                            ]
-                        ):
-                            continue
+                months = (
+                    "january|february|march|april|may|june|"
+                    "july|august|september|october|november|december"
+                )
+                date_re = re.compile(months, re.IGNORECASE)
 
-                        # Skip if it's a number or version
-                        if line.replace(".", "").replace(",", "").isdigit():
-                            continue
+                def is_author_line(line):
+                    if re.search(r"[\x00-\x08\x0b\x0c\x0e-\x1f]", line):
+                        return True
+                    if "@" in line:
+                        return True
+                    if re.search(r"[†‡]", line) and len(line) < 80:
+                        return True
+                    stripped = re.sub(r"[∗†‡*]+$", "", line).strip()
+                    words = [w for w in stripped.split() if w]
+                    if not words:
+                        return False
+                    filler = {"and", "de", "van", "von", "der", "del", "di", "le", "la"}
+                    cap_or_filler = all(w[0].isupper() or w in filler for w in words)
+                    if cap_or_filler and len(words) <= 6 and len(stripped) < 50:
+                        return True
+                    return False
 
-                        # Skip common headers
-                        if any(
-                            skip in line.lower()
-                            for skip in ["abstract", "keywords", "page", "volume", "issue"]
-                        ):
-                            continue
+                # Collect title candidate lines: between start and abstract, skipping junk/authors/dates
+                title_parts = []
+                found_title_start = False
+                for i in range(min(abstract_idx, 15)):
+                    line = lines[i]
+                    if junk_re.search(line):
+                        continue
+                    if len(line) < 10:
+                        if found_title_start:
+                            break
+                        continue
+                    if date_re.search(line) and len(line) < 40:
+                        if found_title_start:
+                            break
+                        continue
+                    if line.replace(".", "").replace(",", "").strip().isdigit():
+                        continue
+                    if re.match(r"^abstract\b", line, re.IGNORECASE):
+                        break
+                    if re.match(r"^(keywords|page|volume|issue)\b", line, re.IGNORECASE):
+                        break
+                    if is_author_line(line) and found_title_start:
+                        break
+                    if is_author_line(line):
+                        continue
+                    # This line is a title candidate
+                    cleaned = re.sub(r"[∗†‡*]+$", "", line).strip()
+                    if len(cleaned) >= 10:
+                        title_parts.append(cleaned)
+                        found_title_start = True
 
-                        # This is likely the title
-                        return line
+                if title_parts:
+                    return " ".join(title_parts)
 
         except ImportError:
             print("      ⚠️ PyPDF2 not installed - can't extract PDF titles")
@@ -372,6 +442,232 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
             print(f"      ⚠️ Failed to extract title from PDF: {e}")
 
         return None
+
+    def _search_title_by_authors(
+        self, author_names: list, abstract_snippet: str = ""
+    ) -> Optional[str]:
+        if not requests or not author_names:
+            return None
+        from urllib.parse import quote_plus
+
+        try:
+            query_parts = [quote_plus(n) for n in author_names[:2]]
+            query = "+".join(query_parts)
+            url = f"https://api.crossref.org/works?query.author={query}&rows=5&sort=published&order=desc"
+            resp = requests.get(url, timeout=10)
+            if resp.status_code != 200:
+                return None
+            items = resp.json().get("message", {}).get("items", [])
+            abstract_words = (
+                set(abstract_snippet.lower().split()[:20]) if abstract_snippet else set()
+            )
+            for item in items:
+                title = " ".join(item.get("title", []))
+                if not title or len(title) < 15:
+                    continue
+                journal = " ".join(item.get("container-title", []))
+                if "finance" in journal.lower() or "stochastic" in journal.lower():
+                    return title
+                if abstract_words:
+                    item_abstract = item.get("abstract", "")
+                    if item_abstract:
+                        item_words = set(item_abstract.lower().split()[:30])
+                        overlap = len(abstract_words & item_words)
+                        if overlap >= 5:
+                            return title
+        except Exception:
+            pass
+        return None
+
+    @staticmethod
+    def _clean_pdf_text(text: str) -> str:
+        if not text:
+            return text
+        ligatures = {"ﬃ": "ffi", "ﬄ": "ffl", "ﬁ": "fi", "ﬂ": "fl", "ﬀ": "ff", "ﬆ": "st"}
+        for lig, repl in ligatures.items():
+            text = text.replace(lig, repl)
+        for repl in ["ffi", "ffl", "fi", "fl", "ff"]:
+            doubled = repl + repl
+            while doubled in text:
+                text = text.replace(doubled, repl)
+        broken_ligatures = {
+            "di usion": "diffusion",
+            "e ect": "effect",
+            "e ective": "effective",
+            "e iciency": "efficiency",
+            "e icient": "efficient",
+            "o er": "offer",
+            "su icient": "sufficient",
+            "su er": "suffer",
+            "coe icient": "coefficient",
+            "a ect": "affect",
+            "a ord": "afford",
+            "o icial": "official",
+            "expecte d": "expected",
+            "di erent": "different",
+            "di erential": "differential",
+            "re ection": "reflection",
+            "re erence": "reference",
+            "pre ference": "preference",
+            "sto chastic": "stochastic",
+            "speci c": "specific",
+            "speci cation": "specification",
+            "classi cation": "classification",
+            "veri cation": "verification",
+            "identi cation": "identification",
+            "signi cant": "significant",
+            "bene t": "benefit",
+            "pro t": "profit",
+            "de nition": "definition",
+            "de ne": "define",
+            "in nite": "infinite",
+            "in nitesimal": "infinitesimal",
+            "th e": "the",
+            "appropr iate": "appropriate",
+            "incomplet e": "incomplete",
+            "equilibr ium": "equilibrium",
+            "portf olio": "portfolio",
+            "di erence": "difference",
+            "di erences": "differences",
+            "e ort": "effort",
+            "su ciently": "sufficiently",
+            "su cient": "sufficient",
+            "insu cient": "insufficient",
+            "ine cient": "inefficient",
+        }
+        for broken, fixed in broken_ligatures.items():
+            text = re.sub(r"(?<!\w)" + re.escape(broken), fixed, text, flags=re.IGNORECASE)
+        text = re.sub(r"(?<=[a-z])-\s+(?=[a-z])", "", text)
+        text = re.sub(r"\s*\[\d+(?:,\s*\d+)*\]", "", text)
+        text = re.sub(r"\s*\(\d+\)\s*", " ", text)
+        text = re.sub(r"\s{2,}", " ", text)
+        return text.strip()
+
+    def _extract_abstract_from_pdf(self, pdf_path: str) -> str:
+        text = self.safe_pdf_extract(pdf_path, default="")
+        if not text:
+            return ""
+
+        abstract_match = re.search(
+            r"(?i)\babstract\b[.\s:]*\n?(.*?)(?=\n\s*(?:1[\.\s]|introduction|keywords|key\s*words|jel|msc|mathematics subject)\b)",
+            text,
+            re.DOTALL,
+        )
+        if abstract_match:
+            abstract = abstract_match.group(1).strip()
+            abstract = re.sub(r"\s+", " ", abstract)
+            abstract = self._clean_pdf_text(abstract)
+            if len(abstract) > 50:
+                return abstract[:2000]
+
+        lines = text.split("\n")
+        body_start = 0
+        for i, line in enumerate(lines):
+            stripped = line.strip()
+            if len(stripped) > 80 and not stripped.isupper():
+                body_start = i
+                break
+        if body_start > 0:
+            body = " ".join(l.strip() for l in lines[body_start : body_start + 15] if l.strip())
+            body = re.sub(r"\s+", " ", body)
+            body = self._clean_pdf_text(body)
+            if len(body) > 100:
+                return body[:500]
+
+        return ""
+
+    def _extract_keywords_from_pdf(self, pdf_path: str) -> list:
+        text = self.safe_pdf_extract(pdf_path, default="")
+        if not text:
+            return []
+        patterns = [
+            r"(?i)Keywords?[:\s]+(.*?)(?=\n\s*(?:JEL|MSC|Mathematics Subject|Contents|1[\.\s]|Introduction|\n\n))",
+            r"(?i)Key\s?words?[:\s]+(.*?)(?=\n\s*(?:JEL|MSC|Mathematics Subject|Contents|1[\.\s]|Introduction|\n\n))",
+        ]
+        for pattern in patterns:
+            match = re.search(pattern, text, re.DOTALL)
+            if match:
+                raw = match.group(1).strip()
+                raw = re.sub(r"[\x00-\x08\x0b\x0c\x0e-\x1f]", ";", raw)
+                raw = re.sub(r"\s+", " ", raw)
+                raw = self._clean_pdf_text(raw)
+                if ";" in raw:
+                    keywords = re.split(r"[;·•]", raw)
+                else:
+                    keywords = re.split(r"[,·•]", raw)
+                keywords = [
+                    k.strip().strip(".,") for k in keywords if k.strip() and len(k.strip()) > 2
+                ]
+                keywords = [k for k in keywords if not k.lower().startswith("contents")]
+                return keywords[:10]
+        return []
+
+    @staticmethod
+    def _clean_affiliation(text: str) -> str:
+        if not text:
+            return text
+        text = re.sub(r"\s*\d+\s*\d*\s*Introduction\b.*", "", text, flags=re.IGNORECASE)
+        text = re.sub(r"\b\d+\s+Introduction\b.*", "", text, flags=re.IGNORECASE)
+        text = re.sub(r"(?<=[a-z])-\s+(?=[a-z])", "", text)
+        text = re.sub(r"^[∗†‡§¶*]+\s*", "", text)
+        text = re.sub(r"\s*[Ee]-?mail:?\s*<[^>]+>", "", text)
+        text = re.sub(r"\s*[Ee]-?mail:?\s*[\w.,+-]+@[\w.-]+\.\w+", "", text)
+        text = re.sub(r"\s*<[\w.,+-]+@[\w.-]+\.\w+>", "", text)
+        text = re.sub(r"\s*[\w.+-]+@[\w.-]+\.\w+", "", text)
+        known_fixes = {
+            "Infor matique": "Informatique",
+            "E otv os Lor and": "Eötvös Loránd",
+            "Eotv os Lor and": "Eötvös Loránd",
+            "E otv os": "Eötvös",
+            "Eotv os": "Eötvös",
+            "Lor and University": "Loránd University",
+            "Mathe matiques": "Mathematiques",
+            "Math ematiques": "Mathematiques",
+            "Univer sity": "University",
+            "Labora toire": "Laboratoire",
+            "Probabil ites": "Probabilites",
+            "Statis tique": "Statistique",
+            "Model isation": "Modelisation",
+            "Centrale- Supelec": "CentraleSupelec",
+            "Centrale -Supelec": "CentraleSupelec",
+            "Yvett e": "Yvette",
+            "Complexit e": "Complexite",
+            "Syst emes": "Systemes",
+        }
+        for bad, good in known_fixes.items():
+            text = text.replace(bad, good)
+        text = re.sub(r"\s{2,}", " ", text).strip()
+        text = text.rstrip("., ;:")
+        return text
+
+    @staticmethod
+    def _restore_pdf_diacritics(text: str) -> str:
+        import unicodedata
+
+        def _add_acute(m):
+            return m.group(1) + "\u0301"
+
+        def _add_grave(m):
+            return m.group(1) + "\u0300"
+
+        text = re.sub(r"[\u00b4\u02ca]\s*([a-zA-Z])", _add_acute, text)
+        text = re.sub(r"[\u0060\u02cb]\s*([a-zA-Z])", _add_grave, text)
+        text = re.sub(r"(?<![a-zA-Z])[´]\s*([a-zA-Z])", _add_acute, text)
+        text = re.sub(r"(?<![a-zA-Z])[`]\s*([a-zA-Z])", _add_grave, text)
+        text = unicodedata.normalize("NFC", text)
+        text = re.sub(r"\s{2,}", " ", text)
+        return text
+
+    @staticmethod
+    def _clean_latex_accents(text: str) -> str:
+        import unicodedata
+
+        text = re.sub(r"[´`]\s*([a-zA-Z])", r"\1", text)
+        text = re.sub(r"[\u00b4\u0060\u02ca\u02cb]\s*([a-zA-Z])", r"\1", text)
+        text = unicodedata.normalize("NFKD", text)
+        text = re.sub(r"[\u0300-\u036f]", "", text)
+        text = re.sub(r"\s{2,}", " ", text)
+        return text
 
     def extract_authors_from_pdf(self, pdf_path: str) -> List[Dict[str, Any]]:
         """Extract authors with affiliations from PDF manuscript."""
@@ -386,7 +682,7 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
                 if reader.metadata and "/Author" in reader.metadata:
                     author_str = reader.metadata["/Author"]
                     if author_str:
-                        # Clean and split author string
+                        author_str = re.sub(r"[\x00-\x08\x0b\x0c\x0e-\x1f]", ", ", author_str)
                         author_str = re.sub(r"[*†‡§¶#∗]+", "", author_str)
                         potential_authors = re.split(r"[,;&]|\sand\s", author_str)
                         for author in potential_authors:
@@ -401,19 +697,21 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
                 for page_num in range(min(2, len(reader.pages))):
                     full_text += reader.pages[page_num].extract_text() + "\n"
 
+                full_text = re.sub(r"[\x00-\x08\x0b\x0c\x0e-\x1f]", " , ", full_text)
+                full_text = re.sub(r"(\w)-\s*\n\s*(\w)", r"\1\2", full_text)
+                diacritics_text = self._restore_pdf_diacritics(full_text)
+                full_text = self._clean_latex_accents(full_text)
                 lines = full_text.strip().split("\n")
 
-                # Find title first (to know where authors section starts)
                 title_line_idx = -1
                 for i, line in enumerate(lines[:30]):
-                    line = line.strip()
-                    # Title is usually long, no special chars, not all caps
+                    line_clean = re.sub(r"[∗†‡§¶*]+$", "", line.strip()).strip()
                     if (
-                        len(line) > 30
-                        and not any(char in line for char in ["@", "†", "‡", "∗", "§"])
-                        and not line.isupper()
+                        len(line_clean) > 30
+                        and not any(char in line_clean for char in ["@", "†", "‡", "∗", "§"])
+                        and not line_clean.isupper()
                         and not any(
-                            keyword in line.lower()
+                            keyword in line_clean.lower()
                             for keyword in ["abstract", "keywords", "introduction"]
                         )
                     ):
@@ -443,25 +741,161 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
                             break
 
                         # Detect author lines
-                        if "@" in line or re.search(
-                            r"^[A-Z][a-z]+(?:\s+[A-Z]\.?)?\s+[A-Z][a-z]+", line
-                        ):
+                        if "@" in line or re.search(r"^[A-Z]\w+(?:\s+[A-Z]\.?)?\s+[A-Z]\w+", line):
                             in_author_section = True
                             author_section.append(line)
                         elif in_author_section:
-                            # Could be affiliation line
-                            if line and not line[0].isdigit():
+                            if line and line[0] in "∗†‡§¶" and len(line) > 5:
+                                author_section.append(line)
+                            elif line and not line[0].isdigit():
                                 author_section.append(line)
                             elif line.startswith(("1", "2", "3", "4", "5")) and len(line) > 5:
-                                # Numbered affiliation
                                 author_section.append(line)
 
-                    # Parse collected author section
+                    inst_kws = [
+                        "universit",
+                        "institute",
+                        "laboratory",
+                        "school",
+                        "department",
+                        "college",
+                        "email",
+                        "oxford",
+                        "cambridge",
+                        "eth",
+                        "mit",
+                        "cnrs",
+                        "ceremade",
+                        "inria",
+                        "centre",
+                        "center",
+                        "faculty",
+                        "research",
+                        "mathematical",
+                        "mathematics",
+                        "polytechnique",
+                        "dauphine",
+                    ]
+                    footnote_aff = None
+                    for line in lines:
+                        line_s = line.strip()
+                        if line_s and line_s[0] in "∗†‡§¶" and len(line_s) > 10:
+                            if any(kw in line_s.lower() for kw in inst_kws) or "@" in line_s:
+                                if footnote_aff:
+                                    author_section.append(footnote_aff)
+                                footnote_aff = line_s
+                                continue
+                        if footnote_aff and line_s:
+                            if line_s[0] in "∗†‡§¶" and len(line_s) > 10:
+                                author_section.append(footnote_aff)
+                                if any(kw in line_s.lower() for kw in inst_kws) or "@" in line_s:
+                                    footnote_aff = line_s
+                                else:
+                                    footnote_aff = None
+                                continue
+                            if re.match(r"^\d+\s*[.)]?\s*\w", line_s) and not any(
+                                kw in line_s.lower() for kw in inst_kws
+                            ):
+                                author_section.append(footnote_aff)
+                                footnote_aff = None
+                                continue
+                            if (
+                                any(kw in line_s.lower() for kw in inst_kws)
+                                or "@" in line_s
+                                or (len(line_s) > 5 and not line_s[0].isdigit())
+                            ):
+                                footnote_aff += " " + line_s
+                            else:
+                                author_section.append(footnote_aff)
+                                footnote_aff = None
+                        elif footnote_aff and not line_s:
+                            author_section.append(footnote_aff)
+                            footnote_aff = None
+                    if footnote_aff:
+                        author_section.append(footnote_aff)
+
                     authors_from_text = self._parse_author_section(author_section)
-                    if (
-                        authors_from_text and not authors
-                    ):  # Use text extraction if metadata was empty
+                    if authors_from_text and not authors:
                         authors = authors_from_text
+
+                if authors and diacritics_text:
+                    import unicodedata
+
+                    nfd_text = unicodedata.normalize("NFD", diacritics_text)
+                    for a in authors:
+                        ascii_name = a["name"]
+                        parts = ascii_name.split()
+                        if len(parts) >= 2:
+                            pattern = ""
+                            for j, p in enumerate(parts):
+                                if j > 0:
+                                    pattern += r"[\s,]+"
+                                for c in p:
+                                    pattern += re.escape(c) + "[\u0300-\u036f]?"
+                            try:
+                                dm = re.search(pattern, nfd_text)
+                                if dm:
+                                    restored = unicodedata.normalize("NFC", dm.group(0).strip())
+                                    restored = " ".join(restored.split())
+                                    if len(restored) >= len(ascii_name) and restored != ascii_name:
+                                        a["name"] = restored
+                            except Exception:
+                                pass
+
+                if authors:
+                    skip_domains = {
+                        "gmail.com",
+                        "yahoo.com",
+                        "hotmail.com",
+                        "outlook.com",
+                        "springer.com",
+                        "ethz.ch",
+                    }
+                    dehyphenated_text = re.sub(r"(\w)-\s*\n\s*(\w)", r"\1\2", full_text)
+                    dehyphenated_text = re.sub(r"(\w)-\s+(\w[\w.]*@)", r"\1\2", dehyphenated_text)
+                    all_pdf_emails = re.findall(r"[\w.+-]+@[\w.-]+\.\w{2,}", dehyphenated_text)
+                    all_pdf_emails = [
+                        e for e in all_pdf_emails if e.split("@")[1].lower() not in skip_domains
+                    ]
+                    assigned_emails = {a["email"].lower() for a in authors if a.get("email")}
+                    unassigned = [e for e in all_pdf_emails if e.lower() not in assigned_emails]
+                    for a in authors:
+                        if a.get("email"):
+                            continue
+                        aname = a["name"]
+                        parts = aname.split()
+                        if len(parts) < 2:
+                            continue
+                        surname = parts[-1].lower()
+                        given = parts[0].lower()
+                        best = None
+                        for em in unassigned:
+                            local = (
+                                em.split("@")[0]
+                                .lower()
+                                .replace(".", " ")
+                                .replace("-", " ")
+                                .replace("_", " ")
+                            )
+                            if surname[:4] in local:
+                                best = em
+                                break
+                            if len(given) > 2 and given[:3] in local and len(local) > 3:
+                                best = em
+                                break
+                            initials = given[0] + surname
+                            if initials in local.replace(" ", ""):
+                                best = em
+                                break
+                        if best:
+                            a["email"] = best
+                            assigned_emails.add(best.lower())
+                            unassigned = [e for e in unassigned if e.lower() != best.lower()]
+                            if not a.get("affiliation"):
+                                domain = best.split("@")[1]
+                                inst = self._infer_institution_from_domain(domain)
+                                if inst and inst != domain:
+                                    a["affiliation"] = inst
 
             if authors:
                 print(f"      ✅ Extracted {len(authors)} authors from PDF")
@@ -486,61 +920,238 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
         """Parse author section lines to extract names, emails, and affiliations."""
         authors = []
         affiliations = {}
+        raw_affiliations = {}
 
-        # First pass: collect numbered affiliations
+        lines = [self._clean_latex_accents(l) for l in lines]
+
+        letter_markers = set()
         for line in lines:
             match = re.match(r"^(\d+)\s*(.+)", line)
             if match:
                 num, affiliation = match.groups()
-                affiliations[num] = affiliation.strip()
+                raw_affiliations[num] = affiliation.strip()
+                affiliations[num] = self._clean_affiliation(affiliation.strip())
+            sym_match = re.match(r"^([∗†‡§¶])\s*(.+)", line)
+            if sym_match:
+                marker, affiliation = sym_match.groups()
+                raw_affiliations[marker] = affiliation.strip()
+                affiliations[marker] = self._clean_affiliation(affiliation.strip())
+            letter_match = re.match(r"^([a-z])\s*[A-Z]", line)
+            if letter_match:
+                lm = letter_match.group(1)
+                rest = line[1:].strip()
+                if any(
+                    kw in rest.lower()
+                    for kw in [
+                        "universit",
+                        "school",
+                        "institute",
+                        "department",
+                        "college",
+                        "laboratory",
+                        "email",
+                    ]
+                ):
+                    letter_markers.add(lm)
+                    raw_affiliations[lm] = rest
+                    affiliations[lm] = self._clean_affiliation(rest)
 
-        # Second pass: extract authors
-        for line in lines:
-            # Skip pure affiliation lines
-            if re.match(r"^\d+\s+\w", line):
+        expanded = []
+        for orig_line in lines:
+            chunks = re.split(r"([∗†‡§¶*]+)", orig_line)
+            current_fragment = ""
+            current_markers = []
+            for chunk in chunks:
+                if re.match(r"^[∗†‡§¶*]+$", chunk):
+                    current_markers.extend(list(set(chunk)))
+                else:
+                    if current_fragment.strip():
+                        sub_parts = re.split(r"\s*,\s*|\s+and\s+", current_fragment)
+                        for sp in sub_parts:
+                            if sp.strip():
+                                expanded.append((sp.strip(), orig_line, list(current_markers)))
+                        current_markers = []
+                    else:
+                        pass
+                    current_fragment = chunk
+            if current_fragment.strip():
+                sub_parts = re.split(r"\s*,\s*|\s+and\s+", current_fragment)
+                for sp in sub_parts:
+                    if sp.strip():
+                        expanded.append((sp.strip(), orig_line, list(current_markers)))
+
+        for fragment, orig_line, fragment_markers in expanded:
+            if not fragment:
                 continue
 
-            # Look for email addresses
-            email_match = re.search(r"([\w.+-]+@[\w.-]+\.\w+)", line)
+            if re.match(r"^\d+\s+\w", fragment):
+                continue
+
+            email_match = re.search(r"([\w.+-]+@[\w.-]+\.\w+)", fragment)
             email = email_match.group(1) if email_match else None
 
-            # Extract name
             if email:
-                # Name is usually before email
                 name_match = re.search(
                     r"([A-Z][a-zA-Z]+(?:\s+[A-Z]\.?)?\s+[A-Z][a-zA-Z]+)(?:\s*[*†‡§¶#∗\d]*\s*[,:]?\s*"
                     + re.escape(email)
                     + ")",
-                    line,
+                    fragment,
                 )
                 if name_match:
                     name = name_match.group(1)
                 else:
-                    # Try to get name from start of line
-                    name_part = line.split(email)[0].strip()
+                    name_part = fragment.split(email)[0].strip()
                     name = re.sub(r"[*†‡§¶#∗\d,]+", "", name_part).strip()
             else:
-                # No email, try to extract name
-                name = re.sub(r"[*†‡§¶#∗\d]+", "", line).strip()
-                # Check if it looks like a name
-                if not re.match(r"^[A-Z][a-z]+(?:\s+[A-Z]\.?)?\s+[A-Z][a-z]+", name):
+                name = re.sub(r"[*†‡§¶#∗\d]+", "", fragment).strip()
+                if not re.match(r"^[A-Z]\w+(?:\s+[A-Z]\.?)?\s+[A-Z]\w+", name):
                     continue
 
-            if name and len(name.split()) >= 2:
-                # Look for affiliation markers
-                affiliation = None
-                for marker in ["†", "‡", "∗", "§", "¶", "#", "1", "2", "3", "4", "5"]:
-                    if marker in line and marker in affiliations:
-                        affiliation = affiliations[marker]
-                        break
+            non_name_words = {
+                "mathematical",
+                "institute",
+                "university",
+                "universite",
+                "department",
+                "school",
+                "laboratory",
+                "road",
+                "building",
+                "street",
+                "avenue",
+                "abstract",
+                "keywords",
+                "classification",
+                "france",
+                "germany",
+                "italy",
+                "usa",
+                "uk",
+                "email",
+                "e-mail",
+                "cnrs",
+                "umr",
+                "ceremade",
+                "saclay",
+                "dauphine-psl",
+                "centrale-supelec",
+                "supelec",
+                "cedex",
+                "oxford",
+                "cambridge",
+                "december",
+                "january",
+                "february",
+                "march",
+                "april",
+                "may",
+                "june",
+                "july",
+                "august",
+                "september",
+                "october",
+                "november",
+                "polytechnique",
+                "innovation",
+                "office",
+                "nkfih",
+                "grants",
+                "acknowledges",
+                "support",
+                "research",
+                "ecole",
+                "rte",
+                "palaiseau",
+                "mathematics",
+                "probabilites",
+                "statistique",
+                "centre",
+                "center",
+                "college",
+                "sciences",
+                "gratefully",
+                "funded",
+                "acknowledgment",
+                "acknowledgement",
+                "financial",
+                "hungarian",
+                "national",
+            }
+            name_words = name.lower().split()
+            if any(w.rstrip(".,;:") in non_name_words for w in name_words):
+                continue
+            if re.search(r"\b[A-Z]{2}\d", name) or re.search(r"\d{3,}", name):
+                continue
+            if len(name) > 50 or len(name.split()) > 4:
+                continue
+            if re.search(r"\(.*\)", name):
+                continue
 
-                # If no affiliation found, try to extract from email domain
+            if name and len(name.split()) >= 2:
+                affiliation = None
+                marker_chars = {"†": "†", "‡": "‡", "∗": "∗", "*": "∗", "§": "§", "¶": "¶"}
+                for m in fragment_markers:
+                    normalized_m = marker_chars.get(m, m)
+                    if normalized_m in affiliations:
+                        affiliation = affiliations[normalized_m]
+                        break
+                if not affiliation:
+                    num_match = re.search(r"(\d)", fragment)
+                    if num_match and num_match.group(1) in affiliations:
+                        affiliation = affiliations[num_match.group(1)]
+
                 if not affiliation and email:
                     domain = email.split("@")[1] if "@" in email else ""
                     if domain and domain not in ["gmail.com", "yahoo.com", "hotmail.com"]:
                         affiliation = self._infer_institution_from_domain(domain)
 
                 authors.append({"name": name, "email": email, "affiliation": affiliation})
+
+        if letter_markers:
+            for a in authors:
+                aname = a["name"]
+                parts = aname.split()
+                if parts:
+                    last = parts[-1]
+                    while len(last) > 2 and last[-1].lower() in letter_markers:
+                        marker = last[-1].lower()
+                        if not a.get("affiliation") and marker in affiliations:
+                            a["affiliation"] = affiliations[marker]
+                        last = last[:-1]
+                    if last != parts[-1]:
+                        parts[-1] = last
+                        a["name"] = " ".join(parts)
+
+        all_emails_expanded = []
+        for aff_text in raw_affiliations.values():
+            multi_local = re.search(
+                r"([\w.+-]+(?:\s*,\s*[\w.+-]+)+)\s*@\s*([\w.-]+\.\w+)", aff_text
+            )
+            if multi_local:
+                locals_str = multi_local.group(1)
+                domain = multi_local.group(2)
+                for local in re.split(r"\s*,\s*", locals_str):
+                    local = local.strip()
+                    if local:
+                        all_emails_expanded.append(f"{local}@{domain}")
+            single_emails = re.findall(r"[\w.+-]+@[\w.-]+\.\w+", aff_text)
+            for em in single_emails:
+                if em not in all_emails_expanded:
+                    all_emails_expanded.append(em)
+
+        for a in authors:
+            if not a.get("email"):
+                author_surname = a["name"].split()[-1].lower()
+                author_given = a["name"].split()[0].lower() if a["name"].split() else ""
+                for em in all_emails_expanded:
+                    local = em.split("@")[0].lower()
+                    if author_surname[:4] in local or (
+                        author_given and author_given[:3] in local and len(author_given) > 2
+                    ):
+                        a["email"] = em
+                        break
+                if not a.get("email") and len(authors) == 1 and all_emails_expanded:
+                    a["email"] = all_emails_expanded[0]
 
         return authors
 
@@ -567,6 +1178,54 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
             "ucla.edu": "UCLA",
             "cambridge.ac.uk": "University of Cambridge",
             "oxford.ac.uk": "University of Oxford",
+            "maths.ox.ac.uk": "University of Oxford",
+            "wbs.ac.uk": "Warwick Business School",
+            "warwick.ac.uk": "University of Warwick",
+            "guasoni.com": "Dublin City University",
+            "guasoni.it": "Dublin City University",
+            "dcu.ie": "Dublin City University",
+            "math.su.se": "Stockholm University",
+            "su.se": "Stockholm University",
+            "kth.se": "KTH Royal Institute of Technology",
+            "polytechnique.edu": "Ecole Polytechnique",
+            "cmap.polytechnique.fr": "Ecole Polytechnique",
+            "ip-paris.fr": "Institut Polytechnique de Paris",
+            "ensae.fr": "ENSAE Paris",
+            "dauphine.psl.eu": "Universite Paris Dauphine-PSL",
+            "dauphine.fr": "Universite Paris Dauphine-PSL",
+            "univ-paris-saclay.fr": "Universite Paris-Saclay",
+            "centralesupelec.fr": "CentraleSupelec",
+            "cuhk.edu.cn": "Chinese University of Hong Kong, Shenzhen",
+            "cuhk.edu.hk": "Chinese University of Hong Kong",
+            "nus.edu.sg": "National University of Singapore",
+            "lse.ac.uk": "London School of Economics",
+            "ucl.ac.uk": "University College London",
+            "tum.de": "Technical University of Munich",
+            "hu-berlin.de": "Humboldt University of Berlin",
+            "uni-konstanz.de": "University of Konstanz",
+            "ualberta.ca": "University of Alberta",
+            "mcgill.ca": "McGill University",
+            "uwaterloo.ca": "University of Waterloo",
+            "renyi.hu": "Renyi Institute of Mathematics",
+            "renyi.mta.hu": "Renyi Institute of Mathematics",
+            "sztaki.hu": "Hungarian Academy of Sciences",
+            "univ-amu.fr": "Aix-Marseille University",
+            "inria.fr": "INRIA",
+            "ceremade.dauphine.fr": "CEREMADE, Universite Paris Dauphine-PSL",
+            "link.cuhk.edu.cn": "Chinese University of Hong Kong, Shenzhen",
+            "univr.it": "University of Verona",
+            "univr.com": "University of Verona",
+            "unipd.it": "University of Padova",
+            "unipi.it": "University of Pisa",
+            "polimi.it": "Polytechnic University of Milan",
+            "uni-bielefeld.de": "Bielefeld University",
+            "uni-mannheim.de": "University of Mannheim",
+            "uni-bonn.de": "University of Bonn",
+            "kcl.ac.uk": "King's College London",
+            "ed.ac.uk": "University of Edinburgh",
+            "bath.ac.uk": "University of Bath",
+            "leeds.ac.uk": "University of Leeds",
+            "qmul.ac.uk": "Queen Mary University of London",
         }
 
         if domain in known_domains:
@@ -597,6 +1256,7 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
             "arxiv_id": None,
             "doi": None,
             "url": None,
+            "title": None,
         }
 
         try:
@@ -626,6 +1286,33 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
                             enriched_data["url"] = f"https://arxiv.org/abs/{id_match.group(1)}"
                             enriched_data["source"] = "arXiv"
                             enriched_data["found"] = True
+
+                            title_match = re.search(
+                                r"<entry>.*?<title>([^<]+)</title>", content, re.DOTALL
+                            )
+                            if title_match:
+                                enriched_data["title"] = " ".join(title_match.group(1).split())
+
+                            from difflib import SequenceMatcher
+
+                            arxiv_title = enriched_data.get("title", "")
+                            title_sim = (
+                                SequenceMatcher(
+                                    None, clean_title.lower(), arxiv_title.lower()
+                                ).ratio()
+                                if arxiv_title
+                                else 0
+                            )
+                            if title_sim < 0.4:
+                                print(
+                                    f"         ⚠️ arXiv title mismatch (sim={title_sim:.2f}): '{arxiv_title[:60]}'"
+                                )
+                                enriched_data["found"] = False
+                                enriched_data["arxiv_id"] = None
+                                enriched_data["url"] = None
+                                enriched_data["source"] = None
+                                enriched_data["title"] = None
+                                return enriched_data
 
                             # Extract authors - limit to first 3 for FS papers (main authors)
                             author_matches = re.findall(r"<name>([^<]+)</name>", content)[:3]
@@ -666,59 +1353,6 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
 
             except Exception as e:
                 print(f"         ⚠️ arXiv search failed: {e}")
-
-            # If not found on arXiv, try to search by title pattern
-            if not enriched_data["found"]:
-                # Check for common finance/math papers - use better heuristics
-                if any(
-                    keyword in title.lower()
-                    for keyword in ["optimal", "equilibrium", "hedge", "portfolio", "stochastic"]
-                ):
-                    # These are likely finance papers - try to match known patterns
-                    if "dividend" in title.lower() and "capital injection" in title.lower():
-                        # This looks like the FS-25-4725 paper
-                        enriched_data["authors"] = [
-                            {
-                                "name": "Sang Hu",
-                                "email": None,
-                                "affiliation": "Chinese University of Hong Kong",
-                                "country": "China",
-                            },
-                            {
-                                "name": "Zihan Zhou",
-                                "email": None,
-                                "affiliation": "Chinese University of Hong Kong",
-                                "country": "China",
-                            },
-                        ]
-                        enriched_data["found"] = True
-                        enriched_data["source"] = "Pattern matching"
-                        print(f"         💡 Matched paper pattern - found likely authors")
-                    elif "informed broker" in title.lower() and "hedging" in title.lower():
-                        # This looks like the FS-25-4733 paper
-                        enriched_data["authors"] = [
-                            {
-                                "name": "Philippe Bergault",
-                                "email": None,
-                                "affiliation": "Université Paris-Dauphine",
-                                "country": "France",
-                            },
-                            {
-                                "name": "Pierre Cardaliaguet",
-                                "email": None,
-                                "affiliation": "Université Paris-Dauphine",
-                                "country": "France",
-                            },
-                            {
-                                "name": "Catherine Rainer",
-                                "email": None,
-                                "affiliation": "Université de Brest",
-                                "country": "France",
-                            },
-                        ]
-                        enriched_data["found"] = True
-                        enriched_data["source"] = "Pattern matching"
-                        print(f"         💡 Matched paper pattern - found likely authors")
 
         except Exception as e:
             print(f"         ❌ Online search error: {e}")
@@ -877,6 +1511,54 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
                         "country": "France",
                     },
                     "imperial.ac.uk": {"institution": "Imperial College London", "country": "UK"},
+                    "wbs.ac.uk": {"institution": "Warwick Business School", "country": "UK"},
+                    "warwick.ac.uk": {"institution": "University of Warwick", "country": "UK"},
+                    "guasoni.com": {"institution": "Dublin City University", "country": "Ireland"},
+                    "guasoni.it": {"institution": "Dublin City University", "country": "Ireland"},
+                    "dcu.ie": {"institution": "Dublin City University", "country": "Ireland"},
+                    "math.su.se": {"institution": "Stockholm University", "country": "Sweden"},
+                    "su.se": {"institution": "Stockholm University", "country": "Sweden"},
+                    "maths.ox.ac.uk": {"institution": "University of Oxford", "country": "UK"},
+                    "oxford.ac.uk": {"institution": "University of Oxford", "country": "UK"},
+                    "cambridge.ac.uk": {"institution": "University of Cambridge", "country": "UK"},
+                    "polytechnique.edu": {
+                        "institution": "Ecole Polytechnique",
+                        "country": "France",
+                    },
+                    "cmap.polytechnique.fr": {
+                        "institution": "Ecole Polytechnique",
+                        "country": "France",
+                    },
+                    "dauphine.psl.eu": {
+                        "institution": "Universite Paris Dauphine-PSL",
+                        "country": "France",
+                    },
+                    "univ-paris-saclay.fr": {
+                        "institution": "Universite Paris-Saclay",
+                        "country": "France",
+                    },
+                    "cuhk.edu.cn": {
+                        "institution": "Chinese University of Hong Kong, Shenzhen",
+                        "country": "China",
+                    },
+                    "cuhk.edu.hk": {
+                        "institution": "Chinese University of Hong Kong",
+                        "country": "China",
+                    },
+                    "renyi.hu": {
+                        "institution": "Renyi Institute of Mathematics",
+                        "country": "Hungary",
+                    },
+                    "sztaki.hu": {
+                        "institution": "Hungarian Academy of Sciences",
+                        "country": "Hungary",
+                    },
+                    "stanford.edu": {"institution": "Stanford University", "country": "USA"},
+                    "mit.edu": {"institution": "MIT", "country": "USA"},
+                    "harvard.edu": {"institution": "Harvard University", "country": "USA"},
+                    "columbia.edu": {"institution": "Columbia University", "country": "USA"},
+                    "berkeley.edu": {"institution": "UC Berkeley", "country": "USA"},
+                    "inria.fr": {"institution": "INRIA", "country": "France"},
                 }
 
                 # Check for exact match
@@ -1230,7 +1912,8 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
             return "Under Review"
 
         # Check for revision indicators
-        if ".R" in manuscript.get("id", ""):
+        ms_id = manuscript.get("id", "")
+        if re.search(r"[-.]R\d+", ms_id):
             return "Revision Under Review"
 
         # Default
@@ -1238,7 +1921,7 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
 
     def detect_revision_round(self, manuscript_id: str) -> int:
         """Detect revision round from manuscript ID."""
-        match = re.search(r"\.R(\d+)$", manuscript_id)
+        match = re.search(r"[-.]R(\d+)", manuscript_id)
         if match:
             return int(match.group(1))
         return 0
@@ -1308,7 +1991,7 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
         # Look for revision submissions in timeline
         for event in manuscript.get("timeline", []):
             subject = event.get("subject", "")
-            revision_match = re.search(r"\.R(\d+)", subject)
+            revision_match = re.search(r"[-.]R(\d+)", subject)
             if revision_match:
                 round_num = self.safe_int(revision_match.group(1))
                 if round_num > current_round:
@@ -1334,6 +2017,55 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
 
         return revisions
 
+    def _normalize_name(self, name: str) -> str:
+        name = name.strip().strip('"').strip("'").strip()
+        name = re.sub(r"\s*\([^)]*\)\s*", " ", name).strip()
+        if "," in name:
+            parts = name.split(",", 1)
+            name = f"{parts[1].strip()} {parts[0].strip()}"
+        name = " ".join(name.split())
+        if not name:
+            return ""
+        words = name.split()
+        if len(words) == 2:
+            if words[0].isupper() and not words[1].isupper() and len(words[0]) > 1:
+                words = [words[1], words[0]]
+            elif words[0].isupper() and words[1].isupper() and len(words[0]) > 1:
+                words = [words[1], words[0]]
+        name = " ".join(words)
+        name = name.title()
+        particles = {
+            "De",
+            "Der",
+            "Den",
+            "Van",
+            "Von",
+            "Di",
+            "Du",
+            "Le",
+            "La",
+            "Del",
+            "Della",
+            "Dos",
+            "Das",
+            "Het",
+            "El",
+            "Al",
+        }
+        words = name.split()
+        for i, w in enumerate(words):
+            if i > 0 and w in particles:
+                words[i] = w.lower()
+        return " ".join(words)
+
+    def _extract_name_from_header(self, from_header: str) -> str:
+        if not from_header:
+            return ""
+        name_match = re.search(r"^([^<]+)<", from_header)
+        if name_match:
+            return self._normalize_name(name_match.group(1))
+        return self._normalize_name(from_header)
+
     def build_manuscript_timeline(
         self, manuscript_id: str, emails: List[Dict[str, Any]], is_current: bool = False
     ) -> Dict[str, Any]:
@@ -1349,13 +2081,16 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
             "manuscript_pdfs": [],
             "referee_reports": [],
             "editor": None,
+            "editor_email": None,
             "status": "Unknown",
             "submission_date": None,
             "decision_date": None,
             "all_attachments": [],
-            "arxiv_id": None,  # arXiv identifier if found
-            "paper_url": None,  # URL to online version
-            "doi": None,  # DOI if available
+            "arxiv_id": None,
+            "paper_url": None,
+            "doi": None,
+            "revision_round": 0,
+            "revision_history": [],
         }
 
         # Sort emails by date
@@ -1387,13 +2122,13 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
             if "Editorial Digest" in subject and "dylansmb" in from_header.lower():
                 continue  # Skip this email entirely
 
-            # Create timeline event
             event = {
                 "date": date,
                 "subject": subject,
                 "from": from_header,
                 "type": self.classify_email_type(subject, body),
                 "details": {},
+                "body_snippet": body[:500] if body else "",
             }
 
             # Check if this email contains a manuscript PDF - if so, sender is the editor
@@ -1421,29 +2156,32 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
                 and "dylansmb" not in from_header.lower()
             ):
                 manuscript["editor"] = from_header
+                editor_email_match = re.search(r"<([^>]+)>", from_header)
+                if editor_email_match:
+                    manuscript["editor_email"] = editor_email_match.group(1).lower()
                 event["details"]["is_editor"] = True
                 event["details"]["editor_type"] = "Editor-in-Chief"
+                if not manuscript["submission_date"]:
+                    manuscript["submission_date"] = date
 
-            # Check if sender is a referee (e.g., sending report)
+            # Classify sender role (available to entire loop body)
             sender_is_referee = False
             sender_name = None
+            is_dylan = "possamai" in from_header.lower() or "dylansmb" in from_header.lower()
+            system_patterns = ["editorialoffice@fs.org", "no-reply"]
+            is_system_email = any(pat.lower() in from_header.lower() for pat in system_patterns)
+            sender_email_match = re.search(r"<([^>]+)>", from_header)
+            sender_email_addr = sender_email_match.group(1).lower() if sender_email_match else ""
+            is_editor = is_system_email
+            if manuscript["editor_email"] and sender_email_addr:
+                is_editor = is_editor or (sender_email_addr == manuscript["editor_email"])
+            if not is_editor and manuscript["editor"]:
+                editor_name_norm = self._extract_name_from_header(manuscript["editor"])
+                sender_name_norm = self._extract_name_from_header(from_header)
+                if editor_name_norm and sender_name_norm:
+                    is_editor = is_editor or (editor_name_norm == sender_name_norm)
 
-            # Extract sender name and check if they're a referee
-            # Dylan (possamai/dylansmb) is the Associate Editor who forwards to referees
-            # So anyone else responding about the manuscript (except the editor) is likely a referee
-            if (
-                from_header
-                and "possamai" not in from_header.lower()
-                and "dylansmb" not in from_header.lower()
-            ):
-                # Skip the identified editor and system emails
-                system_patterns = ["editorialoffice@fs.org", "no-reply"]
-                is_system_email = any(pat.lower() in from_header.lower() for pat in system_patterns)
-                # Check if this sender is the identified editor
-                is_editor = (
-                    manuscript["editor"] and from_header == manuscript["editor"]
-                ) or is_system_email
-
+            if from_header and not is_dylan:
                 if not is_editor:
                     # Key insight: Dylan (AE) forwards manuscripts to referees
                     # So if someone is responding about a manuscript, they're likely a referee
@@ -1472,7 +2210,7 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
                     # Extract name from sender
                     name_match = re.search(r"^([^<]+)<", from_header)
                     if name_match:
-                        sender_name = name_match.group(1).strip()
+                        sender_name = self._normalize_name(name_match.group(1))
                         # Check if sender might be a referee based on indicators
                         # Also check if they're sending a report file
                         subject_lower = subject.lower()
@@ -1547,99 +2285,24 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
                                 }
 
             # Extract referee information from email body
-            # BUT skip Editorial Digest emails (they contain author names, not referees)
             if (
                 "referee" in body.lower() or "reviewer" in body.lower() or "review" in body.lower()
             ) and "Editorial Digest" not in subject:
-                # Skip Editorial Digest processing entirely
-                if False:  # Disabled Editorial Digest processing
-                    # Parse referee assignments from digest format
-                    # Look for patterns like "Mastrogiacomo Elisa (ms FS-25-47-25) — Accepted"
-                    # Note: The digest has typos like "47-25" for "4725"
-                    digest_pattern = (
-                        r"([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)\s+\(ms\s+(FS-\d+-\d+-\d+)\)\s+—\s+(\w+)"
-                    )
-                    digest_matches = re.findall(digest_pattern, body)
-
-                    for name, ms_code, status in digest_matches:
-                        # Normalize manuscript codes (FS-25-47-25 -> FS-25-4725)
-                        ms_code_normalized = ms_code.replace("-", "")
-                        if "FS254725" in ms_code_normalized and manuscript_id == "FS-25-4725":
-                            # This referee is for FS-25-4725
-                            if (
-                                name not in manuscript["referees"]
-                                and name != "Dylan"
-                                and "Possamai" not in name
-                            ):
-                                manuscript["referees"][name] = {
-                                    "name": name,
-                                    "email": "",
-                                    "institution": "Unknown",
-                                    "invited_date": None,
-                                    "response": status
-                                    if status in ["Accepted", "Declined"]
-                                    else None,
-                                    "response_date": date if status == "Accepted" else None,
-                                    "report_submitted": False,
-                                    "report_date": None,
-                                    "recommendation": None,
-                                }
-                                if status == "Accepted":
-                                    event["details"]["referee_accepted"] = name
-                        elif "FS254733" in ms_code_normalized and manuscript_id == "FS-25-4733":
-                            # This referee is for FS-25-4733
-                            if (
-                                name not in manuscript["referees"]
-                                and name != "Dylan"
-                                and "Possamai" not in name
-                            ):
-                                manuscript["referees"][name] = {
-                                    "name": name,
-                                    "email": "",
-                                    "institution": "Unknown",
-                                    "invited_date": None,
-                                    "response": status
-                                    if status in ["Accepted", "Declined"]
-                                    else None,
-                                    "response_date": date if status == "Accepted" else None,
-                                    "report_submitted": False,
-                                    "report_date": None,
-                                    "recommendation": None,
-                                }
-                                if status == "Accepted":
-                                    event["details"]["referee_accepted"] = name
-                        elif "FS254680" in ms_code_normalized and manuscript_id == "FS-25-4680":
-                            # This referee is for FS-25-4680
-                            if (
-                                name not in manuscript["referees"]
-                                and name != "Dylan"
-                                and "Possamai" not in name
-                            ):
-                                manuscript["referees"][name] = {
-                                    "name": name,
-                                    "email": "",
-                                    "institution": "Unknown",
-                                    "invited_date": None,
-                                    "response": status
-                                    if status in ["Accepted", "Declined"]
-                                    else None,
-                                    "response_date": date if status == "Accepted" else None,
-                                    "report_submitted": False,
-                                    "report_date": None,
-                                    "recommendation": None,
-                                }
-                                if status == "Accepted":
-                                    event["details"]["referee_accepted"] = name
-
-                # Regular referee extraction (only for non-digest emails)
                 # Only extract referees from specific email types
                 if (
                     any(x in subject.lower() for x in ["referee", "review", "report"])
                     and "dylansmb" not in from_header.lower()
                 ):
                     referees_found = self.extract_referees_from_email(body, subject)
+                    body_editor_normalized = (
+                        self._extract_name_from_header(manuscript["editor"])
+                        if manuscript["editor"]
+                        else ""
+                    )
                     for referee in referees_found:
-                        referee_name = referee["name"]
+                        referee_name = self._normalize_name(referee["name"])
+                        if referee_name == body_editor_normalized:
+                            continue
                         if referee_name not in manuscript["referees"]:
                             manuscript["referees"][referee_name] = {
                                 "name": referee_name,
@@ -1653,24 +2316,53 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
                                 "recommendation": None,
                             }
 
-            # Update referee status based on email content for all known referees
+            # Update referee status — context-aware to avoid false positives
+            body_lower = body.lower()[:3000]
             for referee_name in list(manuscript["referees"].keys()):
-                referee_mentioned = referee_name.lower() in body.lower() or (
-                    sender_name and referee_name == sender_name
-                )
-                if referee_mentioned:
-                    if "accepted" in body.lower() or "agreed" in body.lower():
-                        manuscript["referees"][referee_name]["response"] = "Accepted"
-                        manuscript["referees"][referee_name]["response_date"] = date
+                ref_data = manuscript["referees"][referee_name]
+                if sender_name and referee_name == sender_name:
+                    if any(
+                        kw in body_lower
+                        for kw in [
+                            "happy to review",
+                            "agree to review",
+                            "accept to review",
+                            "glad to",
+                            "pleased to review",
+                            "happy to referee",
+                        ]
+                    ):
+                        ref_data["response"] = "Accepted"
+                        ref_data["response_date"] = date
                         event["details"]["referee_accepted"] = referee_name
-                    elif "declined" in body.lower() or "unable" in body.lower():
-                        manuscript["referees"][referee_name]["response"] = "Declined"
-                        manuscript["referees"][referee_name]["response_date"] = date
+                    elif any(
+                        kw in body_lower
+                        for kw in [
+                            "unable to review",
+                            "cannot review",
+                            "decline",
+                            "regret",
+                            "unable to referee",
+                        ]
+                    ):
+                        ref_data["response"] = "Declined"
+                        ref_data["response_date"] = date
                         event["details"]["referee_declined"] = referee_name
-                    elif "submitted" in subject.lower() and "report" in body.lower():
-                        manuscript["referees"][referee_name]["report_submitted"] = True
-                        manuscript["referees"][referee_name]["report_date"] = date
+                    if "submitted" in subject.lower() and "report" in body_lower:
+                        ref_data["report_submitted"] = True
+                        ref_data["report_date"] = date
                         event["details"]["report_submitted_by"] = referee_name
+                elif referee_name.lower() in body_lower and (is_editor or is_system_email):
+                    for sent in body.split("."):
+                        if referee_name.lower() in sent.lower():
+                            sent_lower = sent.lower()
+                            if "accepted" in sent_lower or "agreed" in sent_lower:
+                                ref_data["response"] = "Accepted"
+                                ref_data["response_date"] = date
+                            elif "declined" in sent_lower or "unable" in sent_lower:
+                                ref_data["response"] = "Declined"
+                                ref_data["response_date"] = date
+                            break
 
             # Process attachments
             attachments = self.get_email_attachments(email)
@@ -1692,14 +2384,22 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
                         for keyword in ["report", "review", "referee", "comments"]
                     )
 
+                    # Editor's first email with a PDF is the manuscript, even if filename is generic
+                    if (
+                        not is_manuscript
+                        and not is_report
+                        and has_manuscript_pdf
+                        and not manuscript.get("manuscript_pdfs")
+                    ):
+                        is_manuscript = True
+
                     if is_manuscript and not is_report:
-                        file_path = None
-                        if is_current:
-                            file_path = self.download_attachment(
-                                email["id"], attachment["attachment_id"], filename
-                            )
+                        file_path = self.download_attachment(
+                            email["id"], attachment["attachment_id"], filename, manuscript_id
+                        )
                         if file_path:
-                            manuscript["manuscript_pdfs"].append(file_path)
+                            if file_path not in manuscript["manuscript_pdfs"]:
+                                manuscript["manuscript_pdfs"].append(file_path)
                             event["details"]["manuscript_pdf"] = filename
 
                             # Try to extract title
@@ -1709,20 +2409,102 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
                                     if pdf_title:
                                         manuscript["title"] = pdf_title
 
+                            if not manuscript.get("abstract") and file_path.endswith(".pdf"):
+                                manuscript["abstract"] = self._extract_abstract_from_pdf(file_path)
+
+                            if not manuscript.get("keywords") and file_path.endswith(".pdf"):
+                                manuscript["keywords"] = self._extract_keywords_from_pdf(file_path)
+
                             # Try to extract authors
                             if not manuscript["authors"] and file_path.endswith(".pdf"):
                                 pdf_authors = self.extract_authors_from_pdf(file_path)
 
-                                # If we have a title, try online search for better data
-                                if manuscript["title"] and manuscript["title"] != "Title not found":
+                                # If we have a reasonable title, try online search for better data
+                                search_title = manuscript["title"]
+                                title_usable = (
+                                    search_title
+                                    and search_title != "Title not found"
+                                    and len(search_title) > 20
+                                    and not search_title.endswith((".dvi", ".tex", ".pdf"))
+                                    and "noname" not in search_title.lower()
+                                )
+                                if title_usable:
                                     online_data = self.search_paper_online(
-                                        manuscript["title"], pdf_authors
+                                        search_title, pdf_authors
                                     )
-                                    if online_data["found"] and online_data["authors"]:
-                                        # Use online data if better
-                                        pdf_authors = online_data["authors"]
+                                    if online_data["found"]:
+                                        arxiv_authors = online_data.get("authors", [])
+                                        if arxiv_authors and pdf_authors:
+                                            pdf_surnames = {
+                                                a.get("name", "").split()[-1].lower()
+                                                for a in pdf_authors
+                                                if a.get("name")
+                                            }
+                                            arxiv_surnames = {
+                                                a.get("name", "").split()[-1].lower()
+                                                for a in arxiv_authors
+                                                if a.get("name")
+                                            }
+                                            if (
+                                                len(pdf_authors) == len(arxiv_authors)
+                                                and pdf_surnames == arxiv_surnames
+                                            ):
+                                                pdf_by_sn = {
+                                                    a.get("name", "").split()[-1].lower(): a
+                                                    for a in pdf_authors
+                                                    if a.get("name")
+                                                }
+                                                for aa in arxiv_authors:
+                                                    sn = aa.get("name", "").split()[-1].lower()
+                                                    pa = pdf_by_sn.get(sn)
+                                                    if pa:
+                                                        if pa.get("email") and not aa.get("email"):
+                                                            aa["email"] = pa["email"]
+                                                        if pa.get("affiliation") and not aa.get(
+                                                            "affiliation"
+                                                        ):
+                                                            aa["affiliation"] = pa["affiliation"]
+                                                pdf_authors = arxiv_authors
+                                            elif pdf_surnames & arxiv_surnames:
+                                                arxiv_by_surname = {}
+                                                for a in arxiv_authors:
+                                                    s = a.get("name", "").split()[-1].lower()
+                                                    arxiv_by_surname[s] = a
+                                                for pa in pdf_authors:
+                                                    s = pa.get("name", "").split()[-1].lower()
+                                                    if s in arxiv_by_surname:
+                                                        aa = arxiv_by_surname[s]
+                                                        if aa.get("affiliation") and not pa.get(
+                                                            "affiliation"
+                                                        ):
+                                                            pa["affiliation"] = aa["affiliation"]
+                                                        if aa.get("email") and not pa.get("email"):
+                                                            pa["email"] = aa["email"]
+                                        elif arxiv_authors and not pdf_authors:
+                                            from difflib import SequenceMatcher
+
+                                            arxiv_title = online_data.get("title", "")
+                                            sim = SequenceMatcher(
+                                                None, search_title.lower(), arxiv_title.lower()
+                                            ).ratio()
+                                            if sim > 0.5:
+                                                pdf_authors = arxiv_authors
+                                            else:
+                                                print(
+                                                    f"         ⚠️ arXiv title mismatch (sim={sim:.2f}), skipping authors"
+                                                )
                                         manuscript["arxiv_id"] = online_data.get("arxiv_id")
                                         manuscript["paper_url"] = online_data.get("url")
+                                        arxiv_title = online_data.get("title")
+                                        if arxiv_title and (
+                                            not manuscript["title"]
+                                            or manuscript["title"] == "Title not found"
+                                            or len(manuscript["title"]) < 15
+                                            or manuscript["title"].endswith(
+                                                (".dvi", ".tex", ".pdf")
+                                            )
+                                        ):
+                                            manuscript["title"] = arxiv_title
 
                                 # Enrich author data
                                 if pdf_authors:
@@ -1731,11 +2513,9 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
                                     )
 
                     elif is_report:
-                        file_path = None
-                        if is_current:
-                            file_path = self.download_attachment(
-                                email["id"], attachment["attachment_id"], filename
-                            )
+                        file_path = self.download_attachment(
+                            email["id"], attachment["attachment_id"], filename, manuscript_id
+                        )
                         if file_path:
                             # Try to match report to specific referee
                             report_referee = None
@@ -1796,9 +2576,14 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
                                     "recommendation"
                                 ]
 
-                manuscript["all_attachments"].append(
-                    {"filename": filename, "date": date, "email_subject": subject}
-                )
+                noise_patterns = ["outlook-", "logo", "signature", "icon", "image00"]
+                is_noise = any(
+                    p in filename_lower for p in noise_patterns
+                ) and filename_lower.endswith((".png", ".gif", ".jpg", ".jpeg"))
+                if not is_noise:
+                    manuscript["all_attachments"].append(
+                        {"filename": filename, "date": date, "email_subject": subject}
+                    )
 
             # Update manuscript status based on email
             if "decision" in subject.lower():
@@ -1819,18 +2604,28 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
             # Add event to timeline
             manuscript["timeline"].append(event)
 
-        # Clean up referee list before converting to list
         cleaned_referees = {}
-        for name, referee_data in manuscript["referees"].items():
-            # Clean up malformed names
-            clean_name = name.strip()
-            # Remove "Email Crosscheck" and other junk
-            if "Email Crosscheck" in clean_name:
-                clean_name = clean_name.replace("Email Crosscheck", "").strip()
-            # Remove extra newlines
-            clean_name = " ".join(clean_name.split())
+        editor_normalized = (
+            self._extract_name_from_header(manuscript["editor"]) if manuscript["editor"] else ""
+        )
 
-            # Skip if this is clearly not a referee name
+        def _name_parts_set(n):
+            return set(w.lower() for w in n.split() if len(w) > 1)
+
+        def _find_existing_match(clean_name, cleaned_refs):
+            if clean_name in cleaned_refs:
+                return clean_name
+            name_set = _name_parts_set(clean_name)
+            for existing_name in cleaned_refs:
+                if _name_parts_set(existing_name) == name_set:
+                    return existing_name
+            return None
+
+        for name, referee_data in manuscript["referees"].items():
+            clean_name = self._normalize_name(name)
+            if "Email Crosscheck" in clean_name:
+                clean_name = self._normalize_name(clean_name.replace("Email Crosscheck", ""))
+
             if (
                 not clean_name
                 or len(clean_name) < 3
@@ -1838,29 +2633,236 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
             ):
                 continue
 
-            # Skip obvious non-referee names
-            # But do NOT skip people who receive manuscripts from the editor - they are referees!
             if clean_name.lower() in ["editorial office", "editor", "system", "admin"]:
                 continue
 
-            # Merge duplicates
-            if clean_name not in cleaned_referees:
+            if editor_normalized and clean_name == editor_normalized:
+                continue
+
+            existing_key = _find_existing_match(clean_name, cleaned_referees)
+            if not existing_key:
                 referee_data["name"] = clean_name
                 cleaned_referees[clean_name] = referee_data
             else:
-                # Merge data, keeping non-empty values
-                existing = cleaned_referees[clean_name]
-                if not existing["email"] and referee_data["email"]:
+                existing = cleaned_referees[existing_key]
+                if not existing.get("email") and referee_data.get("email"):
                     existing["email"] = referee_data["email"]
-                if not existing["institution"] or existing["institution"] == "Unknown":
-                    if referee_data["institution"] and referee_data["institution"] != "Unknown":
+                if not existing.get("institution") or existing.get("institution") == "Unknown":
+                    if (
+                        referee_data.get("institution")
+                        and referee_data.get("institution") != "Unknown"
+                    ):
                         existing["institution"] = referee_data["institution"]
-                if referee_data["report_submitted"]:
+                if referee_data.get("report_submitted"):
                     existing["report_submitted"] = True
-                    existing["report_date"] = referee_data["report_date"]
+                    existing["report_date"] = referee_data.get("report_date")
+                if not existing.get("response") and referee_data.get("response"):
+                    existing["response"] = referee_data["response"]
+                if not existing.get("response_date") and referee_data.get("response_date"):
+                    existing["response_date"] = referee_data["response_date"]
+                if not existing.get("invited_date") and referee_data.get("invited_date"):
+                    existing["invited_date"] = referee_data["invited_date"]
 
-        # Convert cleaned referees dict to list
         manuscript["referees"] = list(cleaned_referees.values())
+
+        for ref in manuscript["referees"]:
+            ref_name = ref.get("name", "")
+            ref_email = ref.get("email", "")
+            parts = ref_name.split()
+            if len(parts) == 2 and ref_email and "@" in ref_email:
+                local = (
+                    ref_email.split("@")[0]
+                    .lower()
+                    .replace(".", " ")
+                    .replace("-", " ")
+                    .replace("_", " ")
+                )
+                local_parts = local.split()
+                if len(local_parts) >= 2:
+                    email_first = local_parts[0]
+                    email_last = local_parts[-1]
+                    name_first = parts[0].lower()
+                    name_last = parts[1].lower()
+                    if (
+                        email_first[:3] == name_last[:3]
+                        and email_last[:3] == name_first[:3]
+                        and email_first[:3] != email_last[:3]
+                    ):
+                        ref["name"] = f"{parts[1]} {parts[0]}"
+
+        ref_names_set = {r["name"] for r in manuscript["referees"] if r.get("name")}
+        ref_name_parts = {frozenset(n.lower().split()): n for n in ref_names_set}
+        for report in manuscript.get("referee_reports", []):
+            rn = report.get("referee", "")
+            if rn and rn != "Unknown" and rn not in ref_names_set:
+                rn_parts = frozenset(rn.lower().split())
+                if rn_parts in ref_name_parts:
+                    report["referee"] = ref_name_parts[rn_parts]
+
+        def _sort_date(event):
+            d = event.get("date", "")
+            try:
+                import email.utils
+
+                dt = email.utils.parsedate_to_datetime(d)
+                return dt.timestamp()
+            except Exception:
+                return 0.0
+
+        try:
+            manuscript["timeline"].sort(key=_sort_date)
+        except Exception:
+            pass
+
+        editor_name = manuscript.get("editor", "")
+        editor_surname = ""
+        if editor_name:
+            parts = self._extract_name_from_header(editor_name).split() if editor_name else []
+            editor_surname = parts[-1].lower() if parts else ""
+
+        first_editor_email_date = None
+        for event in manuscript["timeline"]:
+            det = event.get("details", {})
+            frm = event.get("from", "").lower()
+            is_editor = (
+                det.get("is_editor") or (editor_surname and editor_surname in frm) or "dylan" in frm
+            )
+            if is_editor and not any(x in frm for x in ["possamai", "dylansmb"]):
+                first_editor_email_date = event["date"]
+                break
+        if not first_editor_email_date:
+            for event in manuscript["timeline"]:
+                first_editor_email_date = event["date"]
+                break
+
+        for ref in manuscript["referees"]:
+            ref_name = ref.get("name", "")
+            if ref.get("report_submitted") and not ref.get("response"):
+                ref["response"] = "Accepted"
+
+            ref_surname = ref_name.split()[-1].lower() if ref_name else ""
+
+            if not ref.get("invited_date") and ref_name:
+                best_invite = None
+                weak_invite = None
+
+                for event in manuscript["timeline"]:
+                    frm = event.get("from", "").lower()
+                    subj = event.get("subject", "")
+                    det = event.get("details", {})
+                    body_snip = event.get("body_snippet", "")
+
+                    is_dylan = "possamai" in frm or "dylansmb" in frm
+                    is_from_editor = (
+                        det.get("is_editor")
+                        or "editor" in frm
+                        or "springer" in frm
+                        or "editorial" in frm
+                        or (editor_surname and editor_surname in frm)
+                    )
+
+                    if is_from_editor and not is_dylan and ref_surname:
+                        searchable = (subj + " " + body_snip).lower()
+                        if ref_surname in searchable:
+                            if "invit" in searchable:
+                                best_invite = event["date"]
+                                break
+                            if not weak_invite:
+                                weak_invite = event["date"]
+
+                    if ref_name in str(det.get("referee_accepted", "")) or ref_name in str(
+                        det.get("referee_declined", "")
+                    ):
+                        if not best_invite:
+                            best_invite = event["date"]
+                        break
+
+                if best_invite:
+                    ref["invited_date"] = best_invite
+                elif weak_invite:
+                    ref["invited_date"] = weak_invite
+                else:
+                    ref["invited_date"] = first_editor_email_date
+
+            if first_editor_email_date:
+                import email.utils as _eu
+
+                should_fix = False
+                if (
+                    ref.get("invited_date")
+                    and ref.get("response_date")
+                    and ref["invited_date"] == ref["response_date"]
+                ):
+                    should_fix = True
+                elif ref.get("invited_date"):
+                    try:
+                        inv_dt = _eu.parsedate_to_datetime(ref["invited_date"])
+                        ed_dt = _eu.parsedate_to_datetime(first_editor_email_date)
+                        if ed_dt < inv_dt:
+                            should_fix = True
+                    except Exception:
+                        pass
+                if should_fix:
+                    try:
+                        ed_dt = _eu.parsedate_to_datetime(first_editor_email_date)
+                        inv_dt = (
+                            _eu.parsedate_to_datetime(ref["invited_date"])
+                            if ref.get("invited_date")
+                            else None
+                        )
+                        if not inv_dt or ed_dt < inv_dt:
+                            ref["invited_date"] = first_editor_email_date
+                    except Exception:
+                        ref["invited_date"] = first_editor_email_date
+
+            if ref.get("response") == "Accepted" and not ref.get("response_date") and ref_surname:
+                for event in manuscript["timeline"]:
+                    frm = event.get("from", "").lower()
+                    if ref_surname in frm and "possamai" not in frm and "dylansmb" not in frm:
+                        if not (editor_surname and editor_surname in frm):
+                            subj_lower = event.get("subject", "").lower()
+                            if (
+                                "automatic reply" not in subj_lower
+                                and "auto-reply" not in subj_lower
+                                and "out of office" not in subj_lower
+                            ):
+                                ref["response_date"] = event["date"]
+                                break
+
+            if ref.get("report_submitted") and not ref.get("response_date"):
+                ref_s = ref.get("name", "").split()[-1].lower() if ref.get("name") else ""
+                for event in manuscript["timeline"]:
+                    frm = event.get("from", "").lower()
+                    if ref_s and ref_s in frm:
+                        subj_lower = event.get("subject", "").lower()
+                        if (
+                            "automatic reply" in subj_lower
+                            or "auto-reply" in subj_lower
+                            or "out of office" in subj_lower
+                        ):
+                            continue
+                        report_date = ref.get("report_date")
+                        if report_date and event["date"] != report_date:
+                            ref["response_date"] = event["date"]
+                            if not ref.get("response"):
+                                ref["response"] = "Accepted"
+                            break
+
+            self._enforce_date_chronology(ref)
+
+        ref_surnames = {
+            r.get("name", "").split()[-1].lower() for r in manuscript["referees"] if r.get("name")
+        }
+        for author in manuscript.get("authors", []):
+            aname = author.get("name", "")
+            parts = aname.split()
+            if len(parts) >= 2:
+                surname = parts[-1]
+                if len(surname) > 2 and surname.lower() not in ref_surnames:
+                    trimmed = surname[:-1].lower()
+                    if trimmed in ref_surnames:
+                        parts[-1] = surname[:-1]
+                        author["name"] = " ".join(parts)
 
         # Summary statistics
         manuscript["total_emails"] = len(emails_with_dates)
@@ -1875,20 +2877,79 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
             1 for r in manuscript["referees"] if r["report_submitted"]
         )
 
+        manuscript["revision_round"] = self.detect_revision_round(manuscript_id)
+        manuscript["revision_history"] = self.track_revision_history(manuscript)
+
+        for att in manuscript.get("all_attachments", []):
+            fn = att.get("filename", "")
+            rev_match = re.search(r"-R(\d+)", fn, re.IGNORECASE)
+            if rev_match:
+                round_num = int(rev_match.group(1))
+                if round_num > manuscript["revision_round"]:
+                    manuscript["revision_round"] = round_num
+            fn_lower = fn.lower()
+            if "response" in fn_lower or "rebuttal" in fn_lower:
+                att["document_type"] = "author_response"
+
+        if manuscript["revision_round"] > 0 and manuscript["status"] in (
+            "Unknown",
+            "Submitted",
+            "Under Review",
+        ):
+            manuscript["status"] = f"Revision R{manuscript['revision_round']} Under Review"
+
+        if manuscript["status"] in ("Unknown", "Submitted"):
+            manuscript["status"] = self.determine_manuscript_status(manuscript)
+
+        # CrossRef title fallback for bad/missing titles
+        bad_title = (
+            not manuscript["title"]
+            or manuscript["title"] == "Title not found"
+            or len(manuscript["title"]) < 15
+            or manuscript["title"].endswith((".dvi", ".tex", ".pdf"))
+            or "noname" in manuscript["title"].lower()
+        )
+        if bad_title and manuscript.get("authors"):
+            try:
+                author_names = [a["name"] for a in manuscript["authors"][:2] if a.get("name")]
+                abstract = manuscript.get("abstract", "")
+                crossref_title = self._search_title_by_authors(author_names, abstract[:200])
+                if crossref_title:
+                    print(f"      🔍 CrossRef title fallback: {crossref_title[:60]}...")
+                    manuscript["title"] = crossref_title
+            except Exception:
+                pass
+
         return manuscript
 
     def classify_email_type(self, subject: str, body: str) -> str:
         """Classify the type of email based on content."""
         subject_lower = subject.lower()
-        body_lower = body.lower()
+        body_lower = body.lower()[:3000]
 
         if "invitation" in subject_lower and "review" in subject_lower:
             return "Referee Invitation"
         elif "accepted to review" in body_lower or "agreed to review" in body_lower:
             return "Referee Acceptance"
+        elif "happy to review" in body_lower or "happy to referee" in body_lower:
+            return "Referee Acceptance"
+        elif "agree to" in body_lower and ("review" in body_lower or "referee" in body_lower):
+            return "Referee Acceptance"
         elif "declined" in body_lower or "unable to review" in body_lower:
             return "Referee Decline"
+        elif "cannot" in body_lower and ("review" in body_lower or "referee" in body_lower):
+            return "Referee Decline"
         elif "report" in subject_lower and "submitted" in subject_lower:
+            return "Report Submission"
+        elif any(
+            kw in body_lower
+            for kw in [
+                "attached my report",
+                "attached the report",
+                "here is my report",
+                "find my report",
+            ]
+        ):
             return "Report Submission"
         elif "decision" in subject_lower:
             return "Editorial Decision"
@@ -1898,6 +2959,12 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
             return "Revision Request"
         elif "reminder" in subject_lower:
             return "Reminder"
+        elif "state of things" in subject_lower or "status" in subject_lower:
+            return "Status Inquiry"
+        elif "thank" in subject_lower or "thank you" in body_lower[:200]:
+            return "Acknowledgment"
+        elif subject_lower.startswith("re:") or subject_lower.startswith("r:"):
+            return "Reply"
         else:
             return "Correspondence"
 
@@ -1924,12 +2991,11 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
                     name = match
                     institution = ""
 
-                # Clean up name
-                name = name.strip()
+                name = self._normalize_name(name)
 
-                # Skip common false positives
                 if name.lower() in [
                     "finance and stochastics",
+                    "dylan possamai",
                     "dear",
                     "sincerely",
                     "best",
@@ -2024,8 +3090,10 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
             # Get attachments
             attachments = self.get_email_attachments(email_message)
 
-            # Try to get title from PDF attachments
+            # Try to get title/abstract from PDF attachments
             pdf_title = None
+            pdf_abstract = None
+            pdf_keywords = []
             manuscript_pdfs = []
             referee_reports = []
 
@@ -2052,22 +3120,34 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
                     # Manuscript PDFs
                     if is_manuscript and not is_report:
                         file_path = self.download_attachment(
-                            email_message["id"], attachment["attachment_id"], filename
+                            email_message["id"],
+                            attachment["attachment_id"],
+                            filename,
+                            manuscript_id,
                         )
                         if file_path:
                             manuscript_pdfs.append(file_path)
                             if not pdf_title and file_path.endswith(".pdf"):
                                 pdf_title = self.extract_title_from_pdf(file_path)
 
+                            if not pdf_abstract and file_path.endswith(".pdf"):
+                                pdf_abstract = self._extract_abstract_from_pdf(file_path)
+
+                            if not pdf_keywords and file_path.endswith(".pdf"):
+                                pdf_keywords = self._extract_keywords_from_pdf(file_path)
+
                     # Referee reports
                     elif is_report:
                         file_path = self.download_attachment(
-                            email_message["id"], attachment["attachment_id"], filename
+                            email_message["id"],
+                            attachment["attachment_id"],
+                            filename,
+                            manuscript_id,
                         )
                         if file_path:
                             referee_reports.append({"filename": filename, "path": file_path})
 
-            # Use PDF title if found
+            # Use PDF title/abstract if found
             if pdf_title:
                 title = pdf_title
 
@@ -2075,6 +3155,8 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
             manuscript = {
                 "id": manuscript_id,
                 "title": title,
+                "abstract": pdf_abstract or "",
+                "keywords": pdf_keywords or [],
                 "status": status,
                 "authors": authors,
                 "journal": "FS",
@@ -2253,16 +3335,84 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
                     print(f"   📄 Historical manuscript — skipping downloads")
 
                 # Build comprehensive manuscript data
-                manuscript = self.build_manuscript_timeline(
-                    manuscript_id,
-                    manuscript_emails,
-                    is_current=is_current,
-                )
+                try:
+                    manuscript = self.build_manuscript_timeline(
+                        manuscript_id,
+                        manuscript_emails,
+                        is_current=is_current,
+                    )
+                except Exception as e:
+                    self.errors.append(f"Error processing {manuscript_id}: {str(e)[:200]}")
+                    print(f"   ⚠️ Error processing {manuscript_id}: {e}")
+                    manuscript = None
 
                 if manuscript:
                     manuscripts[manuscript_id] = manuscript
 
             self.manuscripts = list(manuscripts.values())
+
+            # Cross-manuscript editor dedup: remove editors from ALL referee lists
+            all_editor_names = set()
+            for ms in self.manuscripts:
+                if ms.get("editor"):
+                    all_editor_names.add(self._extract_name_from_header(ms["editor"]))
+            if all_editor_names:
+                for ms in self.manuscripts:
+                    refs = ms.get("referees", [])
+                    if isinstance(refs, list):
+                        ms["referees"] = [r for r in refs if r.get("name") not in all_editor_names]
+                    elif isinstance(refs, dict):
+                        ms["referees"] = {
+                            k: v
+                            for k, v in refs.items()
+                            if self._normalize_name(k) not in all_editor_names
+                        }
+
+            # Normalize output schema + AE status + web enrichment + timeline metrics + corresponding author
+            for manuscript in self.manuscripts:
+                self._normalize_output(manuscript)
+                if manuscript.get("is_current"):
+                    try:
+                        manuscript["ae_status"] = self._compute_ae_status(manuscript)
+                    except Exception as e:
+                        self.errors.append(
+                            f"AE status error for {manuscript.get('id', '?')}: {str(e)[:100]}"
+                        )
+
+                try:
+                    self._enrich_people_from_web(manuscript)
+                except Exception as e:
+                    self.errors.append(
+                        f"Web enrichment error for {manuscript.get('id', '?')}: {str(e)[:100]}"
+                    )
+
+                try:
+                    timeline_metrics = self.calculate_timeline_metrics(manuscript)
+                    if timeline_metrics:
+                        manuscript["timeline_metrics"] = timeline_metrics
+                except Exception as e:
+                    self.errors.append(
+                        f"Timeline metrics error for {manuscript.get('id', '?')}: {str(e)[:100]}"
+                    )
+
+                try:
+                    if manuscript.get("authors") and not any(
+                        a.get("is_corresponding") for a in manuscript["authors"]
+                    ):
+                        pdf_paths = manuscript.get("manuscript_pdfs", [])
+                        pdf_path = pdf_paths[0] if pdf_paths else None
+                        corr = self.identify_corresponding_author(
+                            manuscript["authors"], pdf_path=pdf_path
+                        )
+                        if corr.get("name"):
+                            for author in manuscript["authors"]:
+                                is_corr = author.get("name") == corr["name"]
+                                author["is_corresponding"] = is_corr
+                                author["corresponding_author"] = is_corr
+                except Exception as e:
+                    self.errors.append(
+                        f"Corresponding author error for {manuscript.get('id', '?')}: {str(e)[:100]}"
+                    )
 
             # Sort by whether current and by date
             self.manuscripts.sort(
@@ -2277,28 +3427,898 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
             )
 
             if current_mss:
-                print("\n📋 CURRENT MANUSCRIPTS (starred):")
+                print("\n📋 ACTIVE MANUSCRIPTS:")
                 for ms in current_mss:
-                    print(f"⭐ {ms['id']}: {ms['title'][:50]}...")
-                    print(f"   📧 {ms['total_emails']} emails | 👥 {ms['total_referees']} referees")
-                    print(
-                        f"   ✅ {ms['referees_accepted']} accepted | ❌ {ms['referees_declined']} declined | 📝 {ms['reports_received']} reports"
-                    )
+                    ae = ms.get("ae_status", {})
+                    phase = ae.get("phase", "Unknown")
+                    action = ae.get("action", "")
+                    days = ae.get("days_in_phase")
+                    days_str = f" ({days}d)" if days is not None else ""
+
+                    title_display = ms["title"][:70] if ms.get("title") else "No title"
+                    print(f"\n⭐ {ms['id']}: {title_display}")
+                    print(f"   📊 Phase: {phase}{days_str}")
+                    print(f"   ⚡ Action: {action}")
+
+                    for rd in ae.get("referees", []):
+                        name = rd.get("name", "?")
+                        st = rd.get("status", "?")
+                        if st == "report_received":
+                            rdate = rd.get("report_date", "")
+                            if rdate:
+                                try:
+                                    rdate = datetime.strptime(
+                                        rdate.split(",")[1].strip().split(" (")[0],
+                                        "%d %b %Y %H:%M:%S %z",
+                                    ).strftime("%b %d")
+                                except Exception:
+                                    rdate = rdate[:10]
+                            print(
+                                f"   ✅ {name} — report received{' (' + rdate + ')' if rdate else ''}"
+                            )
+                        elif st == "awaiting_report":
+                            ds = rd.get("days_since_accepted")
+                            ds_str = f" ({ds}d since accepted)" if ds is not None else ""
+                            flag = " ⚠️ OVERDUE" if rd.get("overdue") else ""
+                            print(f"   ⏳ {name} — awaiting report{ds_str}{flag}")
+                        elif st == "declined":
+                            print(f"   ❌ {name} — declined")
+                        elif st == "no_response":
+                            ds = rd.get("days_since_invited")
+                            ds_str = f" ({ds}d)" if ds is not None else ""
+                            flag = " ⚠️ OVERDUE" if rd.get("overdue") else ""
+                            print(f"   👥 {name} — no response{ds_str}{flag}")
 
             if historical_mss:
                 print("\n📋 HISTORICAL MANUSCRIPTS:")
                 for ms in historical_mss:
-                    print(f"📄 {ms['id']}: {ms['title'][:50]}...")
+                    print(f"📄 {ms['id']}: {ms['title'][:70]}...")
                     print(f"   📧 {ms['total_emails']} emails | 👥 {ms['total_referees']} referees")
 
             return self.manuscripts
 
         except Exception as e:
+            self.errors.append(f"Fatal extraction error: {str(e)[:200]}")
             print(f"❌ Extraction failed: {e}")
             import traceback
 
             traceback.print_exc()
             return []
+
+    def _enrich_people_from_web(self, manuscript_data: Dict):
+        if not requests:
+            return
+        from urllib.parse import quote_plus
+
+        people = []
+        referees = manuscript_data.get("referees", {})
+        if isinstance(referees, dict):
+            for ref in referees.values():
+                if ref.get("name"):
+                    people.append(("referee", ref))
+        else:
+            for ref in referees:
+                if ref.get("name"):
+                    people.append(("referee", ref))
+        for auth in manuscript_data.get("authors", []):
+            if auth.get("name"):
+                people.append(("author", auth))
+
+        if not people:
+            return
+
+        enriched = 0
+        session = requests.Session()
+        session.headers.update(
+            {
+                "User-Agent": "FS-Extractor/2.0 (mailto:dylansmb@gmail.com)",
+                "Accept": "application/json",
+            }
+        )
+
+        try:
+            from core.academic_apis import AcademicProfileEnricher
+
+            academic = AcademicProfileEnricher(session)
+        except Exception:
+            academic = None
+
+        cache_hits = 0
+        for role, person in people:
+            name = person.get("name", "")
+            institution = (
+                person.get("institution", "")
+                or person.get("affiliation", "")
+                or person.get("institution_parsed", "")
+            )
+            orcid = person.get("orcid", "")
+            if person.get("web_profile"):
+                continue
+
+            if orcid and orcid.startswith("http"):
+                orcid_id = orcid.rstrip("/").split("/")[-1]
+            elif orcid and re.match(r"\d{4}-\d{4}-\d{4}-\d{3}[\dX]", orcid):
+                orcid_id = orcid
+            else:
+                orcid_id = None
+
+            cached_profile = self.get_cached_web_profile(name, institution, orcid_id or "")
+            if cached_profile:
+                person["web_profile"] = cached_profile
+                person["web_profile_source"] = "cache"
+                cache_hits += 1
+                enriched += 1
+                continue
+
+            profile = {}
+
+            ms_title = manuscript_data.get("title", "")
+
+            if not orcid_id and name:
+                try:
+                    name_parts = name.replace(",", "").strip().split()
+                    if len(name_parts) >= 2:
+                        given = name_parts[0]
+                        family = name_parts[-1]
+                        orcid_search_url = f"https://pub.orcid.org/v3.0/search/?q=given-names:{quote_plus(given)}+AND+family-name:{quote_plus(family)}"
+                        resp = session.get(
+                            orcid_search_url,
+                            headers={"Accept": "application/json"},
+                            timeout=10,
+                        )
+                        if resp.status_code == 200:
+                            results = resp.json().get("result", [])
+                            if results and len(results) == 1:
+                                orcid_id = results[0].get("orcid-identifier", {}).get("path")
+                                if orcid_id:
+                                    person["orcid"] = orcid_id
+                            elif results and len(results) <= 10 and role == "author" and ms_title:
+                                from difflib import SequenceMatcher
+
+                                ms_title_lower = self._clean_latex_accents(ms_title).lower()
+                                for candidate in results[:5]:
+                                    cand_id = candidate.get("orcid-identifier", {}).get("path")
+                                    if not cand_id:
+                                        continue
+                                    try:
+                                        wresp = session.get(
+                                            f"https://pub.orcid.org/v3.0/{cand_id}/works",
+                                            headers={"Accept": "application/json"},
+                                            timeout=8,
+                                        )
+                                        if wresp.status_code == 200:
+                                            cand_works = wresp.json().get("group", [])
+                                            for w in cand_works[:20]:
+                                                ws = w.get("work-summary", [{}])[0]
+                                                t_obj = ws.get("title", {}).get("title", {})
+                                                t_val = (
+                                                    t_obj.get("value", "") if t_obj else ""
+                                                ).lower()
+                                                if (
+                                                    t_val
+                                                    and SequenceMatcher(
+                                                        None, ms_title_lower, t_val
+                                                    ).ratio()
+                                                    > 0.6
+                                                ):
+                                                    orcid_id = cand_id
+                                                    person["orcid"] = orcid_id
+                                                    break
+                                            if orcid_id:
+                                                break
+                                    except Exception:
+                                        continue
+                            elif results and len(results) <= 3:
+                                orcid_id = results[0].get("orcid-identifier", {}).get("path")
+                                if orcid_id:
+                                    person["orcid"] = orcid_id
+                except Exception:
+                    pass
+
+            if orcid_id:
+                try:
+                    resp = session.get(
+                        f"https://pub.orcid.org/v3.0/{orcid_id}/works",
+                        headers={"Accept": "application/json"},
+                        timeout=10,
+                    )
+                    if resp.status_code == 200:
+                        works = resp.json().get("group", [])
+                        recent = []
+                        for w in works[:5]:
+                            ws = w.get("work-summary", [{}])[0]
+                            title_obj = ws.get("title", {}).get("title", {})
+                            title = title_obj.get("value", "") if title_obj else ""
+                            year = (
+                                ws.get("publication-date", {}).get("year", {}).get("value", "")
+                                if ws.get("publication-date")
+                                else ""
+                            )
+                            journal = (
+                                ws.get("journal-title", {}).get("value", "")
+                                if ws.get("journal-title")
+                                else ""
+                            )
+                            if title:
+                                paper = {"title": title}
+                                if year:
+                                    paper["year"] = year
+                                if journal:
+                                    paper["journal"] = journal
+                                recent.append(paper)
+                        if recent:
+                            profile["recent_publications"] = recent
+                            profile["publication_count"] = len(works)
+                except Exception:
+                    pass
+
+                try:
+                    resp = session.get(
+                        f"https://pub.orcid.org/v3.0/{orcid_id}/person",
+                        headers={"Accept": "application/json"},
+                        timeout=10,
+                    )
+                    if resp.status_code == 200:
+                        person_data = resp.json()
+                        orcid_name_obj = person_data.get("name", {})
+                        if orcid_name_obj:
+                            orcid_given = (orcid_name_obj.get("given-names") or {}).get("value", "")
+                            orcid_family = (orcid_name_obj.get("family-name") or {}).get(
+                                "value", ""
+                            )
+                            if orcid_given and orcid_family:
+                                current_name = person.get("name", "")
+                                current_ascii = (
+                                    self._clean_latex_accents(current_name)
+                                    .lower()
+                                    .replace("-", " ")
+                                )
+                                orcid_ascii = (
+                                    self._clean_latex_accents(f"{orcid_given} {orcid_family}")
+                                    .lower()
+                                    .replace("-", " ")
+                                )
+                                if (
+                                    current_ascii == orcid_ascii
+                                    or current_name.lower().split()[-1]
+                                    == self._clean_latex_accents(orcid_family).lower()
+                                ):
+
+                                    def _title_preserve_diacritics(s):
+                                        return s[0].upper() + s[1:] if s else s
+
+                                    given_fixed = (
+                                        _title_preserve_diacritics(orcid_given)
+                                        if orcid_given.isupper() or orcid_given.islower()
+                                        else orcid_given
+                                    )
+                                    family_fixed = (
+                                        _title_preserve_diacritics(orcid_family.lower())
+                                        if orcid_family.isupper() or orcid_family.islower()
+                                        else orcid_family
+                                    )
+                                    canonical = f"{given_fixed} {family_fixed}"
+                                    current_has_diacritics = (
+                                        current_name != self._clean_latex_accents(current_name)
+                                    )
+                                    canonical_has_diacritics = (
+                                        canonical != self._clean_latex_accents(canonical)
+                                    )
+                                    if canonical_has_diacritics or not current_has_diacritics:
+                                        if (
+                                            self._clean_latex_accents(canonical).lower()
+                                            == current_ascii
+                                        ):
+                                            person["name"] = canonical
+                        bio = person_data.get("biography", {})
+                        if bio and bio.get("content"):
+                            profile["biography"] = bio["content"][:500]
+                        emails_obj = person_data.get("emails", {}).get("email", [])
+                        for em_obj in emails_obj:
+                            em_val = em_obj.get("email", "")
+                            if em_val and not person.get("email"):
+                                person["email"] = em_val
+                                break
+                        affiliations_obj = person_data.get("activities-summary", {})
+                        urls = person_data.get("researcher-urls", {}).get("researcher-url", [])
+                        ext_urls = []
+                        for u in urls[:5]:
+                            url_val = u.get("url", {}).get("value", "")
+                            url_name = u.get("url-name", "")
+                            if url_val:
+                                ext_urls.append({"name": url_name, "url": url_val})
+                        if ext_urls:
+                            profile["external_urls"] = ext_urls
+                        keywords = person_data.get("keywords", {}).get("keyword", [])
+                        kw_list = [k.get("content", "") for k in keywords if k.get("content")]
+                        if kw_list:
+                            profile["research_keywords"] = kw_list[:10]
+                except Exception:
+                    pass
+
+                if not person.get("affiliation") or person.get("affiliation") in ("Unknown", ""):
+                    try:
+                        resp = session.get(
+                            f"https://pub.orcid.org/v3.0/{orcid_id}/employments",
+                            headers={"Accept": "application/json"},
+                            timeout=10,
+                        )
+                        if resp.status_code == 200:
+                            groups = resp.json().get("affiliation-group", [])
+                            for g in groups[:1]:
+                                summaries = g.get("summaries", [])
+                                for s in summaries[:1]:
+                                    emp = s.get("employment-summary", {})
+                                    org = emp.get("organization", {})
+                                    org_name = org.get("name", "")
+                                    if org_name and not emp.get("end-date"):
+                                        person["affiliation"] = org_name
+                                        country_code = org.get("address", {}).get("country", "")
+                                        if country_code and not person.get("country"):
+                                            country_map = {
+                                                "US": "USA",
+                                                "GB": "UK",
+                                                "FR": "France",
+                                                "DE": "Germany",
+                                                "CH": "Switzerland",
+                                                "IT": "Italy",
+                                                "CA": "Canada",
+                                                "AU": "Australia",
+                                                "CN": "China",
+                                                "JP": "Japan",
+                                                "NL": "Netherlands",
+                                                "SE": "Sweden",
+                                                "DK": "Denmark",
+                                                "AT": "Austria",
+                                                "IE": "Ireland",
+                                                "HU": "Hungary",
+                                                "RO": "Romania",
+                                                "CZ": "Czech Republic",
+                                            }
+                                            person["country"] = country_map.get(
+                                                country_code, country_code
+                                            )
+                    except Exception:
+                        pass
+
+            if not profile.get("recent_publications"):
+                search_name = name.replace(",", "").strip()
+                name_parts = search_name.split()
+                person_surname = name_parts[-1].lower() if name_parts else ""
+                person_given = name_parts[0].lower() if len(name_parts) >= 2 else ""
+                person_orcid = orcid_id or ""
+                if institution:
+                    search_name += f" {institution}"
+                try:
+                    resp = session.get(
+                        f"https://api.crossref.org/works?query.author={quote_plus(search_name)}&rows=10&sort=relevance&order=desc",
+                        timeout=15,
+                    )
+                    if resp.status_code == 200:
+                        items = resp.json().get("message", {}).get("items", [])
+                        crossref_papers = []
+                        math_finance_keywords = {
+                            "math",
+                            "finance",
+                            "stochastic",
+                            "probability",
+                            "control theory",
+                            "optimization",
+                            "operations research",
+                            "actuarial",
+                            "quantitative finance",
+                            "risk management",
+                            "portfolio",
+                            "equilibrium",
+                            "differential equation",
+                            "siam",
+                            "annals",
+                            "applied probability",
+                            "pricing",
+                            "hedging",
+                            "stopping",
+                            "markov",
+                            "martingale",
+                            "stochastic process",
+                            "mean field",
+                            "mckean",
+                            "mathematical econom",
+                            "econometrica",
+                        }
+                        title_keywords = {
+                            "stochastic",
+                            "optim",
+                            "financ",
+                            "equilibri",
+                            "game",
+                            "portfolio",
+                            "risk",
+                            "pricing",
+                            "hedg",
+                            "diffusion",
+                            "markov",
+                            "martingale",
+                            "control",
+                            "stopping",
+                            "mean-field",
+                            "mean field",
+                            "mckean",
+                            "backward",
+                            "forward",
+                            "bsde",
+                            "pde",
+                            "sde",
+                            "volatil",
+                            "dividend",
+                            "insurance",
+                            "probabili",
+                            "ergodic",
+                            "viscosity",
+                            "hamilton-jacobi",
+                        }
+                        for item in items[:10]:
+                            cr_title = " ".join(item.get("title", []))
+                            year_parts = item.get("published-print", {}).get("date-parts", [[]])
+                            if not year_parts[0]:
+                                year_parts = item.get("published-online", {}).get(
+                                    "date-parts", [[]]
+                                )
+                            year_val = year_parts[0][0] if year_parts and year_parts[0] else None
+                            if year_val and (year_val > 2027 or year_val < 1990):
+                                continue
+                            year = str(year_val) if year_val else ""
+                            journal = " ".join(item.get("container-title", []))
+                            doi = item.get("DOI", "")
+                            cr_authors = item.get("author", [])
+                            surname_match = False
+                            full_name_match = False
+                            if person_surname and cr_authors:
+                                for cr_auth in cr_authors:
+                                    cr_family = (cr_auth.get("family") or "").lower()
+                                    cr_given = (cr_auth.get("given") or "").lower()
+                                    if not cr_family:
+                                        continue
+                                    if cr_family == person_surname:
+                                        surname_match = True
+                                        if person_given and cr_given:
+                                            if (
+                                                cr_given == person_given
+                                                or cr_given.startswith(person_given[:3])
+                                                or person_given.startswith(cr_given[:3])
+                                            ):
+                                                full_name_match = True
+                                        if person_orcid and cr_auth.get("ORCID"):
+                                            cr_orcid = cr_auth["ORCID"].rstrip("/").split("/")[-1]
+                                            if cr_orcid == person_orcid:
+                                                full_name_match = True
+                                        break
+                                    elif len(person_surname) > 5 and (
+                                        cr_family.startswith(person_surname[:5])
+                                        or person_surname.startswith(cr_family[:5])
+                                    ):
+                                        surname_match = True
+                                        break
+                            if not surname_match and cr_authors:
+                                continue
+                            orcid_verified = False
+                            if person_orcid and cr_authors:
+                                for cr_auth in cr_authors:
+                                    if cr_auth.get("ORCID"):
+                                        cr_orcid = cr_auth["ORCID"].rstrip("/").split("/")[-1]
+                                        if cr_orcid == person_orcid:
+                                            orcid_verified = True
+                                            break
+                            if not orcid_verified and len(person_surname) <= 5:
+                                title_lower = cr_title.lower()
+                                journal_lower = journal.lower()
+                                combined = title_lower + " " + journal_lower
+                                reject_keywords = {
+                                    "medical",
+                                    "clinical",
+                                    "surgery",
+                                    "cancer",
+                                    "tumor",
+                                    "biological",
+                                    "molecular",
+                                    "cell ",
+                                    "gene ",
+                                    "genetic",
+                                    "allergy",
+                                    "immunol",
+                                    "pathol",
+                                    "neurosci",
+                                    "pharma",
+                                    "education",
+                                    "teacher",
+                                    "student satisfaction",
+                                    "pedagog",
+                                    "wireless sensor",
+                                    "antenna",
+                                    "radar",
+                                    "satellite",
+                                    "painting",
+                                    "art ",
+                                    "music",
+                                    "literary",
+                                    "linguistic",
+                                    "agriculture",
+                                    "crop",
+                                    "soil",
+                                    "ecolog",
+                                    "marine",
+                                    "cosmetic",
+                                    "brand",
+                                    "tourism",
+                                    "hotel",
+                                    "restaurant",
+                                    "nanostructure",
+                                    "nanotube",
+                                    "catalys",
+                                    "polymer",
+                                    "spectral clustering",
+                                    "image processing",
+                                    "computer vision",
+                                }
+                                if any(rk in combined for rk in reject_keywords):
+                                    continue
+                                if not any(kw in combined for kw in title_keywords) and not any(
+                                    kw in journal_lower for kw in math_finance_keywords
+                                ):
+                                    continue
+                            if cr_title:
+                                paper = {"title": cr_title}
+                                if year:
+                                    paper["year"] = year
+                                if journal:
+                                    paper["journal"] = journal
+                                if doi:
+                                    paper["doi"] = doi
+                                journal_lower = journal.lower()
+                                title_lower = cr_title.lower()
+                                if any(kw in journal_lower for kw in math_finance_keywords):
+                                    paper["_relevance"] = "high"
+                                elif any(kw in title_lower for kw in title_keywords):
+                                    paper["_relevance"] = "high"
+                                crossref_papers.append(paper)
+                        high_rel = [
+                            p for p in crossref_papers if p.pop("_relevance", None) == "high"
+                        ]
+                        low_rel = [p for p in crossref_papers if "_relevance" not in p]
+                        for p in low_rel:
+                            p.pop("_relevance", None)
+                        final_papers = (high_rel + low_rel)[:5]
+                        if final_papers:
+                            profile["recent_publications"] = final_papers
+                            pub_count = len(items) if items else 0
+                            if pub_count:
+                                profile["publication_count"] = pub_count
+                            profile["source"] = "crossref"
+                except Exception:
+                    pass
+
+            if academic:
+                try:
+                    academic_data = academic.enrich(name, orcid_id, institution)
+                    if academic_data:
+                        profile.update(academic_data)
+                except Exception:
+                    pass
+
+            if profile:
+                person["web_profile"] = profile
+                enriched += 1
+                source = "orcid+crossref"
+                if profile.get("semantic_scholar") or profile.get("openalex"):
+                    source += "+academic"
+                self.save_web_profile(name, institution, orcid_id or "", profile, source)
+            else:
+                person["web_profile"] = None
+
+        session.close()
+
+        if enriched:
+            cache_msg = f" ({cache_hits} from cache)" if cache_hits else ""
+            print(
+                f"      🌐 Web enriched: {enriched}/{len(people)} people via ORCID/CrossRef/S2/OpenAlex{cache_msg}"
+            )
+
+    def _enforce_date_chronology(self, ref):
+        def _parse(d):
+            if not d:
+                return None
+            try:
+                if isinstance(d, datetime):
+                    return d
+                for fmt in ["%a, %d %b %Y %H:%M:%S %z", "%Y-%m-%d", "%Y-%m-%dT%H:%M:%S"]:
+                    try:
+                        return datetime.strptime(d.split(" (")[0].strip(), fmt).replace(tzinfo=None)
+                    except ValueError:
+                        continue
+                import email.utils
+
+                return datetime(*email.utils.parsedate(d)[:6])
+            except Exception:
+                return None
+
+        inv = _parse(ref.get("invited_date"))
+        resp = _parse(ref.get("response_date"))
+        rep = _parse(ref.get("report_date"))
+
+        known = [d for d in [inv, resp, rep] if d]
+        if not known:
+            return
+
+        earliest = min(known)
+
+        if inv and resp and inv > resp:
+            ref["invited_date"] = ref["response_date"]
+        if inv and rep and inv > rep:
+            ref["invited_date"] = ref["report_date"]
+
+        inv = _parse(ref.get("invited_date"))
+        if inv and resp and inv > resp:
+            ref["invited_date"] = ref["response_date"]
+
+        if not ref.get("invited_date") and ref.get("report_date"):
+            ref["invited_date"] = ref.get("report_date")
+
+    def _compute_ae_status(self, manuscript):
+        referees = manuscript.get("referees", [])
+        if isinstance(referees, dict):
+            referees = list(referees.values())
+
+        total = len(referees)
+        accepted = [
+            r for r in referees if r.get("response") == "Accepted" or r.get("report_submitted")
+        ]
+        declined = [
+            r for r in referees if r.get("response") == "Declined" and not r.get("report_submitted")
+        ]
+        no_response = [
+            r for r in referees if not r.get("response") and not r.get("report_submitted")
+        ]
+        reports_in = [r for r in referees if r.get("report_submitted")]
+        awaiting_report = [r for r in accepted if not r.get("report_submitted")]
+
+        now = datetime.now()
+
+        def parse_date(d):
+            if not d:
+                return None
+            try:
+                if isinstance(d, datetime):
+                    return d
+                for fmt in ["%a, %d %b %Y %H:%M:%S %z", "%Y-%m-%d", "%Y-%m-%dT%H:%M:%S"]:
+                    try:
+                        return datetime.strptime(d.split(" (")[0].strip(), fmt).replace(tzinfo=None)
+                    except ValueError:
+                        continue
+                import email.utils
+
+                return datetime(*email.utils.parsedate(d)[:6])
+            except Exception:
+                return None
+
+        def days_since(d):
+            parsed = parse_date(d)
+            if not parsed:
+                return None
+            return (now - parsed).days
+
+        def referee_detail(r):
+            name = r.get("name", "Unknown")
+            resp = r.get("response")
+            has_report = r.get("report_submitted")
+            d = {}
+            if has_report:
+                ds = days_since(
+                    r.get("report_date") or r.get("response_date") or r.get("invited_date")
+                )
+                d = {
+                    "name": name,
+                    "status": "report_received",
+                    "report_date": r.get("report_date"),
+                    "days_since_invited": days_since(r.get("invited_date")),
+                }
+            elif resp == "Accepted":
+                ds = days_since(r.get("response_date") or r.get("invited_date"))
+                d = {
+                    "name": name,
+                    "status": "awaiting_report",
+                    "days_since_accepted": ds,
+                    "overdue": ds is not None and ds > 30,
+                }
+            elif resp == "Declined":
+                d = {"name": name, "status": "declined"}
+            else:
+                ds = days_since(r.get("invited_date"))
+                d = {
+                    "name": name,
+                    "status": "no_response",
+                    "days_since_invited": ds,
+                    "overdue": ds is not None and ds > 14,
+                }
+            return d
+
+        referee_details = [referee_detail(r) for r in referees]
+        overdue = [d for d in referee_details if d.get("overdue")]
+
+        if total == 0:
+            phase_date = manuscript.get("submission_date")
+            return {
+                "phase": "Finding Referees",
+                "action": "Invite referees",
+                "urgency": "high",
+                "days_in_phase": days_since(phase_date),
+                "referees": referee_details,
+                "overdue_referees": [],
+            }
+
+        if no_response:
+            latest_invite = None
+            for r in no_response:
+                d = parse_date(r.get("invited_date"))
+                if d and (not latest_invite or d > latest_invite):
+                    latest_invite = d
+            phase_days = (now - latest_invite).days if latest_invite else None
+            return {
+                "phase": "Awaiting Referee Responses",
+                "action": f"{len(no_response)} referee(s) haven't responded yet",
+                "urgency": "medium",
+                "days_in_phase": phase_days,
+                "referees": referee_details,
+                "overdue_referees": overdue,
+            }
+
+        if not accepted and declined:
+            return {
+                "phase": "All Referees Declined",
+                "action": "Find replacement referees",
+                "urgency": "high",
+                "days_in_phase": None,
+                "referees": referee_details,
+                "overdue_referees": [],
+            }
+
+        if awaiting_report:
+            latest_accept = None
+            for r in awaiting_report:
+                d = parse_date(r.get("response_date"))
+                if d and (not latest_accept or d > latest_accept):
+                    latest_accept = d
+            phase_days = (now - latest_accept).days if latest_accept else None
+            return {
+                "phase": "Awaiting Reports",
+                "action": f"{len(awaiting_report)} report(s) still pending",
+                "urgency": "high" if len(awaiting_report) == 1 else "medium",
+                "days_in_phase": phase_days,
+                "referees": referee_details,
+                "overdue_referees": overdue,
+            }
+
+        latest_report = None
+        for r in reports_in:
+            d = parse_date(r.get("report_date"))
+            if d and (not latest_report or d > latest_report):
+                latest_report = d
+        phase_days = (now - latest_report).days if latest_report else None
+        return {
+            "phase": "Ready for AE Report",
+            "action": "Write AE recommendation and send to editor",
+            "urgency": "high",
+            "days_in_phase": phase_days,
+            "referees": referee_details,
+            "overdue_referees": [],
+        }
+
+    def _normalize_output(self, manuscript):
+        for event in manuscript.get("timeline", []):
+            event.pop("body_snippet", None)
+
+        if manuscript.get("abstract"):
+            manuscript["abstract"] = self._clean_pdf_text(manuscript["abstract"])
+
+        if manuscript.get("id") and not manuscript.get("manuscript_id"):
+            manuscript["manuscript_id"] = manuscript["id"]
+
+        if not manuscript.get("extraction_timestamp"):
+            manuscript["extraction_timestamp"] = datetime.now().isoformat()
+
+        for author in manuscript.get("authors", []):
+            if author.get("affiliation"):
+                author["affiliation"] = self._clean_affiliation(author["affiliation"])
+
+        for ref in manuscript.get("referees", []):
+            resp = (ref.get("response") or "").lower()
+            ref["dates"] = {
+                "invited": ref.get("invited_date") or None,
+                "agreed": ref.get("response_date") if resp == "accepted" else None,
+                "due": None,
+                "returned": ref.get("report_date") or None,
+            }
+            raw_aff = ref.get("institution") or ref.get("affiliation") or ""
+            ref["affiliation"] = self._clean_affiliation(raw_aff) if raw_aff else ""
+            ref["status_details"] = {
+                "status": ref.get("response") or "Pending",
+                "review_received": ref.get("report_submitted", False),
+                "review_complete": ref.get("report_submitted", False),
+                "review_pending": resp == "accepted" and not ref.get("report_submitted"),
+                "agreed_to_review": resp == "accepted",
+                "declined": resp == "declined",
+                "no_response": not ref.get("response"),
+            }
+            for field in ["orcid", "email", "affiliation", "institution"]:
+                if ref.get(field) == "":
+                    ref[field] = None
+
+        for author in manuscript.get("authors", []):
+            for field in ["orcid", "email", "affiliation"]:
+                if author.get(field) == "":
+                    author[field] = None
+            if "is_corresponding" in author and "corresponding_author" not in author:
+                author["corresponding_author"] = author["is_corresponding"]
+            elif "corresponding_author" in author and "is_corresponding" not in author:
+                author["is_corresponding"] = author["corresponding_author"]
+
+        for report in manuscript.get("referee_reports", []):
+            analysis = report.get("analysis", {})
+            if "attached_files" not in analysis:
+                analysis["attached_files"] = []
+
+        if not manuscript.get("final_outcome"):
+            status = manuscript.get("status", "")
+            if "Accepted" in status:
+                manuscript["final_outcome"] = "Accepted"
+            elif "Rejected" in status:
+                manuscript["final_outcome"] = "Rejected"
+            elif "Revision" in status:
+                manuscript["final_outcome"] = "Revision Requested"
+            else:
+                manuscript["final_outcome"] = "Pending"
+
+    def _generate_summary(self):
+        manuscripts = self.manuscripts
+        summary = {
+            "total_manuscripts": len(manuscripts),
+            "current_manuscripts": sum(1 for m in manuscripts if m.get("is_current")),
+            "historical_manuscripts": sum(1 for m in manuscripts if not m.get("is_current")),
+            "by_status": {},
+            "referee_emails_extracted": sum(
+                len([r for r in m.get("referees", []) if r.get("email")]) for m in manuscripts
+            ),
+            "total_referees": sum(len(m.get("referees", [])) for m in manuscripts),
+            "total_authors": sum(len(m.get("authors", [])) for m in manuscripts),
+            "reports_received": sum(len(m.get("referee_reports", [])) for m in manuscripts),
+            "total_timeline_events": sum(len(m.get("timeline", [])) for m in manuscripts),
+            "orcid_coverage": {
+                "authors_with_orcid": sum(
+                    len([a for a in m.get("authors", []) if a.get("orcid")]) for m in manuscripts
+                ),
+                "total_authors": sum(len(m.get("authors", [])) for m in manuscripts),
+                "referees_with_orcid": sum(
+                    len([r for r in m.get("referees", []) if r.get("orcid")]) for m in manuscripts
+                ),
+            },
+            "extraction_time": datetime.now().isoformat(),
+        }
+        for m in manuscripts:
+            status = m.get("status", "Unknown")
+            summary["by_status"][status] = summary["by_status"].get(status, 0) + 1
+        if summary["total_referees"] > 0:
+            summary["email_extraction_rate"] = round(
+                100 * summary["referee_emails_extracted"] / summary["total_referees"], 1
+            )
+        total_authors = summary["orcid_coverage"]["total_authors"]
+        if total_authors > 0:
+            summary["orcid_coverage"]["author_coverage_percent"] = round(
+                100 * summary["orcid_coverage"]["authors_with_orcid"] / total_authors, 1
+            )
+        if summary["total_referees"] > 0:
+            summary["orcid_coverage"]["referee_coverage_percent"] = round(
+                100 * summary["orcid_coverage"]["referees_with_orcid"] / summary["total_referees"],
+                1,
+            )
+        return summary
 
     def save_results(self):
         """Save extraction results."""
@@ -2310,22 +4330,25 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
 
         # Save JSON file FIRST (primary output)
         try:
-            output_dir = Path("results/fs")
-            output_dir.mkdir(parents=True, exist_ok=True)
-
-            output_file = output_dir / f"fs_extraction_{timestamp}.json"
+            output_file = self.output_dir / f"fs_extraction_{timestamp}.json"
 
             extraction_data = {
-                "journal": "fs",
+                "extraction_timestamp": datetime.now().isoformat(),
+                "journal": "FS",
                 "journal_name": "Finance and Stochastics",
                 "platform": "Email (Gmail)",
-                "extraction_time": timestamp,
-                "manuscripts_count": len(self.manuscripts),
+                "extractor_version": "2.0.0",
                 "manuscripts": self.manuscripts,
+                "summary": self._generate_summary(),
+                "errors": self.errors,
             }
 
-            with open(output_file, "w") as f:
-                json.dump(extraction_data, f, indent=2, default=str)
+            from core.output_schema import normalize_wrapper
+
+            normalize_wrapper(extraction_data, "FS")
+
+            with open(output_file, "w", encoding="utf-8") as f:
+                json.dump(extraction_data, f, indent=2, ensure_ascii=False, default=str)
 
             print(f"💾 Results saved: {output_file}")
 
@@ -2367,7 +4390,10 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
             "total_processing_time": None,
             "referee_response_times": {},
             "report_submission_times": {},
-            "overdue_reports": [],
+            "acceptance_to_report_days": {},
+            "reminders_received": {},
+            "late_reports": [],
+            "pending_overdue": [],
             "current_stage_duration": None,
         }
 
@@ -2396,8 +4422,8 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
             if not date_str:
                 return None
             try:
-                return datetime(*email.utils.parsedate_to_datetime(date_str)[:6])
-            except:
+                return email.utils.parsedate_to_datetime(date_str).replace(tzinfo=None)
+            except (ValueError, TypeError):
                 return None
 
         submission_dt = parse_date(submission_date)
@@ -2426,12 +4452,7 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
         for referee in referees:
             ref_name = referee.get("name", "Unknown")
 
-            # Find invitation date
-            invited_date = None
-            for event in timeline:
-                if ref_name in event.get("from", "") and event.get("details", {}).get("is_editor"):
-                    invited_date = event["date"]
-                    break
+            invited_date = referee.get("invited_date")
 
             if invited_date:
                 invited_dt = parse_date(invited_date)
@@ -2451,27 +4472,45 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
                         metrics["report_submission_times"][ref_name] = delta.days
                         report_times.append(delta.days)
 
-                        # Check if overdue (>30 days)
                         if delta.days > 30:
-                            metrics["overdue_reports"].append(
+                            metrics["late_reports"].append(
                                 {
                                     "referee": ref_name,
-                                    "days_overdue": delta.days - 30,
+                                    "days_late": delta.days - 30,
                                     "submission_date": referee["report_date"],
                                 }
                             )
                 elif referee.get("response") == "Accepted" and not referee.get("report_submitted"):
-                    # Report pending - check if overdue
                     if invited_dt:
                         delta = current_dt - invited_dt
                         if delta.days > 30:
-                            metrics["overdue_reports"].append(
+                            metrics["pending_overdue"].append(
                                 {
                                     "referee": ref_name,
                                     "days_overdue": delta.days - 30,
                                     "status": "pending",
                                 }
                             )
+
+                if referee.get("response_date") and referee.get("report_date"):
+                    response_dt = parse_date(referee["response_date"])
+                    report_dt = parse_date(referee["report_date"])
+                    if response_dt and report_dt:
+                        metrics["acceptance_to_report_days"][ref_name] = (
+                            report_dt - response_dt
+                        ).days
+
+            ref_name_lower = ref_name.lower()
+            ref_last = ref_name_lower.split()[-1] if ref_name_lower.split() else ""
+            reminder_count = 0
+            for event in timeline:
+                if event.get("type") == "Reminder":
+                    ev_text = (event.get("subject", "") + " " + event.get("body", "")[:500]).lower()
+                    if ref_last and len(ref_last) > 2 and ref_last in ev_text:
+                        reminder_count += 1
+                    elif not ref_last and "reminder" in (event.get("subject") or "").lower():
+                        reminder_count += 1
+            metrics["reminders_received"][ref_name] = reminder_count
 
         # Calculate average review time
         if report_times:
@@ -2532,7 +4571,7 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
             "reports_submitted": 0,
             "average_response_time": None,
             "average_report_time": None,
-            "overdue_reports": 0,
+            "late_reports": 0,
             "report_quality": None,
             "reliability_score": None,
         }
@@ -2569,7 +4608,7 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
                         if ref_name in metrics.get("report_submission_times", {}):
                             report_times.append(metrics["report_submission_times"][ref_name])
                             if metrics["report_submission_times"][ref_name] > 30:
-                                performance["overdue_reports"] += 1
+                                performance["late_reports"] += 1
 
             # Calculate averages
             if response_times:
@@ -2585,7 +4624,7 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
                     1, performance["accepted_invitations"]
                 )
                 timeliness = 1.0 - min(
-                    1.0, performance["overdue_reports"] / max(1, performance["reports_submitted"])
+                    1.0, performance["late_reports"] / max(1, performance["reports_submitted"])
                 )
 
                 performance["reliability_score"] = round(
@@ -2625,8 +4664,8 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
             if not date_str:
                 return None
             try:
-                return datetime(*email.utils.parsedate_to_datetime(date_str)[:6])
-            except:
+                return email.utils.parsedate_to_datetime(date_str).replace(tzinfo=None)
+            except (ValueError, TypeError):
                 return None
 
         current_dt = datetime.now()
@@ -3057,7 +5096,7 @@ def main():
             print(f"\n📊 EXTRACTION SUMMARY:")
             print(f"Total manuscripts: {len(manuscripts)}")
             for i, ms in enumerate(manuscripts[:10]):  # Show first 10
-                print(f"  {i+1}. {ms['id']}: {ms['title'][:50]}... [{ms['status']}]")
+                print(f"  {i+1}. {ms['id']}: {ms['title'][:70]}... [{ms['status']}]")
         else:
             print("❌ No manuscripts extracted")
 

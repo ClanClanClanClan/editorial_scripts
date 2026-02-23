@@ -47,11 +47,11 @@ class GmailSearchManager:
         from pathlib import Path
 
         token_paths = [
-            "/Users/dylanpossamai/Library/CloudStorage/Dropbox/Work/editorial_scripts/config/gmail_token.json",
-            Path.home()
-            / "Library/CloudStorage/Dropbox/Work/editorial_scripts/config/gmail_token.json",
             "config/gmail_token.json",
         ]
+
+        project_root = Path(__file__).resolve().parent.parent.parent.parent
+        token_paths.insert(0, str(project_root / "config/gmail_token.json"))
 
         creds = None
         for token_path in token_paths:
@@ -212,7 +212,7 @@ class GmailSearchManager:
                         from email.utils import parsedate_to_datetime
 
                         email_data["datetime"] = parsedate_to_datetime(value)
-                    except:
+                    except (ValueError, TypeError):
                         pass
 
             # Extract body snippet
@@ -310,7 +310,7 @@ class GmailSearchManager:
             event_key = self._create_event_key(event)
             if event_key:
                 seen_events.add(event_key)
-                event["source"] = "mf_platform"
+                event["source"] = event.get("source", "platform")
                 event["external"] = False
                 merged_timeline.append(event)
 
@@ -338,7 +338,7 @@ class GmailSearchManager:
                                 # Make it timezone-aware if email_time is timezone-aware
                                 if email_time.tzinfo is not None:
                                     event_time = event_time.replace(tzinfo=UTC)
-                            except:
+                            except (ValueError, TypeError, AttributeError):
                                 event_time = None
 
                         if event_time and isinstance(event_time, datetime):
@@ -373,7 +373,7 @@ class GmailSearchManager:
                     return event["datetime"]
                 try:
                     return datetime.fromisoformat(event["datetime"].replace("Z", "+00:00"))
-                except:
+                except (ValueError, TypeError):
                     pass
 
             # Try date field
@@ -389,7 +389,7 @@ class GmailSearchManager:
                     # Make it timezone-aware UTC to match Gmail dates
 
                     return parsed.replace(tzinfo=UTC)
-                except:
+                except (ValueError, TypeError):
                     pass
 
             # Default to epoch (timezone-aware)
@@ -429,7 +429,7 @@ class GmailSearchManager:
                     clean_date = date.replace(" GMT", "").replace(" EDT", "")
                     parsed = datetime.strptime(clean_date, "%d-%b-%Y %I:%M %p")
                     date_str = parsed.strftime("%Y-%m-%d %H:%M")
-                except:
+                except (ValueError, TypeError):
                     date_str = date[:20]  # First 20 chars as fallback
             else:
                 date_str = str(date)
@@ -493,7 +493,7 @@ def enhance_audit_trail_with_gmail(manuscript_data: dict) -> dict:
                 start_date = submission_date - timedelta(days=30)
                 end_date = datetime.now()
                 date_range = (start_date, end_date)
-            except:
+            except (ValueError, TypeError):
                 pass
 
         # Search for external emails

@@ -20,6 +20,9 @@ venv/
 # OS
 .DS_Store
 
+# Dropbox sync conflicts
+*conflicted copy*
+
 # Coverage
 .coverage
 htmlcov/
@@ -39,13 +42,20 @@ config/env/
 # Downloads and generated artifacts
 downloads/
 production/src/extractors/downloads/
+production/downloads/
 results/
 production/src/extractors/results/
 artifacts/
 
-# Debug artifacts
+# Extraction outputs and caches (large JSON, not source code)
+production/outputs/
+production/cache/
+
+# Debug artifacts and HTML captures
 debug_*.html
 *debug*.html
+dev/html_captures/
+dev/em_recon/captures/
 *timeline_report_*.txt
 *comprehensive_*.json
 ULTRATHINK_*.json
@@ -57,3 +67,6 @@ FS_*_ANALYSIS_*.md
 logs/
 archive/*.tar.gz
 editorial_scripts_backup.git/
+
+# Backup files
+*.backup

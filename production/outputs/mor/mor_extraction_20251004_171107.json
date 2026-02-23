@@ -4,7 +4,6 @@
   "extractor_version": "2.0.0-MF-Level-Robust",
   "manuscripts": [
     {
-      "id": "MOR-2025-1190",
       "title": "Geometric BSDEs",
       "authors": [
         {
@@ -23,59 +22,75 @@
           "email": ""
         }
       ],
-      "submission_date": "09-Sep-2025",
-      "last_updated": "30-Sep-2025",
-      "in_review_time": "25d 4h 27min 34sec",
+      "submission_date": "2025-09-09",
       "status": "Assign Reviewers",
-      "status_details": "2 active selections; 2 invited; 1 agreed; 2 declined; 0 returned",
-      "article_type": "",
-      "special_issue": "",
+      "article_type": null,
       "referees": [
         {
           "name": "ludovic tangpi",
           "email": "",
-          "affiliation": "Princeton University, ORFE",
           "orcid": "https://orcid.org/0000-0003-3830-1418",
           "status": "Declined\ninvite again",
           "dates": {
-            "invited": "23-Sep-2025"
+            "invited": "2025-09-23",
+            "agreed": null,
+            "due": null,
+            "returned": null
           },
-          "report": null
+          "report": null,
+          "institution": "Princeton University, ORFE",
+          "platform_specific": {
+            "affiliation": "Princeton University, ORFE"
+          }
         },
         {
           "name": "Michael Kupper",
           "email": "",
-          "affiliation": "University of Konstanz, Department of Mathematics",
           "orcid": "https://orcid.org/0000-0001-9643-0811",
           "status": "Agreed",
           "dates": {
-            "invited": "23-Sep-2025",
-            "agreed": "30-Sep-2025",
-            "due": "29-Dec-2025"
+            "invited": "2025-09-23",
+            "agreed": "2025-09-30",
+            "due": "2025-12-29",
+            "returned": null
           },
-          "report": null
+          "report": null,
+          "institution": "University of Konstanz, Department of Mathematics",
+          "platform_specific": {
+            "affiliation": "University of Konstanz, Department of Mathematics"
+          }
         },
         {
           "name": "Khaled Bahlali",
           "email": "",
-          "affiliation": "",
           "orcid": "",
           "status": "Declined\ninvite again",
           "dates": {
-            "invited": "23-Sep-2025"
+            "invited": "2025-09-23",
+            "agreed": null,
+            "due": null,
+            "returned": null
           },
-          "report": null
+          "report": null,
+          "platform_specific": {
+            "affiliation": ""
+          }
         },
         {
           "name": "Mohammed Hassani",
           "email": "",
-          "affiliation": "",
           "orcid": "",
           "status": "Invited\nResponse\n      Select...\n    \n           Agreed\n         \n           Declined\n         \n           No Response\n         \n           Unavailable\n         \n           Auto-declined",
           "dates": {
-            "invited": "01-Oct-2025"
+            "invited": "2025-10-01",
+            "agreed": null,
+            "due": null,
+            "returned": null
           },
-          "report": null
+          "report": null,
+          "platform_specific": {
+            "affiliation": ""
+          }
         }
       ],
       "editors": {
@@ -96,10 +111,18 @@
           "email": ""
         }
       },
-      "category": "Awaiting Reviewer Reports"
+      "category": "Awaiting Reviewer Reports",
+      "manuscript_id": "MOR-2025-1190",
+      "keywords": [],
+      "platform_specific": {
+        "id": "MOR-2025-1190",
+        "last_updated": "30-Sep-2025",
+        "in_review_time": "25d 4h 27min 34sec",
+        "status_details": "2 active selections; 2 invited; 1 agreed; 2 declined; 0 returned",
+        "special_issue": ""
+      }
     },
     {
-      "id": "MOR-2025-1037",
       "title": "The Value of Partial Information",
       "authors": [
         {
@@ -113,56 +136,64 @@
           "email": ""
         }
       ],
-      "submission_date": "11-May-2025",
-      "last_updated": "12-May-2025",
-      "in_review_time": "145d 12h 37min 27sec",
+      "submission_date": "2025-05-11",
       "status": "Awaiting Reviewer Scores",
-      "status_details": "2 active selections; 2 invited; 2 agreed; 1 declined; 1 returned",
-      "article_type": "",
-      "special_issue": "",
+      "article_type": null,
       "referees": [
         {
           "name": "Anna Aksamit",
           "email": "",
-          "affiliation": "The University of Sydney, School of Mathematics and Statistics",
           "orcid": "",
           "status": "Declined\ninvite again",
           "dates": {
-            "invited": "04-Jun-2025"
+            "invited": "2025-06-04",
+            "agreed": null,
+            "due": null,
+            "returned": null
           },
-          "report": null
+          "report": null,
+          "institution": "The University of Sydney, School of Mathematics and Statistics",
+          "platform_specific": {
+            "affiliation": "The University of Sydney, School of Mathematics and Statistics"
+          }
         },
         {
           "name": "Bahman Angoshtari",
           "email": "",
-          "affiliation": "University of Miami, Mathematics",
           "orcid": "https://orcid.org/0000-0003-1415-4062",
           "status": "Major Revision\n\nrescind",
           "dates": {
-            "invited": "04-Jun-2025",
-            "agreed": "04-Jun-2025",
-            "due": "02-Sep-2025",
-            "returned": "02-Sep-2025"
+            "invited": "2025-06-04",
+            "agreed": "2025-06-04",
+            "due": "2025-09-02",
+            "returned": "2025-09-02"
           },
           "report": {
             "comments_to_editor": "",
             "comments_to_author": "Clearly label your Major and Minor Comments to Author in the field provided below. Please be sure to retain anonymity in your comments.",
             "recommendation": "",
             "pdf_files": []
+          },
+          "institution": "University of Miami, Mathematics",
+          "platform_specific": {
+            "affiliation": "University of Miami, Mathematics"
           }
         },
         {
           "name": "Umut Cetin",
           "email": "",
-          "affiliation": "",
           "orcid": "",
           "status": "Overdue",
           "dates": {
-            "invited": "06-Jun-2025",
-            "agreed": "11-Jun-2025",
-            "due": "01-Oct-2025"
+            "invited": "2025-06-06",
+            "agreed": "2025-06-11",
+            "due": "2025-10-01",
+            "returned": null
           },
-          "report": null
+          "report": null,
+          "platform_specific": {
+            "affiliation": ""
+          }
         }
       ],
       "editors": {
@@ -183,7 +214,16 @@
           "email": ""
         }
       },
-      "category": "Overdue Reviewer Reports"
+      "category": "Overdue Reviewer Reports",
+      "manuscript_id": "MOR-2025-1037",
+      "keywords": [],
+      "platform_specific": {
+        "id": "MOR-2025-1037",
+        "last_updated": "12-May-2025",
+        "in_review_time": "145d 12h 37min 27sec",
+        "status_details": "2 active selections; 2 invited; 2 agreed; 1 declined; 1 returned",
+        "special_issue": ""
+      }
     }
   ],
   "summary": {
@@ -208,5 +248,8 @@
     "extraction_time": "2025-10-04T17:11:07.849320",
     "email_extraction_rate": 0.0
   },
-  "errors": []
+  "errors": [],
+  "schema_version": "1.0.0",
+  "journal_name": "Mathematics of Operations Research",
+  "platform": "ScholarOne"
 }

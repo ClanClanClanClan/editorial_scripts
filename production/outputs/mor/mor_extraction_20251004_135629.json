@@ -4,7 +4,6 @@
   "extractor_version": "2.0.0-MF-Level-Robust",
   "manuscripts": [
     {
-      "id": "MOR-2025-1190",
       "title": "Geometric BSDEs",
       "authors": [
         {
@@ -23,13 +22,9 @@
           "email": ""
         }
       ],
-      "submission_date": "09-Sep-2025",
-      "last_updated": "30-Sep-2025",
-      "in_review_time": "25d 1h 14min 58sec",
+      "submission_date": "2025-09-09",
       "status": "Assign Reviewers",
-      "status_details": "2 active selections; 2 invited; 1 agreed; 2 declined; 0 returned",
-      "article_type": "",
-      "special_issue": "",
+      "article_type": null,
       "referees": [],
       "editors": {
         "AE": {
@@ -49,10 +44,18 @@
           "email": ""
         }
       },
-      "category": "Awaiting Reviewer Reports"
+      "category": "Awaiting Reviewer Reports",
+      "manuscript_id": "MOR-2025-1190",
+      "keywords": [],
+      "platform_specific": {
+        "id": "MOR-2025-1190",
+        "last_updated": "30-Sep-2025",
+        "in_review_time": "25d 1h 14min 58sec",
+        "status_details": "2 active selections; 2 invited; 1 agreed; 2 declined; 0 returned",
+        "special_issue": ""
+      }
     },
     {
-      "id": "MOR-2025-1037",
       "title": "The Value of Partial Information",
       "authors": [
         {
@@ -66,13 +69,9 @@
           "email": ""
         }
       ],
-      "submission_date": "11-May-2025",
-      "last_updated": "12-May-2025",
-      "in_review_time": "145d 9h 23min 44sec",
+      "submission_date": "2025-05-11",
       "status": "Awaiting Reviewer Scores",
-      "status_details": "2 active selections; 2 invited; 2 agreed; 1 declined; 1 returned",
-      "article_type": "",
-      "special_issue": "",
+      "article_type": null,
       "referees": [],
       "editors": {
         "AE": {
@@ -92,7 +91,16 @@
           "email": ""
         }
       },
-      "category": "Overdue Reviewer Reports"
+      "category": "Overdue Reviewer Reports",
+      "manuscript_id": "MOR-2025-1037",
+      "keywords": [],
+      "platform_specific": {
+        "id": "MOR-2025-1037",
+        "last_updated": "12-May-2025",
+        "in_review_time": "145d 9h 23min 44sec",
+        "status_details": "2 active selections; 2 invited; 2 agreed; 1 declined; 1 returned",
+        "special_issue": ""
+      }
     }
   ],
   "summary": {
@@ -115,5 +123,8 @@
     "cache_hits": 0,
     "extraction_time": "2025-10-04T13:56:29.023232"
   },
-  "errors": []
+  "errors": [],
+  "schema_version": "1.0.0",
+  "journal_name": "Mathematics of Operations Research",
+  "platform": "ScholarOne"
 }

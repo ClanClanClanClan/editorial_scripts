@@ -68,18 +68,14 @@ class CacheManager:
 
     def __init__(self, cache_dir: Path = None, test_mode: bool = None):
         """Initialize cache manager with persistent storage."""
-        # Auto-detect test mode if not specified
-        if test_mode is None:
-            test_mode = self._is_test_environment()
+        import os
 
-        # SAFETY CHECK: If we detect ANY test indicators, force test mode
-        # This prevents production pollution even if test_mode=False is explicitly passed
         detected_test_env = self._is_test_environment()
-        if detected_test_env and not test_mode:
-            print(
-                "🛡️ SAFETY OVERRIDE: Test environment detected, forcing test mode to prevent production pollution"
-            )
-            test_mode = True
+        if test_mode is None:
+            test_mode = detected_test_env
+        if not os.environ.get("EDITORIAL_FORCE_PRODUCTION_MODE"):
+            if detected_test_env and not test_mode:
+                test_mode = True
 
         self.test_mode = test_mode
 
@@ -105,7 +101,7 @@ class CacheManager:
         self._init_database()
 
         # Thread lock for database access
-        self.lock = threading.Lock()
+        self.lock = threading.RLock()
 
         # Track database connections for cleanup
         self._db_connections = []
@@ -164,8 +160,8 @@ class CacheManager:
                             test_indicators.append(True)
                             break
                     frame = frame.f_back
-            except:
-                pass  # Ignore errors in stack inspection
+            except Exception:
+                pass
 
             # CRITICAL SAFETY: Check if we're in editorial_scripts project directory
             # This prevents ANY cache creation within the project during development
@@ -198,7 +194,7 @@ class CacheManager:
                 for conn in self._db_connections:
                     try:
                         conn.close()
-                    except:
+                    except OSError:
                         pass
 
             # Wait a moment for any pending operations
@@ -228,8 +224,8 @@ class CacheManager:
         """Automatic cleanup when object is destroyed."""
         try:
             self.cleanup_test_cache()
-        except:
-            pass  # Ignore errors during destruction
+        except Exception:
+            pass
 
     def _init_database(self):
         """Initialize SQLite database with required tables."""
@@ -316,6 +312,21 @@ class CacheManager:
             """
             )
 
+            # Web profiles (ORCID + CrossRef enrichment cache)
+            cursor.execute(
+                """
+                CREATE TABLE IF NOT EXISTS web_profiles (
+                    person_key TEXT PRIMARY KEY,
+                    person_name TEXT,
+                    orcid_id TEXT,
+                    profile_data TEXT,
+                    source TEXT,
+                    last_updated TEXT,
+                    data_hash TEXT
+                )
+            """
+            )
+
             # Extraction runs metadata
             cursor.execute(
                 """
@@ -335,6 +346,68 @@ class CacheManager:
             )
 
             conn.commit()
+
+        self._migrate_orcid_cache()
+
+    def _migrate_orcid_cache(self):
+        orcid_db = self.cache_dir / "orcid_cache.db"
+        if not orcid_db.exists():
+            return
+        try:
+            with sqlite3.connect(orcid_db) as src:
+                rows = src.execute(
+                    "SELECT lookup_key, orcid_id, full_name, affiliations, lookup_date, raw_response FROM orcid_cache"
+                ).fetchall()
+            if not rows:
+                return
+            migrated = 0
+            with sqlite3.connect(self.db_path) as conn:
+                for (
+                    lookup_key,
+                    orcid_id,
+                    full_name,
+                    affiliations,
+                    lookup_date,
+                    raw_response,
+                ) in rows:
+                    existing = conn.execute(
+                        "SELECT 1 FROM web_profiles WHERE person_key = ?",
+                        (orcid_id or lookup_key,),
+                    ).fetchone()
+                    if existing:
+                        continue
+                    profile_data = {}
+                    if affiliations:
+                        try:
+                            profile_data["affiliations"] = json.loads(affiliations)
+                        except (json.JSONDecodeError, TypeError):
+                            profile_data["affiliations"] = affiliations
+                    if raw_response:
+                        try:
+                            raw = json.loads(raw_response)
+                            if isinstance(raw, dict):
+                                profile_data["orcid_raw"] = raw
+                        except (json.JSONDecodeError, TypeError):
+                            pass
+                    data_hash = self._compute_data_hash(profile_data, list(profile_data.keys()))
+                    conn.execute(
+                        "INSERT OR IGNORE INTO web_profiles VALUES (?, ?, ?, ?, ?, ?, ?)",
+                        (
+                            orcid_id or lookup_key,
+                            full_name or "",
+                            orcid_id or "",
+                            json.dumps(profile_data),
+                            "orcid_cache_migration",
+                            lookup_date or datetime.now().isoformat(),
+                            data_hash,
+                        ),
+                    )
+                    migrated += 1
+                conn.commit()
+            if migrated:
+                print(f"   📦 Migrated {migrated} entries from orcid_cache.db → web_profiles")
+        except Exception:
+            pass
 
     def _compute_data_hash(self, data: dict[str, Any], fields: list[str]) -> str:
         """Compute hash of specific fields to detect changes."""
@@ -377,7 +450,7 @@ class CacheManager:
 
     def update_referee(self, referee_data: dict[str, Any], journal: str) -> CachedReferee:
         """Update or create referee profile with intelligent merging."""
-        email = referee_data.get("email", "").lower().strip()
+        email = (referee_data.get("email") or "").lower().strip()
         if not email:
             return None
 
@@ -390,13 +463,13 @@ class CacheManager:
                 changed = False
 
                 # Update name if provided and different
-                new_name = referee_data.get("name", "").strip()
+                new_name = (referee_data.get("name") or "").strip()
                 if new_name and new_name != existing.name:
                     existing.name = new_name
                     changed = True
 
                 # Track affiliation changes
-                new_institution = referee_data.get("institution", "").strip()
+                new_institution = (referee_data.get("institution") or "").strip()
                 if new_institution and new_institution != existing.institution:
                     # Add to history
                     existing.affiliations_history.append(
@@ -412,13 +485,13 @@ class CacheManager:
                     changed = True
 
                 # Update country if provided
-                new_country = referee_data.get("country", "").strip()
+                new_country = (referee_data.get("country") or "").strip()
                 if new_country and new_country != existing.country:
                     existing.country = new_country
                     changed = True
 
                 # Update ORCID if provided
-                new_orcid = referee_data.get("orcid", "").strip()
+                new_orcid = (referee_data.get("orcid") or "").strip()
                 if new_orcid and new_orcid != existing.orcid:
                     existing.orcid = new_orcid
                     changed = True
@@ -546,13 +619,15 @@ class CacheManager:
             print(f"   📝 Updated date changed: {cached.last_updated} → {last_updated}")
             return True
 
-        # Check cache age (configurable, default 7 days for completed, 1 day for active)
-        cache_age = datetime.now() - datetime.fromisoformat(cached.extraction_date)
+        try:
+            cache_age = datetime.now() - datetime.fromisoformat(cached.extraction_date)
+        except (ValueError, TypeError):
+            return True
 
         if status and "complete" in status.lower():
-            max_age = timedelta(days=30)  # Completed manuscripts rarely change
+            max_age = timedelta(days=30)
         else:
-            max_age = timedelta(days=1)  # Active manuscripts need frequent updates
+            max_age = timedelta(days=1)
 
         if cache_age > max_age:
             print(f"   📝 Cache expired: {cache_age.days} days old")
@@ -617,7 +692,7 @@ class CacheManager:
                     manuscript.data_hash,
                     manuscript.referee_count,
                     manuscript.has_version_history,
-                    json.dumps(manuscript.full_data),
+                    json.dumps(manuscript.full_data, default=str),
                 ),
             )
             conn.commit()
@@ -661,6 +736,48 @@ class CacheManager:
 
             # Update session cache
             self.session_cache["institutions"][domain] = (institution_name, country)
+
+    # WEB PROFILE CACHING (ORCID + CrossRef)
+
+    def get_web_profile(self, person_key: str, max_age_days: int = 60) -> dict[str, Any] | None:
+        with self.lock:
+            with sqlite3.connect(self.db_path) as conn:
+                cursor = conn.cursor()
+                cursor.execute(
+                    "SELECT profile_data, last_updated FROM web_profiles WHERE person_key = ?",
+                    (person_key,),
+                )
+                row = cursor.fetchone()
+                if row:
+                    last_updated = row[1]
+                    try:
+                        age = datetime.now() - datetime.fromisoformat(last_updated)
+                        if age.days <= max_age_days:
+                            return json.loads(row[0])
+                    except (ValueError, TypeError):
+                        pass
+                return None
+
+    def update_web_profile(
+        self, person_key: str, name: str, orcid_id: str, profile_data: dict, source: str
+    ):
+        with self.lock:
+            data_hash = self._compute_data_hash(profile_data, list(profile_data.keys()))
+            with sqlite3.connect(self.db_path) as conn:
+                cursor = conn.cursor()
+                cursor.execute(
+                    "INSERT OR REPLACE INTO web_profiles VALUES (?, ?, ?, ?, ?, ?, ?)",
+                    (
+                        person_key,
+                        name,
+                        orcid_id or "",
+                        json.dumps(profile_data),
+                        source,
+                        datetime.now().isoformat(),
+                        data_hash,
+                    ),
+                )
+                conn.commit()
 
     # REFEREE PERFORMANCE CACHING (V1.0 SPEC COMPLIANCE)
 
@@ -918,22 +1035,23 @@ class CacheManager:
 
     def get_referee_performance_metrics(self, referee_email: str) -> dict[str, Any] | None:
         """Get cached referee performance metrics if still valid."""
-        with sqlite3.connect(self.db_path) as conn:
-            cursor = conn.cursor()
+        with self.lock:
+            with sqlite3.connect(self.db_path) as conn:
+                cursor = conn.cursor()
 
-            cursor.execute(
-                """
-                SELECT metrics, valid_until
-                FROM referee_performance_cache
-                WHERE referee_email = ? AND valid_until > ?
-            """,
-                (referee_email, datetime.now().isoformat()),
-            )
+                cursor.execute(
+                    """
+                    SELECT metrics, valid_until
+                    FROM referee_performance_cache
+                    WHERE referee_email = ? AND valid_until > ?
+                """,
+                    (referee_email, datetime.now().isoformat()),
+                )
 
-            result = cursor.fetchone()
-            if result:
-                return json.loads(result[0])
-            return None
+                result = cursor.fetchone()
+                if result:
+                    return json.loads(result[0])
+                return None
 
     def update_journal_statistics(
         self,
@@ -1102,7 +1220,10 @@ class ExtractorCacheMixin:
 
     def cache_manuscript_data(self, manuscript_data: dict[str, Any]):
         """Cache manuscript data after extraction."""
-        cached = self.cache_manager.get_manuscript(manuscript_data["id"], self.journal_name)
+        ms_id = manuscript_data.get("id", "")
+        if not ms_id:
+            return
+        cached = self.cache_manager.get_manuscript(ms_id, self.journal_name)
 
         if cached:
             self.extraction_stats["updated_manuscripts"] += 1

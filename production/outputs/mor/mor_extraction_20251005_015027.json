@@ -16,11 +16,19 @@
           "department": "ORFE",
           "country": "USA",
           "status": "Declined",
-          "invitation_date": "23-Sep-2025",
-          "response_date": "23-Sep-2025",
           "orcid": "",
           "email": "",
-          "email_domain": "@princeton.edu"
+          "dates": {
+            "invited": "2025-09-23",
+            "agreed": null,
+            "due": null,
+            "returned": null
+          },
+          "platform_specific": {
+            "invitation_date": "23-Sep-2025",
+            "response_date": "23-Sep-2025",
+            "email_domain": "@princeton.edu"
+          }
         },
         {
           "name": "Kupper, Michael",
@@ -28,11 +36,19 @@
           "department": "Department of Mathematics",
           "country": "",
           "status": "Agreed",
-          "invitation_date": "23-Sep-2025",
-          "response_date": "30-Sep-2025",
           "orcid": "",
           "email": "",
-          "email_domain": ""
+          "dates": {
+            "invited": "2025-09-23",
+            "agreed": null,
+            "due": null,
+            "returned": null
+          },
+          "platform_specific": {
+            "invitation_date": "23-Sep-2025",
+            "response_date": "30-Sep-2025",
+            "email_domain": ""
+          }
         },
         {
           "name": "Bahlali, Khaled",
@@ -40,11 +56,19 @@
           "department": "",
           "country": "",
           "status": "Declined",
-          "invitation_date": "23-Sep-2025",
-          "response_date": "01-Oct-2025",
           "orcid": "",
           "email": "",
-          "email_domain": ""
+          "dates": {
+            "invited": "2025-09-23",
+            "agreed": null,
+            "due": null,
+            "returned": null
+          },
+          "platform_specific": {
+            "invitation_date": "23-Sep-2025",
+            "response_date": "01-Oct-2025",
+            "email_domain": ""
+          }
         },
         {
           "name": "Hassani, Mohammed",
@@ -52,22 +76,35 @@
           "department": "",
           "country": "",
           "status": "Declined",
-          "invitation_date": "01-Oct-2025",
-          "response_date": "",
           "orcid": "",
           "email": "",
-          "email_domain": ""
+          "dates": {
+            "invited": "2025-10-01",
+            "agreed": null,
+            "due": null,
+            "returned": null
+          },
+          "platform_specific": {
+            "invitation_date": "01-Oct-2025",
+            "response_date": "",
+            "email_domain": ""
+          }
         }
       ],
       "editors": [],
-      "metadata": {},
       "audit_trail": [],
       "documents": {},
-      "version_history": [],
-      "status_details": {},
-      "emails_extracted": false,
       "category": "Awaiting Reviewer Assignment",
-      "id": "MOR-2025-1190"
+      "article_type": null,
+      "status": null,
+      "keywords": [],
+      "platform_specific": {
+        "metadata": {},
+        "version_history": [],
+        "status_details": {},
+        "emails_extracted": false,
+        "id": "MOR-2025-1190"
+      }
     }
   ],
   "summary": {
@@ -90,5 +127,8 @@
     "extraction_time": "2025-10-05T01:50:27.804814",
     "email_extraction_rate": 0.0
   },
-  "errors": []
+  "errors": [],
+  "schema_version": "1.0.0",
+  "journal_name": "Mathematics of Operations Research",
+  "platform": "ScholarOne"
 }

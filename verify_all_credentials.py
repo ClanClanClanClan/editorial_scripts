@@ -43,11 +43,11 @@ class CredentialVerifier:
                 "email_env": "SIFIN_EMAIL",
                 "password_env": "SIFIN_PASSWORD",
             },
-            # AIMS Sciences
+            # EditFlow (MSP)
             "NACO": {
                 "name": "Numerical Algebra, Control and Optimization",
-                "platform": "AIMS Sciences",
-                "email_env": "NACO_EMAIL",
+                "platform": "EditFlow (MSP)",
+                "email_env": "NACO_USERNAME",
                 "password_env": "NACO_PASSWORD",
             },
             # Editorial Manager

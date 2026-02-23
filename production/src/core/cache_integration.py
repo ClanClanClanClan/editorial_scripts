@@ -7,8 +7,11 @@ Provides easy integration of the comprehensive cache system into extractors.
 Handles both test and production modes automatically.
 """
 
+import glob
+import os
 from datetime import datetime
 from pathlib import Path
+from typing import Any, Dict, Optional
 
 # Import cache components
 from .cache_manager import ExtractorCacheMixin
@@ -102,6 +105,65 @@ class CachedExtractorMixin(ExtractorCacheMixin):
     def cache_manuscript(self, manuscript_data):
         """Cache manuscript data after extraction."""
         self.cache_manuscript_data(manuscript_data)
+
+    def _check_existing_download(
+        self, manuscript_id: str, doc_type: str, download_dir: str
+    ) -> Optional[str]:
+        pattern = os.path.join(download_dir, f"{manuscript_id}*{doc_type}*")
+        matches = glob.glob(pattern)
+        if not matches:
+            pattern_alt = os.path.join(download_dir, f"*{manuscript_id}*")
+            matches = [
+                m for m in glob.glob(pattern_alt) if doc_type.lower() in os.path.basename(m).lower()
+            ]
+        if not matches:
+            safe_id = manuscript_id.replace("-", "_").replace(".", "_")
+            pattern_safe = os.path.join(download_dir, f"*{safe_id}*")
+            matches = [
+                m
+                for m in glob.glob(pattern_safe)
+                if doc_type.lower() in os.path.basename(m).lower()
+            ]
+        if matches:
+            newest = max(matches, key=os.path.getmtime)
+            if os.path.getsize(newest) > 0:
+                return newest
+        return None
+
+    def get_cached_web_profile(
+        self, name: str, institution: str = "", orcid_id: str = ""
+    ) -> Optional[Dict]:
+        if not hasattr(self, "cache_manager"):
+            return None
+        if orcid_id:
+            result = self.cache_manager.get_web_profile(orcid_id)
+            if result:
+                return result
+        name_key = f"{name.strip().lower()}|{institution.strip().lower()}"
+        return self.cache_manager.get_web_profile(name_key)
+
+    def save_web_profile(
+        self,
+        name: str,
+        institution: str,
+        orcid_id: str,
+        profile_data: Dict,
+        source: str = "orcid+crossref",
+    ):
+        if not hasattr(self, "cache_manager"):
+            return
+        key = orcid_id if orcid_id else f"{name.strip().lower()}|{institution.strip().lower()}"
+        if orcid_id:
+            name_key = f"{name.strip().lower()}|{institution.strip().lower()}"
+            try:
+                import sqlite3
+
+                with sqlite3.connect(self.cache_manager.db_path) as conn:
+                    conn.execute("DELETE FROM web_profiles WHERE person_key = ?", (name_key,))
+                    conn.commit()
+            except Exception:
+                pass
+        self.cache_manager.update_web_profile(key, name, orcid_id, profile_data, source)
 
     def finish_extraction_with_stats(self):
         """Finish extraction and show comprehensive statistics."""

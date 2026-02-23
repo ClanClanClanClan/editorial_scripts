@@ -4,11 +4,8 @@ version = "2.0.0"
 description = "Editorial Command Center - AI-powered journal manuscript extraction and management system"
 authors = ["Dylan Possamaï <dylan.possamai@math.ethz.ch>"]
 readme = "README.md"
-# Use src layout and install only the ECC package
-packages = [
-  { include = "ecc", from = "src" },
-  { include = "core", from = "src" }
-]
+# Production code lives in production/src/ (not installed as packages)
+packages = []
 
 [tool.poetry.dependencies]
 python = "^3.11"
@@ -95,25 +92,18 @@ mkdocs-material = "^9.5.3"
 ipython = "^8.18.0"
 jupyter = "^1.0.0"
 
-[tool.poetry.scripts]
-# CLI entrypoint
-ecc = "ecc.cli:main"
-
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.pytest.ini_options]
 minversion = "7.0"
-testpaths = ["tests", "."]
-pythonpath = ["src", "."]
+testpaths = ["tests"]
+pythonpath = ["production/src", "."]
 asyncio_mode = "auto"
 addopts = [
     "--strict-markers",
     "--tb=short",
-    "--cov=src",
-    "--cov-report=term-missing",
-    "--cov-report=html",
 ]
 markers = [
     "slow: marks tests as slow (deselect with '-m \"not slow\"')",
@@ -166,7 +156,7 @@ strict_equality = true
 explicit_package_bases = true
 namespace_packages = true
 # Analyze code under src/ (mypy understands source directories via files)
-files = ["src/ecc"]
+files = ["production/src/core"]
 
 [[tool.mypy.overrides]]
 module = [

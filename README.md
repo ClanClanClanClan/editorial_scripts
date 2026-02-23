@@ -1,192 +1,95 @@
 # Editorial Scripts
 
-A comprehensive system for extracting manuscript and referee data from 8 academic journal editorial platforms.
+Manuscript extraction system for 8 academic journals. Extracts referee reports, manuscripts, author/referee profiles, audit trails, and documents from editorial platforms.
 
-## 📊 Current Status (October 4, 2025)
+## Current Status (February 2026)
 
-**For detailed status and implementation plans, see:**
-- **[PROJECT_STATUS_CONSOLIDATED_20251004.md](./PROJECT_STATUS_CONSOLIDATED_20251004.md)** - Complete status
-- **[IMPLEMENTATION_PLAN_20251004.md](./IMPLEMENTATION_PLAN_20251004.md)** - Fix plan
-- **[COMPREHENSIVE_AUDIT_20251004.md](./COMPREHENSIVE_AUDIT_20251004.md)** - Full audit
+| Journal | Code | Platform | Extractor | Status |
+|---------|------|----------|-----------|--------|
+| Mathematical Finance | MF | ScholarOne | `ComprehensiveMFExtractor` | **WORKING** |
+| Mathematics of Operations Research | MOR | ScholarOne | `MORExtractor` | **WORKING** |
+| Finance and Stochastics | FS | Gmail API | `ComprehensiveFSExtractor` | **WORKING** |
+| JOTA | JOTA | Editorial Manager | — | Skeleton |
+| MAFE | MAFE | Editorial Manager | — | Skeleton |
+| SICON | SICON | SIAM | — | Skeleton |
+| SIFIN | SIFIN | SIAM | — | Skeleton |
+| NACO | NACO | AIMS Sciences | — | Skeleton |
 
-**Quick Status**:
-- ✅ MOR extractor: Syntax fixed, ready to test
-- ❌ MF extractor: Blocked by Gmail OAuth setup (see implementation plan)
-- ⚠️ ECC: 5% complete (authentication only)
+## Quick Start
 
-## ⚠️ IMPORTANT: Credentials Already Stored!
-**All journal credentials are permanently stored in macOS Keychain. Never ask for them again.**
-
-## 🚀 Quick Start
-
-### Prerequisites
-- Python 3.11+
-- Poetry 1.7+
-- Chrome/Chromium browser
-- macOS (for keychain storage)
-
-### Installation
 ```bash
-# Clone and setup
-git clone <repository>
-cd editorial_scripts
-
-# Install dependencies with Poetry
-poetry install
-
-# Activate the venv for local runs
-poetry shell
-
-# Optional: scaffold Gmail config for local OAuth credentials
-cp config/gmail_config.json.example config/gmail_config.json
-# Update the copied file with your Gmail address before running automation
-```
-
-### Running ECC
-```bash
-# API (FastAPI)
-uvicorn ecc.main:app --host 0.0.0.0 --port 8000 --reload
-
-# CLI
-ecc --help
-```
-
-Note: Legacy extractors under `production/` are preserved for reference only. They are not security-hardened and should not be used for new runs.
-
-### Verify Credentials
-```bash
-# Check all credentials are properly stored
+# Verify credentials (stored in macOS Keychain)
 python3 verify_all_credentials.py
 
-# Load credentials manually if needed
-source ~/.editorial_scripts/load_all_credentials.sh
+# Run extractors
+cd production/src/extractors
+python3 mf_extractor.py
+python3 mor_extractor.py
+python3 fs_extractor.py
+
+# Orchestrator
+python3 run_extractors.py --status
+python3 run_extractors.py --journal mf
+python3 run_extractors.py --all
 ```
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 editorial_scripts/
-├── archive/                     # Historical artifacts (see data_snapshots/, logs/)
-├── config/                      # Configuration files & templates
-│   ├── gmail_config.json.example # Copy to gmail_config.json for local runs
-│   ├── grafana/                 # docker-compose dashboard placeholders
-│   └── selectors/               # Platform-specific CSS/XPath selectors
-├── dev/                         # Sandbox development area (isolated from prod)
-│   └── mf/
-│       ├── scripts/            # One-off MF fix utilities
-│       └── tests/manual_runs/  # Manual end-to-end extraction harnesses
-├── production/                  # WORKING extractors (messy but functional)
-│   └── src/
-│       └── extractors/
-│           └── mf_extractor.py  # 3,698 lines, DO NOT BREAK
-├── src/                         # NEW clean architecture (IN PROGRESS)
-│   ├── core/                    # Base components
-│   │   ├── base_extractor.py    # Abstract base
-│   │   ├── browser_manager.py   # Selenium management
-│   │   ├── credential_manager.py # Credential handling
-│   │   ├── data_models.py       # Type-safe models
-│   │   └── gmail_manager.py     # 2FA support
-│   ├── platforms/               # Platform base classes
-│   │   └── scholarone.py        # Base for MF, MOR
-│   └── ecc/                     # FastAPI app + adapters
-├── scripts/                     # Utility scripts
-├── tests/                       # Automated unit/integration suite
-└── docs/                        # Documentation
+├── production/src/extractors/     # ALL WORKING CODE
+│   ├── mf_extractor.py           # MF - ScholarOne
+│   ├── mor_extractor.py          # MOR - ScholarOne
+│   └── fs_extractor.py           # FS - Gmail API
+├── production/src/core/           # Shared utilities
+│   ├── cache_manager.py          # SQLite persistent cache
+│   ├── gmail_search.py           # Gmail timeline integration
+│   └── gmail_verification.py     # 2FA code fetching
+├── production/outputs/            # Extraction JSON results
+│   ├── mf/                       # MF outputs
+│   └── mor/                      # MOR outputs
+├── production/downloads/          # Downloaded documents
+│   ├── mf/                       # MF documents
+│   └── mor/                      # MOR documents
+├── config/                        # Gmail OAuth tokens, journal configs
+├── archive/                       # Legacy code + skeleton extractors
+├── dev/                           # Development/testing sandbox
+├── docs/                          # Documentation & specifications
+├── run_extractors.py              # Orchestrator
+└── verify_all_credentials.py      # Credential verification
 ```
 
-Manual end-to-end MF scripts live under `dev/mf/tests/manual_runs` so the automated `pytest` run stays deterministic.
+## Key Features
 
-## 🔑 Supported Journals
+- **Multi-pass extraction**: Forward → Backward → Forward navigation (MF: 3-pass, MOR: 6-pass)
+- **Web enrichment**: ORCID API + CrossRef API for author/referee publication profiles
+- **Gmail integration**: 2FA code fetching + audit trail cross-checking with external emails
+- **Session recovery**: Automatic re-login on connection drops
+- **Document downloads**: Manuscript PDFs, cover letters, original files, author responses
+- **SQLite caching**: Persistent referee/manuscript cache across runs
+- **Auto ChromeDriver**: webdriver-manager handles version matching
 
-| Journal | Platform | Authentication | Status |
-|---------|----------|----------------|--------|
-| MF | ScholarOne | Email + 2FA | ✅ Production + New |
-| MOR | ScholarOne | Email + 2FA | ✅ Production |
-| SICON | SIAM | ORCID OAuth | ✅ Legacy |
-| SIFIN | SIAM | ORCID OAuth | ✅ Legacy |
-| NACO | SIAM | ORCID OAuth | ⚠️ Partial |
-| JOTA | Editorial Manager | Username/Pass | ✅ Legacy |
-| MAFE | Editorial Manager | Username/Pass | ✅ Legacy |
-| FS | Email-based | Gmail API | ⚠️ Manual |
+## Credentials
 
-## 🏗️ Architecture
-
-### Current State (Jan 2025)
-- **Production**: Working but monolithic (3,698 lines per extractor)
-- **New Architecture**: Clean, modular, 53% less code
-- **Migration**: MF complete, others in progress
-
-### Design Principles
-```
-BaseExtractor (abstract)
-├── Platform Base (shared logic)
-│   └── Journal Extractor (specific logic)
-│
-├── BrowserManager (Selenium handling)
-├── CredentialManager (auth management)
-└── GmailManager (2FA codes)
-```
-
-## 📊 Key Features
-
-- **3-Pass Extraction**: Forward → Backward → Forward navigation
-- **Popup Email Extraction**: Referee emails from popup windows
-- **2FA Support**: Automatic Gmail verification codes
-- **Document Downloads**: PDFs, cover letters, reports
-- **Audit Trail**: Complete timeline extraction
-- **Type Safety**: Dataclasses with enums
-- **Error Recovery**: Automatic retry mechanisms
-
-## 🛡️ Security
-
-- ✅ Credentials stored in macOS Keychain (encrypted)
-- ✅ No plaintext passwords in code or files
-- ✅ Automatic loading from secure storage
-- ✅ Git-ignored sensitive directories
-- ✅ Masked password output in logs
-
-See SECURITY.md for vulnerability reporting and deployment hardening guidance.
-
-## 📖 Documentation
-
-- `CLAUDE.md` - AI assistant guide
-- `CREDENTIALS_STORED.md` - Credential documentation
-- `.credentials_permanent_storage_record.md` - Storage record
-- `docs/` - Technical specifications
-
-## 🧪 Testing
+All credentials are permanently stored in macOS Keychain. Never hardcode them.
 
 ```bash
-# Verify setup
 python3 verify_all_credentials.py
-
-# Compare implementations
-python3 compare_implementations.py
-
-# Test specific journal
-python3 production/src/extractors/mf_extractor.py
+source ~/.editorial_scripts/load_all_credentials.sh
 ```
 
-## 🤝 Contributing
+## Development
 
-1. **Never break production/** - It works, keep it working
-2. **Test thoroughly** - Real journal access required
-3. **Follow patterns** - Use platform inheritance
-4. **Document changes** - Update CLAUDE.md
+Always use `dev/` for testing. Never create test files in project root or production.
 
-## ⚡ Troubleshooting
+```bash
+cd dev/mf
+python3 run_mf_dev.py
+```
 
-| Issue | Solution |
-|-------|----------|
-| "No credentials found" | Run `source ~/.editorial_scripts/load_all_credentials.sh` |
-| 2FA timeout | Check Gmail API setup |
-| Login fails | Verify credentials with `verify_all_credentials.py` |
-| Popup blocked | Browser manager should handle automatically |
+## Documentation
 
-## 📝 License
-
-Private repository - All rights reserved
-
----
-
-**Remember**: Credentials are permanently stored. Never ask for them again!
+- `CLAUDE.md` — AI assistant guide
+- `docs/specifications/` — Target architecture and vision
+- `docs/extractors/` — Per-extractor documentation
+- `docs/workflows/` — Extraction workflows

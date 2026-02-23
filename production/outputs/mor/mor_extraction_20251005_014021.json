@@ -16,8 +16,11 @@
           "department": "",
           "country": "",
           "orcid": "",
-          "email_domain": "",
-          "corresponding_author": false
+          "is_corresponding": false,
+          "platform_specific": {
+            "email_domain": "",
+            "corresponding_author": false
+          }
         },
         {
           "name": "Laeven, Roger",
@@ -26,8 +29,11 @@
           "department": "",
           "country": "",
           "orcid": "",
-          "email_domain": "",
-          "corresponding_author": false
+          "is_corresponding": false,
+          "platform_specific": {
+            "email_domain": "",
+            "corresponding_author": false
+          }
         },
         {
           "name": "Laeven, Roger",
@@ -36,8 +42,11 @@
           "department": "",
           "country": "",
           "orcid": "",
-          "email_domain": "",
-          "corresponding_author": false
+          "is_corresponding": false,
+          "platform_specific": {
+            "email_domain": "",
+            "corresponding_author": false
+          }
         },
         {
           "name": "Rosazza Gianin, Emanuela",
@@ -46,8 +55,11 @@
           "department": "",
           "country": "",
           "orcid": "",
-          "email_domain": "",
-          "corresponding_author": false
+          "is_corresponding": false,
+          "platform_specific": {
+            "email_domain": "",
+            "corresponding_author": false
+          }
         },
         {
           "name": "Zullino, Marco",
@@ -56,8 +68,11 @@
           "department": "",
           "country": "",
           "orcid": "",
-          "email_domain": "",
-          "corresponding_author": false
+          "is_corresponding": false,
+          "platform_specific": {
+            "email_domain": "",
+            "corresponding_author": false
+          }
         }
       ],
       "referees": [
@@ -67,11 +82,19 @@
           "department": "ORFE",
           "country": "USA",
           "status": "Declined",
-          "invitation_date": "23-Sep-2025",
-          "response_date": "23-Sep-2025",
           "orcid": "",
           "email": "",
-          "email_domain": "@princeton.edu"
+          "dates": {
+            "invited": "2025-09-23",
+            "agreed": null,
+            "due": null,
+            "returned": null
+          },
+          "platform_specific": {
+            "invitation_date": "23-Sep-2025",
+            "response_date": "23-Sep-2025",
+            "email_domain": "@princeton.edu"
+          }
         },
         {
           "name": "Kupper, Michael",
@@ -79,11 +102,19 @@
           "department": "Department of Mathematics",
           "country": "",
           "status": "Agreed",
-          "invitation_date": "23-Sep-2025",
-          "response_date": "30-Sep-2025",
           "orcid": "",
           "email": "",
-          "email_domain": ""
+          "dates": {
+            "invited": "2025-09-23",
+            "agreed": null,
+            "due": null,
+            "returned": null
+          },
+          "platform_specific": {
+            "invitation_date": "23-Sep-2025",
+            "response_date": "30-Sep-2025",
+            "email_domain": ""
+          }
         },
         {
           "name": "Bahlali, Khaled",
@@ -91,11 +122,19 @@
           "department": "",
           "country": "",
           "status": "Declined",
-          "invitation_date": "23-Sep-2025",
-          "response_date": "01-Oct-2025",
           "orcid": "",
           "email": "",
-          "email_domain": ""
+          "dates": {
+            "invited": "2025-09-23",
+            "agreed": null,
+            "due": null,
+            "returned": null
+          },
+          "platform_specific": {
+            "invitation_date": "23-Sep-2025",
+            "response_date": "01-Oct-2025",
+            "email_domain": ""
+          }
         },
         {
           "name": "Hassani, Mohammed",
@@ -103,11 +142,19 @@
           "department": "",
           "country": "",
           "status": "Declined",
-          "invitation_date": "01-Oct-2025",
-          "response_date": "",
           "orcid": "",
           "email": "",
-          "email_domain": ""
+          "dates": {
+            "invited": "2025-10-01",
+            "agreed": null,
+            "due": null,
+            "returned": null
+          },
+          "platform_specific": {
+            "invitation_date": "01-Oct-2025",
+            "response_date": "",
+            "email_domain": ""
+          }
         }
       ],
       "editors": [
@@ -130,24 +177,39 @@
           "institution": ""
         }
       ],
-      "metadata": {
-        "title": "Geometric BSDEs",
-        "submission_date": "09-Sep-2025",
-        "last_updated": "30-Sep-2025",
-        "keywords": "Geometric BSDEs , Two-driver BSDEs , Logarithmic non-linearity and singularity at zero , Dynamic return and star-shaped risk measures , Dynamics of $L^{p}$-norms",
-        "manuscript_type": "Research Article",
-        "funding": "Ermenegildo Zegna Founder’s Scholarship",
-        "abstract": "09-Sep-2025 Managing Editor: Elmore (Editorial Office), Jeff AU REV AE AreaED EIC ME PROD Date to Managing Editor: 09-Sep-2025 Editor-in-Chief: Scheinberg, Katya AU REV AE AreaED EIC Date to Editor-in-Chief: 12-Sep-2025 Area Editor: Srikant, R. AU REV AE AreaED Date to Area Editor: 12-Sep-2025 Associate Editor: Possamaï, Dylan AU REV AE Date to Associate Editor: 22-Sep-2025 Version History Manuscript ID Manuscript Title Date Submitted Decision Letter & Response Switch Details MOR-2",
-        "figure_count": 0,
-        "days_since_submission": 26
-      },
       "audit_trail": [],
       "documents": {},
-      "version_history": [],
-      "status_details": {},
-      "emails_extracted": false,
       "category": "Awaiting Reviewer Assignment",
-      "id": "MOR-2025-1190"
+      "title": "Geometric BSDEs",
+      "abstract": "09-Sep-2025 Managing Editor: Elmore (Editorial Office), Jeff AU REV AE AreaED EIC ME PROD Date to Managing Editor: 09-Sep-2025 Editor-in-Chief: Scheinberg, Katya AU REV AE AreaED EIC Date to Editor-in-Chief: 12-Sep-2025 Area Editor: Srikant, R. AU REV AE AreaED Date to Area Editor: 12-Sep-2025 Associate Editor: Possamaï, Dylan AU REV AE Date to Associate Editor: 22-Sep-2025 Version History Manuscript ID Manuscript Title Date Submitted Decision Letter & Response Switch Details MOR-2",
+      "keywords": [
+        "Geometric BSDEs",
+        "Two-driver BSDEs",
+        "Logarithmic non-linearity and singularity at zero",
+        "Dynamic return and star-shaped risk measures",
+        "Dynamics of $L^{p}$-norms"
+      ],
+      "submission_date": "2025-09-09",
+      "article_type": "Research Article",
+      "status": null,
+      "platform_specific": {
+        "metadata": {
+          "title": "Geometric BSDEs",
+          "submission_date": "09-Sep-2025",
+          "last_updated": "30-Sep-2025",
+          "keywords": "Geometric BSDEs , Two-driver BSDEs , Logarithmic non-linearity and singularity at zero , Dynamic return and star-shaped risk measures , Dynamics of $L^{p}$-norms",
+          "manuscript_type": "Research Article",
+          "funding": "Ermenegildo Zegna Founder’s Scholarship",
+          "abstract": "09-Sep-2025 Managing Editor: Elmore (Editorial Office), Jeff AU REV AE AreaED EIC ME PROD Date to Managing Editor: 09-Sep-2025 Editor-in-Chief: Scheinberg, Katya AU REV AE AreaED EIC Date to Editor-in-Chief: 12-Sep-2025 Area Editor: Srikant, R. AU REV AE AreaED Date to Area Editor: 12-Sep-2025 Associate Editor: Possamaï, Dylan AU REV AE Date to Associate Editor: 22-Sep-2025 Version History Manuscript ID Manuscript Title Date Submitted Decision Letter & Response Switch Details MOR-2",
+          "figure_count": 0,
+          "days_since_submission": 26
+        },
+        "version_history": [],
+        "status_details": {},
+        "emails_extracted": false,
+        "id": "MOR-2025-1190",
+        "manuscript_type": "Research Article"
+      }
     },
     {
       "manuscript_id": "MOR-2025-1190",
@@ -162,8 +224,11 @@
           "department": "",
           "country": "",
           "orcid": "",
-          "email_domain": "",
-          "corresponding_author": false
+          "is_corresponding": false,
+          "platform_specific": {
+            "email_domain": "",
+            "corresponding_author": false
+          }
         },
         {
           "name": "Laeven, Roger",
@@ -172,8 +237,11 @@
           "department": "",
           "country": "",
           "orcid": "",
-          "email_domain": "",
-          "corresponding_author": false
+          "is_corresponding": false,
+          "platform_specific": {
+            "email_domain": "",
+            "corresponding_author": false
+          }
         },
         {
           "name": "Laeven, Roger",
@@ -182,8 +250,11 @@
           "department": "",
           "country": "",
           "orcid": "",
-          "email_domain": "",
-          "corresponding_author": false
+          "is_corresponding": false,
+          "platform_specific": {
+            "email_domain": "",
+            "corresponding_author": false
+          }
         },
         {
           "name": "Rosazza Gianin, Emanuela",
@@ -192,8 +263,11 @@
           "department": "",
           "country": "",
           "orcid": "",
-          "email_domain": "",
-          "corresponding_author": false
+          "is_corresponding": false,
+          "platform_specific": {
+            "email_domain": "",
+            "corresponding_author": false
+          }
         },
         {
           "name": "Zullino, Marco",
@@ -202,8 +276,11 @@
           "department": "",
           "country": "",
           "orcid": "",
-          "email_domain": "",
-          "corresponding_author": false
+          "is_corresponding": false,
+          "platform_specific": {
+            "email_domain": "",
+            "corresponding_author": false
+          }
         }
       ],
       "referees": [
@@ -213,11 +290,19 @@
           "department": "ORFE",
           "country": "USA",
           "status": "Declined",
-          "invitation_date": "23-Sep-2025",
-          "response_date": "23-Sep-2025",
           "orcid": "",
           "email": "",
-          "email_domain": "@princeton.edu"
+          "dates": {
+            "invited": "2025-09-23",
+            "agreed": null,
+            "due": null,
+            "returned": null
+          },
+          "platform_specific": {
+            "invitation_date": "23-Sep-2025",
+            "response_date": "23-Sep-2025",
+            "email_domain": "@princeton.edu"
+          }
         },
         {
           "name": "Kupper, Michael",
@@ -225,11 +310,19 @@
           "department": "Department of Mathematics",
           "country": "",
           "status": "Agreed",
-          "invitation_date": "23-Sep-2025",
-          "response_date": "30-Sep-2025",
           "orcid": "",
           "email": "",
-          "email_domain": ""
+          "dates": {
+            "invited": "2025-09-23",
+            "agreed": null,
+            "due": null,
+            "returned": null
+          },
+          "platform_specific": {
+            "invitation_date": "23-Sep-2025",
+            "response_date": "30-Sep-2025",
+            "email_domain": ""
+          }
         },
         {
           "name": "Bahlali, Khaled",
@@ -237,11 +330,19 @@
           "department": "",
           "country": "",
           "status": "Declined",
-          "invitation_date": "23-Sep-2025",
-          "response_date": "01-Oct-2025",
           "orcid": "",
           "email": "",
-          "email_domain": ""
+          "dates": {
+            "invited": "2025-09-23",
+            "agreed": null,
+            "due": null,
+            "returned": null
+          },
+          "platform_specific": {
+            "invitation_date": "23-Sep-2025",
+            "response_date": "01-Oct-2025",
+            "email_domain": ""
+          }
         },
         {
           "name": "Hassani, Mohammed",
@@ -249,11 +350,19 @@
           "department": "",
           "country": "",
           "status": "Declined",
-          "invitation_date": "01-Oct-2025",
-          "response_date": "",
           "orcid": "",
           "email": "",
-          "email_domain": ""
+          "dates": {
+            "invited": "2025-10-01",
+            "agreed": null,
+            "due": null,
+            "returned": null
+          },
+          "platform_specific": {
+            "invitation_date": "01-Oct-2025",
+            "response_date": "",
+            "email_domain": ""
+          }
         }
       ],
       "editors": [
@@ -276,24 +385,39 @@
           "institution": ""
         }
       ],
-      "metadata": {
-        "title": "Geometric BSDEs",
-        "submission_date": "09-Sep-2025",
-        "last_updated": "30-Sep-2025",
-        "keywords": "Geometric BSDEs , Two-driver BSDEs , Logarithmic non-linearity and singularity at zero , Dynamic return and star-shaped risk measures , Dynamics of $L^{p}$-norms",
-        "manuscript_type": "Research Article",
-        "funding": "Ermenegildo Zegna Founder’s Scholarship",
-        "abstract": "09-Sep-2025 Managing Editor: Elmore (Editorial Office), Jeff AU REV AE AreaED EIC ME PROD Date to Managing Editor: 09-Sep-2025 Editor-in-Chief: Scheinberg, Katya AU REV AE AreaED EIC Date to Editor-in-Chief: 12-Sep-2025 Area Editor: Srikant, R. AU REV AE AreaED Date to Area Editor: 12-Sep-2025 Associate Editor: Possamaï, Dylan AU REV AE Date to Associate Editor: 22-Sep-2025 Version History Manuscript ID Manuscript Title Date Submitted Decision Letter & Response Switch Details MOR-2",
-        "figure_count": 0,
-        "days_since_submission": 26
-      },
       "audit_trail": [],
       "documents": {},
-      "version_history": [],
-      "status_details": {},
-      "emails_extracted": false,
       "category": "Awaiting Reviewer Assignment",
-      "id": "MOR-2025-1190"
+      "title": "Geometric BSDEs",
+      "abstract": "09-Sep-2025 Managing Editor: Elmore (Editorial Office), Jeff AU REV AE AreaED EIC ME PROD Date to Managing Editor: 09-Sep-2025 Editor-in-Chief: Scheinberg, Katya AU REV AE AreaED EIC Date to Editor-in-Chief: 12-Sep-2025 Area Editor: Srikant, R. AU REV AE AreaED Date to Area Editor: 12-Sep-2025 Associate Editor: Possamaï, Dylan AU REV AE Date to Associate Editor: 22-Sep-2025 Version History Manuscript ID Manuscript Title Date Submitted Decision Letter & Response Switch Details MOR-2",
+      "keywords": [
+        "Geometric BSDEs",
+        "Two-driver BSDEs",
+        "Logarithmic non-linearity and singularity at zero",
+        "Dynamic return and star-shaped risk measures",
+        "Dynamics of $L^{p}$-norms"
+      ],
+      "submission_date": "2025-09-09",
+      "article_type": "Research Article",
+      "status": null,
+      "platform_specific": {
+        "metadata": {
+          "title": "Geometric BSDEs",
+          "submission_date": "09-Sep-2025",
+          "last_updated": "30-Sep-2025",
+          "keywords": "Geometric BSDEs , Two-driver BSDEs , Logarithmic non-linearity and singularity at zero , Dynamic return and star-shaped risk measures , Dynamics of $L^{p}$-norms",
+          "manuscript_type": "Research Article",
+          "funding": "Ermenegildo Zegna Founder’s Scholarship",
+          "abstract": "09-Sep-2025 Managing Editor: Elmore (Editorial Office), Jeff AU REV AE AreaED EIC ME PROD Date to Managing Editor: 09-Sep-2025 Editor-in-Chief: Scheinberg, Katya AU REV AE AreaED EIC Date to Editor-in-Chief: 12-Sep-2025 Area Editor: Srikant, R. AU REV AE AreaED Date to Area Editor: 12-Sep-2025 Associate Editor: Possamaï, Dylan AU REV AE Date to Associate Editor: 22-Sep-2025 Version History Manuscript ID Manuscript Title Date Submitted Decision Letter & Response Switch Details MOR-2",
+          "figure_count": 0,
+          "days_since_submission": 26
+        },
+        "version_history": [],
+        "status_details": {},
+        "emails_extracted": false,
+        "id": "MOR-2025-1190",
+        "manuscript_type": "Research Article"
+      }
     },
     {
       "manuscript_id": "MOR-2025-1190",
@@ -308,8 +432,11 @@
           "department": "",
           "country": "",
           "orcid": "",
-          "email_domain": "",
-          "corresponding_author": false
+          "is_corresponding": false,
+          "platform_specific": {
+            "email_domain": "",
+            "corresponding_author": false
+          }
         },
         {
           "name": "Laeven, Roger",
@@ -318,8 +445,11 @@
           "department": "",
           "country": "",
           "orcid": "",
-          "email_domain": "",
-          "corresponding_author": false
+          "is_corresponding": false,
+          "platform_specific": {
+            "email_domain": "",
+            "corresponding_author": false
+          }
         },
         {
           "name": "Laeven, Roger",
@@ -328,8 +458,11 @@
           "department": "",
           "country": "",
           "orcid": "",
-          "email_domain": "",
-          "corresponding_author": false
+          "is_corresponding": false,
+          "platform_specific": {
+            "email_domain": "",
+            "corresponding_author": false
+          }
         },
         {
           "name": "Rosazza Gianin, Emanuela",
@@ -338,8 +471,11 @@
           "department": "",
           "country": "",
           "orcid": "",
-          "email_domain": "",
-          "corresponding_author": false
+          "is_corresponding": false,
+          "platform_specific": {
+            "email_domain": "",
+            "corresponding_author": false
+          }
         },
         {
           "name": "Zullino, Marco",
@@ -348,8 +484,11 @@
           "department": "",
           "country": "",
           "orcid": "",
-          "email_domain": "",
-          "corresponding_author": false
+          "is_corresponding": false,
+          "platform_specific": {
+            "email_domain": "",
+            "corresponding_author": false
+          }
         }
       ],
       "referees": [
@@ -359,11 +498,19 @@
           "department": "ORFE",
           "country": "USA",
           "status": "Declined",
-          "invitation_date": "23-Sep-2025",
-          "response_date": "23-Sep-2025",
           "orcid": "",
           "email": "",
-          "email_domain": "@princeton.edu"
+          "dates": {
+            "invited": "2025-09-23",
+            "agreed": null,
+            "due": null,
+            "returned": null
+          },
+          "platform_specific": {
+            "invitation_date": "23-Sep-2025",
+            "response_date": "23-Sep-2025",
+            "email_domain": "@princeton.edu"
+          }
         },
         {
           "name": "Kupper, Michael",
@@ -371,11 +518,19 @@
           "department": "Department of Mathematics",
           "country": "",
           "status": "Agreed",
-          "invitation_date": "23-Sep-2025",
-          "response_date": "30-Sep-2025",
           "orcid": "",
           "email": "",
-          "email_domain": ""
+          "dates": {
+            "invited": "2025-09-23",
+            "agreed": null,
+            "due": null,
+            "returned": null
+          },
+          "platform_specific": {
+            "invitation_date": "23-Sep-2025",
+            "response_date": "30-Sep-2025",
+            "email_domain": ""
+          }
         },
         {
           "name": "Bahlali, Khaled",
@@ -383,11 +538,19 @@
           "department": "",
           "country": "",
           "status": "Declined",
-          "invitation_date": "23-Sep-2025",
-          "response_date": "01-Oct-2025",
           "orcid": "",
           "email": "",
-          "email_domain": ""
+          "dates": {
+            "invited": "2025-09-23",
+            "agreed": null,
+            "due": null,
+            "returned": null
+          },
+          "platform_specific": {
+            "invitation_date": "23-Sep-2025",
+            "response_date": "01-Oct-2025",
+            "email_domain": ""
+          }
         },
         {
           "name": "Hassani, Mohammed",
@@ -395,11 +558,19 @@
           "department": "",
           "country": "",
           "status": "Declined",
-          "invitation_date": "01-Oct-2025",
-          "response_date": "",
           "orcid": "",
           "email": "",
-          "email_domain": ""
+          "dates": {
+            "invited": "2025-10-01",
+            "agreed": null,
+            "due": null,
+            "returned": null
+          },
+          "platform_specific": {
+            "invitation_date": "01-Oct-2025",
+            "response_date": "",
+            "email_domain": ""
+          }
         }
       ],
       "editors": [
@@ -422,24 +593,39 @@
           "institution": ""
         }
       ],
-      "metadata": {
-        "title": "Geometric BSDEs",
-        "submission_date": "09-Sep-2025",
-        "last_updated": "30-Sep-2025",
-        "keywords": "Geometric BSDEs , Two-driver BSDEs , Logarithmic non-linearity and singularity at zero , Dynamic return and star-shaped risk measures , Dynamics of $L^{p}$-norms",
-        "manuscript_type": "Research Article",
-        "funding": "Ermenegildo Zegna Founder’s Scholarship",
-        "abstract": "09-Sep-2025 Managing Editor: Elmore (Editorial Office), Jeff AU REV AE AreaED EIC ME PROD Date to Managing Editor: 09-Sep-2025 Editor-in-Chief: Scheinberg, Katya AU REV AE AreaED EIC Date to Editor-in-Chief: 12-Sep-2025 Area Editor: Srikant, R. AU REV AE AreaED Date to Area Editor: 12-Sep-2025 Associate Editor: Possamaï, Dylan AU REV AE Date to Associate Editor: 22-Sep-2025 Version History Manuscript ID Manuscript Title Date Submitted Decision Letter & Response Switch Details MOR-2",
-        "figure_count": 0,
-        "days_since_submission": 26
-      },
       "audit_trail": [],
       "documents": {},
-      "version_history": [],
-      "status_details": {},
-      "emails_extracted": false,
       "category": "Awaiting Reviewer Assignment",
-      "id": "MOR-2025-1190"
+      "title": "Geometric BSDEs",
+      "abstract": "09-Sep-2025 Managing Editor: Elmore (Editorial Office), Jeff AU REV AE AreaED EIC ME PROD Date to Managing Editor: 09-Sep-2025 Editor-in-Chief: Scheinberg, Katya AU REV AE AreaED EIC Date to Editor-in-Chief: 12-Sep-2025 Area Editor: Srikant, R. AU REV AE AreaED Date to Area Editor: 12-Sep-2025 Associate Editor: Possamaï, Dylan AU REV AE Date to Associate Editor: 22-Sep-2025 Version History Manuscript ID Manuscript Title Date Submitted Decision Letter & Response Switch Details MOR-2",
+      "keywords": [
+        "Geometric BSDEs",
+        "Two-driver BSDEs",
+        "Logarithmic non-linearity and singularity at zero",
+        "Dynamic return and star-shaped risk measures",
+        "Dynamics of $L^{p}$-norms"
+      ],
+      "submission_date": "2025-09-09",
+      "article_type": "Research Article",
+      "status": null,
+      "platform_specific": {
+        "metadata": {
+          "title": "Geometric BSDEs",
+          "submission_date": "09-Sep-2025",
+          "last_updated": "30-Sep-2025",
+          "keywords": "Geometric BSDEs , Two-driver BSDEs , Logarithmic non-linearity and singularity at zero , Dynamic return and star-shaped risk measures , Dynamics of $L^{p}$-norms",
+          "manuscript_type": "Research Article",
+          "funding": "Ermenegildo Zegna Founder’s Scholarship",
+          "abstract": "09-Sep-2025 Managing Editor: Elmore (Editorial Office), Jeff AU REV AE AreaED EIC ME PROD Date to Managing Editor: 09-Sep-2025 Editor-in-Chief: Scheinberg, Katya AU REV AE AreaED EIC Date to Editor-in-Chief: 12-Sep-2025 Area Editor: Srikant, R. AU REV AE AreaED Date to Area Editor: 12-Sep-2025 Associate Editor: Possamaï, Dylan AU REV AE Date to Associate Editor: 22-Sep-2025 Version History Manuscript ID Manuscript Title Date Submitted Decision Letter & Response Switch Details MOR-2",
+          "figure_count": 0,
+          "days_since_submission": 26
+        },
+        "version_history": [],
+        "status_details": {},
+        "emails_extracted": false,
+        "id": "MOR-2025-1190",
+        "manuscript_type": "Research Article"
+      }
     },
     {
       "manuscript_id": "MOR-2025-1190",
@@ -454,8 +640,11 @@
           "department": "",
           "country": "",
           "orcid": "",
-          "email_domain": "",
-          "corresponding_author": false
+          "is_corresponding": false,
+          "platform_specific": {
+            "email_domain": "",
+            "corresponding_author": false
+          }
         },
         {
           "name": "Laeven, Roger",
@@ -464,8 +653,11 @@
           "department": "",
           "country": "",
           "orcid": "",
-          "email_domain": "",
-          "corresponding_author": false
+          "is_corresponding": false,
+          "platform_specific": {
+            "email_domain": "",
+            "corresponding_author": false
+          }
         },
         {
           "name": "Laeven, Roger",
@@ -474,8 +666,11 @@
           "department": "",
           "country": "",
           "orcid": "",
-          "email_domain": "",
-          "corresponding_author": false
+          "is_corresponding": false,
+          "platform_specific": {
+            "email_domain": "",
+            "corresponding_author": false
+          }
         },
         {
           "name": "Rosazza Gianin, Emanuela",
@@ -484,8 +679,11 @@
           "department": "",
           "country": "",
           "orcid": "",
-          "email_domain": "",
-          "corresponding_author": false
+          "is_corresponding": false,
+          "platform_specific": {
+            "email_domain": "",
+            "corresponding_author": false
+          }
         },
         {
           "name": "Zullino, Marco",
@@ -494,8 +692,11 @@
           "department": "",
           "country": "",
           "orcid": "",
-          "email_domain": "",
-          "corresponding_author": false
+          "is_corresponding": false,
+          "platform_specific": {
+            "email_domain": "",
+            "corresponding_author": false
+          }
         }
       ],
       "referees": [
@@ -505,11 +706,19 @@
           "department": "ORFE",
           "country": "USA",
           "status": "Declined",
-          "invitation_date": "23-Sep-2025",
-          "response_date": "23-Sep-2025",
           "orcid": "",
           "email": "",
-          "email_domain": "@princeton.edu"
+          "dates": {
+            "invited": "2025-09-23",
+            "agreed": null,
+            "due": null,
+            "returned": null
+          },
+          "platform_specific": {
+            "invitation_date": "23-Sep-2025",
+            "response_date": "23-Sep-2025",
+            "email_domain": "@princeton.edu"
+          }
         },
         {
           "name": "Kupper, Michael",
@@ -517,11 +726,19 @@
           "department": "Department of Mathematics",
           "country": "",
           "status": "Agreed",
-          "invitation_date": "23-Sep-2025",
-          "response_date": "30-Sep-2025",
           "orcid": "",
           "email": "",
-          "email_domain": ""
+          "dates": {
+            "invited": "2025-09-23",
+            "agreed": null,
+            "due": null,
+            "returned": null
+          },
+          "platform_specific": {
+            "invitation_date": "23-Sep-2025",
+            "response_date": "30-Sep-2025",
+            "email_domain": ""
+          }
         },
         {
           "name": "Bahlali, Khaled",
@@ -529,11 +746,19 @@
           "department": "",
           "country": "",
           "status": "Declined",
-          "invitation_date": "23-Sep-2025",
-          "response_date": "01-Oct-2025",
           "orcid": "",
           "email": "",
-          "email_domain": ""
+          "dates": {
+            "invited": "2025-09-23",
+            "agreed": null,
+            "due": null,
+            "returned": null
+          },
+          "platform_specific": {
+            "invitation_date": "23-Sep-2025",
+            "response_date": "01-Oct-2025",
+            "email_domain": ""
+          }
         },
         {
           "name": "Hassani, Mohammed",
@@ -541,11 +766,19 @@
           "department": "",
           "country": "",
           "status": "Declined",
-          "invitation_date": "01-Oct-2025",
-          "response_date": "",
           "orcid": "",
           "email": "",
-          "email_domain": ""
+          "dates": {
+            "invited": "2025-10-01",
+            "agreed": null,
+            "due": null,
+            "returned": null
+          },
+          "platform_specific": {
+            "invitation_date": "01-Oct-2025",
+            "response_date": "",
+            "email_domain": ""
+          }
         }
       ],
       "editors": [
@@ -568,24 +801,39 @@
           "institution": ""
         }
       ],
-      "metadata": {
-        "title": "Geometric BSDEs",
-        "submission_date": "09-Sep-2025",
-        "last_updated": "30-Sep-2025",
-        "keywords": "Geometric BSDEs , Two-driver BSDEs , Logarithmic non-linearity and singularity at zero , Dynamic return and star-shaped risk measures , Dynamics of $L^{p}$-norms",
-        "manuscript_type": "Research Article",
-        "funding": "Ermenegildo Zegna Founder’s Scholarship",
-        "abstract": "09-Sep-2025 Managing Editor: Elmore (Editorial Office), Jeff AU REV AE AreaED EIC ME PROD Date to Managing Editor: 09-Sep-2025 Editor-in-Chief: Scheinberg, Katya AU REV AE AreaED EIC Date to Editor-in-Chief: 12-Sep-2025 Area Editor: Srikant, R. AU REV AE AreaED Date to Area Editor: 12-Sep-2025 Associate Editor: Possamaï, Dylan AU REV AE Date to Associate Editor: 22-Sep-2025 Version History Manuscript ID Manuscript Title Date Submitted Decision Letter & Response Switch Details MOR-2",
-        "figure_count": 0,
-        "days_since_submission": 26
-      },
       "audit_trail": [],
       "documents": {},
-      "version_history": [],
-      "status_details": {},
-      "emails_extracted": false,
       "category": "Awaiting Reviewer Assignment",
-      "id": "MOR-2025-1190"
+      "title": "Geometric BSDEs",
+      "abstract": "09-Sep-2025 Managing Editor: Elmore (Editorial Office), Jeff AU REV AE AreaED EIC ME PROD Date to Managing Editor: 09-Sep-2025 Editor-in-Chief: Scheinberg, Katya AU REV AE AreaED EIC Date to Editor-in-Chief: 12-Sep-2025 Area Editor: Srikant, R. AU REV AE AreaED Date to Area Editor: 12-Sep-2025 Associate Editor: Possamaï, Dylan AU REV AE Date to Associate Editor: 22-Sep-2025 Version History Manuscript ID Manuscript Title Date Submitted Decision Letter & Response Switch Details MOR-2",
+      "keywords": [
+        "Geometric BSDEs",
+        "Two-driver BSDEs",
+        "Logarithmic non-linearity and singularity at zero",
+        "Dynamic return and star-shaped risk measures",
+        "Dynamics of $L^{p}$-norms"
+      ],
+      "submission_date": "2025-09-09",
+      "article_type": "Research Article",
+      "status": null,
+      "platform_specific": {
+        "metadata": {
+          "title": "Geometric BSDEs",
+          "submission_date": "09-Sep-2025",
+          "last_updated": "30-Sep-2025",
+          "keywords": "Geometric BSDEs , Two-driver BSDEs , Logarithmic non-linearity and singularity at zero , Dynamic return and star-shaped risk measures , Dynamics of $L^{p}$-norms",
+          "manuscript_type": "Research Article",
+          "funding": "Ermenegildo Zegna Founder’s Scholarship",
+          "abstract": "09-Sep-2025 Managing Editor: Elmore (Editorial Office), Jeff AU REV AE AreaED EIC ME PROD Date to Managing Editor: 09-Sep-2025 Editor-in-Chief: Scheinberg, Katya AU REV AE AreaED EIC Date to Editor-in-Chief: 12-Sep-2025 Area Editor: Srikant, R. AU REV AE AreaED Date to Area Editor: 12-Sep-2025 Associate Editor: Possamaï, Dylan AU REV AE Date to Associate Editor: 22-Sep-2025 Version History Manuscript ID Manuscript Title Date Submitted Decision Letter & Response Switch Details MOR-2",
+          "figure_count": 0,
+          "days_since_submission": 26
+        },
+        "version_history": [],
+        "status_details": {},
+        "emails_extracted": false,
+        "id": "MOR-2025-1190",
+        "manuscript_type": "Research Article"
+      }
     },
     {
       "manuscript_id": "MOR-2025-1190",
@@ -600,8 +848,11 @@
           "department": "",
           "country": "",
           "orcid": "",
-          "email_domain": "",
-          "corresponding_author": false
+          "is_corresponding": false,
+          "platform_specific": {
+            "email_domain": "",
+            "corresponding_author": false
+          }
         },
         {
           "name": "Laeven, Roger",
@@ -610,8 +861,11 @@
           "department": "",
           "country": "",
           "orcid": "",
-          "email_domain": "",
-          "corresponding_author": false
+          "is_corresponding": false,
+          "platform_specific": {
+            "email_domain": "",
+            "corresponding_author": false
+          }
         },
         {
           "name": "Laeven, Roger",
@@ -620,8 +874,11 @@
           "department": "",
           "country": "",
           "orcid": "",
-          "email_domain": "",
-          "corresponding_author": false
+          "is_corresponding": false,
+          "platform_specific": {
+            "email_domain": "",
+            "corresponding_author": false
+          }
         },
         {
           "name": "Rosazza Gianin, Emanuela",
@@ -630,8 +887,11 @@
           "department": "",
           "country": "",
           "orcid": "",
-          "email_domain": "",
-          "corresponding_author": false
+          "is_corresponding": false,
+          "platform_specific": {
+            "email_domain": "",
+            "corresponding_author": false
+          }
         },
         {
           "name": "Zullino, Marco",
@@ -640,8 +900,11 @@
           "department": "",
           "country": "",
           "orcid": "",
-          "email_domain": "",
-          "corresponding_author": false
+          "is_corresponding": false,
+          "platform_specific": {
+            "email_domain": "",
+            "corresponding_author": false
+          }
         }
       ],
       "referees": [
@@ -651,11 +914,19 @@
           "department": "ORFE",
           "country": "USA",
           "status": "Declined",
-          "invitation_date": "23-Sep-2025",
-          "response_date": "23-Sep-2025",
           "orcid": "",
           "email": "",
-          "email_domain": "@princeton.edu"
+          "dates": {
+            "invited": "2025-09-23",
+            "agreed": null,
+            "due": null,
+            "returned": null
+          },
+          "platform_specific": {
+            "invitation_date": "23-Sep-2025",
+            "response_date": "23-Sep-2025",
+            "email_domain": "@princeton.edu"
+          }
         },
         {
           "name": "Kupper, Michael",
@@ -663,11 +934,19 @@
           "department": "Department of Mathematics",
           "country": "",
           "status": "Agreed",
-          "invitation_date": "23-Sep-2025",
-          "response_date": "30-Sep-2025",
           "orcid": "",
           "email": "",
-          "email_domain": ""
+          "dates": {
+            "invited": "2025-09-23",
+            "agreed": null,
+            "due": null,
+            "returned": null
+          },
+          "platform_specific": {
+            "invitation_date": "23-Sep-2025",
+            "response_date": "30-Sep-2025",
+            "email_domain": ""
+          }
         },
         {
           "name": "Bahlali, Khaled",
@@ -675,11 +954,19 @@
           "department": "",
           "country": "",
           "status": "Declined",
-          "invitation_date": "23-Sep-2025",
-          "response_date": "01-Oct-2025",
           "orcid": "",
           "email": "",
-          "email_domain": ""
+          "dates": {
+            "invited": "2025-09-23",
+            "agreed": null,
+            "due": null,
+            "returned": null
+          },
+          "platform_specific": {
+            "invitation_date": "23-Sep-2025",
+            "response_date": "01-Oct-2025",
+            "email_domain": ""
+          }
         },
         {
           "name": "Hassani, Mohammed",
@@ -687,11 +974,19 @@
           "department": "",
           "country": "",
           "status": "Declined",
-          "invitation_date": "01-Oct-2025",
-          "response_date": "",
           "orcid": "",
           "email": "",
-          "email_domain": ""
+          "dates": {
+            "invited": "2025-10-01",
+            "agreed": null,
+            "due": null,
+            "returned": null
+          },
+          "platform_specific": {
+            "invitation_date": "01-Oct-2025",
+            "response_date": "",
+            "email_domain": ""
+          }
         }
       ],
       "editors": [
@@ -714,24 +1009,39 @@
           "institution": ""
         }
       ],
-      "metadata": {
-        "title": "Geometric BSDEs",
-        "submission_date": "09-Sep-2025",
-        "last_updated": "30-Sep-2025",
-        "keywords": "Geometric BSDEs , Two-driver BSDEs , Logarithmic non-linearity and singularity at zero , Dynamic return and star-shaped risk measures , Dynamics of $L^{p}$-norms",
-        "manuscript_type": "Research Article",
-        "funding": "Ermenegildo Zegna Founder’s Scholarship",
-        "abstract": "09-Sep-2025 Managing Editor: Elmore (Editorial Office), Jeff AU REV AE AreaED EIC ME PROD Date to Managing Editor: 09-Sep-2025 Editor-in-Chief: Scheinberg, Katya AU REV AE AreaED EIC Date to Editor-in-Chief: 12-Sep-2025 Area Editor: Srikant, R. AU REV AE AreaED Date to Area Editor: 12-Sep-2025 Associate Editor: Possamaï, Dylan AU REV AE Date to Associate Editor: 22-Sep-2025 Version History Manuscript ID Manuscript Title Date Submitted Decision Letter & Response Switch Details MOR-2",
-        "figure_count": 0,
-        "days_since_submission": 26
-      },
       "audit_trail": [],
       "documents": {},
-      "version_history": [],
-      "status_details": {},
-      "emails_extracted": false,
       "category": "Awaiting Reviewer Reports",
-      "id": "MOR-2025-1190"
+      "title": "Geometric BSDEs",
+      "abstract": "09-Sep-2025 Managing Editor: Elmore (Editorial Office), Jeff AU REV AE AreaED EIC ME PROD Date to Managing Editor: 09-Sep-2025 Editor-in-Chief: Scheinberg, Katya AU REV AE AreaED EIC Date to Editor-in-Chief: 12-Sep-2025 Area Editor: Srikant, R. AU REV AE AreaED Date to Area Editor: 12-Sep-2025 Associate Editor: Possamaï, Dylan AU REV AE Date to Associate Editor: 22-Sep-2025 Version History Manuscript ID Manuscript Title Date Submitted Decision Letter & Response Switch Details MOR-2",
+      "keywords": [
+        "Geometric BSDEs",
+        "Two-driver BSDEs",
+        "Logarithmic non-linearity and singularity at zero",
+        "Dynamic return and star-shaped risk measures",
+        "Dynamics of $L^{p}$-norms"
+      ],
+      "submission_date": "2025-09-09",
+      "article_type": "Research Article",
+      "status": null,
+      "platform_specific": {
+        "metadata": {
+          "title": "Geometric BSDEs",
+          "submission_date": "09-Sep-2025",
+          "last_updated": "30-Sep-2025",
+          "keywords": "Geometric BSDEs , Two-driver BSDEs , Logarithmic non-linearity and singularity at zero , Dynamic return and star-shaped risk measures , Dynamics of $L^{p}$-norms",
+          "manuscript_type": "Research Article",
+          "funding": "Ermenegildo Zegna Founder’s Scholarship",
+          "abstract": "09-Sep-2025 Managing Editor: Elmore (Editorial Office), Jeff AU REV AE AreaED EIC ME PROD Date to Managing Editor: 09-Sep-2025 Editor-in-Chief: Scheinberg, Katya AU REV AE AreaED EIC Date to Editor-in-Chief: 12-Sep-2025 Area Editor: Srikant, R. AU REV AE AreaED Date to Area Editor: 12-Sep-2025 Associate Editor: Possamaï, Dylan AU REV AE Date to Associate Editor: 22-Sep-2025 Version History Manuscript ID Manuscript Title Date Submitted Decision Letter & Response Switch Details MOR-2",
+          "figure_count": 0,
+          "days_since_submission": 26
+        },
+        "version_history": [],
+        "status_details": {},
+        "emails_extracted": false,
+        "id": "MOR-2025-1190",
+        "manuscript_type": "Research Article"
+      }
     }
   ],
   "summary": {
@@ -756,5 +1066,8 @@
     "extraction_time": "2025-10-05T01:40:21.570367",
     "email_extraction_rate": 0.0
   },
-  "errors": []
+  "errors": [],
+  "schema_version": "1.0.0",
+  "journal_name": "Mathematics of Operations Research",
+  "platform": "ScholarOne"
 }

@@ -7,10 +7,12 @@ Simple orchestrator for running journal extractors reliably.
 Focuses on working extractors first, not grand architecture.
 
 Supports:
-- MF (Mathematical Finance) - WORKING
-- MOR (Mathematics of Operations Research) - WORKING
-- FS (Finance and Stochastics) - WORKING
-- SICON, SIFIN, NACO, JOTA, MAFE - SKELETON (not functional)
+- MF (Mathematical Finance) - ScholarOne
+- MOR (Mathematics of Operations Research) - ScholarOne
+- FS (Finance and Stochastics) - Gmail API
+- SICON, SIFIN (SIAM) - SIAM/ORCID
+- JOTA, MAFE (Editorial Manager) - Editorial Manager
+- NACO (Numerical Algebra, Control and Optimization) - EditFlow/MSP
 
 Usage:
     python3 run_extractors.py --journal mf
@@ -29,7 +31,7 @@ from pathlib import Path
 from typing import Dict, List, Optional
 
 # Add production extractors to path
-sys.path.insert(0, "production/src/extractors")
+sys.path.insert(0, str(Path(__file__).parent / "production/src/extractors"))
 
 
 class ExtractorOrchestrator:
@@ -66,43 +68,43 @@ class ExtractorOrchestrator:
                 "url": "https://mc.manuscriptcentral.com/mor",
             },
             "sicon": {
-                "name": "SIAM Control and Optimization",
+                "name": "SIAM Journal on Control and Optimization",
                 "module": "sicon_extractor",
-                "class": "ComprehensiveSICONExtractor",
+                "class": "SICONExtractor",
                 "platform": "SIAM",
-                "status": "SKELETON",
-                "url": "https://epubs.siam.org/journal/sicon",
+                "status": "WORKING",
+                "url": "https://sicon.siam.org",
             },
             "sifin": {
-                "name": "SIAM Financial Mathematics",
+                "name": "SIAM Journal on Financial Mathematics",
                 "module": "sifin_extractor",
-                "class": "ComprehensiveSIFINExtractor",
+                "class": "SIFINExtractor",
                 "platform": "SIAM",
-                "status": "SKELETON",
-                "url": "https://epubs.siam.org/journal/sifin",
+                "status": "WORKING",
+                "url": "https://sifin.siam.org",
             },
             "naco": {
                 "name": "Numerical Algebra, Control and Optimization",
                 "module": "naco_extractor",
-                "class": "ComprehensiveNACOExtractor",
-                "platform": "AIMS Sciences",
-                "status": "SKELETON",
-                "url": "https://www.aimsciences.org/naco",
+                "class": "NACOExtractor",
+                "platform": "EditFlow (MSP)",
+                "status": "WORKING",
+                "url": "https://ef.msp.org/login.php",
             },
             "jota": {
                 "name": "Journal of Optimization Theory and Applications",
                 "module": "jota_extractor",
-                "class": "ComprehensiveJOTAExtractor",
+                "class": "JOTAExtractor",
                 "platform": "Editorial Manager",
-                "status": "SKELETON",
+                "status": "WORKING",
                 "url": "https://www.editorialmanager.com/jota",
             },
             "mafe": {
                 "name": "Mathematics and Financial Economics",
                 "module": "mafe_extractor",
-                "class": "ComprehensiveMAFEExtractor",
+                "class": "MAFEExtractor",
                 "platform": "Editorial Manager",
-                "status": "SKELETON",
+                "status": "WORKING",
                 "url": "https://www.editorialmanager.com/mafe",
             },
             "fs": {
@@ -192,42 +194,44 @@ class ExtractorOrchestrator:
             journal_output = self.output_dir / journal_id
             journal_output.mkdir(exist_ok=True)
 
-            # Initialize and run extractor
-            extractor = extractor_class()
+            if journal_id in ("mor", "mf", "sicon", "sifin", "jota", "mafe", "naco"):
+                extractor = extractor_class(headless=headless)
+            else:
+                extractor = extractor_class()
 
             self.logger.info(f"Running {journal_id.upper()} extraction...")
             start_time = datetime.now()
 
-            # Run extraction (this will take time)
-            result = extractor.extract_all()
+            if journal_id in ("sicon", "sifin", "jota", "mafe", "naco"):
+                result = extractor.run()
+            else:
+                result = extractor.extract_all()
 
             end_time = datetime.now()
             duration = (end_time - start_time).total_seconds()
 
-            # Save results
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            results_file = journal_output / f"{journal_id}_extraction_{timestamp}.json"
+            manuscript_count = 0
+            if isinstance(result, list):
+                manuscript_count = len(result)
+            elif isinstance(result, dict) and "manuscripts" in result:
+                manuscript_count = len(result["manuscripts"])
+            elif hasattr(extractor, "manuscripts") and extractor.manuscripts:
+                manuscript_count = len(extractor.manuscripts)
+            elif hasattr(extractor, "manuscripts_data") and extractor.manuscripts_data:
+                manuscript_count = len(extractor.manuscripts_data)
 
-            if hasattr(extractor, "manuscripts") and extractor.manuscripts:
-                # Save detailed results
+            if manuscript_count > 0:
+                self.logger.info(f"Extraction completed successfully")
+                self.logger.info(f"Duration: {duration:.1f} seconds")
+                self.logger.info(f"Manuscripts: {manuscript_count}")
+
                 extraction_data = {
                     "journal": journal_id,
                     "journal_name": config["name"],
-                    "extraction_time": timestamp,
+                    "extraction_time": datetime.now().strftime("%Y%m%d_%H%M%S"),
                     "duration_seconds": duration,
-                    "manuscripts_count": len(extractor.manuscripts),
-                    "manuscripts": [
-                        m.to_dict() if hasattr(m, "to_dict") else m for m in extractor.manuscripts
-                    ],
+                    "manuscripts_count": manuscript_count,
                 }
-
-                with open(results_file, "w") as f:
-                    json.dump(extraction_data, f, indent=2, default=str)
-
-                self.logger.info(f"Extraction completed successfully")
-                self.logger.info(f"Duration: {duration:.1f} seconds")
-                self.logger.info(f"Manuscripts: {len(extractor.manuscripts)}")
-                self.logger.info(f"Results saved: {results_file}")
 
                 return extraction_data
 
@@ -239,12 +243,14 @@ class ExtractorOrchestrator:
             self.logger.error(f"Extraction failed for {journal_id}: {e}")
             return None
         finally:
-            # Cleanup
             try:
                 if "extractor" in locals():
-                    extractor.cleanup()
-            except:
-                pass
+                    if hasattr(extractor, "cleanup_driver"):
+                        extractor.cleanup_driver()
+                    elif hasattr(extractor, "cleanup"):
+                        extractor.cleanup()
+            except Exception as e:
+                self.logger.warning(f"Cleanup error for {journal_id}: {e}")
 
     def run_all_working(self, headless: bool = True) -> Dict[str, Optional[Dict]]:
         """Run all working extractors.
@@ -325,6 +331,8 @@ def main():
     )
     parser.add_argument("--all", action="store_true", help="Run all working extractors")
     parser.add_argument("--status", action="store_true", help="Show status of all extractors")
+    parser.add_argument("--report", action="store_true", help="Cross-journal summary report")
+    parser.add_argument("--json", action="store_true", help="Save JSON output (use with --report)")
     parser.add_argument("--recent", action="store_true", help="Show recent extraction results")
     parser.add_argument(
         "--visible", action="store_true", help="Run with visible browser (default: headless)"
@@ -340,6 +348,12 @@ def main():
 
     if args.status:
         orchestrator.show_status()
+
+    elif args.report:
+        sys.path.insert(0, str(Path(__file__).parent / "production/src"))
+        from reporting.cross_journal_report import run_report
+
+        run_report(save_json=args.json)
 
     elif args.recent:
         results = orchestrator.get_recent_results()

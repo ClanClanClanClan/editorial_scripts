@@ -1,41 +1,21 @@
-# 📚 Editorial Scripts Documentation
+# Editorial Scripts Documentation
 
-## 📁 Structure
+## Primary Reference
 
-### 🔄 Workflows
-- **[MF_WORKFLOW.md](workflows/MF_WORKFLOW.md)** - How to run MF extractor
-- **[SICON_EXTRACTION_WORKFLOW.md](workflows/SICON_EXTRACTION_WORKFLOW.md)** - SICON extraction process
-- **[GMAIL_API_SETUP_GUIDE.md](workflows/GMAIL_API_SETUP_GUIDE.md)** - Gmail API configuration
+Start with **[CLAUDE.md](../CLAUDE.md)** — the single source of truth for all operational details, env vars, and troubleshooting.
 
-### 📋 Specifications
-- **[PROJECT_SPECIFICATIONS.md](specifications/PROJECT_SPECIFICATIONS.md)** - Complete project specifications
-- **[EDITORIAL_COMMAND_CENTER_SPECS.md](specifications/EDITORIAL_COMMAND_CENTER_SPECS.md)** - Command center specifications
-- **[SICON_COMPLETE_SPECIFICATION.md](specifications/SICON_COMPLETE_SPECIFICATION.md)** - SICON platform specs
-- **[MASTER_IMPLEMENTATION_PLAN.md](specifications/MASTER_IMPLEMENTATION_PLAN.md)** - Implementation roadmap
+## Docs
 
-## 🎯 Quick Navigation
+| File | Contents |
+|------|----------|
+| **[EXTRACTOR_REFERENCE.md](EXTRACTOR_REFERENCE.md)** | Full operational details for all 8 extractors by platform |
+| **[TROUBLESHOOTING.md](TROUBLESHOOTING.md)** | Common failures, fixes, and debug procedures |
+| **[GMAIL_OAUTH_SETUP.md](GMAIL_OAUTH_SETUP.md)** | Gmail OAuth token setup and refresh |
+| **[GENERAL_AUDIENCE_OVERVIEW.md](GENERAL_AUDIENCE_OVERVIEW.md)** | Non-technical project overview |
+| **[CRITICAL_FINDING.md](CRITICAL_FINDING.md)** | MF referee email extraction finding (Aug 2025) |
 
-**For New Users:**
-1. Read [CLAUDE.md](../CLAUDE.md) first
-2. Check [MF_WORKFLOW.md](workflows/MF_WORKFLOW.md) for MF extractor usage
-3. Review [PROJECT_SPECIFICATIONS.md](specifications/PROJECT_SPECIFICATIONS.md) for architecture
+## Archived Docs
 
-**For Developers:**
-1. Study [MASTER_IMPLEMENTATION_PLAN.md](specifications/MASTER_IMPLEMENTATION_PLAN.md)
-2. Review platform-specific specifications
-3. Check workflow documentation for operational procedures
-
-**For System Setup:**
-1. Follow [GMAIL_API_SETUP_GUIDE.md](workflows/GMAIL_API_SETUP_GUIDE.md)
-2. Use credential verification scripts
-3. Test with production extractors
-
-## 📖 Documentation Philosophy
-
-This documentation is **essential-only** - no bloat, just what you need to:
-- Understand the system architecture
-- Run extractors successfully
-- Implement new journal extractors
-- Maintain and troubleshoot
-
-All historical/archived documentation is preserved in `../archive/` for reference.
+Stale documentation (references dead ECC architecture, old class names, or pre-refactor file paths):
+- `archive/docs_stale_20260211/` — first cleanup
+- `archive/docs_stale_20260223/` — second cleanup (specifications/, workflows/, extractors/, etc.)

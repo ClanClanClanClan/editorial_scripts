@@ -19,5 +19,8 @@
     "cache_hits": 0,
     "extraction_time": "2025-10-04T18:14:51.612362"
   },
-  "errors": []
+  "errors": [],
+  "schema_version": "1.0.0",
+  "journal_name": "Mathematics of Operations Research",
+  "platform": "ScholarOne"
 }

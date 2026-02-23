@@ -141,7 +141,6 @@ def _get_gmail_service():
 
     # Check for existing token - prioritize the known location
     token_paths = [
-        "/Users/dylanpossamai/Library/CloudStorage/Dropbox/Work/editorial_scripts/config/gmail_token.json",  # Explicit path first
         str(project_root / "config/gmail_token.json"),
         str(project_root / "config/token.json"),
         "config/gmail_token.json",

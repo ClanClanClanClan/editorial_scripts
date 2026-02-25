@@ -6,6 +6,8 @@ Usage:
     python3 run_pipeline.py --journal sicon --manuscript M178221
     python3 run_pipeline.py --journal sicon --pending
     python3 run_pipeline.py --journal sicon --manuscript M178221 --llm
+    python3 run_pipeline.py --train
+    python3 run_pipeline.py --rebuild-index
 """
 
 import argparse
@@ -24,12 +26,13 @@ def main():
         epilog="""Examples:
   python3 run_pipeline.py -j sicon -m M178221       Single manuscript
   python3 run_pipeline.py -j sicon --pending         All pending manuscripts
-  python3 run_pipeline.py -j sicon -m M178221 --llm  With LLM desk-rejection""",
+  python3 run_pipeline.py -j sicon -m M178221 --llm  With LLM desk-rejection
+  python3 run_pipeline.py --train                     Train all ML models
+  python3 run_pipeline.py --rebuild-index             Rebuild FAISS referee index""",
     )
     parser.add_argument(
         "--journal",
         "-j",
-        required=True,
         choices=["mf", "mor", "fs", "jota", "mafe", "sicon", "sifin", "naco"],
         help="Journal code",
     )
@@ -41,10 +44,51 @@ def main():
     parser.add_argument(
         "--max-candidates", type=int, default=15, help="Max referee candidates (default: 15)"
     )
+    parser.add_argument("--train", action="store_true", help="Train/retrain all ML models")
+    parser.add_argument(
+        "--validate", action="store_true", help="Run model validation and print metrics"
+    )
+    parser.add_argument(
+        "--rebuild-index", action="store_true", help="Rebuild FAISS expertise index"
+    )
     args = parser.parse_args()
 
+    if args.train:
+        from pipeline.training import ModelTrainer
+
+        trainer = ModelTrainer()
+        results = trainer.train_all()
+        print("\nTraining complete.")
+        return
+
+    if args.validate:
+        from pipeline.training import ModelTrainer
+
+        trainer = ModelTrainer()
+        results = trainer.train_all()
+        stats = trainer.get_feedback_stats()
+        if stats:
+            print("\nFeedback stats:")
+            for journal, s in stats.items():
+                print(f"  {journal}: {s['total']} outcomes — {s['decisions']}")
+        return
+
+    if args.rebuild_index:
+        from pipeline.models.expertise_index import ExpertiseIndex
+
+        idx = ExpertiseIndex()
+        n = idx.build()
+        if n > 0:
+            idx.save()
+            print(f"Index rebuilt: {n} referees")
+        else:
+            print("No referee data found to index")
+        return
+
+    if not args.journal:
+        parser.error("--journal is required with --manuscript or --pending")
     if not args.manuscript and not args.pending:
-        parser.error("Specify --manuscript ID or --pending")
+        parser.error("Specify --manuscript ID, --pending, --train, --validate, or --rebuild-index")
 
     pipeline = RefereePipeline(use_llm=args.llm, max_candidates=args.max_candidates)
 

@@ -21,6 +21,8 @@ def find_referees(
     enricher: AcademicProfileEnricher,
     session: requests.Session,
     max_candidates: int = 15,
+    expertise_index=None,
+    response_predictor=None,
 ) -> list:
     keywords = manuscript.get("keywords", [])
     title = manuscript.get("title", "")
@@ -45,6 +47,23 @@ def find_referees(
         if key and key not in seen_keys and key not in author_names:
             seen_keys.add(key)
             candidates.append(c)
+
+    if expertise_index is not None:
+        try:
+            idx_results = expertise_index.search(manuscript, k=30)
+            for ref in idx_results:
+                c = _make_candidate(ref, source="expertise_index")
+                c["semantic_similarity"] = ref.get("semantic_similarity", 0.0)
+                if ref.get("h_index"):
+                    c["h_index"] = ref["h_index"]
+                if ref.get("topics"):
+                    c["research_topics"] = ref["topics"]
+                key = _dedup_key(c)
+                if key and key not in seen_keys and key not in author_names:
+                    seen_keys.add(key)
+                    candidates.append(c)
+        except Exception:
+            pass
 
     oa_candidates = _search_openalex_works(keywords, title, session, author_names)
     for c in oa_candidates:
@@ -86,7 +105,9 @@ def find_referees(
                 pass
 
     for c in candidates:
-        c["relevance_score"] = _compute_relevance(c, keywords, title, abstract)
+        c["relevance_score"] = _compute_relevance(
+            c, keywords, title, abstract, response_predictor, journal_code, manuscript
+        )
         c["topic_overlap"] = _compute_topic_overlap(c, keywords)
 
     candidates.sort(key=lambda x: -x["relevance_score"])
@@ -292,24 +313,36 @@ def _search_historical(
     return candidates
 
 
-def _compute_relevance(candidate: dict, keywords: list, title: str, abstract: str) -> float:
+def _compute_relevance(
+    candidate: dict,
+    keywords: list,
+    title: str,
+    abstract: str,
+    response_predictor=None,
+    journal_code: str = None,
+    manuscript: dict = None,
+) -> float:
     score = 0.0
 
-    topics = candidate.get("research_topics", [])
-    if topics and keywords:
-        kw_lower = {k.lower() for k in keywords}
-        topic_lower = {t.lower() for t in topics}
-        kw_words = set()
-        for k in kw_lower:
-            kw_words.update(k.split())
-        topic_words = set()
-        for t in topic_lower:
-            topic_words.update(t.split())
-        common = kw_words & topic_words
-        union = kw_words | topic_words
-        if union:
-            word_overlap = len(common) / len(union)
-            score += 0.30 * min(1.0, word_overlap * 3)
+    semantic_sim = candidate.get("semantic_similarity")
+    if semantic_sim is not None:
+        score += 0.30 * min(1.0, max(0.0, semantic_sim))
+    else:
+        topics = candidate.get("research_topics", [])
+        if topics and keywords:
+            kw_lower = {k.lower() for k in keywords}
+            topic_lower = {t.lower() for t in topics}
+            kw_words = set()
+            for k in kw_lower:
+                kw_words.update(k.split())
+            topic_words = set()
+            for t in topic_lower:
+                topic_words.update(t.split())
+            common = kw_words & topic_words
+            union = kw_words | topic_words
+            if union:
+                word_overlap = len(common) / len(union)
+                score += 0.30 * min(1.0, word_overlap * 3)
 
     papers = candidate.get("relevant_papers", [])
     if papers and title:
@@ -326,18 +359,28 @@ def _compute_relevance(candidate: dict, keywords: list, title: str, abstract: st
             if union:
                 sim = len(common) / len(union)
                 best = max(best, sim)
-        score += 0.25 * min(1.0, best * 3)
+        score += 0.15 * min(1.0, best * 3)
 
     h = candidate.get("h_index") or 0
-    score += 0.15 * min(1.0, h / 25)
+    score += 0.10 * min(1.0, h / 25)
 
     source_weights = {
-        "author_suggested": 0.15,
-        "historical_referee": 0.12,
-        "openalex_search": 0.08,
-        "semantic_scholar_search": 0.08,
+        "author_suggested": 0.10,
+        "expertise_index": 0.09,
+        "historical_referee": 0.08,
+        "openalex_search": 0.05,
+        "semantic_scholar_search": 0.05,
     }
-    score += source_weights.get(candidate.get("source", ""), 0.05)
+    score += source_weights.get(candidate.get("source", ""), 0.03)
+
+    if response_predictor is not None and manuscript is not None:
+        try:
+            p_accept = response_predictor.predict_for_candidate(
+                candidate, manuscript, journal_code or ""
+            )
+            score += 0.20 * p_accept
+        except Exception:
+            score += 0.10
 
     if papers:
         recent = any(p.get("year") and p["year"] >= 2023 for p in papers)

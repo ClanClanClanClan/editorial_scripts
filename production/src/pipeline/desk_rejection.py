@@ -200,6 +200,8 @@ def assess_desk_rejection(
     journal_code: str,
     all_journals_data: Optional[Dict[str, dict]] = None,
     use_llm: bool = False,
+    outcome_predictor=None,
+    report_quality: dict = None,
 ) -> dict:
     signals = _heuristic_signals(manuscript, journal_code, all_journals_data)
 
@@ -208,12 +210,30 @@ def assess_desk_rejection(
     confidence = min(0.9, 0.3 * len(high_signals) + 0.1 * len(signals))
     if not signals:
         confidence = 0.05
-
-    summary = _build_summary(signals, should_reject)
     method = "heuristic"
 
+    if outcome_predictor is not None:
+        try:
+            p_accept = outcome_predictor.predict(manuscript, journal_code)
+            signals.append(
+                {
+                    "signal_name": "model_prediction",
+                    "severity": "high"
+                    if p_accept < 0.2
+                    else ("medium" if p_accept < 0.4 else "low"),
+                    "description": f"Trained model: P(accept)={p_accept:.2f}",
+                    "confidence": 0.7,
+                }
+            )
+            confidence = round(1.0 - p_accept, 2) if should_reject else round(p_accept, 2)
+            method = "heuristic+model"
+        except Exception:
+            pass
+
+    summary = _build_summary(signals, should_reject)
+
     if use_llm:
-        llm_result = _llm_assessment(manuscript, journal_code, signals)
+        llm_result = _llm_assessment(manuscript, journal_code, signals, report_quality)
         if llm_result:
             method = "heuristic+llm"
             if llm_result.get("should_desk_reject") is not None:
@@ -291,6 +311,34 @@ def _heuristic_signals(
                     "confidence": 0.8,
                 }
             )
+
+    scope_desc = JOURNAL_SCOPES_LLM.get(journal_code.upper(), "")
+    if scope_desc and abstract:
+        try:
+            from pipeline.embeddings import get_engine
+
+            engine = get_engine()
+            scope_sim = engine.similarity(abstract[:2000], scope_desc)
+            if scope_sim < 0.2:
+                signals.append(
+                    {
+                        "signal_name": "scope_embedding_mismatch",
+                        "severity": "high",
+                        "description": f"Semantic scope similarity very low ({scope_sim:.2f})",
+                        "confidence": 0.7,
+                    }
+                )
+            elif scope_sim >= 0.5:
+                signals.append(
+                    {
+                        "signal_name": "scope_embedding_match",
+                        "severity": "low",
+                        "description": f"Strong semantic scope match ({scope_sim:.2f})",
+                        "confidence": 0.8,
+                    }
+                )
+        except Exception:
+            pass
 
     authors = manuscript.get("authors", [])
     if authors:
@@ -377,6 +425,7 @@ def _llm_assessment(
     manuscript: dict,
     journal_code: str,
     heuristic_signals: list,
+    report_quality: dict = None,
 ) -> Optional[dict]:
     api_key = os.environ.get("ANTHROPIC_API_KEY")
     if not api_key:
@@ -406,6 +455,14 @@ def _llm_assessment(
         f"- [{s['severity']}] {s['signal_name']}: {s['description']}" for s in heuristic_signals
     )
 
+    rq_text = ""
+    if report_quality and report_quality.get("n_reports", 0) > 0:
+        rq_text = f"\n\nReport quality: {report_quality.get('n_reports')} reports, overall={report_quality.get('overall_quality', 'N/A')}"
+        if report_quality.get("consensus"):
+            rq_text += (
+                f", consensus={report_quality['consensus'].get('sentiment_agreement', 'N/A')}"
+            )
+
     prompt = f"""You are an associate editor for {journal_code.upper()}.
 
 Journal scope: {scope}
@@ -420,7 +477,7 @@ Authors:
 {chr(10).join(authors_summary) if authors_summary else '(no author data)'}
 
 Heuristic signals:
-{signals_text if signals_text else '(none)'}
+{signals_text if signals_text else '(none)'}{rq_text}
 
 Respond in JSON format:
 {{"should_desk_reject": true/false, "confidence": 0.0-1.0, "reasoning": "brief explanation", "summary": "one sentence recommendation"}}

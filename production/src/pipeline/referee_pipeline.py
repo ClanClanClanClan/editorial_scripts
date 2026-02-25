@@ -127,6 +127,39 @@ class RefereePipeline:
             {"User-Agent": "Editorial-Scripts/1.0 (mailto:dylansmb@gmail.com)"}
         )
         self.enricher = AcademicProfileEnricher(self.session)
+        self.expertise_index = None
+        self.response_predictor = None
+        self.outcome_predictor = None
+        self._load_models()
+
+    def _load_models(self):
+        try:
+            from pipeline.models.expertise_index import ExpertiseIndex
+
+            idx = ExpertiseIndex()
+            if idx.load():
+                self.expertise_index = idx
+                print(f"   Loaded expertise index ({len(idx.referees)} referees)")
+        except Exception:
+            pass
+        try:
+            from pipeline.models.response_predictor import RefereeResponsePredictor
+
+            rp = RefereeResponsePredictor()
+            if rp.load():
+                self.response_predictor = rp
+                print("   Loaded response predictor")
+        except Exception:
+            pass
+        try:
+            from pipeline.models.outcome_predictor import ManuscriptOutcomePredictor
+
+            op = ManuscriptOutcomePredictor()
+            if op.load():
+                self.outcome_predictor = op
+                print("   Loaded outcome predictor")
+        except Exception:
+            pass
 
     def run_single(self, journal_code: str, manuscript_id: str) -> dict:
         jc = journal_code.upper()
@@ -188,8 +221,24 @@ class RefereePipeline:
             if jd:
                 all_journals[j] = jd
 
-        print("   [1/4] Desk rejection assessment...")
-        desk = assess_desk_rejection(manuscript, journal_code, all_journals, use_llm=self.use_llm)
+        from pipeline.report_quality import assess_report_quality
+
+        print("   [1/5] Report quality assessment...")
+        rq = assess_report_quality(manuscript)
+        if rq["n_reports"] > 0:
+            print(f"   >> {rq['n_reports']} reports, quality={rq['overall_quality']:.2f}")
+        else:
+            print("   >> No reports available")
+
+        print("   [2/5] Desk rejection assessment...")
+        desk = assess_desk_rejection(
+            manuscript,
+            journal_code,
+            all_journals,
+            use_llm=self.use_llm,
+            outcome_predictor=self.outcome_predictor,
+            report_quality=rq,
+        )
         if desk["should_desk_reject"]:
             print(f"   >> DESK REJECT (confidence={desk['confidence']}): {desk['summary']}")
         else:
@@ -197,9 +246,15 @@ class RefereePipeline:
 
         candidates = []
         if not desk["should_desk_reject"] or desk["confidence"] < 0.8:
-            print("   [2/4] Searching for referee candidates...")
+            print("   [3/5] Searching for referee candidates...")
             candidates = find_referees(
-                manuscript, journal_code, self.enricher, self.session, self.max_candidates
+                manuscript,
+                journal_code,
+                self.enricher,
+                self.session,
+                self.max_candidates,
+                expertise_index=self.expertise_index,
+                response_predictor=self.response_predictor,
             )
             print(f"   >> Found {len(candidates)} candidates")
 
@@ -208,7 +263,7 @@ class RefereePipeline:
                 rec = manuscript.get("platform_specific", {}).get("referee_recommendations", {})
             opposed = rec.get("opposed_referees", [])
 
-            print("   [3/4] Checking conflicts...")
+            print("   [4/5] Checking conflicts...")
             for c in candidates:
                 conflicts = check_conflicts(
                     c,
@@ -231,11 +286,11 @@ class RefereePipeline:
                 f"   >> {conflicted_count} conflicted, {len(candidates) - conflicted_count} clean"
             )
         else:
-            print("   [2/4] Skipping referee search (desk rejection recommended)")
-            print("   [3/4] Skipping conflict check")
+            print("   [3/5] Skipping referee search (desk rejection recommended)")
+            print("   [4/5] Skipping conflict check")
 
-        print("   [4/4] Building report...")
-        report = self._build_report(manuscript, journal_code, desk, candidates)
+        print("   [5/5] Building report...")
+        report = self._build_report(manuscript, journal_code, desk, candidates, rq)
         self._save_report(report, journal_code)
         self._print_summary(report)
         return report
@@ -246,6 +301,7 @@ class RefereePipeline:
         journal_code: str,
         desk: dict,
         candidates: list,
+        report_quality: dict = None,
     ) -> dict:
         clean = [c for c in candidates if not c["is_conflicted"]]
         conflicted = [c for c in candidates if c["is_conflicted"]]
@@ -281,11 +337,17 @@ class RefereePipeline:
             "referee_candidates": _sanitize_candidates(top),
             "conflicted_candidates": _sanitize_candidates(conflicted[:10]),
             "author_suggested_status": suggested_status,
+            "report_quality": report_quality or {},
             "metadata": {
                 "candidates_found": len(candidates),
                 "candidates_clean": len(clean),
                 "candidates_conflicted": len(conflicted),
                 "top_returned": len(top),
+                "models_loaded": {
+                    "expertise_index": self.expertise_index is not None,
+                    "response_predictor": self.response_predictor is not None,
+                    "outcome_predictor": self.outcome_predictor is not None,
+                },
             },
         }
 

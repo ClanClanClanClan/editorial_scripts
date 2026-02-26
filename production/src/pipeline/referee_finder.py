@@ -323,32 +323,29 @@ def _compute_relevance(
     journal_code: str = None,
     manuscript: dict = None,
 ) -> float:
-    score = 0.0
-
+    # Spec weights: 30% topic, 25% publication, 15% seniority, 15% source trust, 15% recency
+    topic_score = 0.0
     semantic_sim = candidate.get("semantic_similarity")
     if semantic_sim is not None:
-        score += 0.30 * min(1.0, max(0.0, semantic_sim))
+        topic_score = min(1.0, max(0.0, semantic_sim))
     else:
         topics = candidate.get("research_topics", [])
         if topics and keywords:
-            kw_lower = {k.lower() for k in keywords}
-            topic_lower = {t.lower() for t in topics}
             kw_words = set()
-            for k in kw_lower:
-                kw_words.update(k.split())
+            for k in keywords:
+                kw_words.update(k.lower().split())
             topic_words = set()
-            for t in topic_lower:
-                topic_words.update(t.split())
+            for t in topics:
+                topic_words.update(t.lower().split())
             common = kw_words & topic_words
             union = kw_words | topic_words
             if union:
-                word_overlap = len(common) / len(union)
-                score += 0.30 * min(1.0, word_overlap * 3)
+                topic_score = min(1.0, len(common) / len(union) * 3)
 
+    pub_score = 0.0
     papers = candidate.get("relevant_papers", [])
     if papers and title:
-        title_lower = title.lower()
-        title_words = set(title_lower.split())
+        title_words = set(title.lower().split())
         best = 0.0
         for p in papers:
             ptitle = (p.get("title") or "").lower()
@@ -358,59 +355,48 @@ def _compute_relevance(
             common = title_words & p_words
             union = title_words | p_words
             if union:
-                sim = len(common) / len(union)
-                best = max(best, sim)
-        score += 0.15 * min(1.0, best * 3)
+                best = max(best, len(common) / len(union))
+        pub_score = min(1.0, best * 3)
 
     h = candidate.get("h_index") or 0
-    score += 0.10 * min(1.0, h / 25)
+    seniority_score = min(1.0, h / 30)
 
-    source_weights = {
-        "author_suggested": 0.10,
-        "expertise_index": 0.09,
-        "historical_referee": 0.08,
-        "openalex_search": 0.05,
-        "semantic_scholar_search": 0.05,
+    source_trust = {
+        "author_suggested": 1.0,
+        "expertise_index": 0.85,
+        "historical_referee": 0.7,
+        "openalex_search": 0.4,
+        "semantic_scholar_search": 0.4,
     }
-    score += source_weights.get(candidate.get("source", ""), 0.03)
+    trust_score = source_trust.get(candidate.get("source", ""), 0.3)
+
+    recency_score = 0.0
+    if papers:
+        years = [p.get("year") or 0 for p in papers]
+        max_year = max(years) if years else 0
+        if max_year >= 2024:
+            recency_score = 1.0
+        elif max_year >= 2022:
+            recency_score = 0.6
+        elif max_year >= 2020:
+            recency_score = 0.3
+
+    score = (
+        0.30 * topic_score
+        + 0.25 * pub_score
+        + 0.15 * seniority_score
+        + 0.15 * trust_score
+        + 0.15 * recency_score
+    )
 
     if response_predictor is not None and manuscript is not None:
         try:
             p_accept = response_predictor.predict_for_candidate(
                 candidate, manuscript, journal_code or ""
             )
-            score += 0.15 * p_accept
+            score += 0.05 * p_accept
         except Exception:
-            score += 0.075
-
-    reliability = candidate.get("_reliability_score")
-    if reliability is not None:
-        score += 0.10 * min(1.0, max(0.0, reliability))
-    elif candidate.get("source") == "historical_referee":
-        score += 0.05
-
-    if manuscript is not None:
-        ms_institutions = set()
-        for a in manuscript.get("authors", []):
-            inst = (a.get("institution") or "").lower()
-            if inst:
-                ms_institutions.add(inst)
-        cand_inst = (candidate.get("institution") or "").lower()
-        cand_country = (candidate.get("country") or "").lower()
-        ms_countries = set()
-        for a in manuscript.get("authors", []):
-            c = (a.get("country") or "").lower()
-            if c:
-                ms_countries.add(c)
-        if cand_inst and not any(cand_inst in mi or mi in cand_inst for mi in ms_institutions):
-            score += 0.05
-        if cand_country and cand_country not in ms_countries:
-            score += 0.05
-
-    if papers:
-        recent = any(p.get("year") and p["year"] >= 2023 for p in papers)
-        if recent:
-            score += 0.05
+            pass
 
     return round(min(1.0, score), 3)
 

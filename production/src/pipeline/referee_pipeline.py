@@ -36,7 +36,7 @@ AWAITING_REFEREE_CONFIG = {
         ],
     },
     "Editorial Manager": {
-        "status_needs_referee_check": ["Under Review", "With Referees", "Submitted to Journal"],
+        "status_needs_referee_check": ["Under Review", "With Referees"],
     },
     "EditFlow (MSP)": {
         "status_needs_referee_check": ["Under Review"],

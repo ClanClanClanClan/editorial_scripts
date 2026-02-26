@@ -288,26 +288,31 @@ def _heuristic_signals(
         )
 
     scope_kws = JOURNAL_SCOPE_KEYWORDS.get(journal_code.upper(), [])
-    if scope_kws and (keywords or abstract):
-        ms_text = " ".join(keywords).lower() + " " + abstract.lower()
-        ms_text += " " + (manuscript.get("title") or "").lower()
-        matches = sum(1 for kw in scope_kws if kw.lower() in ms_text)
-        overlap = matches / len(scope_kws) if scope_kws else 0
-        if overlap < 0.05 and abstract:
+    if scope_kws and keywords:
+        ms_words = set()
+        for kw in keywords:
+            ms_words.update(kw.lower().split())
+        scope_words = set()
+        for kw in scope_kws:
+            scope_words.update(kw.lower().split())
+        intersection = ms_words & scope_words
+        union = ms_words | scope_words
+        jaccard = len(intersection) / len(union) if union else 0.0
+        if jaccard < 0.1 and abstract:
             signals.append(
                 {
                     "signal_name": "scope_mismatch",
                     "severity": "high",
-                    "description": f"Only {matches}/{len(scope_kws)} scope keywords found in title+abstract+keywords",
+                    "description": f"Keyword-scope Jaccard similarity={jaccard:.2f} (threshold 0.1)",
                     "confidence": 0.6,
                 }
             )
-        elif overlap >= 0.1:
+        elif jaccard >= 0.15:
             signals.append(
                 {
                     "signal_name": "scope_match",
                     "severity": "low",
-                    "description": f"{matches}/{len(scope_kws)} scope keywords match",
+                    "description": f"Good keyword-scope overlap (Jaccard={jaccard:.2f})",
                     "confidence": 0.8,
                 }
             )

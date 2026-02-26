@@ -81,7 +81,8 @@ def _score_single_report(report: dict, manuscript: dict, referee: dict) -> dict:
     recommendation = report.get("recommendation", "") or referee.get("recommendation", "") or ""
 
     word_count = len(text.split()) if text else 0
-    length_score = min(word_count / 200.0, 1.0)
+
+    thoroughness_score = _thoroughness(text, word_count)
 
     specificity_score = 0.0
     if text:
@@ -103,24 +104,27 @@ def _score_single_report(report: dict, manuscript: dict, referee: dict) -> dict:
             pass
 
     consistency_score = _recommendation_consistency(text, recommendation)
+    timeliness_score = _timeliness(referee)
 
     overall = (
-        0.25 * length_score
-        + 0.20 * specificity_score
+        0.20 * thoroughness_score
+        + 0.15 * specificity_score
         + 0.20 * constructiveness_score
-        + 0.20 * engagement_score
+        + 0.15 * engagement_score
         + 0.15 * consistency_score
+        + 0.15 * timeliness_score
     )
 
     return {
         "reviewer": referee.get("name", "Unknown"),
         "recommendation": recommendation,
         "word_count": word_count,
-        "length_score": round(length_score, 3),
+        "thoroughness_score": round(thoroughness_score, 3),
         "specificity_score": round(specificity_score, 3),
         "constructiveness_score": round(constructiveness_score, 3),
         "engagement_score": round(engagement_score, 3),
         "consistency_score": round(consistency_score, 3),
+        "timeliness_score": round(timeliness_score, 3),
         "overall": round(overall, 3),
     }
 
@@ -130,13 +134,57 @@ def _score_from_recommendation_only(referee: dict) -> dict:
         "reviewer": referee.get("name", "Unknown"),
         "recommendation": referee.get("recommendation", ""),
         "word_count": 0,
-        "length_score": 0.0,
+        "thoroughness_score": 0.0,
         "specificity_score": 0.0,
         "constructiveness_score": 0.0,
         "engagement_score": 0.0,
         "consistency_score": 0.0,
+        "timeliness_score": _timeliness(referee),
         "overall": 0.0,
     }
+
+
+def _thoroughness(text: str, word_count: int) -> float:
+    if not text:
+        return 0.0
+    length_component = min(word_count / 500.0, 1.0)
+    sections_found = 0
+    section_markers = [
+        r"summary|overview",
+        r"strengths?|positive",
+        r"weakness|concern|issue|problem",
+        r"suggest|recommend|improvement",
+        r"minor|typo|editorial",
+    ]
+    lower = text.lower()
+    for pattern in section_markers:
+        if re.search(pattern, lower):
+            sections_found += 1
+    coverage_component = min(sections_found / 4.0, 1.0)
+    return 0.6 * length_component + 0.4 * coverage_component
+
+
+def _timeliness(referee: dict, allowed_days: int = 28) -> float:
+    invited = referee.get("date_invited") or referee.get("invitation_date")
+    completed = referee.get("date_completed") or referee.get("report_date")
+    if not invited or not completed:
+        return 0.5
+    try:
+        from datetime import datetime
+
+        for fmt in ["%Y-%m-%d", "%d %b %Y", "%m/%d/%Y", "%Y-%m-%dT%H:%M:%S"]:
+            try:
+                d1 = datetime.strptime(str(invited).strip()[:19], fmt)
+                d2 = datetime.strptime(str(completed).strip()[:19], fmt)
+                actual_days = (d2 - d1).days
+                if actual_days < 0 or actual_days > 365:
+                    return 0.5
+                return max(0.0, 1.0 - actual_days / allowed_days)
+            except ValueError:
+                continue
+    except Exception:
+        pass
+    return 0.5
 
 
 def _constructiveness(text: str) -> float:

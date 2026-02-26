@@ -13,6 +13,8 @@ from pipeline.models.response_predictor import RefereeResponsePredictor
 from pipeline.report_quality import (
     _constructiveness,
     _recommendation_consistency,
+    _thoroughness,
+    _timeliness,
     assess_report_quality,
 )
 from pipeline.training import ModelTrainer
@@ -129,6 +131,30 @@ class TestReportQuality:
         )
         assert score > 0.5
 
+    def test_thoroughness_long_text(self):
+        text = (
+            "I suggest the authors revise section 3. The strengths of the paper include the novel approach. However, there is a weakness in the proof. Minor typos on page 5. "
+            + "word " * 300
+        )
+        score = _thoroughness(text, len(text.split()))
+        assert score > 0.5
+
+    def test_thoroughness_empty(self):
+        assert _thoroughness("", 0) == 0.0
+
+    def test_timeliness_fast_review(self):
+        ref = {"date_invited": "2025-01-01", "date_completed": "2025-01-14"}
+        score = _timeliness(ref)
+        assert score > 0.4
+
+    def test_timeliness_slow_review(self):
+        ref = {"date_invited": "2025-01-01", "date_completed": "2025-03-01"}
+        score = _timeliness(ref)
+        assert score < 0.1
+
+    def test_timeliness_no_dates(self):
+        assert _timeliness({}) == 0.5
+
     def test_assess_report_quality_no_reports(self):
         ms = {"referees": []}
         result = assess_report_quality(ms)
@@ -201,7 +227,7 @@ class TestOutcomePredictor:
         with patch.object(
             predictor,
             "_build_training_data",
-            return_value=(np.array([]).reshape(0, 9), np.array([])),
+            return_value=(np.array([]).reshape(0, 10), np.array([])),
         ):
             result = predictor.train()
         assert result["status"] == "insufficient_data"
@@ -210,7 +236,7 @@ class TestOutcomePredictor:
         predictor = ManuscriptOutcomePredictor()
         n = 20
         rng = np.random.RandomState(42)
-        X = rng.rand(n, 9)
+        X = rng.rand(n, 10)
         y = (X[:, 0] > 0.5).astype(int)
         with patch.object(predictor, "_build_training_data", return_value=(X, y)):
             result = predictor.train()
@@ -226,7 +252,7 @@ class TestOutcomePredictor:
         predictor = ManuscriptOutcomePredictor()
         n = 10
         rng = np.random.RandomState(42)
-        X = rng.rand(n, 9)
+        X = rng.rand(n, 10)
         y = (X[:, 0] > 0.5).astype(int)
         with patch.object(predictor, "_build_training_data", return_value=(X, y)):
             predictor.train()
@@ -250,7 +276,11 @@ class TestResponsePredictor:
         with patch.object(
             predictor,
             "_build_training_data",
-            return_value=(np.array([]).reshape(0, 5), np.array([])),
+            return_value=(
+                np.array([]).reshape(0, 8),
+                np.array([]),
+                np.array([]),
+            ),
         ):
             result = predictor.train()
         assert result["status"] == "insufficient_data"
@@ -259,9 +289,10 @@ class TestResponsePredictor:
         predictor = RefereeResponsePredictor()
         n = 30
         rng = np.random.RandomState(42)
-        X = rng.rand(n, 5)
-        y = (X[:, 0] > 0.4).astype(int)
-        with patch.object(predictor, "_build_training_data", return_value=(X, y)):
+        X = rng.rand(n, 8)
+        y_agree = (X[:, 0] > 0.4).astype(int)
+        y_complete = (X[:, 1] > 0.3).astype(int)
+        with patch.object(predictor, "_build_training_data", return_value=(X, y_agree, y_complete)):
             result = predictor.train()
         assert result["status"] == "trained"
         assert result["n_samples"] == n
@@ -272,24 +303,51 @@ class TestResponsePredictor:
             "n_past_reviews": 0.3,
             "journal_match": 1.0,
             "expertise_similarity": 0.7,
+            "avg_turnaround": 0.4,
+            "active_load": 0.2,
+            "institution_distance": 1.0,
         }
         prob = predictor.predict(features)
+        assert 0.0 <= prob <= 1.0
+
+    def test_predict_completion(self):
+        predictor = RefereeResponsePredictor()
+        n = 30
+        rng = np.random.RandomState(42)
+        X = rng.rand(n, 8)
+        y_agree = (X[:, 0] > 0.2).astype(int)
+        y_complete = (X[:, 1] > 0.3).astype(int)
+        with patch.object(predictor, "_build_training_data", return_value=(X, y_agree, y_complete)):
+            predictor.train()
+        prob = predictor.predict_completion({"h_index": 0.5})
         assert 0.0 <= prob <= 1.0
 
     def test_predict_for_candidate(self):
         predictor = RefereeResponsePredictor()
         n = 20
         rng = np.random.RandomState(42)
-        X = rng.rand(n, 5)
-        y = (X[:, 0] > 0.4).astype(int)
-        with patch.object(predictor, "_build_training_data", return_value=(X, y)):
+        X = rng.rand(n, 8)
+        y_agree = (X[:, 0] > 0.4).astype(int)
+        y_complete = (X[:, 1] > 0.3).astype(int)
+        with patch.object(predictor, "_build_training_data", return_value=(X, y_agree, y_complete)):
             predictor.train()
 
         candidate = {
             "web_profile": {"h_index": 15},
-            "_referee_stats": {"acceptance_rate": 0.7, "n_reviews": 5, "journals": {"sicon": 2}},
+            "_referee_stats": {
+                "acceptance_rate": 0.7,
+                "n_reviews": 5,
+                "journals": {"sicon": 2},
+                "avg_turnaround_days": 20,
+                "active_reviews": 1,
+            },
         }
-        ms = {"title": "test", "abstract": "test", "keywords": ["control"]}
+        ms = {
+            "title": "test",
+            "abstract": "test",
+            "keywords": ["control"],
+            "authors": [{"institution": "MIT"}],
+        }
         prob = predictor.predict_for_candidate(candidate, ms, "sicon")
         assert 0.0 <= prob <= 1.0
 
@@ -297,9 +355,10 @@ class TestResponsePredictor:
         predictor = RefereeResponsePredictor()
         n = 20
         rng = np.random.RandomState(42)
-        X = rng.rand(n, 5)
-        y = (X[:, 0] > 0.4).astype(int)
-        with patch.object(predictor, "_build_training_data", return_value=(X, y)):
+        X = rng.rand(n, 8)
+        y_agree = (X[:, 0] > 0.4).astype(int)
+        y_complete = (X[:, 1] > 0.3).astype(int)
+        with patch.object(predictor, "_build_training_data", return_value=(X, y_agree, y_complete)):
             predictor.train()
 
         predictor.save(tmp_path)

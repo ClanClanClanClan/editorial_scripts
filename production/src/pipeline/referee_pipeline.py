@@ -343,13 +343,23 @@ class RefereePipeline:
                 "candidates_clean": len(clean),
                 "candidates_conflicted": len(conflicted),
                 "top_returned": len(top),
-                "models_loaded": {
-                    "expertise_index": self.expertise_index is not None,
-                    "response_predictor": self.response_predictor is not None,
-                    "outcome_predictor": self.outcome_predictor is not None,
-                },
+                "models": self._model_metadata(),
             },
         }
+
+    def _model_metadata(self) -> dict:
+        info = {
+            "expertise_index": None,
+            "response_predictor": None,
+            "outcome_predictor": None,
+        }
+        if self.expertise_index is not None:
+            info["expertise_index"] = {"n_referees": len(self.expertise_index.referees)}
+        if self.response_predictor is not None:
+            info["response_predictor"] = {"loaded": True}
+        if self.outcome_predictor is not None:
+            info["outcome_predictor"] = {"loaded": True}
+        return info
 
     def _save_report(self, report: dict, journal_code: str) -> Path:
         rec_dir = OUTPUTS_DIR / journal_code.lower() / "recommendations"

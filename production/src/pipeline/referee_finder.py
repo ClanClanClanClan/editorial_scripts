@@ -378,9 +378,33 @@ def _compute_relevance(
             p_accept = response_predictor.predict_for_candidate(
                 candidate, manuscript, journal_code or ""
             )
-            score += 0.20 * p_accept
+            score += 0.15 * p_accept
         except Exception:
-            score += 0.10
+            score += 0.075
+
+    reliability = candidate.get("_reliability_score")
+    if reliability is not None:
+        score += 0.10 * min(1.0, max(0.0, reliability))
+    elif candidate.get("source") == "historical_referee":
+        score += 0.05
+
+    if manuscript is not None:
+        ms_institutions = set()
+        for a in manuscript.get("authors", []):
+            inst = (a.get("institution") or "").lower()
+            if inst:
+                ms_institutions.add(inst)
+        cand_inst = (candidate.get("institution") or "").lower()
+        cand_country = (candidate.get("country") or "").lower()
+        ms_countries = set()
+        for a in manuscript.get("authors", []):
+            c = (a.get("country") or "").lower()
+            if c:
+                ms_countries.add(c)
+        if cand_inst and not any(cand_inst in mi or mi in cand_inst for mi in ms_institutions):
+            score += 0.05
+        if cand_country and cand_country not in ms_countries:
+            score += 0.05
 
     if papers:
         recent = any(p.get("year") and p["year"] >= 2023 for p in papers)

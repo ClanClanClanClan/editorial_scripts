@@ -26,6 +26,7 @@ class ManuscriptOutcomePredictor:
             "author_citation_max",
             "has_freemail",
             "keyword_scope_overlap",
+            "article_type_encoded",
         ]
 
     def train(self, journals: list = None) -> dict:
@@ -223,6 +224,32 @@ class ManuscriptOutcomePredictor:
             except Exception:
                 pass
 
+        article_type = (
+            ms.get("article_type")
+            or ms.get("type")
+            or ms.get("platform_specific", {}).get("article_type", "")
+            or ""
+        ).lower()
+        type_scores = {
+            "regular paper": 1.0,
+            "research article": 1.0,
+            "original paper": 1.0,
+            "full paper": 1.0,
+            "short note": 0.6,
+            "short communication": 0.6,
+            "review": 0.8,
+            "survey": 0.8,
+            "letter": 0.4,
+            "comment": 0.3,
+            "erratum": 0.2,
+            "correction": 0.2,
+        }
+        article_type_val = 0.7
+        for key, val in type_scores.items():
+            if key in article_type:
+                article_type_val = val
+                break
+
         return {
             "scope_similarity": scope_sim,
             "abstract_length": min(len(abstract.split()) / 300.0, 1.0),
@@ -237,6 +264,7 @@ class ManuscriptOutcomePredictor:
             else 0.0,
             "has_freemail": 1.0 if has_freemail else 0.0,
             "keyword_scope_overlap": keyword_overlap,
+            "article_type_encoded": article_type_val,
         }
 
 

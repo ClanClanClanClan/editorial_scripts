@@ -457,11 +457,23 @@ def _llm_assessment(
 
     rq_text = ""
     if report_quality and report_quality.get("n_reports", 0) > 0:
-        rq_text = f"\n\nReport quality: {report_quality.get('n_reports')} reports, overall={report_quality.get('overall_quality', 'N/A')}"
-        if report_quality.get("consensus"):
-            rq_text += (
-                f", consensus={report_quality['consensus'].get('sentiment_agreement', 'N/A')}"
+        rq_lines = [
+            f"\n\nExisting referee reports ({report_quality['n_reports']} total, "
+            f"overall quality={report_quality.get('overall_quality', 'N/A')}):"
+        ]
+        for rpt in report_quality.get("reports", []):
+            rq_lines.append(
+                f"  - {rpt.get('reviewer', '?')}: rec={rpt.get('recommendation', '?')}, "
+                f"words={rpt.get('word_count', 0)}, thoroughness={rpt.get('thoroughness_score', 'N/A')}, "
+                f"timeliness={rpt.get('timeliness_score', 'N/A')}"
             )
+        if report_quality.get("consensus"):
+            cons = report_quality["consensus"]
+            rq_lines.append(
+                f"  Consensus: agreement={cons.get('recommendation_agreement', 'N/A')}, "
+                f"sentiment={cons.get('sentiment_agreement', 'N/A')}"
+            )
+        rq_text = "\n".join(rq_lines)
 
     prompt = f"""You are an associate editor for {journal_code.upper()}.
 

@@ -29,6 +29,10 @@ webdriver-manager = "^4.0.0"
 # AI and analysis
 openai = "^1.8.0"
 numpy = "^1.26.3"
+scikit-learn = "^1.4.0"
+joblib = "^1.3.0"
+faiss-cpu = "^1.7.0"
+sentence-transformers = "^2.2.0"
 
 # Caching and queue
 redis = "^5.0.0"

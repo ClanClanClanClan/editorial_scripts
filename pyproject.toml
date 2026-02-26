@@ -4,8 +4,7 @@ version = "2.0.0"
 description = "Editorial Command Center - AI-powered journal manuscript extraction and management system"
 authors = ["Dylan Possamaï <dylan.possamai@math.ethz.ch>"]
 readme = "README.md"
-# Production code lives in production/src/ (not installed as packages)
-packages = []
+package-mode = false
 
 [tool.poetry.dependencies]
 python = "^3.11"

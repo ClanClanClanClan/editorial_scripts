@@ -275,7 +275,8 @@ def _search_historical(
             continue
 
         try:
-            data = json.load(open(latest))
+            with open(latest) as _f:
+                data = json.load(_f)
         except (json.JSONDecodeError, OSError):
             continue
 

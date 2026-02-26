@@ -149,5 +149,8 @@ def _find_latest_json(journal_dir: Path):
 
 
 def _load_json(path: Path) -> dict:
-    with open(path) as f:
-        return json.load(f)
+    try:
+        with open(path) as f:
+            return json.load(f)
+    except (json.JSONDecodeError, OSError):
+        return {}

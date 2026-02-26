@@ -245,12 +245,6 @@ def _compute_consensus(reports: list) -> dict:
     sentiment_spread = max(sentiments) - min(sentiments) if len(sentiments) >= 2 else 0.0
     sentiment_agreement = 1.0 - sentiment_spread
 
-    texts = [
-        (r.get("word_count", 0), r.get("reviewer", ""))
-        for r in reports
-        if r.get("word_count", 0) > 50
-    ]
-
     return {
         "n_reviewers": len(reports),
         "recommendation_agreement": round(recommendation_agreement, 3),

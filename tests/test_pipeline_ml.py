@@ -232,6 +232,17 @@ class TestOutcomePredictor:
             result = predictor.train()
         assert result["status"] == "insufficient_data"
 
+    def test_quality_gate_rejects_weak_model(self):
+        predictor = ManuscriptOutcomePredictor()
+        n = 20
+        rng = np.random.RandomState(99)
+        X = rng.rand(n, 10)
+        y = rng.randint(0, 2, n)
+        with patch.object(predictor, "_build_training_data", return_value=(X, y)):
+            result = predictor.train()
+        assert result["status"] == "model_not_useful"
+        assert predictor.model is None
+
     def test_train_and_predict(self):
         predictor = ManuscriptOutcomePredictor()
         n = 20
@@ -285,13 +296,25 @@ class TestResponsePredictor:
             result = predictor.train()
         assert result["status"] == "insufficient_data"
 
-    def test_train_and_predict(self):
+    def test_quality_gate_rejects_weak_model(self):
         predictor = RefereeResponsePredictor()
         n = 30
-        rng = np.random.RandomState(42)
+        rng = np.random.RandomState(99)
         X = rng.rand(n, 8)
-        y_agree = (X[:, 0] > 0.4).astype(int)
-        y_complete = (X[:, 1] > 0.3).astype(int)
+        y_agree = rng.randint(0, 2, n)
+        y_complete = rng.randint(0, 2, n)
+        with patch.object(predictor, "_build_training_data", return_value=(X, y_agree, y_complete)):
+            result = predictor.train()
+        assert result["status"] == "model_not_useful"
+        assert predictor.model is None
+
+    def test_train_and_predict(self):
+        predictor = RefereeResponsePredictor()
+        n = 60
+        rng = np.random.RandomState(42)
+        X = np.vstack([rng.rand(30, 8) * 0.3, rng.rand(30, 8) * 0.3 + 0.7])
+        y_agree = np.array([0] * 30 + [1] * 30)
+        y_complete = (X[:, 1] > 0.5).astype(int)
         with patch.object(predictor, "_build_training_data", return_value=(X, y_agree, y_complete)):
             result = predictor.train()
         assert result["status"] == "trained"
@@ -353,11 +376,10 @@ class TestResponsePredictor:
 
     def test_save_load(self, tmp_path):
         predictor = RefereeResponsePredictor()
-        n = 20
         rng = np.random.RandomState(42)
-        X = rng.rand(n, 8)
-        y_agree = (X[:, 0] > 0.4).astype(int)
-        y_complete = (X[:, 1] > 0.3).astype(int)
+        X = np.vstack([rng.rand(30, 8) * 0.3, rng.rand(30, 8) * 0.3 + 0.7])
+        y_agree = np.array([0] * 30 + [1] * 30)
+        y_complete = (X[:, 1] > 0.5).astype(int)
         with patch.object(predictor, "_build_training_data", return_value=(X, y_agree, y_complete)):
             predictor.train()
 

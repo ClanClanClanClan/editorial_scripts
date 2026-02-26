@@ -18,6 +18,8 @@ class EmbeddingEngine:
     def __init__(self):
         self.model = None
         self.dim = None
+        self._tfidf = None
+        self._tfidf_fitted = False
         self._load_model()
 
     def _load_model(self):
@@ -99,7 +101,7 @@ class EmbeddingEngine:
     def _tfidf_embed(self, text: str) -> np.ndarray:
         from sklearn.feature_extraction.text import TfidfVectorizer
 
-        if not hasattr(self, "_tfidf"):
+        if self._tfidf is None:
             self._tfidf = TfidfVectorizer(max_features=768)
             self._tfidf_fitted = False
         if not self._tfidf_fitted:

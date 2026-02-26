@@ -36,14 +36,28 @@ class RefereeResponsePredictor:
 
         self.model = _make_model()
         scores = cross_val_score(self.model, X, y_agree, cv=cv, scoring="accuracy")
+        mean_cv = float(np.mean(scores))
+        positive_rate = float(np.mean(y_agree))
+        baseline = max(positive_rate, 1.0 - positive_rate)
+
+        if mean_cv < baseline + 0.05:
+            self.model = None
+            return {
+                "status": "model_not_useful",
+                "n_samples": len(X),
+                "cv_accuracy": round(mean_cv, 3),
+                "baseline_accuracy": round(baseline, 3),
+                "positive_rate": round(positive_rate, 3),
+            }
+
         self.model.fit(X, y_agree)
 
         result = {
             "status": "trained",
             "n_samples": len(X),
-            "cv_accuracy": round(float(np.mean(scores)), 3),
+            "cv_accuracy": round(mean_cv, 3),
             "cv_std": round(float(np.std(scores)), 3),
-            "positive_rate": round(float(np.mean(y_agree)), 3),
+            "positive_rate": round(positive_rate, 3),
         }
 
         agreed_mask = y_agree == 1

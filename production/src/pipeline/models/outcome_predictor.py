@@ -62,6 +62,18 @@ class ManuscriptOutcomePredictor:
         if best_model is None:
             return {"status": "training_failed", "n_samples": n}
 
+        positive_rate = float(np.mean(y))
+        baseline = max(positive_rate, 1.0 - positive_rate)
+        if best_score < baseline + 0.05:
+            return {
+                "status": "model_not_useful",
+                "n_samples": n,
+                "model_type": best_name,
+                "cv_accuracy": round(best_score, 3),
+                "baseline_accuracy": round(baseline, 3),
+                "positive_rate": round(positive_rate, 3),
+            }
+
         best_model.fit(X_scaled, y)
         self.model = best_model
 
@@ -70,7 +82,7 @@ class ManuscriptOutcomePredictor:
             "n_samples": n,
             "model_type": best_name,
             "cv_accuracy": round(best_score, 3),
-            "positive_rate": round(float(np.mean(y)), 3),
+            "positive_rate": round(positive_rate, 3),
         }
 
     def predict(self, manuscript: dict, journal_code: str = None) -> float:

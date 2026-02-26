@@ -14,7 +14,7 @@ import argparse
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).parent / "production" / "src"))
+sys.path.insert(0, str(Path(__file__).resolve().parent / "production" / "src"))
 
 from pipeline.referee_pipeline import RefereePipeline
 

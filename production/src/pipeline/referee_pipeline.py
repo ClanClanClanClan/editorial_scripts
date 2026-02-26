@@ -140,8 +140,8 @@ class RefereePipeline:
             if idx.load():
                 self.expertise_index = idx
                 print(f"   Loaded expertise index ({len(idx.referees)} referees)")
-        except Exception:
-            pass
+        except Exception as e:
+            print(f"   Expertise index not available: {e}")
         try:
             from pipeline.models.response_predictor import RefereeResponsePredictor
 
@@ -149,8 +149,8 @@ class RefereePipeline:
             if rp.load():
                 self.response_predictor = rp
                 print("   Loaded response predictor")
-        except Exception:
-            pass
+        except Exception as e:
+            print(f"   Response predictor not available: {e}")
         try:
             from pipeline.models.outcome_predictor import ManuscriptOutcomePredictor
 
@@ -158,8 +158,8 @@ class RefereePipeline:
             if op.load():
                 self.outcome_predictor = op
                 print("   Loaded outcome predictor")
-        except Exception:
-            pass
+        except Exception as e:
+            print(f"   Outcome predictor not available: {e}")
 
     def run_single(self, journal_code: str, manuscript_id: str) -> dict:
         jc = journal_code.upper()
@@ -307,6 +307,7 @@ class RefereePipeline:
         conflicted = [c for c in candidates if c["is_conflicted"]]
 
         clean.sort(key=lambda x: -x["relevance_score"])
+        conflicted.sort(key=lambda x: -x["relevance_score"])
         top = clean[: self.max_candidates]
         for i, c in enumerate(top, 1):
             c["rank"] = i

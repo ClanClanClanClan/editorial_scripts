@@ -112,7 +112,7 @@ def _build_referee_profile(ref: dict, ms_keywords: list, ms_title: str, journal:
         "name": ref.get("name", ""),
         "email": ref.get("email", ""),
         "institution": ref.get("institution", ""),
-        "h_index": wp.get("h_index") or wp.get("semantic_scholar", {}).get("h_index", 0) or 0,
+        "h_index": wp.get("h_index") or (wp.get("semantic_scholar") or {}).get("h_index", 0) or 0,
         "journal": journal,
         "topics": topics,
         "text": text,
@@ -129,7 +129,7 @@ def _manuscript_text(ms: dict) -> str:
 def _deduplicate(referees: list) -> list:
     seen = {}
     for ref in referees:
-        key = ref.get("email", "").lower().strip() or ref.get("name", "").lower().strip()
+        key = (ref.get("email") or "").lower().strip() or (ref.get("name") or "").lower().strip()
         if not key:
             continue
         if key in seen:

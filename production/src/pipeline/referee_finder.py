@@ -33,7 +33,7 @@ def find_referees(
 
     rec = manuscript.get("referee_recommendations", {})
     if not rec:
-        rec = manuscript.get("platform_specific", {}).get("referee_recommendations", {})
+        rec = (manuscript.get("platform_specific") or {}).get("referee_recommendations") or {}
     recommended = rec.get("recommended_referees", [])
     opposed = rec.get("opposed_referees", [])
 

@@ -11,6 +11,7 @@ JOURNAL_SCOPE_KEYWORDS = {
         "stochastic control",
         "differential games",
         "mean-field",
+        "mean field",
         "backward SDE",
         "BSDE",
         "Hamilton-Jacobi",
@@ -28,6 +29,9 @@ JOURNAL_SCOPE_KEYWORDS = {
         "Riccati",
         "robust control",
         "filtering",
+        "optimization",
+        "equilibrium",
+        "utility",
     ],
     "SIFIN": [
         "financial mathematics",
@@ -76,7 +80,16 @@ JOURNAL_SCOPE_KEYWORDS = {
         "interest rate",
         "stochastic control",
         "mean-field game",
+        "mean field",
         "equilibrium",
+        "BSDE",
+        "backward SDE",
+        "utility",
+        "optimal",
+        "trading",
+        "contract",
+        "principal agent",
+        "moral hazard",
     ],
     "FS": [
         "stochastic analysis",
@@ -90,6 +103,19 @@ JOURNAL_SCOPE_KEYWORDS = {
         "free boundary",
         "risk",
         "insurance",
+        "hedging",
+        "portfolio",
+        "pricing",
+        "volatility",
+        "market",
+        "trading",
+        "mean field",
+        "equilibrium",
+        "BSDE",
+        "utility",
+        "optimization",
+        "dividend",
+        "control",
     ],
     "JOTA": [
         "optimization",
@@ -291,6 +317,7 @@ def _heuristic_signals(
         )
 
     scope_kws = JOURNAL_SCOPE_KEYWORDS.get(journal_code.upper(), [])
+    jaccard = None
     if scope_kws and keywords:
         ms_words = set()
         for kw in keywords:
@@ -301,25 +328,8 @@ def _heuristic_signals(
         intersection = ms_words & scope_words
         union = ms_words | scope_words
         jaccard = len(intersection) / len(union) if union else 0.0
-        if jaccard < 0.1 and abstract:
-            signals.append(
-                {
-                    "signal_name": "scope_mismatch",
-                    "severity": "high",
-                    "description": f"Keyword-scope Jaccard similarity={jaccard:.2f} (threshold 0.1)",
-                    "confidence": 0.6,
-                }
-            )
-        elif jaccard >= 0.15:
-            signals.append(
-                {
-                    "signal_name": "scope_match",
-                    "severity": "low",
-                    "description": f"Good keyword-scope overlap (Jaccard={jaccard:.2f})",
-                    "confidence": 0.8,
-                }
-            )
 
+    scope_sim = None
     scope_desc = JOURNAL_SCOPES_LLM.get(journal_code.upper(), "")
     if scope_desc and abstract:
         try:
@@ -327,32 +337,75 @@ def _heuristic_signals(
 
             engine = get_engine()
             scope_sim = engine.similarity(abstract[:2000], scope_desc)
-            if scope_sim < 0.2:
-                signals.append(
-                    {
-                        "signal_name": "scope_embedding_mismatch",
-                        "severity": "high",
-                        "description": f"Semantic scope similarity very low ({scope_sim:.2f})",
-                        "confidence": 0.7,
-                    }
-                )
-            elif scope_sim >= 0.5:
-                signals.append(
-                    {
-                        "signal_name": "scope_embedding_match",
-                        "severity": "low",
-                        "description": f"Strong semantic scope match ({scope_sim:.2f})",
-                        "confidence": 0.8,
-                    }
-                )
         except Exception:
             pass
+
+    if jaccard is not None and jaccard < 0.1 and abstract:
+        if jaccard == 0.0:
+            signals.append(
+                {
+                    "signal_name": "scope_mismatch",
+                    "severity": "high",
+                    "description": f"Zero keyword-scope vocabulary overlap (Jaccard=0.00)",
+                    "confidence": 0.7,
+                }
+            )
+        elif scope_sim is not None and scope_sim < 0.2:
+            signals.append(
+                {
+                    "signal_name": "scope_mismatch",
+                    "severity": "high",
+                    "description": (
+                        f"Both keyword Jaccard ({jaccard:.2f}) and semantic similarity "
+                        f"({scope_sim:.2f}) indicate out-of-scope"
+                    ),
+                    "confidence": 0.7,
+                }
+            )
+        else:
+            signals.append(
+                {
+                    "signal_name": "scope_mismatch",
+                    "severity": "medium",
+                    "description": f"Low keyword-scope Jaccard similarity={jaccard:.2f} (threshold 0.1)",
+                    "confidence": 0.4,
+                }
+            )
+    elif jaccard is not None and jaccard >= 0.15:
+        signals.append(
+            {
+                "signal_name": "scope_match",
+                "severity": "low",
+                "description": f"Good keyword-scope overlap (Jaccard={jaccard:.2f})",
+                "confidence": 0.8,
+            }
+        )
+
+    if scope_sim is not None:
+        if scope_sim >= 0.5:
+            signals.append(
+                {
+                    "signal_name": "scope_embedding_match",
+                    "severity": "low",
+                    "description": f"Strong semantic scope match ({scope_sim:.2f})",
+                    "confidence": 0.8,
+                }
+            )
+        elif scope_sim < 0.2 and (jaccard is None or jaccard >= 0.1):
+            signals.append(
+                {
+                    "signal_name": "scope_embedding_mismatch",
+                    "severity": "medium",
+                    "description": f"Semantic scope similarity low ({scope_sim:.2f})",
+                    "confidence": 0.5,
+                }
+            )
 
     authors = manuscript.get("authors", [])
     if authors:
         has_profile = any(
-            a.get("web_profile", {}).get("h_index")
-            or a.get("web_profile", {}).get("citation_count")
+            (a.get("web_profile") or {}).get("h_index")
+            or (a.get("web_profile") or {}).get("citation_count")
             for a in authors
         )
         if not has_profile:
@@ -369,7 +422,7 @@ def _heuristic_signals(
         for a in authors:
             if (
                 a.get("is_corresponding")
-                or a.get("platform_specific", {}).get("role") == "corresponding"
+                or (a.get("platform_specific") or {}).get("role") == "corresponding"
             ):
                 corresponding = a
                 break
@@ -451,9 +504,9 @@ def _llm_assessment(
 
     authors_summary = []
     for a in manuscript.get("authors", [])[:5]:
-        wp = a.get("web_profile", {})
+        wp = a.get("web_profile") or {}
         h = wp.get("h_index") or "unknown"
-        topics = wp.get("research_topics", [])[:5]
+        topics = (wp.get("research_topics") or [])[:5]
         authors_summary.append(
             f"- {a.get('name', '?')} ({a.get('institution', '?')}): "
             f"h-index={h}, topics={topics}"

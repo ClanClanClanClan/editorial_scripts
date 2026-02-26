@@ -51,6 +51,10 @@ artifacts/
 production/outputs/
 production/cache/
 
+# Trained ML model artifacts (binary, regenerated via --train)
+/production/models/
+/models/
+
 # Debug artifacts and HTML captures
 debug_*.html
 *debug*.html

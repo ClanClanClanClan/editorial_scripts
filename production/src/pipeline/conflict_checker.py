@@ -66,9 +66,9 @@ def _check_coauthorship(
     cand_name = candidate.get("name", "")
 
     for author in manuscript_authors:
-        wp = author.get("web_profile", {})
-        s2 = wp.get("semantic_scholar", {})
-        for paper in s2.get("top_papers", []):
+        wp = author.get("web_profile") or {}
+        s2 = wp.get("semantic_scholar") or {}
+        for paper in s2.get("top_papers") or []:
             title = paper.get("title", "")
             if not title:
                 continue
@@ -84,8 +84,8 @@ def _check_coauthorship(
     cand_s2 = cand_wp.get("semantic_scholar") or {}
     cand_papers = cand_s2.get("top_papers", [])
     for author in manuscript_authors:
-        author_wp = author.get("web_profile", {})
-        author_s2 = author_wp.get("semantic_scholar", {})
+        author_wp = author.get("web_profile") or {}
+        author_s2 = author_wp.get("semantic_scholar") or {}
         author_papers = author_s2.get("top_papers", [])
         cand_titles = {p.get("title", "").lower() for p in cand_papers if p.get("title")}
         author_titles = {p.get("title", "").lower() for p in author_papers if p.get("title")}

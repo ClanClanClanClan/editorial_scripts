@@ -117,7 +117,7 @@ class RefereeResponsePredictor:
             "h_index": min(h_index / 30.0, 1.0),
             "acceptance_rate": stats.get("acceptance_rate", 0.5),
             "n_past_reviews": min(stats.get("n_reviews", 0) / 10.0, 1.0),
-            "journal_match": 1.0 if stats.get("journals", {}).get(journal, 0) > 0 else 0.0,
+            "journal_match": 1.0 if (stats.get("journals") or {}).get(journal, 0) > 0 else 0.0,
             "expertise_similarity": candidate.get("semantic_similarity", 0.5),
             "avg_turnaround": min(stats.get("avg_turnaround_days", 30) / 60.0, 1.0),
             "active_load": min(stats.get("active_reviews", 0) / 5.0, 1.0),
@@ -170,7 +170,9 @@ class RefereeResponsePredictor:
                         all_referees.append((ref, journal, ms_keywords))
 
         for ref, journal, _ in all_referees:
-            key = ref.get("email", "").lower().strip() or ref.get("name", "").lower().strip()
+            key = (ref.get("email") or "").lower().strip() or (
+                ref.get("name") or ""
+            ).lower().strip()
             if not key:
                 continue
             if key not in referee_history:
@@ -217,7 +219,9 @@ class RefereeResponsePredictor:
 
             completed = any(s in status for s in ["complete", "submitted"])
 
-            key = ref.get("email", "").lower().strip() or ref.get("name", "").lower().strip()
+            key = (ref.get("email") or "").lower().strip() or (
+                ref.get("name") or ""
+            ).lower().strip()
             stats = referee_history.get(key, {})
             wp = ref.get("web_profile") or {}
             h_index = wp.get("h_index") or 0
@@ -233,7 +237,7 @@ class RefereeResponsePredictor:
             inst = (ref.get("institution") or "").lower()
             inst_distance = 1.0 if inst else 0.5
 
-            journal_count = stats.get("journals", {}).get(journal, 0)
+            journal_count = (stats.get("journals") or {}).get(journal, 0)
             prior_journal_reviews = max(0, journal_count - 1)
             features = [
                 min(h_index / 30.0, 1.0),

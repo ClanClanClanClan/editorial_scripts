@@ -240,7 +240,7 @@ class ManuscriptOutcomePredictor:
         article_type = (
             ms.get("article_type")
             or ms.get("type")
-            or ms.get("platform_specific", {}).get("article_type", "")
+            or (ms.get("platform_specific") or {}).get("article_type", "")
             or ""
         ).lower()
         type_scores = {

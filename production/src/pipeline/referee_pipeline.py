@@ -63,11 +63,11 @@ def is_awaiting_referee(manuscript: dict, platform: str) -> bool:
     for pattern in config.get("status_contains", []):
         if pattern.lower() in status.lower():
             return True
-        main_status = (ps.get("status_details", {}).get("main_status") or "").strip()
+        main_status = ((ps.get("status_details") or {}).get("main_status") or "").strip()
         if pattern.lower() in main_status.lower():
             return True
 
-    current_stage = (ps.get("metadata", {}).get("current_stage") or "").strip()
+    current_stage = ((ps.get("metadata") or {}).get("current_stage") or "").strip()
     for val in config.get("stage_values", []):
         if val.lower() == current_stage.lower():
             return True
@@ -261,7 +261,9 @@ class RefereePipeline:
 
             rec = manuscript.get("referee_recommendations", {})
             if not rec:
-                rec = manuscript.get("platform_specific", {}).get("referee_recommendations", {})
+                rec = (manuscript.get("platform_specific") or {}).get(
+                    "referee_recommendations"
+                ) or {}
             opposed = rec.get("opposed_referees", [])
 
             print("   [4/5] Checking conflicts...")
@@ -316,7 +318,7 @@ class RefereePipeline:
 
         rec = manuscript.get("referee_recommendations", {})
         if not rec:
-            rec = manuscript.get("platform_specific", {}).get("referee_recommendations", {})
+            rec = (manuscript.get("platform_specific") or {}).get("referee_recommendations") or {}
         suggested_status = {}
         for r in rec.get("recommended_referees", []):
             name = r.get("name", "?")

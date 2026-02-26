@@ -36,10 +36,10 @@ jobs:
         run: |
           mkdir -p artifacts/security
           poetry run bandit -q -r production/src -x tests,dev,archive -f json -o artifacts/security/bandit.json || true
-      - name: Upload bandit artifacts
+      - name: Upload bandit artifacts (lint job)
         uses: actions/upload-artifact@v4
         with:
-          name: bandit-security
+          name: bandit-lint
           path: artifacts/security/bandit.json
           retention-days: 14
       - name: pip-audit (dependency vulnerabilities)
@@ -47,10 +47,10 @@ jobs:
         run: |
           mkdir -p artifacts/security
           poetry run pip-audit -s -q -f json -o artifacts/security/pip-audit.json || true
-      - name: Upload pip-audit artifacts
+      - name: Upload pip-audit artifacts (lint job)
         uses: actions/upload-artifact@v4
         with:
-          name: pip-audit
+          name: pip-audit-lint
           path: artifacts/security/pip-audit.json
           retention-days: 14
       - name: Security summary

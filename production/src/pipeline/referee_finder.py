@@ -23,7 +23,7 @@ def find_referees(
     max_candidates: int = 15,
     expertise_index=None,
     response_predictor=None,
-) -> list:
+) -> tuple:
     keywords = manuscript.get("keywords", [])
     title = manuscript.get("title", "")
     abstract = manuscript.get("abstract", "")
@@ -39,6 +39,7 @@ def find_referees(
 
     candidates = []
     seen_keys = set()
+    api_calls = {"openalex": 0, "semantic_scholar": 0, "enrichment": 0}
 
     for ref in recommended:
         c = _make_candidate(ref, source="author_suggested")
@@ -66,14 +67,18 @@ def find_referees(
             pass
 
     oa_candidates = _search_openalex_works(keywords, title, session, author_names)
-    for c in oa_candidates:
+    if oa_candidates is not None:
+        api_calls["openalex"] += 1
+    for c in oa_candidates or []:
         key = _dedup_key(c)
         if key and key not in seen_keys:
             seen_keys.add(key)
             candidates.append(c)
 
     s2_candidates = _search_semantic_scholar(keywords, title, session, author_names)
-    for c in s2_candidates:
+    if s2_candidates is not None:
+        api_calls["semantic_scholar"] += 1
+    for c in s2_candidates or []:
         key = _dedup_key(c)
         if key and key not in seen_keys:
             seen_keys.add(key)
@@ -94,6 +99,7 @@ def find_referees(
                     orcid_id=c.get("orcid"),
                     institution=c.get("institution"),
                 )
+                api_calls["enrichment"] += 1
                 if profile:
                     c["web_profile"] = profile
                     c["h_index"] = profile.get("h_index")
@@ -111,7 +117,7 @@ def find_referees(
         c["topic_overlap"] = _compute_topic_overlap(c, keywords)
 
     candidates.sort(key=lambda x: -x["relevance_score"])
-    return candidates[: max_candidates * 2]
+    return candidates[: max_candidates * 2], api_calls
 
 
 def _normalize(s: str) -> str:

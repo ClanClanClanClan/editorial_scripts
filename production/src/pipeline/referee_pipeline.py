@@ -245,9 +245,10 @@ class RefereePipeline:
             print(f"   >> Pass (confidence={desk['confidence']})")
 
         candidates = []
+        api_calls = {}
         if not desk["should_desk_reject"] or desk["confidence"] < 0.8:
             print("   [3/5] Searching for referee candidates...")
-            candidates = find_referees(
+            candidates, api_calls = find_referees(
                 manuscript,
                 journal_code,
                 self.enricher,
@@ -290,7 +291,7 @@ class RefereePipeline:
             print("   [4/5] Skipping conflict check")
 
         print("   [5/5] Building report...")
-        report = self._build_report(manuscript, journal_code, desk, candidates, rq)
+        report = self._build_report(manuscript, journal_code, desk, candidates, rq, api_calls)
         self._save_report(report, journal_code)
         self._print_summary(report)
         return report
@@ -302,6 +303,7 @@ class RefereePipeline:
         desk: dict,
         candidates: list,
         report_quality: dict = None,
+        api_calls: dict = None,
     ) -> dict:
         clean = [c for c in candidates if not c["is_conflicted"]]
         conflicted = [c for c in candidates if c["is_conflicted"]]
@@ -340,8 +342,9 @@ class RefereePipeline:
             "author_suggested_status": suggested_status,
             "report_quality": report_quality or {},
             "metadata": {
+                "api_calls": api_calls or {},
                 "candidates_found": len(candidates),
-                "candidates_clean": len(clean),
+                "candidates_after_conflict_filter": len(clean),
                 "candidates_conflicted": len(conflicted),
                 "top_returned": len(top),
                 "models": self._model_metadata(),

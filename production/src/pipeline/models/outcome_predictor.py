@@ -114,9 +114,10 @@ class ManuscriptOutcomePredictor:
             import joblib
 
             data = joblib.load(model_path)
-            self.model = data["model"]
-            self.scaler = data["scaler"]
-            return True
+            if isinstance(data, dict):
+                self.model = data.get("model")
+                self.scaler = data.get("scaler")
+            return self.model is not None
         return False
 
     def _get_model_candidates(self, n: int) -> list:

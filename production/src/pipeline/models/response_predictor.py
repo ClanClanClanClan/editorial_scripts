@@ -233,11 +233,13 @@ class RefereeResponsePredictor:
             inst = (ref.get("institution") or "").lower()
             inst_distance = 1.0 if inst else 0.5
 
+            journal_count = stats.get("journals", {}).get(journal, 0)
+            prior_journal_reviews = max(0, journal_count - 1)
             features = [
                 min(h_index / 30.0, 1.0),
                 acceptance_rate,
                 min(n_inv / 10.0, 1.0),
-                1.0 if stats.get("journals", {}).get(journal, 0) > 1 else 0.0,
+                1.0 if prior_journal_reviews > 0 else 0.0,
                 expertise_sim,
                 min(avg_turnaround / 60.0, 1.0),
                 min(stats.get("active_count", 0) / 5.0, 1.0),

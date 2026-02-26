@@ -207,9 +207,12 @@ def assess_desk_rejection(
 
     high_signals = [s for s in signals if s["severity"] == "high"]
     should_reject = len(high_signals) > 0
-    confidence = min(0.9, 0.3 * len(high_signals) + 0.1 * len(signals))
     if not signals:
-        confidence = 0.05
+        confidence = 0.85
+    elif should_reject:
+        confidence = min(0.9, 0.3 * len(high_signals) + 0.1 * len(signals))
+    else:
+        confidence = max(0.3, 0.8 - 0.1 * len(signals))
     method = "heuristic"
 
     if outcome_predictor is not None:

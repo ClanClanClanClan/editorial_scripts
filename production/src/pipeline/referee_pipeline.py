@@ -133,6 +133,16 @@ class RefereePipeline:
         self._load_models()
 
     def _load_models(self):
+        if self._models_are_stale():
+            print("   Models are stale — retraining...")
+            try:
+                from pipeline.training import ModelTrainer
+
+                trainer = ModelTrainer()
+                trainer.train_all()
+            except Exception as e:
+                print(f"   Auto-retrain failed: {e}")
+
         try:
             from pipeline.models.expertise_index import ExpertiseIndex
 
@@ -160,6 +170,26 @@ class RefereePipeline:
                 print("   Loaded outcome predictor")
         except Exception as e:
             print(f"   Outcome predictor not available: {e}")
+
+    def _models_are_stale(self) -> bool:
+        models_dir = OUTPUTS_DIR.parent / "models"
+        if not models_dir.exists():
+            return True
+        artifacts = list(models_dir.glob("*.joblib")) + list(models_dir.glob("*.faiss"))
+        if not artifacts:
+            return True
+        oldest_model = min(a.stat().st_mtime for a in artifacts)
+        latest_extraction = 0.0
+        for journal_dir in OUTPUTS_DIR.iterdir():
+            if not journal_dir.is_dir():
+                continue
+            for json_path in journal_dir.glob("*_extraction_*.json"):
+                mtime = json_path.stat().st_mtime
+                if mtime > latest_extraction:
+                    latest_extraction = mtime
+        if latest_extraction == 0.0:
+            return False
+        return latest_extraction > oldest_model
 
     def run_single(self, journal_code: str, manuscript_id: str) -> dict:
         jc = journal_code.upper()

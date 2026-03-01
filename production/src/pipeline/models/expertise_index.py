@@ -25,19 +25,16 @@ class ExpertiseIndex:
             journal_dir = OUTPUTS_DIR / journal
             if not journal_dir.exists():
                 continue
-            latest = _find_latest_json(journal_dir)
-            if not latest:
-                continue
-            data = _load_json(latest)
-            manuscripts = data.get("manuscripts", [])
-            for ms in manuscripts:
-                ms_keywords = ms.get("keywords", []) or []
-                ms_title = ms.get("title", "")
-                for ref in ms.get("referees", []):
-                    profile = _build_referee_profile(ref, ms_keywords, ms_title, journal)
-                    if profile["text"].strip():
-                        self.referees.append(profile)
-                        texts.append(profile["text"])
+            for json_path in sorted(journal_dir.glob("*_extraction_*.json")):
+                data = _load_json(json_path)
+                for ms in data.get("manuscripts", []):
+                    ms_keywords = ms.get("keywords", []) or []
+                    ms_title = ms.get("title", "")
+                    for ref in ms.get("referees", []):
+                        profile = _build_referee_profile(ref, ms_keywords, ms_title, journal)
+                        if profile["text"].strip():
+                            self.referees.append(profile)
+                            texts.append(profile["text"])
 
         if not texts:
             return 0
@@ -139,13 +136,6 @@ def _deduplicate(referees: list) -> list:
         else:
             seen[key] = ref
     return list(seen.values())
-
-
-def _find_latest_json(journal_dir: Path):
-    jsons = sorted(
-        journal_dir.glob("*_extraction_*.json"), key=lambda p: p.stat().st_mtime, reverse=True
-    )
-    return jsons[0] if jsons else None
 
 
 def _load_json(path: Path) -> dict:

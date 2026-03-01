@@ -9,7 +9,10 @@ from pipeline.desk_rejection import assess_desk_rejection
 from pipeline.embeddings import EmbeddingEngine
 from pipeline.models.expertise_index import ExpertiseIndex, _deduplicate
 from pipeline.models.outcome_predictor import ManuscriptOutcomePredictor, _classify_outcome
-from pipeline.models.response_predictor import RefereeResponsePredictor
+from pipeline.models.response_predictor import (
+    RefereeResponsePredictor,
+    _extract_turnaround_days,
+)
 from pipeline.report_quality import (
     _constructiveness,
     _recommendation_consistency,
@@ -143,14 +146,19 @@ class TestReportQuality:
         assert _thoroughness("", 0) == 0.0
 
     def test_timeliness_fast_review(self):
-        ref = {"date_invited": "2025-01-01", "date_completed": "2025-01-14"}
+        ref = {"dates": {"invited": "2025-01-01", "returned": "2025-01-14"}}
         score = _timeliness(ref)
         assert score > 0.4
 
     def test_timeliness_slow_review(self):
-        ref = {"date_invited": "2025-01-01", "date_completed": "2025-03-01"}
+        ref = {"dates": {"invited": "2025-01-01", "returned": "2025-03-01"}}
         score = _timeliness(ref)
         assert score < 0.1
+
+    def test_timeliness_legacy_fields(self):
+        ref = {"date_invited": "2025-01-01", "date_completed": "2025-01-14"}
+        score = _timeliness(ref)
+        assert score > 0.4
 
     def test_timeliness_no_dates(self):
         assert _timeliness({}) == 0.5
@@ -487,3 +495,55 @@ class TestRefereeFinderWithModels:
         s_with = _compute_relevance(c, ["control"], "Test", "", predictor, "sicon", ms)
         s_without = _compute_relevance(c, ["control"], "Test", "")
         assert s_with > s_without
+
+
+class TestTurnaroundDays:
+    def test_nested_dates(self):
+        ref = {"dates": {"invited": "2025-01-01", "returned": "2025-01-21"}}
+        assert _extract_turnaround_days(ref) == 20
+
+    def test_legacy_fields(self):
+        ref = {"date_invited": "2025-01-01", "date_completed": "2025-01-15"}
+        assert _extract_turnaround_days(ref) == 14
+
+    def test_no_dates(self):
+        assert _extract_turnaround_days({}) is None
+
+    def test_null_returned(self):
+        ref = {"dates": {"invited": "2025-01-01", "returned": None}}
+        assert _extract_turnaround_days(ref) is None
+
+    def test_various_formats(self):
+        ref = {"dates": {"invited": "01 Jan 2025", "returned": "15 Jan 2025"}}
+        assert _extract_turnaround_days(ref) == 14
+
+
+class TestResponsePredictorDedup:
+    def test_dedup_across_files(self, tmp_path):
+        journal_dir = tmp_path / "testj"
+        journal_dir.mkdir()
+        ms = {
+            "manuscript_id": "M1",
+            "keywords": ["control"],
+            "referees": [
+                {
+                    "name": "Smith",
+                    "email": "smith@mit.edu",
+                    "status": "Agreed",
+                    "web_profile": {"h_index": 10, "research_topics": ["control"]},
+                }
+            ],
+        }
+        file1 = journal_dir / "testj_extraction_20250101.json"
+        file1.write_text(json.dumps({"manuscripts": [ms]}))
+        import time
+
+        time.sleep(0.05)
+        file2 = journal_dir / "testj_extraction_20250201.json"
+        file2.write_text(json.dumps({"manuscripts": [ms]}))
+
+        predictor = RefereeResponsePredictor()
+        with patch("pipeline.models.response_predictor.OUTPUTS_DIR", tmp_path):
+            X, y_agree, y_complete = predictor._build_training_data(["testj"])
+
+        assert len(X) == 1

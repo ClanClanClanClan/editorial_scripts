@@ -320,6 +320,19 @@ class ExtractorOrchestrator:
         return results
 
 
+def _retrain_models():
+    print("\n🔄 RETRAINING ML MODELS")
+    print("=" * 40)
+    try:
+        sys.path.insert(0, str(Path(__file__).parent / "production/src"))
+        from pipeline.training import ModelTrainer
+
+        trainer = ModelTrainer()
+        trainer.train_all()
+    except Exception as e:
+        print(f"❌ Retrain failed: {e}")
+
+
 def main():
     """Main entry point."""
     parser = argparse.ArgumentParser(description="Editorial Extractors Runner")
@@ -334,6 +347,7 @@ def main():
     parser.add_argument("--report", action="store_true", help="Cross-journal summary report")
     parser.add_argument("--json", action="store_true", help="Save JSON output (use with --report)")
     parser.add_argument("--recent", action="store_true", help="Show recent extraction results")
+    parser.add_argument("--retrain", action="store_true", help="Retrain ML models after extraction")
     parser.add_argument(
         "--visible", action="store_true", help="Run with visible browser (default: headless)"
     )
@@ -382,6 +396,8 @@ def main():
             print(f"Journal: {result['journal_name']}")
             print(f"Manuscripts: {result['manuscripts_count']}")
             print(f"Duration: {result['duration_seconds']:.1f} seconds")
+            if args.retrain:
+                _retrain_models()
         else:
             print(f"\n❌ EXTRACTION FAILED")
             sys.exit(1)
@@ -407,6 +423,11 @@ def main():
                 print(f"❌ {journal_id.upper():6}: FAILED")
 
         print(f"\nTotal: {successful}/{len(results)} successful, {total_manuscripts} manuscripts")
+        if args.retrain and successful > 0:
+            _retrain_models()
+
+    elif args.retrain:
+        _retrain_models()
 
     else:
         parser.print_help()

@@ -165,8 +165,9 @@ def _thoroughness(text: str, word_count: int) -> float:
 
 
 def _timeliness(referee: dict, allowed_days: int = 28) -> float:
-    invited = referee.get("date_invited") or referee.get("invitation_date")
-    completed = referee.get("date_completed") or referee.get("report_date")
+    dates = referee.get("dates") or {}
+    invited = dates.get("invited") or referee.get("date_invited") or referee.get("invitation_date")
+    completed = dates.get("returned") or referee.get("date_completed") or referee.get("report_date")
     if not invited or not completed:
         return 0.5
     try:

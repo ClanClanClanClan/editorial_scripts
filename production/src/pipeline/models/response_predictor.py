@@ -155,20 +155,37 @@ class RefereeResponsePredictor:
         if journals is None:
             journals = [d.name for d in OUTPUTS_DIR.iterdir() if d.is_dir()]
 
-        referee_history = {}
-        all_referees = []
+        raw_entries = {}
 
         for journal in journals:
             journal_dir = OUTPUTS_DIR / journal
             if not journal_dir.exists():
                 continue
-            for json_path in sorted(journal_dir.glob("*_extraction_*.json")):
+            for json_path in sorted(
+                journal_dir.glob("*_extraction_*.json"),
+                key=lambda p: p.stat().st_mtime,
+            ):
                 data = _load_json(json_path)
+                file_mtime = json_path.stat().st_mtime
                 for ms in data.get("manuscripts", []):
+                    ms_id = ms.get("manuscript_id", "")
                     ms_keywords = ms.get("keywords", []) or []
                     for ref in ms.get("referees", []):
-                        all_referees.append((ref, journal, ms_keywords))
+                        ref_key = (ref.get("email") or "").lower().strip() or (
+                            ref.get("name") or ""
+                        ).lower().strip()
+                        if not ref_key:
+                            continue
+                        entry_key = (journal, ms_id, ref_key)
+                        if entry_key not in raw_entries or file_mtime > raw_entries[entry_key][1]:
+                            raw_entries[entry_key] = (
+                                (ref, journal, ms_keywords),
+                                file_mtime,
+                            )
 
+        all_referees = [entry for entry, _ in raw_entries.values()]
+
+        referee_history = {}
         for ref, journal, _ in all_referees:
             key = (ref.get("email") or "").lower().strip() or (
                 ref.get("name") or ""
@@ -291,8 +308,9 @@ def _make_model():
 
 
 def _extract_turnaround_days(ref: dict) -> int | None:
-    invited = ref.get("date_invited") or ref.get("invitation_date")
-    completed = ref.get("date_completed") or ref.get("report_date")
+    dates = ref.get("dates") or {}
+    invited = dates.get("invited") or ref.get("date_invited") or ref.get("invitation_date")
+    completed = dates.get("returned") or ref.get("date_completed") or ref.get("report_date")
     if not invited or not completed:
         return None
     try:

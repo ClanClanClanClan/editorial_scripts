@@ -157,29 +157,40 @@ class ManuscriptOutcomePredictor:
         if journals is None:
             journals = [d.name for d in OUTPUTS_DIR.iterdir() if d.is_dir()]
 
-        samples_X = []
-        samples_y = []
+        manuscript_map = {}
 
         for journal in journals:
             journal_dir = OUTPUTS_DIR / journal
             if not journal_dir.exists():
                 continue
-            latest = _find_latest_json(journal_dir)
-            if not latest:
-                continue
-            data = _load_json(latest)
-            for ms in data.get("manuscripts", []):
-                label = _classify_outcome(ms)
-                if label is None:
-                    continue
-                features = self._extract_features(ms, journal)
-                row = [features.get(f, 0.0) for f in self.feature_names]
-                samples_X.append(row)
-                samples_y.append(label)
+            for json_path in sorted(
+                journal_dir.glob("*_extraction_*.json"),
+                key=lambda p: p.stat().st_mtime,
+            ):
+                data = _load_json(json_path)
+                file_mtime = json_path.stat().st_mtime
+                for ms in data.get("manuscripts", []):
+                    ms_id = ms.get("manuscript_id", "")
+                    key = (journal, ms_id)
+                    if key not in manuscript_map or file_mtime > manuscript_map[key][1]:
+                        manuscript_map[key] = (ms, file_mtime, journal)
 
-        return np.array(samples_X) if samples_X else np.array([]).reshape(
-            0, len(self.feature_names)
-        ), np.array(samples_y)
+        samples_X = []
+        samples_y = []
+
+        for (journal, ms_id), (ms, _, _) in manuscript_map.items():
+            label = _classify_outcome(ms)
+            if label is None:
+                continue
+            features = self._extract_features(ms, journal)
+            row = [features.get(f, 0.0) for f in self.feature_names]
+            samples_X.append(row)
+            samples_y.append(label)
+
+        return (
+            np.array(samples_X) if samples_X else np.array([]).reshape(0, len(self.feature_names)),
+            np.array(samples_y),
+        )
 
     def _extract_features(self, ms: dict, journal_code: str = None) -> dict:
         abstract = ms.get("abstract", "") or ""
@@ -293,13 +304,6 @@ def _classify_outcome(ms: dict) -> int | None:
         if s in combined:
             return 0
     return None
-
-
-def _find_latest_json(journal_dir: Path):
-    jsons = sorted(
-        journal_dir.glob("*_extraction_*.json"), key=lambda p: p.stat().st_mtime, reverse=True
-    )
-    return jsons[0] if jsons else None
 
 
 def _load_json(path: Path) -> dict:

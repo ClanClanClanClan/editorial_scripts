@@ -1,6 +1,7 @@
 import json
-import numpy as np
 from pathlib import Path
+
+import numpy as np
 
 BASE_DIR = Path(__file__).resolve().parents[4]
 OUTPUTS_DIR = BASE_DIR / "production" / "outputs"
@@ -27,7 +28,7 @@ class RefereeResponsePredictor:
         if len(X) < 10:
             return {"status": "insufficient_data", "n_samples": len(X)}
 
-        from sklearn.model_selection import cross_val_score, StratifiedKFold
+        from sklearn.model_selection import StratifiedKFold, cross_val_score
 
         n_splits = min(5, min(int(np.sum(y_agree)), int(np.sum(1 - y_agree))))
         if n_splits < 2:

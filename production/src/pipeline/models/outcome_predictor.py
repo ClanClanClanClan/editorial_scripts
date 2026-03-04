@@ -1,6 +1,7 @@
 import json
-import numpy as np
 from pathlib import Path
+
+import numpy as np
 
 BASE_DIR = Path(__file__).resolve().parents[4]
 OUTPUTS_DIR = BASE_DIR / "production" / "outputs"
@@ -34,8 +35,8 @@ class ManuscriptOutcomePredictor:
         if len(X) < 5:
             return {"status": "insufficient_data", "n_samples": len(X)}
 
+        from sklearn.model_selection import LeaveOneOut, cross_val_score
         from sklearn.preprocessing import StandardScaler
-        from sklearn.model_selection import cross_val_score, LeaveOneOut
 
         self.scaler = StandardScaler()
         X_scaled = self.scaler.fit_transform(X)
@@ -56,7 +57,8 @@ class ManuscriptOutcomePredictor:
                     best_score = mean_score
                     best_model = model
                     best_name = name
-            except Exception:
+            except (ValueError, RuntimeError) as e:
+                print(f"   Warning: cross_val_score failed for {name}: {e}")
                 continue
 
         if best_model is None:
@@ -178,7 +180,7 @@ class ManuscriptOutcomePredictor:
         samples_X = []
         samples_y = []
 
-        for (journal, ms_id), (ms, _, _) in manuscript_map.items():
+        for (_journal, _ms_id), (ms, _, _) in manuscript_map.items():
             label = _classify_outcome(ms)
             if label is None:
                 continue
@@ -224,15 +226,15 @@ class ManuscriptOutcomePredictor:
         scope_sim = 0.5
         if journal_code and abstract:
             try:
-                from pipeline.embeddings import get_engine
                 from pipeline.desk_rejection import JOURNAL_SCOPES_LLM
+                from pipeline.embeddings import get_engine
 
                 scope_desc = JOURNAL_SCOPES_LLM.get(journal_code.upper(), "")
                 if scope_desc:
                     engine = get_engine()
                     scope_sim = max(0.0, engine.similarity(abstract[:2000], scope_desc))
-            except Exception:
-                pass
+            except (ValueError, RuntimeError) as e:
+                print(f"   Warning: scope similarity computation failed: {e}")
 
         keyword_overlap = 0.0
         if journal_code and keywords:
@@ -245,8 +247,8 @@ class ManuscriptOutcomePredictor:
                     ms_words.update(kw.lower().split())
                 if scope_kw and ms_words:
                     keyword_overlap = len(ms_words & scope_kw) / max(len(ms_words), 1)
-            except Exception:
-                pass
+            except (ValueError, KeyError) as e:
+                print(f"   Warning: keyword overlap computation failed: {e}")
 
         article_type = (
             ms.get("article_type")
@@ -310,5 +312,6 @@ def _load_json(path: Path) -> dict:
     try:
         with open(path) as f:
             return json.load(f)
-    except Exception:
+    except (OSError, json.JSONDecodeError) as e:
+        print(f"   Warning: failed to load JSON from {path}: {e}")
         return {}

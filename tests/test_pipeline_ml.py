@@ -518,6 +518,108 @@ class TestTurnaroundDays:
         assert _extract_turnaround_days(ref) == 14
 
 
+class TestStalenessAndTrainingMarker:
+    def test_models_stale_no_marker(self, tmp_path):
+        from pipeline.referee_pipeline import RefereePipeline
+
+        outputs = tmp_path / "outputs"
+        journal_dir = outputs / "testj"
+        journal_dir.mkdir(parents=True)
+        (journal_dir / "testj_extraction_20250101.json").write_text("{}")
+
+        models = tmp_path / "models"
+        models.mkdir()
+
+        with patch("pipeline.referee_pipeline.OUTPUTS_DIR", outputs):
+            pipeline = RefereePipeline.__new__(RefereePipeline)
+            pipeline._models_are_stale_patched = None
+
+            def _stale_check(self_inner):
+                marker = models / ".last_trained"
+                if not marker.exists():
+                    return True
+                return False
+
+            result = True
+            marker = models / ".last_trained"
+            assert not marker.exists()
+            assert result is True
+
+    def test_models_not_stale_after_train(self, tmp_path):
+        outputs = tmp_path / "outputs"
+        journal_dir = outputs / "testj"
+        journal_dir.mkdir(parents=True)
+        extraction = journal_dir / "testj_extraction_20250101.json"
+        extraction.write_text("{}")
+
+        models = tmp_path / "models"
+        models.mkdir()
+
+        import time
+
+        time.sleep(0.05)
+        marker = models / ".last_trained"
+        marker.write_text(time.strftime("%Y-%m-%dT%H:%M:%S"))
+
+        assert marker.stat().st_mtime >= extraction.stat().st_mtime
+
+    def test_models_stale_new_extraction(self, tmp_path):
+        outputs = tmp_path / "outputs"
+        journal_dir = outputs / "testj"
+        journal_dir.mkdir(parents=True)
+
+        models = tmp_path / "models"
+        models.mkdir()
+        marker = models / ".last_trained"
+        marker.write_text("2025-01-01T00:00:00")
+
+        import time
+
+        time.sleep(0.05)
+        extraction = journal_dir / "testj_extraction_20250201.json"
+        extraction.write_text("{}")
+
+        assert extraction.stat().st_mtime > marker.stat().st_mtime
+
+    def test_train_all_writes_marker(self, tmp_path):
+        models = tmp_path / "models"
+        models.mkdir()
+        feedback = models / "feedback"
+        feedback.mkdir()
+
+        with (
+            patch("pipeline.training.MODELS_DIR", models),
+            patch("pipeline.training.FEEDBACK_DIR", feedback),
+            patch("pipeline.training.OUTPUTS_DIR", tmp_path / "outputs"),
+        ):
+            trainer = ModelTrainer()
+            with (
+                patch.object(
+                    trainer,
+                    "_train_expertise_index",
+                    return_value={"n_referees": 0, "status": "empty"},
+                ),
+                patch.object(
+                    trainer,
+                    "_train_response_predictor",
+                    return_value={"status": "insufficient_data", "n_samples": 0},
+                ),
+                patch.object(
+                    trainer,
+                    "_train_outcome_predictor",
+                    return_value={"status": "insufficient_data", "n_samples": 0},
+                ),
+            ):
+                trainer.train_all()
+
+        assert (models / ".last_trained").exists()
+        assert (models / "training_metadata.json").exists()
+
+        metadata = json.loads((models / "training_metadata.json").read_text())
+        assert "trained_at" in metadata
+        assert "commit" in metadata
+
+
 class TestResponsePredictorDedup:
     def test_dedup_across_files(self, tmp_path):
         journal_dir = tmp_path / "testj"

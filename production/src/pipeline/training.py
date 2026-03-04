@@ -1,4 +1,5 @@
 import json
+import subprocess
 import time
 from pathlib import Path
 
@@ -45,7 +46,38 @@ class ModelTrainer:
             json.dump(results, f, indent=2, default=str)
         print(f"\nResults saved to {results_path}")
 
+        marker = MODELS_DIR / ".last_trained"
+        marker.write_text(time.strftime("%Y-%m-%dT%H:%M:%S"))
+
+        self._write_training_metadata(results)
+
         return results
+
+    def _write_training_metadata(self, results: dict):
+        commit = "unknown"
+        try:
+            out = subprocess.run(
+                ["git", "rev-parse", "--short", "HEAD"],
+                capture_output=True,
+                text=True,
+                timeout=5,
+            )
+            if out.returncode == 0:
+                commit = out.stdout.strip()
+        except (OSError, subprocess.TimeoutExpired):
+            pass
+
+        metadata = {
+            "trained_at": time.strftime("%Y-%m-%dT%H:%M:%S"),
+            "commit": commit,
+            "expertise_index": results.get("expertise_index", {}),
+            "response_predictor": results.get("response_predictor", {}),
+            "outcome_predictor": results.get("outcome_predictor", {}),
+        }
+        metadata_path = MODELS_DIR / "training_metadata.json"
+        with open(metadata_path, "w") as f:
+            json.dump(metadata, f, indent=2, default=str)
+        print(f"Training metadata saved to {metadata_path}")
 
     def _train_expertise_index(self, journals: list = None) -> dict:
         from pipeline.models.expertise_index import ExpertiseIndex
@@ -98,7 +130,7 @@ class ModelTrainer:
                     rec = json.loads(line)
                     d = rec.get("decision", "unknown")
                     decisions[d] = decisions.get(d, 0) + 1
-                except Exception:
+                except (json.JSONDecodeError, KeyError):
                     pass
             stats[journal] = {"total": len(lines), "decisions": decisions}
         return stats

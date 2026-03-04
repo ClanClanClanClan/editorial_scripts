@@ -1,5 +1,6 @@
-import numpy as np
 from pathlib import Path
+
+import numpy as np
 
 _engine = None
 
@@ -28,7 +29,7 @@ class EmbeddingEngine:
 
             try:
                 self.model = SentenceTransformer(self.MODEL_NAME)
-            except Exception:
+            except (OSError, RuntimeError, ValueError):
                 print(f"  SPECTER unavailable, falling back to {self.FALLBACK_MODEL}")
                 self.model = SentenceTransformer(self.FALLBACK_MODEL)
             test = self.model.encode(["test"])
@@ -75,7 +76,7 @@ class EmbeddingEngine:
         vec = self.embed(query).astype(np.float32).reshape(1, -1)
         scores, indices = index.search(vec, min(k, index.ntotal))
         results = []
-        for i, (idx, score) in enumerate(zip(indices[0], scores[0])):
+        for _i, (idx, score) in enumerate(zip(indices[0], scores[0], strict=False)):
             if idx >= 0:
                 results.append((int(idx), float(score)))
         return results
@@ -85,8 +86,8 @@ class EmbeddingEngine:
             import faiss
 
             faiss.write_index(index, str(path))
-        except Exception:
-            pass
+        except Exception as e:
+            print(f"   Warning: failed to save FAISS index: {e}")
 
     def load_index(self, path: Path):
         try:
@@ -94,8 +95,8 @@ class EmbeddingEngine:
 
             if path.exists():
                 return faiss.read_index(str(path))
-        except Exception:
-            pass
+        except Exception as e:
+            print(f"   Warning: failed to load FAISS index: {e}")
         return None
 
     def _tfidf_embed(self, text: str) -> np.ndarray:
@@ -103,11 +104,16 @@ class EmbeddingEngine:
 
         if self._tfidf is None:
             self._tfidf = TfidfVectorizer(max_features=768)
+            self._tfidf_corpus = []
             self._tfidf_fitted = False
+        if not self._tfidf_fitted or len(self._tfidf_corpus) < 100:
+            self._tfidf_corpus.append(text)
+            if len(self._tfidf_corpus) >= 2:
+                self._tfidf.fit(self._tfidf_corpus)
+                self._tfidf_fitted = True
+                self.dim = min(len(self._tfidf.vocabulary_), 768)
         if not self._tfidf_fitted:
-            self._tfidf.fit([text])
-            self._tfidf_fitted = True
-            self.dim = len(self._tfidf.vocabulary_)
+            return np.zeros(768)
         vec = self._tfidf.transform([text]).toarray()[0]
         if len(vec) < 768:
             vec = np.pad(vec, (0, 768 - len(vec)))

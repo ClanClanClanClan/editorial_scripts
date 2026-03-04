@@ -1,18 +1,17 @@
 #!/usr/bin/env python3
 """Conflict-of-interest detection for referee candidates."""
 
-from typing import Dict, List, Optional
 
 from core.academic_apis import AcademicProfileEnricher
 
 
 def check_conflicts(
     candidate: dict,
-    manuscript_authors: List[dict],
-    opposed_referees: List[dict],
-    manuscript_editors: List[dict],
+    manuscript_authors: list[dict],
+    opposed_referees: list[dict],
+    manuscript_editors: list[dict],
     enricher: AcademicProfileEnricher,
-) -> List[str]:
+) -> list[str]:
     conflicts = []
 
     cand_name = candidate.get("name", "")
@@ -39,10 +38,10 @@ def check_conflicts(
         opp_name = opp.get("name", "")
         opp_email = (opp.get("email") or "").lower()
         if opp_email and cand_email and opp_email == cand_email:
-            conflicts.append(f"Author-opposed referee (email match)")
+            conflicts.append("Author-opposed referee (email match)")
             break
         if opp_name and enricher._name_match(cand_name, opp_name):
-            conflicts.append(f"Author-opposed referee (name match)")
+            conflicts.append("Author-opposed referee (name match)")
             break
 
     for editor in manuscript_editors:
@@ -60,10 +59,10 @@ def check_conflicts(
 
 def _check_coauthorship(
     candidate: dict,
-    manuscript_authors: List[dict],
+    manuscript_authors: list[dict],
     enricher: AcademicProfileEnricher,
-) -> Optional[str]:
-    cand_name = candidate.get("name", "")
+) -> str | None:
+    candidate.get("name", "")
 
     for author in manuscript_authors:
         wp = author.get("web_profile") or {}

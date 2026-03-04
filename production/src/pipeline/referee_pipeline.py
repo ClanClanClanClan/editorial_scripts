@@ -8,12 +8,11 @@ checks conflicts, and produces a recommendation report.
 import json
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional
 
 import requests
-
 from core.academic_apis import AcademicProfileEnricher
 from core.output_schema import JOURNAL_NAME_MAP, PLATFORM_MAP
+
 from pipeline.conflict_checker import check_conflicts
 from pipeline.desk_rejection import assess_desk_rejection
 from pipeline.referee_finder import find_referees
@@ -95,7 +94,7 @@ def is_awaiting_referee(manuscript: dict, platform: str) -> bool:
     return False
 
 
-def find_latest_output(journal: str) -> Optional[Path]:
+def find_latest_output(journal: str) -> Path | None:
     journal_dir = OUTPUTS_DIR / journal.lower()
     if not journal_dir.exists():
         return None
@@ -107,7 +106,7 @@ def find_latest_output(journal: str) -> Optional[Path]:
     return None
 
 
-def load_journal_data(journal: str) -> Optional[dict]:
+def load_journal_data(journal: str) -> dict | None:
     path = find_latest_output(journal)
     if not path:
         return None
@@ -173,12 +172,10 @@ class RefereePipeline:
 
     def _models_are_stale(self) -> bool:
         models_dir = OUTPUTS_DIR.parent / "models"
-        if not models_dir.exists():
+        marker = models_dir / ".last_trained"
+        if not marker.exists():
             return True
-        artifacts = list(models_dir.glob("*.joblib")) + list(models_dir.glob("*.faiss"))
-        if not artifacts:
-            return True
-        oldest_model = min(a.stat().st_mtime for a in artifacts)
+        marker_mtime = marker.stat().st_mtime
         latest_extraction = 0.0
         for journal_dir in OUTPUTS_DIR.iterdir():
             if not journal_dir.is_dir():
@@ -189,7 +186,7 @@ class RefereePipeline:
                     latest_extraction = mtime
         if latest_extraction == 0.0:
             return False
-        return latest_extraction > oldest_model
+        return latest_extraction > marker_mtime
 
     def run_single(self, journal_code: str, manuscript_id: str) -> dict:
         jc = journal_code.upper()
@@ -448,7 +445,7 @@ class RefereePipeline:
 
         suggested = report.get("author_suggested_status", {})
         if suggested:
-            print(f"\n  Author-suggested referees:")
+            print("\n  Author-suggested referees:")
             for name, status in suggested.items():
                 print(f"    {name}: {status}")
 

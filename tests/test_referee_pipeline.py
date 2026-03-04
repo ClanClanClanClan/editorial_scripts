@@ -263,3 +263,142 @@ class TestTopicOverlap:
         kw = ["stochastic control"]
         overlap = _compute_topic_overlap(c, kw)
         assert len(overlap) == 0
+
+
+class TestModelPredictionFlipsDecision:
+    def test_model_prediction_flips_to_reject(self):
+        predictor = MagicMock()
+        predictor.predict.return_value = 0.1
+
+        ms = {
+            "abstract": "We study optimal control of stochastic systems with applications to engineering.",
+            "keywords": ["optimal control", "stochastic systems"],
+            "authors": [{"name": "Smith", "web_profile": {"h_index": 10}}],
+            "title": "Optimal Control of SDEs",
+        }
+        result = assess_desk_rejection(ms, "SICON", outcome_predictor=predictor)
+        assert result["should_desk_reject"] is True
+        assert result["method"] == "heuristic+model"
+        model_signals = [s for s in result["signals"] if s["signal_name"] == "model_prediction"]
+        assert len(model_signals) == 1
+        assert model_signals[0]["severity"] == "high"
+
+    def test_model_prediction_does_not_flip_when_high_accept(self):
+        predictor = MagicMock()
+        predictor.predict.return_value = 0.8
+
+        ms = {
+            "abstract": "We study optimal control of stochastic systems with applications to engineering.",
+            "keywords": ["optimal control", "stochastic systems"],
+            "authors": [{"name": "Smith", "web_profile": {"h_index": 10}}],
+            "title": "Optimal Control of SDEs",
+        }
+        result = assess_desk_rejection(ms, "SICON", outcome_predictor=predictor)
+        assert result["should_desk_reject"] is False
+        model_signals = [s for s in result["signals"] if s["signal_name"] == "model_prediction"]
+        assert len(model_signals) == 1
+        assert model_signals[0]["severity"] == "low"
+
+
+class TestHeuristicSignalEdgeCases:
+    def test_scope_embedding_match_logged(self):
+        ms = {
+            "abstract": "We study optimal control of stochastic differential equations using dynamic programming and viscosity solutions for Hamilton-Jacobi-Bellman equations.",
+            "keywords": [
+                "optimal control",
+                "stochastic differential equation",
+                "viscosity solution",
+            ],
+            "authors": [{"name": "Smith", "web_profile": {"h_index": 15}}],
+            "title": "Optimal Control via HJB",
+        }
+        result = assess_desk_rejection(ms, "SICON")
+        names = [s["signal_name"] for s in result["signals"]]
+        assert "scope_match" in names or "scope_embedding_match" in names
+
+    def test_scope_zero_jaccard_always_high(self):
+        ms = {
+            "abstract": "We analyze numerical methods for stochastic optimal control problems with applications to feedback stabilization of nonlinear dynamical systems.",
+            "keywords": ["amphibians", "biodiversity"],
+            "authors": [],
+            "title": "Numerical Stochastic Control",
+        }
+        result = assess_desk_rejection(ms, "SICON")
+        mismatch_signals = [s for s in result["signals"] if s["signal_name"] == "scope_mismatch"]
+        assert len(mismatch_signals) > 0
+        assert mismatch_signals[0]["severity"] == "high"
+
+    def test_weak_author_profiles_signal(self):
+        ms = {
+            "abstract": "A" * 100,
+            "keywords": ["control"],
+            "authors": [
+                {"name": "A", "web_profile": {}},
+                {"name": "B", "web_profile": None},
+                {"name": "C"},
+            ],
+            "title": "Test",
+        }
+        result = assess_desk_rejection(ms, "SICON")
+        names = [s["signal_name"] for s in result["signals"]]
+        assert "weak_author_profiles" in names
+
+    def test_no_signals_clean_paper(self):
+        ms = {
+            "abstract": "We prove existence and uniqueness of solutions to a backward stochastic differential equation with Lipschitz coefficients and applications to optimal control.",
+            "keywords": ["backward SDE", "BSDE", "stochastic control", "optimal control"],
+            "authors": [
+                {
+                    "name": "Smith",
+                    "email": "smith@mit.edu",
+                    "web_profile": {"h_index": 15, "citation_count": 1000},
+                },
+            ],
+            "title": "BSDEs with Lipschitz Coefficients",
+        }
+        result = assess_desk_rejection(ms, "SICON")
+        assert result["should_desk_reject"] is False
+        assert result["confidence"] >= 0.3
+        high_signals = [s for s in result["signals"] if s["severity"] == "high"]
+        assert len(high_signals) == 0
+
+
+class TestConflictCheckerEdgeCases:
+    def _enricher(self):
+        import requests
+        from core.academic_apis import AcademicProfileEnricher
+
+        return AcademicProfileEnricher(requests.Session())
+
+    def test_coauthorship_shared_paper(self):
+        enricher = self._enricher()
+        candidate = {
+            "name": "Jane Doe",
+            "relevant_papers": [{"title": "A Novel Method for Stochastic Control"}],
+        }
+        authors = [
+            {
+                "name": "John Smith",
+                "web_profile": {
+                    "semantic_scholar": {
+                        "top_papers": [{"title": "A Novel Method for Stochastic Control"}]
+                    }
+                },
+            }
+        ]
+        conflicts = check_conflicts(candidate, authors, [], [], enricher)
+        assert any("co-author" in c.lower() or "shared paper" in c.lower() for c in conflicts)
+
+    def test_no_web_profile_no_crash(self):
+        enricher = self._enricher()
+        candidate = {"name": "Alice Brown", "institution": "Stanford"}
+        authors = [{"name": "Bob White"}]
+        conflicts = check_conflicts(candidate, authors, [], [], enricher)
+        assert isinstance(conflicts, list)
+
+    def test_opposed_by_email(self):
+        enricher = self._enricher()
+        candidate = {"name": "Different Name", "email": "target@example.com"}
+        opposed = [{"name": "Someone Else", "email": "target@example.com"}]
+        conflicts = check_conflicts(candidate, [], opposed, [], enricher)
+        assert any("opposed" in c.lower() for c in conflicts)

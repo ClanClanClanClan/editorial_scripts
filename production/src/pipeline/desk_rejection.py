@@ -3,7 +3,6 @@
 
 import os
 import re
-from typing import Dict, List, Optional
 
 JOURNAL_SCOPE_KEYWORDS = {
     "SICON": [
@@ -224,7 +223,7 @@ JOURNAL_SCOPES_LLM = {
 def assess_desk_rejection(
     manuscript: dict,
     journal_code: str,
-    all_journals_data: Optional[Dict[str, dict]] = None,
+    all_journals_data: dict[str, dict] | None = None,
     use_llm: bool = False,
     outcome_predictor=None,
     report_quality: dict = None,
@@ -244,16 +243,17 @@ def assess_desk_rejection(
     if outcome_predictor is not None:
         try:
             p_accept = outcome_predictor.predict(manuscript, journal_code)
+            model_severity = "high" if p_accept < 0.2 else ("medium" if p_accept < 0.4 else "low")
             signals.append(
                 {
                     "signal_name": "model_prediction",
-                    "severity": "high"
-                    if p_accept < 0.2
-                    else ("medium" if p_accept < 0.4 else "low"),
+                    "severity": model_severity,
                     "description": f"Trained model: P(accept)={p_accept:.2f}",
                     "confidence": 0.7,
                 }
             )
+            high_signals = [s for s in signals if s["severity"] == "high"]
+            should_reject = len(high_signals) > 0
             confidence = round(1.0 - p_accept, 2) if should_reject else round(p_accept, 2)
             method = "heuristic+model"
         except Exception:
@@ -290,7 +290,7 @@ def assess_desk_rejection(
 def _heuristic_signals(
     manuscript: dict,
     journal_code: str,
-    all_journals_data: Optional[Dict[str, dict]],
+    all_journals_data: dict[str, dict] | None,
 ) -> list:
     signals = []
 
@@ -346,7 +346,7 @@ def _heuristic_signals(
                 {
                     "signal_name": "scope_mismatch",
                     "severity": "high",
-                    "description": f"Zero keyword-scope vocabulary overlap (Jaccard=0.00)",
+                    "description": "Zero keyword-scope vocabulary overlap (Jaccard=0.00)",
                     "confidence": 0.7,
                 }
             )
@@ -487,7 +487,7 @@ def _llm_assessment(
     journal_code: str,
     heuristic_signals: list,
     report_quality: dict = None,
-) -> Optional[dict]:
+) -> dict | None:
     api_key = os.environ.get("ANTHROPIC_API_KEY")
     if not api_key:
         return None

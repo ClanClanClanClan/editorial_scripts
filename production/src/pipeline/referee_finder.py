@@ -5,10 +5,8 @@ import json
 import time
 import unicodedata
 from pathlib import Path
-from typing import Dict, List, Optional
 
 import requests
-
 from core.academic_apis import AcademicProfileEnricher
 
 OUTPUTS_DIR = Path(__file__).parent.parent.parent / "outputs"
@@ -28,14 +26,12 @@ def find_referees(
     title = manuscript.get("title", "")
     abstract = manuscript.get("abstract", "")
     authors = manuscript.get("authors", [])
-    editors = manuscript.get("editors", [])
     author_names = {_normalize(a.get("name", "")) for a in authors if a.get("name")}
 
     rec = manuscript.get("referee_recommendations", {})
     if not rec:
         rec = (manuscript.get("platform_specific") or {}).get("referee_recommendations") or {}
     recommended = rec.get("recommended_referees", [])
-    opposed = rec.get("opposed_referees", [])
 
     candidates = []
     seen_keys = set()
@@ -63,8 +59,8 @@ def find_referees(
                 if key and key not in seen_keys and key not in author_names:
                     seen_keys.add(key)
                     candidates.append(c)
-        except Exception:
-            pass
+        except (ValueError, RuntimeError) as e:
+            print(f"   Warning: expertise_index search failed: {e}")
 
     oa_candidates = _search_openalex_works(keywords, title, session, author_names)
     if oa_candidates is not None:
@@ -107,8 +103,8 @@ def find_referees(
                     c["research_topics"] = profile.get("research_topics", [])
                     s2 = profile.get("semantic_scholar", {})
                     c["relevant_papers"] = s2.get("top_papers", [])[:5]
-            except Exception:
-                pass
+            except (requests.RequestException, ValueError, RuntimeError) as e:
+                print(f"   Warning: enrichment failed for {c.get('name', 'unknown')}: {e}")
 
     for c in candidates:
         c["relevance_score"] = _compute_relevance(
@@ -154,7 +150,7 @@ def _make_candidate(data: dict, source: str) -> dict:
 
 
 def _search_openalex_works(
-    keywords: List[str],
+    keywords: list[str],
     title: str,
     session: requests.Session,
     exclude_names: set,
@@ -213,7 +209,7 @@ def _search_openalex_works(
 
 
 def _search_semantic_scholar(
-    keywords: List[str],
+    keywords: list[str],
     title: str,
     session: requests.Session,
     exclude_names: set,
@@ -252,7 +248,7 @@ def _search_semantic_scholar(
 
 
 def _search_historical(
-    keywords: List[str],
+    keywords: list[str],
     current_journal: str,
     exclude_names: set,
 ) -> list:
@@ -401,8 +397,8 @@ def _compute_relevance(
                 candidate, manuscript, journal_code or ""
             )
             score += 0.05 * p_accept
-        except Exception:
-            pass
+        except (ValueError, RuntimeError) as e:
+            print(f"   Warning: response prediction failed: {e}")
 
     return round(min(1.0, score), 3)
 

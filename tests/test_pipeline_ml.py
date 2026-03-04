@@ -86,6 +86,25 @@ class TestEmbeddingEngine:
         assert len(results) > 0
 
 
+class TestTfidfFallback:
+    def test_tfidf_fallback_returns_vector(self):
+        engine = EmbeddingEngine()
+        engine.model = None
+        engine._tfidf = None
+
+        vec1 = engine._tfidf_embed("stochastic control of dynamical systems")
+        assert np.allclose(vec1, 0)
+
+        vec2 = engine._tfidf_embed("optimal stopping and free boundary problems")
+        assert not np.allclose(vec2, 0)
+        assert len(vec2) == 768
+
+        vec3 = engine._tfidf_embed("Hamilton-Jacobi-Bellman equations in control theory")
+        assert not np.allclose(vec3, 0)
+        norm = np.linalg.norm(vec3)
+        assert abs(norm - 1.0) < 0.01
+
+
 class TestExpertiseIndex:
     def test_deduplicate_by_email(self):
         refs = [
@@ -210,6 +229,33 @@ class TestReportQuality:
         result = assess_report_quality(ms)
         assert result["n_reports"] == 1
         assert result["reports"][0]["word_count"] == 0
+
+
+class TestEngagementScore:
+    def test_engagement_score_uses_embeddings(self):
+        ms = {
+            "referees": [
+                {
+                    "name": "R1",
+                    "recommendation": "Minor Revision",
+                    "reports": [
+                        {
+                            "comments_to_author": (
+                                "The paper studies optimal control of stochastic differential equations. "
+                                "The proof of the main theorem uses dynamic programming and viscosity solutions. "
+                                "I suggest the authors clarify the assumptions on the diffusion coefficient."
+                            ),
+                            "recommendation": "Minor Revision",
+                        }
+                    ],
+                }
+            ],
+            "abstract": "We study optimal control of stochastic differential equations using dynamic programming and viscosity solutions for Hamilton-Jacobi-Bellman equations.",
+        }
+        result = assess_report_quality(ms)
+        assert result["n_reports"] == 1
+        report = result["reports"][0]
+        assert report["engagement_score"] > 0
 
 
 class TestOutcomePredictor:

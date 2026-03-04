@@ -256,7 +256,7 @@ def assess_desk_rejection(
             should_reject = len(high_signals) > 0
             confidence = round(1.0 - p_accept, 2) if should_reject else round(p_accept, 2)
             method = "heuristic+model"
-        except Exception:
+        except (AttributeError, TypeError, ValueError, RuntimeError):
             pass
 
     summary = _build_summary(signals, should_reject)
@@ -337,7 +337,7 @@ def _heuristic_signals(
 
             engine = get_engine()
             scope_sim = engine.similarity(abstract[:2000], scope_desc)
-        except Exception:
+        except (ImportError, AttributeError, RuntimeError, ValueError):
             pass
 
     if jaccard is not None and jaccard < 0.1 and abstract:

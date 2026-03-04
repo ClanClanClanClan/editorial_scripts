@@ -86,7 +86,7 @@ class EmbeddingEngine:
             import faiss
 
             faiss.write_index(index, str(path))
-        except Exception as e:
+        except (ImportError, OSError, RuntimeError) as e:
             print(f"   Warning: failed to save FAISS index: {e}")
 
     def load_index(self, path: Path):
@@ -95,7 +95,7 @@ class EmbeddingEngine:
 
             if path.exists():
                 return faiss.read_index(str(path))
-        except Exception as e:
+        except (ImportError, OSError, RuntimeError) as e:
             print(f"   Warning: failed to load FAISS index: {e}")
         return None
 

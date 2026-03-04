@@ -202,7 +202,7 @@ def _search_openalex_works(
 
                 candidates.append(c)
 
-    except Exception as e:
+    except (requests.RequestException, KeyError, ValueError) as e:
         print(f"   [OpenAlex works] search error: {e}")
 
     return candidates
@@ -241,7 +241,7 @@ def _search_semantic_scholar(
                 c = _make_candidate({"name": name}, source="semantic_scholar_search")
                 candidates.append(c)
 
-    except Exception as e:
+    except (requests.RequestException, KeyError, ValueError) as e:
         print(f"   [S2 papers] search error: {e}")
 
     return candidates

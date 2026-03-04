@@ -62,8 +62,6 @@ def _check_coauthorship(
     manuscript_authors: list[dict],
     enricher: AcademicProfileEnricher,
 ) -> str | None:
-    candidate.get("name", "")
-
     for author in manuscript_authors:
         wp = author.get("web_profile") or {}
         s2 = wp.get("semantic_scholar") or {}

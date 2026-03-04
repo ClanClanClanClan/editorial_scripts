@@ -180,7 +180,7 @@ class ManuscriptOutcomePredictor:
         samples_X = []
         samples_y = []
 
-        for (_journal, _ms_id), (ms, _, _) in manuscript_map.items():
+        for (journal, _ms_id), (ms, _, _) in manuscript_map.items():
             label = _classify_outcome(ms)
             if label is None:
                 continue

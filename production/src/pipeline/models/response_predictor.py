@@ -325,7 +325,7 @@ def _extract_turnaround_days(ref: dict) -> int | None:
                 return max(0, days) if days < 365 else None
             except ValueError:
                 continue
-    except Exception:
+    except (ImportError, AttributeError, TypeError):
         pass
     return None
 
@@ -350,5 +350,5 @@ def _load_json(path: Path) -> dict:
     try:
         with open(path) as f:
             return json.load(f)
-    except Exception:
+    except (OSError, json.JSONDecodeError):
         return {}

@@ -100,7 +100,7 @@ def _score_single_report(report: dict, manuscript: dict, referee: dict) -> dict:
             engagement_score = max(
                 0.0, engine.similarity(text[:2000], manuscript["abstract"][:2000])
             )
-        except Exception:
+        except (ImportError, AttributeError, RuntimeError, ValueError):
             pass
 
     consistency_score = _recommendation_consistency(text, recommendation)
@@ -183,7 +183,7 @@ def _timeliness(referee: dict, allowed_days: int = 28) -> float:
                 return max(0.0, 1.0 - actual_days / allowed_days)
             except ValueError:
                 continue
-    except Exception:
+    except (ImportError, AttributeError, TypeError):
         pass
     return 0.5
 

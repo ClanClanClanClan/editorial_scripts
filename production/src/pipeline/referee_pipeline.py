@@ -139,7 +139,7 @@ class RefereePipeline:
 
                 trainer = ModelTrainer()
                 trainer.train_all()
-            except Exception as e:
+            except (ImportError, AttributeError, RuntimeError, ValueError) as e:
                 print(f"   Auto-retrain failed: {e}")
 
         try:
@@ -149,7 +149,7 @@ class RefereePipeline:
             if idx.load():
                 self.expertise_index = idx
                 print(f"   Loaded expertise index ({len(idx.referees)} referees)")
-        except Exception as e:
+        except (ImportError, AttributeError, OSError, RuntimeError) as e:
             print(f"   Expertise index not available: {e}")
         try:
             from pipeline.models.response_predictor import RefereeResponsePredictor
@@ -158,7 +158,7 @@ class RefereePipeline:
             if rp.load():
                 self.response_predictor = rp
                 print("   Loaded response predictor")
-        except Exception as e:
+        except (ImportError, AttributeError, OSError, RuntimeError) as e:
             print(f"   Response predictor not available: {e}")
         try:
             from pipeline.models.outcome_predictor import ManuscriptOutcomePredictor
@@ -167,7 +167,7 @@ class RefereePipeline:
             if op.load():
                 self.outcome_predictor = op
                 print("   Loaded outcome predictor")
-        except Exception as e:
+        except (ImportError, AttributeError, OSError, RuntimeError) as e:
             print(f"   Outcome predictor not available: {e}")
 
     def _models_are_stale(self) -> bool:

@@ -10,17 +10,18 @@ Authentication: Gmail API OAuth
 Platform: Email-based (Gmail)
 """
 
-import os
-import sys
-import json
-import re
-import time
 import base64
-from pathlib import Path
-from datetime import datetime, timedelta
+import json
+import os
+import re
+import sys
+import time
 import traceback
-from typing import Optional, Dict, List, Any, Callable
+from collections.abc import Callable
+from datetime import datetime
 from functools import wraps
+from pathlib import Path
+from typing import Any, Optional
 
 # Add cache integration
 sys.path.append(str(Path(__file__).parent.parent))
@@ -28,9 +29,8 @@ from core.cache_integration import CachedExtractorMixin
 
 # Gmail API imports
 try:
-    from google.oauth2.credentials import Credentials
-    from google_auth_oauthlib.flow import InstalledAppFlow
     from google.auth.transport.requests import Request
+    from google.oauth2.credentials import Credentials
     from googleapiclient.discovery import build
     from googleapiclient.errors import HttpError
 
@@ -256,7 +256,7 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
             return False
 
     @with_api_retry(max_attempts=3, delay=1.0, backoff=2.0)
-    def search_emails(self, query: str, max_results: int = 100) -> List[Dict[str, Any]]:
+    def search_emails(self, query: str, max_results: int = 100) -> list[dict[str, Any]]:
         """Search Gmail for emails matching query."""
         emails = []
 
@@ -280,7 +280,7 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
         print(f"📧 Found {len(emails)} emails matching query")
         return emails
 
-    def get_email_attachments(self, email_message: Dict[str, Any]) -> List[Dict[str, Any]]:
+    def get_email_attachments(self, email_message: dict[str, Any]) -> list[dict[str, Any]]:
         """Extract attachment information from email."""
         attachments = []
 
@@ -669,7 +669,7 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
         text = re.sub(r"\s{2,}", " ", text)
         return text
 
-    def extract_authors_from_pdf(self, pdf_path: str) -> List[Dict[str, Any]]:
+    def extract_authors_from_pdf(self, pdf_path: str) -> list[dict[str, Any]]:
         """Extract authors with affiliations from PDF manuscript."""
         authors = []
         try:
@@ -907,7 +907,7 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
                         details += f" - {author['affiliation'][:30]}..."
                     print(f"         • {details}")
             else:
-                print(f"      ⚠️ Could not extract authors from PDF")
+                print("      ⚠️ Could not extract authors from PDF")
 
         except ImportError:
             print("      ⚠️ PyPDF2 not installed - can't extract authors from PDF")
@@ -916,7 +916,7 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
 
         return authors
 
-    def _parse_author_section(self, lines: List[str]) -> List[Dict[str, Any]]:
+    def _parse_author_section(self, lines: list[str]) -> list[dict[str, Any]]:
         """Parse author section lines to extract names, emails, and affiliations."""
         authors = []
         affiliations = {}
@@ -980,7 +980,7 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
                     if sp.strip():
                         expanded.append((sp.strip(), orig_line, list(current_markers)))
 
-        for fragment, orig_line, fragment_markers in expanded:
+        for fragment, _orig_line, fragment_markers in expanded:
             if not fragment:
                 continue
 
@@ -1244,8 +1244,8 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
         return domain
 
     def search_paper_online(
-        self, title: str, authors: List[Dict[str, Any]] = None
-    ) -> Dict[str, Any]:
+        self, title: str, authors: list[dict[str, Any]] = None
+    ) -> dict[str, Any]:
         """Search for paper online (arXiv, Google Scholar, etc.) to get better author data."""
         print(f"      🔍 Searching online for: {title[:50]}...")
 
@@ -1260,8 +1260,9 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
         }
 
         try:
-            import requests
             from urllib.parse import quote
+
+            import requests
 
             # Clean title for search
             clean_title = re.sub(r"[^\w\s]", " ", title).strip()
@@ -1359,7 +1360,7 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
 
         return enriched_data
 
-    def enrich_authors_with_deep_web(self, authors: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    def enrich_authors_with_deep_web(self, authors: list[dict[str, Any]]) -> list[dict[str, Any]]:
         """Enrich author data with deep web search for affiliations and countries."""
         enriched_authors = []
 
@@ -1458,14 +1459,11 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
 
     def enrich_referee_with_deep_web(
         self, referee_name: str, referee_email: str = None
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Enrich referee information using web search."""
         enriched_data = {}
 
         try:
-            import requests
-            from urllib.parse import quote
-
             # Build search query
             query_parts = [f'"{referee_name}"']
             if referee_email:
@@ -1480,7 +1478,7 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
                     query_parts.append(domain.split(".")[0])  # Institution hint
 
             query_parts.extend(["professor OR researcher OR academic", "university OR institute"])
-            search_query = " ".join(query_parts)
+            " ".join(query_parts)
 
             print(f"      🌐 Searching web for: {referee_name}")
 
@@ -1689,7 +1687,7 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
 
         return "Unknown"
 
-    def extract_review_scores(self, report_text: str) -> Dict[str, Any]:
+    def extract_review_scores(self, report_text: str) -> dict[str, Any]:
         """Extract numerical scores from referee report."""
         scores = {}
 
@@ -1741,7 +1739,7 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
 
         return scores
 
-    def extract_key_concerns(self, report_text: str) -> List[str]:
+    def extract_key_concerns(self, report_text: str) -> list[str]:
         """Extract main concerns and criticisms from referee report."""
         concerns = []
 
@@ -1801,7 +1799,7 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
 
         return concerns
 
-    def analyze_referee_report(self, report_path: str, referee_name: str = None) -> Dict[str, Any]:
+    def analyze_referee_report(self, report_path: str, referee_name: str = None) -> dict[str, Any]:
         """Complete analysis of a referee report PDF."""
         analysis = {
             "report_path": report_path,
@@ -1873,7 +1871,7 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
     # PHASE 2: STATUS & DECISION TRACKING
     # ==========================
 
-    def determine_manuscript_status(self, manuscript: Dict) -> str:
+    def determine_manuscript_status(self, manuscript: dict) -> str:
         """Determine manuscript status based on timeline and referee data."""
         # Check for explicit decision
         if manuscript.get("decision_date"):
@@ -1926,7 +1924,7 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
             return int(match.group(1))
         return 0
 
-    def extract_editorial_decision(self, email_body: str, subject: str = "") -> Dict[str, Any]:
+    def extract_editorial_decision(self, email_body: str, subject: str = "") -> dict[str, Any]:
         """Extract editorial decision from email."""
         decision = {"type": None, "date": None, "details": None}
 
@@ -1983,7 +1981,7 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
 
         return decision
 
-    def track_revision_history(self, manuscript: Dict) -> List[Dict]:
+    def track_revision_history(self, manuscript: dict) -> list[dict]:
         """Track revision history from timeline."""
         revisions = []
         current_round = 0
@@ -2067,8 +2065,8 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
         return self._normalize_name(from_header)
 
     def build_manuscript_timeline(
-        self, manuscript_id: str, emails: List[Dict[str, Any]], is_current: bool = False
-    ) -> Dict[str, Any]:
+        self, manuscript_id: str, emails: list[dict[str, Any]], is_current: bool = False
+    ) -> dict[str, Any]:
         """Build complete manuscript timeline from all related emails."""
 
         manuscript = {
@@ -2165,7 +2163,6 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
                     manuscript["submission_date"] = date
 
             # Classify sender role (available to entire loop body)
-            sender_is_referee = False
             sender_name = None
             is_dylan = "possamai" in from_header.lower() or "dylansmb" in from_header.lower()
             system_patterns = ["editorialoffice@fs.org", "no-reply"]
@@ -2228,8 +2225,6 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
                                 for ind in referee_indicators
                             )
                         ):
-                            sender_is_referee = True
-
                             # Extract institution from email
                             email_match = re.search(r"<([^>]+)>", from_header)
                             institution = "Unknown"
@@ -2968,7 +2963,7 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
         else:
             return "Correspondence"
 
-    def extract_referees_from_email(self, body: str, subject: str) -> List[Dict[str, str]]:
+    def extract_referees_from_email(self, body: str, subject: str) -> list[dict[str, str]]:
         """Extract referee names and details from email body."""
         referees = []
 
@@ -3017,8 +3012,8 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
         return referees
 
     def extract_manuscript_from_email(
-        self, email_message: Dict[str, Any]
-    ) -> Optional[Dict[str, Any]]:
+        self, email_message: dict[str, Any]
+    ) -> Optional[dict[str, Any]]:
         """Extract manuscript data from an email message."""
         try:
             # Get email metadata
@@ -3264,7 +3259,7 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
 
         return body
 
-    def extract_all(self) -> List[Dict[str, Any]]:
+    def extract_all(self) -> list[dict[str, Any]]:
         """Main extraction method for email-based workflow."""
         print("🚀 FS EXTRACTION - COMPREHENSIVE EMAIL ANALYSIS")
         print("=" * 60)
@@ -3332,7 +3327,7 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
 
                 is_current = manuscript_id in current_manuscript_ids
                 if not is_current:
-                    print(f"   📄 Historical manuscript — skipping downloads")
+                    print("   📄 Historical manuscript — skipping downloads")
 
                 # Build comprehensive manuscript data
                 try:
@@ -3485,7 +3480,7 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
             traceback.print_exc()
             return []
 
-    def _enrich_people_from_web(self, manuscript_data: Dict):
+    def _enrich_people_from_web(self, manuscript_data: dict):
         if not requests:
             return
         from urllib.parse import quote_plus
@@ -3719,7 +3714,7 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
                             if em_val and not person.get("email"):
                                 person["email"] = em_val
                                 break
-                        affiliations_obj = person_data.get("activities-summary", {})
+                        person_data.get("activities-summary", {})
                         urls = person_data.get("researcher-urls", {}).get("researcher-url", [])
                         ext_urls = []
                         for u in urls[:5]:
@@ -3871,7 +3866,6 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
                             doi = item.get("DOI", "")
                             cr_authors = item.get("author", [])
                             surname_match = False
-                            full_name_match = False
                             if person_surname and cr_authors:
                                 for cr_auth in cr_authors:
                                     cr_family = (cr_auth.get("family") or "").lower()
@@ -3886,11 +3880,11 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
                                                 or cr_given.startswith(person_given[:3])
                                                 or person_given.startswith(cr_given[:3])
                                             ):
-                                                full_name_match = True
+                                                pass
                                         if person_orcid and cr_auth.get("ORCID"):
                                             cr_orcid = cr_auth["ORCID"].rstrip("/").split("/")[-1]
                                             if cr_orcid == person_orcid:
-                                                full_name_match = True
+                                                pass
                                         break
                                     elif len(person_surname) > 5 and (
                                         cr_family.startswith(person_surname[:5])
@@ -4048,7 +4042,7 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
         if not known:
             return
 
-        earliest = min(known)
+        min(known)
 
         if inv and resp and inv > resp:
             ref["invited_date"] = ref["response_date"]
@@ -4374,7 +4368,7 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
         except (TimeoutError, Exception) as e:
             print(f"⚠️ Cache save error: {e}")
 
-    def calculate_timeline_metrics(self, manuscript: Dict) -> Dict[str, Any]:
+    def calculate_timeline_metrics(self, manuscript: dict) -> dict[str, Any]:
         """Calculate timeline metrics for a manuscript.
 
         Args:
@@ -4414,8 +4408,8 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
             submission_date = timeline[0]["date"] if timeline else None
 
         # Parse dates
-        from datetime import datetime, timedelta
         import email.utils
+        from datetime import datetime
 
         def parse_date(date_str):
             """Parse email date string to datetime."""
@@ -4550,8 +4544,8 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
         return metrics
 
     def track_referee_performance(
-        self, referee: Dict, all_manuscripts: List[Dict] = None
-    ) -> Dict[str, Any]:
+        self, referee: dict, all_manuscripts: list[dict] = None
+    ) -> dict[str, Any]:
         """Track performance metrics for a referee.
 
         Args:
@@ -4646,7 +4640,7 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
 
         return performance
 
-    def generate_alerts(self, manuscript: Dict) -> List[Dict[str, Any]]:
+    def generate_alerts(self, manuscript: dict) -> list[dict[str, Any]]:
         """Generate alerts for manuscript issues.
 
         Args:
@@ -4656,8 +4650,8 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
             List of alert dictionaries
         """
         alerts = []
-        from datetime import datetime, timedelta
         import email.utils
+        from datetime import datetime, timedelta
 
         def parse_date(date_str):
             """Parse email date string to datetime."""
@@ -4795,7 +4789,7 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
 
         return alerts
 
-    def extract_paper_metadata(self, pdf_path: str) -> Dict[str, Any]:
+    def extract_paper_metadata(self, pdf_path: str) -> dict[str, Any]:
         """Extract metadata from paper PDF.
 
         Args:
@@ -4950,8 +4944,8 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
         return metadata
 
     def identify_corresponding_author(
-        self, authors: List[Dict[str, Any]], pdf_path: str = None, emails: List[Dict] = None
-    ) -> Dict[str, Any]:
+        self, authors: list[dict[str, Any]], pdf_path: str = None, emails: list[dict] = None
+    ) -> dict[str, Any]:
         """Identify the corresponding author.
 
         Args:
@@ -5093,7 +5087,7 @@ def main():
         if manuscripts:
             extractor.save_results()
 
-            print(f"\n📊 EXTRACTION SUMMARY:")
+            print("\n📊 EXTRACTION SUMMARY:")
             print(f"Total manuscripts: {len(manuscripts)}")
             for i, ms in enumerate(manuscripts[:10]):  # Show first 10
                 print(f"  {i+1}. {ms['id']}: {ms['title'][:70]}... [{ms['status']}]")

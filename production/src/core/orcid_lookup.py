@@ -2,12 +2,12 @@
 import json
 import sqlite3
 import time
+import urllib.error
+import urllib.parse
+import urllib.request
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Optional, Dict, List
-import urllib.request
-import urllib.parse
-import urllib.error
+from typing import Optional
 
 
 class ORCIDLookup:
@@ -41,7 +41,7 @@ class ORCIDLookup:
             )
             conn.commit()
 
-    def _get_cached(self, key: str) -> Optional[Dict]:
+    def _get_cached(self, key: str) -> Optional[dict]:
         with sqlite3.connect(str(self.db_path)) as conn:
             row = conn.execute(
                 "SELECT orcid_id, full_name, affiliations, lookup_date, raw_response FROM orcid_cache WHERE lookup_key = ?",
@@ -60,7 +60,7 @@ class ORCIDLookup:
         return None
 
     def _set_cached(
-        self, key: str, orcid_id: str, full_name: str, affiliations: List, raw: str = ""
+        self, key: str, orcid_id: str, full_name: str, affiliations: list, raw: str = ""
     ):
         with sqlite3.connect(str(self.db_path)) as conn:
             conn.execute(
@@ -84,7 +84,7 @@ class ORCIDLookup:
             time.sleep(self.RATE_LIMIT_DELAY - elapsed)
         self._last_request_time = time.time()
 
-    def search_by_name(self, first_name: str, last_name: str, email: str = "") -> Optional[Dict]:
+    def search_by_name(self, first_name: str, last_name: str, email: str = "") -> Optional[dict]:
         if not first_name or not last_name:
             return None
 
@@ -173,7 +173,7 @@ class ORCIDLookup:
             print(f"         ⚠️ ORCID lookup error: {str(e)[:50]}")
             return None
 
-    def _fetch_record(self, orcid_id: str) -> Optional[Dict]:
+    def _fetch_record(self, orcid_id: str) -> Optional[dict]:
         try:
             self._rate_limit()
             url = f"{self.API_BASE}/{orcid_id}/person"
@@ -226,7 +226,7 @@ class ORCIDLookup:
         except Exception:
             return None
 
-    def lookup_person(self, name: str, email: str = "") -> Optional[Dict]:
+    def lookup_person(self, name: str, email: str = "") -> Optional[dict]:
         if not name:
             return None
 
@@ -248,7 +248,7 @@ class ORCIDLookup:
 
         return self.search_by_name(first_name, last_name, email)
 
-    def enrich_referees(self, referees: List[Dict], verbose: bool = True) -> int:
+    def enrich_referees(self, referees: list[dict], verbose: bool = True) -> int:
         enriched = 0
         for ref in referees:
             if ref.get("orcid"):
@@ -272,7 +272,7 @@ class ORCIDLookup:
 
         return enriched
 
-    def enrich_authors(self, authors: List[Dict], verbose: bool = True) -> int:
+    def enrich_authors(self, authors: list[dict], verbose: bool = True) -> int:
         enriched = 0
         for author in authors:
             if author.get("orcid"):

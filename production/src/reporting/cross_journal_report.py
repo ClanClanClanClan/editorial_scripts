@@ -3,7 +3,7 @@ import json
 import sys
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Optional
 
 OUTPUTS_DIR = Path(__file__).parent.parent.parent / "outputs"
 
@@ -44,7 +44,7 @@ def find_latest_output(journal: str) -> Optional[Path]:
     return None
 
 
-def load_journal_data(journal: str) -> Optional[Dict]:
+def load_journal_data(journal: str) -> Optional[dict]:
     path = find_latest_output(journal)
     if not path:
         return None
@@ -58,7 +58,7 @@ def load_journal_data(journal: str) -> Optional[Dict]:
         return None
 
 
-def compute_journal_stats(journal: str, data: Dict) -> Dict:
+def compute_journal_stats(journal: str, data: dict) -> dict:
     manuscripts = data.get("manuscripts", [])
     ms_count = len(manuscripts)
 
@@ -117,7 +117,7 @@ def compute_journal_stats(journal: str, data: Dict) -> Dict:
     }
 
 
-def print_terminal_report(all_stats: List[Dict]):
+def print_terminal_report(all_stats: list[dict]):
     print()
     print("╔══════════════════════════════════════════════════════════════════════════════════╗")
     print("║                       CROSS-JOURNAL EXTRACTION REPORT                          ║")
@@ -174,7 +174,7 @@ def print_terminal_report(all_stats: List[Dict]):
     print()
 
 
-def generate_json_report(all_stats: List[Dict]) -> Dict:
+def generate_json_report(all_stats: list[dict]) -> dict:
     return {
         "report_type": "cross_journal",
         "generated_at": datetime.now().isoformat(),
@@ -191,7 +191,7 @@ def generate_json_report(all_stats: List[Dict]) -> Dict:
     }
 
 
-def run_report(save_json: bool = False, output_dir: Optional[Path] = None) -> Dict:
+def run_report(save_json: bool = False, output_dir: Optional[Path] = None) -> dict:
     all_stats = []
     for journal in JOURNALS:
         data = load_journal_data(journal)

@@ -1,27 +1,27 @@
 #!/usr/bin/env python3
+import json
+import logging
 import os
 import re
 import sys
-import json
 import time
-import logging
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
-from datetime import datetime, timedelta, timezone
-from typing import Optional, List, Dict, Any
+from typing import Any, Optional
 
+from bs4 import BeautifulSoup
 from selenium import webdriver
+from selenium.common.exceptions import (
+    ElementClickInterceptedException,
+    NoSuchElementException,
+    TimeoutException,
+)
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import (
-    TimeoutException,
-    NoSuchElementException,
-    ElementClickInterceptedException,
-)
+from selenium.webdriver.support.ui import WebDriverWait
 from webdriver_manager.chrome import ChromeDriverManager
-from bs4 import BeautifulSoup
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from core.cache_integration import CachedExtractorMixin
@@ -58,7 +58,7 @@ class NACOExtractor(CachedExtractorMixin):
         self.headless = headless
         self.driver = None
         self.wait = None
-        self.manuscripts: List[Dict[str, Any]] = []
+        self.manuscripts: list[dict[str, Any]] = []
         self._last_exception_msg = ""
 
         self.username = os.environ.get("NACO_USERNAME")
@@ -229,7 +229,7 @@ class NACOExtractor(CachedExtractorMixin):
             self._save_debug_html("mine_click_error")
             return False
 
-    def parse_manuscripts(self) -> List[Dict[str, Any]]:
+    def parse_manuscripts(self) -> list[dict[str, Any]]:
         soup = BeautifulSoup(self.driver.page_source, "html.parser")
         articles = soup.find_all("article", class_="JournalView-Listing")
 
@@ -260,8 +260,8 @@ class NACOExtractor(CachedExtractorMixin):
         self.logger.info(f"Parsed {len(manuscripts)} manuscripts")
         return manuscripts
 
-    def _parse_single_manuscript(self, article) -> Optional[Dict[str, Any]]:
-        ms: Dict[str, Any] = {
+    def _parse_single_manuscript(self, article) -> Optional[dict[str, Any]]:
+        ms: dict[str, Any] = {
             "manuscript_id": "",
             "title": "",
             "authors": [],
@@ -334,7 +334,7 @@ class NACOExtractor(CachedExtractorMixin):
             return ms
         return None
 
-    def _extract_referees(self, container) -> List[Dict[str, Any]]:
+    def _extract_referees(self, container) -> list[dict[str, Any]]:
         referees = []
         for item in container.find_all(["li", "div", "p"]):
             text = item.text.strip()
@@ -408,7 +408,7 @@ class NACOExtractor(CachedExtractorMixin):
 
     # --- Web Enrichment ---
 
-    def _enrich_people_from_web(self, manuscript_data: Dict):
+    def _enrich_people_from_web(self, manuscript_data: dict):
         enrich_people_from_web(
             manuscript_data,
             get_cached_web_profile=self.get_cached_web_profile,
@@ -418,7 +418,7 @@ class NACOExtractor(CachedExtractorMixin):
 
     # --- Gmail Integration ---
 
-    def _enrich_audit_trail_with_gmail(self, manuscript_data: Dict, manuscript_id: str):
+    def _enrich_audit_trail_with_gmail(self, manuscript_data: dict, manuscript_id: str):
         if not GMAIL_SEARCH_AVAILABLE:
             return
 
@@ -482,7 +482,7 @@ class NACOExtractor(CachedExtractorMixin):
         except Exception as e:
             print(f"      ⚠️ Gmail search error: {str(e)[:60]}")
 
-    def _backfill_author_emails_from_timeline(self, manuscript_data: Dict, timeline: List[Dict]):
+    def _backfill_author_emails_from_timeline(self, manuscript_data: dict, timeline: list[dict]):
         authors = manuscript_data.get("authors", [])
         authors_without_email = [a for a in authors if not a.get("email") and a.get("name")]
         if not authors_without_email:
@@ -528,7 +528,7 @@ class NACOExtractor(CachedExtractorMixin):
 
     # --- Timeline Analytics ---
 
-    def extract_timeline_analytics(self, manuscript: Dict) -> Dict:
+    def extract_timeline_analytics(self, manuscript: dict) -> dict:
         timeline = manuscript.get("communication_timeline") or manuscript.get("audit_trail", [])
         if not timeline:
             return {}
@@ -552,12 +552,12 @@ class NACOExtractor(CachedExtractorMixin):
                     if "GMT" in str(date_str):
                         clean_date = str(date_str).replace(" GMT", "").replace(" EDT", "")
                         parsed_date = datetime.strptime(clean_date, "%d-%b-%Y %I:%M %p").replace(
-                            tzinfo=timezone.utc
+                            tzinfo=UTC
                         )
                     else:
                         parsed_date = datetime.fromisoformat(str(date_str).replace("Z", "+00:00"))
                         if parsed_date.tzinfo is None:
-                            parsed_date = parsed_date.replace(tzinfo=timezone.utc)
+                            parsed_date = parsed_date.replace(tzinfo=UTC)
                     event_dates.append(parsed_date)
                     parsed_dates[idx] = parsed_date
                 except Exception:
@@ -679,7 +679,7 @@ class NACOExtractor(CachedExtractorMixin):
         ]
         if invitation_events and response_events:
             response_times = []
-            for inv_idx, inv in invitation_events:
+            for inv_idx, _inv in invitation_events:
                 inv_date = parsed_dates.get(inv_idx)
                 if inv_date:
                     later_responses = [
@@ -713,7 +713,7 @@ class NACOExtractor(CachedExtractorMixin):
         if reminder_events:
             effective_reminders = 0
             total_reminders = len(reminder_events)
-            for rem_idx, reminder in reminder_events:
+            for rem_idx, _reminder in reminder_events:
                 reminder_date = parsed_dates.get(rem_idx)
                 if reminder_date:
                     cutoff_date = reminder_date + timedelta(days=7)
@@ -801,7 +801,7 @@ class NACOExtractor(CachedExtractorMixin):
 
     # --- Main Orchestration ---
 
-    def run(self) -> List[Dict[str, Any]]:
+    def run(self) -> list[dict[str, Any]]:
         print(f"🚀 {self.JOURNAL_CODE} EXTRACTION — {self.PLATFORM}")
         print("=" * 60)
 

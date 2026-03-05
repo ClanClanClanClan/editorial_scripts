@@ -15,7 +15,6 @@ try:
     from google.auth.transport.requests import Request
     from google.oauth2.credentials import Credentials
     from googleapiclient.discovery import build
-    from googleapiclient.errors import HttpError
 
     GMAIL_AVAILABLE = True
 except ImportError:
@@ -62,7 +61,7 @@ def fetch_latest_verification_code(
     # Convert timestamp to Gmail search format (seconds since epoch)
     # Gmail wants: after:<seconds_since_epoch>
     # Look for emails 5 seconds before the timestamp to account for timing differences
-    gmail_after = int(start_timestamp) - 5
+    int(start_timestamp) - 5
 
     while (time.time() - start_time) < max_wait:
         try:

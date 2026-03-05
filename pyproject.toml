@@ -121,8 +121,6 @@ target-version = "py311"
 line-length = 100
 extend-exclude = [
   "archive",
-  "production/src/extractors",
-  "production/src/core",
   "dev",
   "docs",
 ]
@@ -141,8 +139,14 @@ ignore = [
     "E501",  # line too long, handled by black
     "B008",  # do not perform function calls in argument defaults
     "C901",  # too complex
+    "UP007", # Optional[X] → X | None — too noisy in large extractors
+    "UP038", # isinstance(x, (A, B)) → isinstance(x, A | B) — cosmetic
 ]
 
 [tool.ruff.lint.per-file-ignores]
 "__init__.py" = ["F401"]
 "tests/**/*" = ["F401", "F811"]
+"production/src/core/*_base.py" = ["E402", "E731", "E741", "B023"]
+"production/src/core/em_base.py" = ["E402", "E731", "B023"]
+"production/src/core/academic_apis.py" = ["E731"]
+"production/src/extractors/*.py" = ["E402", "E731", "E741", "E712", "B023", "B904", "C401"]

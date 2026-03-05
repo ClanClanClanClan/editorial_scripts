@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 import re
-import time
-import requests
-from typing import Dict, Callable, Optional
+from collections.abc import Callable
 from urllib.parse import quote_plus
+
+import requests
 
 try:
     from core.academic_apis import AcademicProfileEnricher
@@ -12,7 +12,7 @@ except ImportError:
 
 
 def enrich_people_from_web(
-    manuscript_data: Dict,
+    manuscript_data: dict,
     get_cached_web_profile: Callable,
     save_web_profile: Callable,
     platform_label: str = "platform_metadata",

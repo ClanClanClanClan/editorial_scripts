@@ -11,7 +11,7 @@ import glob
 import os
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Optional
 
 # Import cache components
 from .cache_manager import ExtractorCacheMixin
@@ -132,7 +132,7 @@ class CachedExtractorMixin(ExtractorCacheMixin):
 
     def get_cached_web_profile(
         self, name: str, institution: str = "", orcid_id: str = ""
-    ) -> Optional[Dict]:
+    ) -> Optional[dict]:
         if not hasattr(self, "cache_manager"):
             return None
         if orcid_id:
@@ -147,7 +147,7 @@ class CachedExtractorMixin(ExtractorCacheMixin):
         name: str,
         institution: str,
         orcid_id: str,
-        profile_data: Dict,
+        profile_data: dict,
         source: str = "orcid+crossref",
     ):
         if not hasattr(self, "cache_manager"):

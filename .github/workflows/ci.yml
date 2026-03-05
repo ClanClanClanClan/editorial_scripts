@@ -25,10 +25,10 @@ jobs:
           poetry run pip install ruff black bandit pip-audit detect-secrets
       - name: Ruff (lint)
         run: |
-          poetry run ruff check production/src/pipeline tests
+          poetry run ruff check production/src tests
       - name: Black (check)
         run: |
-          poetry run black --check production/src/pipeline tests
+          poetry run black --check production/src tests
       - name: Detect secrets (baseline)
         run: |
           poetry run detect-secrets-hook --baseline .secrets.baseline $(git ls-files)
@@ -142,6 +142,6 @@ jobs:
       - name: Upload pip-audit artifacts (security job)
         uses: actions/upload-artifact@v4
         with:
-          name: pip-audit
+          name: pip-audit-security
           path: artifacts/security/pip-audit.json
           retention-days: 14

@@ -863,47 +863,6 @@ class CacheManager:
                 )
                 conn.commit()
 
-    def get_journal_statistics(
-        self, journal_id: str, period_start: str = None, period_end: str = None
-    ) -> list[dict[str, Any]]:
-        """Get cached journal statistics."""
-        with self.lock:
-            with sqlite3.connect(self.db_path) as conn:
-                cursor = conn.cursor()
-
-                if period_start and period_end:
-                    cursor.execute(
-                        """
-                        SELECT * FROM journal_statistics
-                        WHERE journal_id = ? AND period_start = ? AND period_end = ?
-                    """,
-                        (journal_id, period_start, period_end),
-                    )
-                else:
-                    cursor.execute(
-                        """
-                        SELECT * FROM journal_statistics
-                        WHERE journal_id = ?
-                        ORDER BY period_start DESC
-                    """,
-                        (journal_id,),
-                    )
-
-                rows = cursor.fetchall()
-
-                return [
-                    {
-                        "journal_id": row[0],
-                        "period_start": row[1],
-                        "period_end": row[2],
-                        "total_submissions": row[3],
-                        "average_review_time": row[4],
-                        "acceptance_rate": row[5],
-                        "desk_rejection_rate": row[6],
-                    }
-                    for row in rows
-                ]
-
     # EXTRACTION RUN TRACKING
 
     def start_extraction_run(self, journal: str) -> str:

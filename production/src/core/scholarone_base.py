@@ -36,11 +36,7 @@ from selenium.common.exceptions import (
     StaleElementReferenceException,
 )
 
-try:
-    from bs4 import BeautifulSoup
-except ImportError:
-    os.system("pip install beautifulsoup4")
-    from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup
 
 sys.path.append(str(Path(__file__).parent.parent))
 from core.cache_integration import CachedExtractorMixin
@@ -68,7 +64,7 @@ try:
 except ImportError:
     GMAIL_SEARCH_AVAILABLE = False
 
-from core.gmail_verification_wrapper import fetch_latest_verification_code
+from core.gmail_verification import fetch_latest_verification_code
 
 
 class ScholarOneBaseExtractor(CachedExtractorMixin):

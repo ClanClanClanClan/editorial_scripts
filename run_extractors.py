@@ -269,12 +269,14 @@ class ExtractorOrchestrator:
 
         self.logger.info(f"Running all working extractors: {working_extractors}")
 
+        siam_journals = {"sicon", "sifin"}
         results = {}
         for journal_id in working_extractors:
             print(f"\n🚀 STARTING {journal_id.upper()} EXTRACTION")
             print("-" * 50)
 
-            result = self.run_extractor(journal_id, headless=headless)
+            journal_headless = False if journal_id in siam_journals else headless
+            result = self.run_extractor(journal_id, headless=journal_headless)
             results[journal_id] = result
 
             if result:

@@ -1,11 +1,8 @@
-import json
 from pathlib import Path
 
 import numpy as np
 
-BASE_DIR = Path(__file__).resolve().parents[4]
-OUTPUTS_DIR = BASE_DIR / "production" / "outputs"
-MODELS_DIR = BASE_DIR / "production" / "models"
+from pipeline import FREEMAIL_DOMAINS, MODELS_DIR, OUTPUTS_DIR, _load_json
 
 FINAL_STATUSES = {
     "accept": ["completed accept", "accept", "accepted"],
@@ -202,14 +199,6 @@ class ManuscriptOutcomePredictor:
         h_indices = []
         citation_counts = []
         has_freemail = False
-        freemail_domains = {
-            "gmail.com",
-            "yahoo.com",
-            "hotmail.com",
-            "outlook.com",
-            "qq.com",
-            "163.com",
-        }
 
         for author in authors:
             wp = author.get("web_profile") or {}
@@ -220,7 +209,7 @@ class ManuscriptOutcomePredictor:
             if c:
                 citation_counts.append(c)
             email = (author.get("email") or "").lower()
-            if any(d in email for d in freemail_domains):
+            if any(d in email for d in FREEMAIL_DOMAINS):
                 has_freemail = True
 
         scope_sim = 0.5
@@ -233,7 +222,7 @@ class ManuscriptOutcomePredictor:
                 if scope_desc:
                     engine = get_engine()
                     scope_sim = max(0.0, engine.similarity(abstract[:2000], scope_desc))
-            except (ValueError, RuntimeError) as e:
+            except (ImportError, ValueError, RuntimeError) as e:
                 print(f"   Warning: scope similarity computation failed: {e}")
 
         keyword_overlap = 0.0
@@ -306,12 +295,3 @@ def _classify_outcome(ms: dict) -> int | None:
         if s in combined:
             return 0
     return None
-
-
-def _load_json(path: Path) -> dict:
-    try:
-        with open(path) as f:
-            return json.load(f)
-    except (OSError, json.JSONDecodeError) as e:
-        print(f"   Warning: failed to load JSON from {path}: {e}")
-        return {}

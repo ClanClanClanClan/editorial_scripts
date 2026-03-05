@@ -749,7 +749,7 @@ class NACOExtractor(CachedExtractorMixin):
 
     def save_results(self):
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        output_file = self.output_dir / f"naco_{timestamp}.json"
+        output_file = self.output_dir / f"naco_extraction_{timestamp}.json"
 
         extraction_data = {
             "journal": self.JOURNAL_CODE,

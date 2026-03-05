@@ -1,16 +1,14 @@
 #!/usr/bin/env python3
 """Referee candidate search: OpenAlex, Semantic Scholar, historical DB, author suggestions."""
 
+import datetime
 import json
 import time
-import unicodedata
-from pathlib import Path
 
 import requests
 from core.academic_apis import AcademicProfileEnricher
 
-OUTPUTS_DIR = Path(__file__).parent.parent.parent / "outputs"
-JOURNALS = ["mf", "mor", "fs", "jota", "mafe", "sicon", "sifin", "naco"]
+from pipeline import JOURNALS, OUTPUTS_DIR, normalize_name
 
 
 def find_referees(
@@ -26,7 +24,7 @@ def find_referees(
     title = manuscript.get("title", "")
     abstract = manuscript.get("abstract", "")
     authors = manuscript.get("authors", [])
-    author_names = {_normalize(a.get("name", "")) for a in authors if a.get("name")}
+    author_names = {normalize_name(a.get("name", "")) for a in authors if a.get("name")}
 
     rec = manuscript.get("referee_recommendations", {})
     if not rec:
@@ -116,15 +114,11 @@ def find_referees(
     return candidates[: max_candidates * 2], api_calls
 
 
-def _normalize(s: str) -> str:
-    return unicodedata.normalize("NFKD", s).encode("ascii", "ignore").decode().lower().strip()
-
-
 def _dedup_key(c: dict) -> str:
     email = (c.get("email") or "").lower().strip()
     if email:
         return email
-    return _normalize(c.get("name", ""))
+    return normalize_name(c.get("name", ""))
 
 
 def _make_candidate(data: dict, source: str) -> dict:
@@ -179,7 +173,7 @@ def _search_openalex_works(
             for authorship in work.get("authorships", []):
                 author = authorship.get("author", {})
                 name = author.get("display_name", "")
-                if not name or _normalize(name) in exclude_names:
+                if not name or normalize_name(name) in exclude_names:
                     continue
 
                 orcid_url = author.get("orcid")
@@ -236,7 +230,7 @@ def _search_semantic_scholar(
         for paper in resp.json().get("data", []):
             for author in paper.get("authors", []):
                 name = author.get("name", "")
-                if not name or _normalize(name) in exclude_names:
+                if not name or normalize_name(name) in exclude_names:
                     continue
                 c = _make_candidate({"name": name}, source="semantic_scholar_search")
                 candidates.append(c)
@@ -290,7 +284,7 @@ def _search_historical(
 
             for ref in ms.get("referees", []):
                 name = ref.get("name", "")
-                if not name or _normalize(name) in exclude_names:
+                if not name or normalize_name(name) in exclude_names:
                     continue
 
                 c = _make_candidate(
@@ -376,11 +370,12 @@ def _compute_relevance(
     if papers:
         years = [p.get("year") or 0 for p in papers]
         max_year = max(years) if years else 0
-        if max_year >= 2024:
+        current_year = datetime.datetime.now().year
+        if max_year >= current_year - 2:
             recency_score = 1.0
-        elif max_year >= 2022:
+        elif max_year >= current_year - 4:
             recency_score = 0.6
-        elif max_year >= 2020:
+        elif max_year >= current_year - 6:
             recency_score = 0.3
 
     score = (

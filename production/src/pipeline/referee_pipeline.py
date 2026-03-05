@@ -13,14 +13,12 @@ import requests
 from core.academic_apis import AcademicProfileEnricher
 from core.output_schema import JOURNAL_NAME_MAP, PLATFORM_MAP
 
+from pipeline import JOURNALS, OUTPUTS_DIR, normalize_name
 from pipeline.conflict_checker import check_conflicts
 from pipeline.desk_rejection import assess_desk_rejection
 from pipeline.referee_finder import find_referees
 
 PIPELINE_VERSION = "0.1.0"
-
-OUTPUTS_DIR = Path(__file__).parent.parent.parent / "outputs"
-JOURNALS = ["mf", "mor", "fs", "jota", "mafe", "sicon", "sifin", "naco"]
 
 AWAITING_REFEREE_CONFIG = {
     "ScholarOne": {
@@ -229,24 +227,32 @@ class RefereePipeline:
             return []
 
         print(f"Found {len(pending)} manuscript(s) awaiting referee assignment in {jc}")
-        reports = []
-        for ms in pending:
-            report = self._process_manuscript(ms, jc)
-            if report:
-                reports.append(report)
-        return reports
-
-    def _process_manuscript(self, manuscript: dict, journal_code: str) -> dict:
-        ms_id = manuscript.get("manuscript_id", "?")
-        title = manuscript.get("title", "?")
-        print(f"\n   Processing: {ms_id}")
-        print(f"   Title: {title[:80]}{'...' if len(title) > 80 else ''}")
-
         all_journals = {}
         for j in JOURNALS:
             jd = load_journal_data(j)
             if jd:
                 all_journals[j] = jd
+        reports = []
+        for ms in pending:
+            report = self._process_manuscript(ms, jc, all_journals)
+            if report:
+                reports.append(report)
+        return reports
+
+    def _process_manuscript(
+        self, manuscript: dict, journal_code: str, all_journals: dict | None = None
+    ) -> dict:
+        ms_id = manuscript.get("manuscript_id", "?")
+        title = manuscript.get("title", "?")
+        print(f"\n   Processing: {ms_id}")
+        print(f"   Title: {title[:80]}{'...' if len(title) > 80 else ''}")
+
+        if all_journals is None:
+            all_journals = {}
+            for j in JOURNALS:
+                jd = load_journal_data(j)
+                if jd:
+                    all_journals[j] = jd
 
         from pipeline.report_quality import assess_report_quality
 
@@ -305,11 +311,11 @@ class RefereePipeline:
                 c["conflicts"] = conflicts
                 c["is_conflicted"] = len(conflicts) > 0
 
-                opp_names = {_norm(o.get("name", "")) for o in opposed if o.get("name")}
+                opp_names = {normalize_name(o.get("name", "")) for o in opposed if o.get("name")}
                 opp_emails = {(o.get("email") or "").lower() for o in opposed if o.get("email")}
-                c["author_opposed"] = (c.get("email") or "").lower() in opp_emails or _norm(
-                    c.get("name", "")
-                ) in opp_names
+                c["author_opposed"] = (
+                    c.get("email") or ""
+                ).lower() in opp_emails or normalize_name(c.get("name", "")) in opp_names
 
             conflicted_count = sum(1 for c in candidates if c["is_conflicted"])
             print(
@@ -450,12 +456,6 @@ class RefereePipeline:
                 print(f"    {name}: {status}")
 
         print()
-
-
-def _norm(s: str) -> str:
-    import unicodedata
-
-    return unicodedata.normalize("NFKD", s).encode("ascii", "ignore").decode().lower().strip()
 
 
 def _sanitize_candidates(candidates: list) -> list:

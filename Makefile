@@ -7,12 +7,12 @@ hooks:
 	poetry run pre-commit install
 
 lint:
-	poetry run ruff check tests
-	poetry run black --check tests
+	poetry run ruff check production/src/pipeline tests
+	poetry run black --check production/src/pipeline tests
 
 fix:
-	poetry run ruff check tests --fix
-	poetry run black tests
+	poetry run ruff check production/src/pipeline tests --fix
+	poetry run black production/src/pipeline tests
 
 test:
 	poetry run pytest

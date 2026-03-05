@@ -1060,7 +1060,7 @@ class ComprehensiveMFExtractor(ScholarOneBaseExtractor):
                                 time.sleep(5)
 
                             sys.path.insert(0, str(Path(__file__).parent.parent))
-                            from core.gmail_verification_wrapper import (
+                            from core.gmail_verification import (
                                 fetch_latest_verification_code,
                             )
 

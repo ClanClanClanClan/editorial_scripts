@@ -4,6 +4,8 @@
 import os
 import re
 
+from pipeline import FREEMAIL_DOMAINS
+
 JOURNAL_SCOPE_KEYWORDS = {
     "SICON": [
         "optimal control",
@@ -157,23 +159,6 @@ JOURNAL_SCOPE_KEYWORDS = {
         "feedback",
         "stabilization",
     ],
-}
-
-FREEMAIL_DOMAINS = {
-    "gmail.com",
-    "yahoo.com",
-    "hotmail.com",
-    "outlook.com",
-    "aol.com",
-    "mail.com",
-    "protonmail.com",
-    "icloud.com",
-    "live.com",
-    "msn.com",
-    "ymail.com",
-    "qq.com",
-    "163.com",
-    "126.com",
 }
 
 JOURNAL_SCOPES_LLM = {

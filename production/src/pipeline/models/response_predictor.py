@@ -1,11 +1,8 @@
-import json
 from pathlib import Path
 
 import numpy as np
 
-BASE_DIR = Path(__file__).resolve().parents[4]
-OUTPUTS_DIR = BASE_DIR / "production" / "outputs"
-MODELS_DIR = BASE_DIR / "production" / "models"
+from pipeline import MODELS_DIR, OUTPUTS_DIR, _load_json
 
 
 class RefereeResponsePredictor:
@@ -344,11 +341,3 @@ def _keyword_overlap(topics: list, keywords: list) -> float:
     common = topic_words & kw_words
     union = topic_words | kw_words
     return len(common) / len(union) if union else 0.5
-
-
-def _load_json(path: Path) -> dict:
-    try:
-        with open(path) as f:
-            return json.load(f)
-    except (OSError, json.JSONDecodeError):
-        return {}

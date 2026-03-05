@@ -1,9 +1,7 @@
 import json
 from pathlib import Path
 
-BASE_DIR = Path(__file__).resolve().parents[4]
-OUTPUTS_DIR = BASE_DIR / "production" / "outputs"
-MODELS_DIR = BASE_DIR / "production" / "models"
+from pipeline import MODELS_DIR, OUTPUTS_DIR, _load_json
 
 
 class ExpertiseIndex:
@@ -136,11 +134,3 @@ def _deduplicate(referees: list) -> list:
         else:
             seen[key] = ref
     return list(seen.values())
-
-
-def _load_json(path: Path) -> dict:
-    try:
-        with open(path) as f:
-            return json.load(f)
-    except (json.JSONDecodeError, OSError):
-        return {}

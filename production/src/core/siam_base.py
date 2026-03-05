@@ -8,9 +8,8 @@ import sys
 import time
 import json
 from datetime import datetime, timedelta, timezone
-from functools import wraps
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 import requests
 import undetected_chromedriver as uc
@@ -38,42 +37,7 @@ except ImportError:
     GMAIL_SEARCH_AVAILABLE = False
 
 
-def with_retry(max_attempts: int = 3, delay: float = 1.0, backoff: float = 2.0):
-    def decorator(func: Callable) -> Callable:
-        @wraps(func)
-        def wrapper(*args, **kwargs):
-            last_exception = None
-            for attempt in range(max_attempts):
-                try:
-                    return func(*args, **kwargs)
-                except (
-                    TimeoutException,
-                    NoSuchElementException,
-                    WebDriverException,
-                    StaleElementReferenceException,
-                ) as e:
-                    last_exception = e
-                    if attempt < max_attempts - 1:
-                        wait_time = delay * (backoff**attempt)
-                        print(
-                            f"   \u26a0\ufe0f {func.__name__} attempt {attempt + 1} failed: {str(e)[:50]}"
-                        )
-                        print(f"      Retrying in {wait_time:.1f} seconds...")
-                        time.sleep(wait_time)
-                    else:
-                        print(f"   \u274c {func.__name__} failed after {max_attempts} attempts")
-                except Exception as e:
-                    print(
-                        f"   \u274c {func.__name__} failed with unrecoverable error: {str(e)[:100]}"
-                    )
-                    raise
-            if last_exception:
-                raise last_exception
-            return None
-
-        return wrapper
-
-    return decorator
+from core.scholarone_utils import with_retry
 
 
 class SIAMExtractor(CachedExtractorMixin):

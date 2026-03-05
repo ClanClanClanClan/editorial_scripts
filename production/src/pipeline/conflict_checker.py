@@ -50,7 +50,7 @@ def check_conflicts(
             conflicts.append(f"Is manuscript editor: {editor_name}")
             break
 
-    coauthor_conflict = _check_coauthorship(candidate, manuscript_authors, enricher)
+    coauthor_conflict = _check_coauthorship(candidate, manuscript_authors)
     if coauthor_conflict:
         conflicts.append(coauthor_conflict)
 
@@ -60,7 +60,6 @@ def check_conflicts(
 def _check_coauthorship(
     candidate: dict,
     manuscript_authors: list[dict],
-    enricher: AcademicProfileEnricher,
 ) -> str | None:
     for author in manuscript_authors:
         wp = author.get("web_profile") or {}

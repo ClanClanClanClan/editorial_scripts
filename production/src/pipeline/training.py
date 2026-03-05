@@ -1,11 +1,9 @@
 import json
 import subprocess
 import time
-from pathlib import Path
 
-BASE_DIR = Path(__file__).resolve().parents[3]
-OUTPUTS_DIR = BASE_DIR / "outputs"
-MODELS_DIR = BASE_DIR / "models"
+from pipeline import MODELS_DIR
+
 FEEDBACK_DIR = MODELS_DIR / "feedback"
 
 

@@ -1,5 +1,4 @@
 import json
-import tempfile
 from pathlib import Path
 from unittest.mock import patch
 
@@ -568,64 +567,61 @@ class TestStalenessAndTrainingMarker:
     def test_models_stale_no_marker(self, tmp_path):
         from pipeline.referee_pipeline import RefereePipeline
 
-        outputs = tmp_path / "outputs"
+        production = tmp_path / "production"
+        outputs = production / "outputs"
         journal_dir = outputs / "testj"
         journal_dir.mkdir(parents=True)
         (journal_dir / "testj_extraction_20250101.json").write_text("{}")
 
-        models = tmp_path / "models"
-        models.mkdir()
+        models = production / "models"
+        models.mkdir(parents=True)
 
         with patch("pipeline.referee_pipeline.OUTPUTS_DIR", outputs):
             pipeline = RefereePipeline.__new__(RefereePipeline)
-            pipeline._models_are_stale_patched = None
-
-            def _stale_check(self_inner):
-                marker = models / ".last_trained"
-                if not marker.exists():
-                    return True
-                return False
-
-            result = True
-            marker = models / ".last_trained"
-            assert not marker.exists()
-            assert result is True
+            assert pipeline._models_are_stale() is True
 
     def test_models_not_stale_after_train(self, tmp_path):
-        outputs = tmp_path / "outputs"
-        journal_dir = outputs / "testj"
-        journal_dir.mkdir(parents=True)
-        extraction = journal_dir / "testj_extraction_20250101.json"
-        extraction.write_text("{}")
-
-        models = tmp_path / "models"
-        models.mkdir()
-
         import time
 
+        from pipeline.referee_pipeline import RefereePipeline
+
+        production = tmp_path / "production"
+        outputs = production / "outputs"
+        journal_dir = outputs / "testj"
+        journal_dir.mkdir(parents=True)
+        (journal_dir / "testj_extraction_20250101.json").write_text("{}")
+
+        models = production / "models"
+        models.mkdir(parents=True)
         time.sleep(0.05)
         marker = models / ".last_trained"
         marker.write_text(time.strftime("%Y-%m-%dT%H:%M:%S"))
 
-        assert marker.stat().st_mtime >= extraction.stat().st_mtime
+        with patch("pipeline.referee_pipeline.OUTPUTS_DIR", outputs):
+            pipeline = RefereePipeline.__new__(RefereePipeline)
+            assert pipeline._models_are_stale() is False
 
     def test_models_stale_new_extraction(self, tmp_path):
-        outputs = tmp_path / "outputs"
+        import time
+
+        from pipeline.referee_pipeline import RefereePipeline
+
+        production = tmp_path / "production"
+        outputs = production / "outputs"
         journal_dir = outputs / "testj"
         journal_dir.mkdir(parents=True)
 
-        models = tmp_path / "models"
-        models.mkdir()
+        models = production / "models"
+        models.mkdir(parents=True)
         marker = models / ".last_trained"
         marker.write_text("2025-01-01T00:00:00")
 
-        import time
-
         time.sleep(0.05)
-        extraction = journal_dir / "testj_extraction_20250201.json"
-        extraction.write_text("{}")
+        (journal_dir / "testj_extraction_20250201.json").write_text("{}")
 
-        assert extraction.stat().st_mtime > marker.stat().st_mtime
+        with patch("pipeline.referee_pipeline.OUTPUTS_DIR", outputs):
+            pipeline = RefereePipeline.__new__(RefereePipeline)
+            assert pipeline._models_are_stale() is True
 
     def test_train_all_writes_marker(self, tmp_path):
         models = tmp_path / "models"
@@ -636,7 +632,6 @@ class TestStalenessAndTrainingMarker:
         with (
             patch("pipeline.training.MODELS_DIR", models),
             patch("pipeline.training.FEEDBACK_DIR", feedback),
-            patch("pipeline.training.OUTPUTS_DIR", tmp_path / "outputs"),
         ):
             trainer = ModelTrainer()
             with (

@@ -38,9 +38,7 @@ def find_referees(
     for ref in recommended:
         c = _make_candidate(ref, source="author_suggested")
         c["author_suggested"] = True
-        key = _dedup_key(c)
-        if key and key not in seen_keys and key not in author_names:
-            seen_keys.add(key)
+        if not _is_duplicate(c, seen_keys, author_names):
             candidates.append(c)
 
     if expertise_index is not None:
@@ -53,9 +51,7 @@ def find_referees(
                     c["h_index"] = ref["h_index"]
                 if ref.get("topics"):
                     c["research_topics"] = ref["topics"]
-                key = _dedup_key(c)
-                if key and key not in seen_keys and key not in author_names:
-                    seen_keys.add(key)
+                if not _is_duplicate(c, seen_keys, author_names):
                     candidates.append(c)
         except (ValueError, RuntimeError) as e:
             print(f"   Warning: expertise_index search failed: {e}")
@@ -64,25 +60,19 @@ def find_referees(
     if oa_candidates is not None:
         api_calls["openalex"] += 1
     for c in oa_candidates or []:
-        key = _dedup_key(c)
-        if key and key not in seen_keys:
-            seen_keys.add(key)
+        if not _is_duplicate(c, seen_keys):
             candidates.append(c)
 
     s2_candidates = _search_semantic_scholar(keywords, title, session, author_names)
     if s2_candidates is not None:
         api_calls["semantic_scholar"] += 1
     for c in s2_candidates or []:
-        key = _dedup_key(c)
-        if key and key not in seen_keys:
-            seen_keys.add(key)
+        if not _is_duplicate(c, seen_keys):
             candidates.append(c)
 
     hist_candidates = _search_historical(keywords, journal_code, author_names)
     for c in hist_candidates:
-        key = _dedup_key(c)
-        if key and key not in seen_keys:
-            seen_keys.add(key)
+        if not _is_duplicate(c, seen_keys):
             candidates.append(c)
 
     for c in candidates:
@@ -114,11 +104,27 @@ def find_referees(
     return candidates[: max_candidates * 2], api_calls
 
 
-def _dedup_key(c: dict) -> str:
+def _dedup_keys(c: dict) -> list[str]:
+    keys = []
+    name = normalize_name(c.get("name", ""))
+    if name:
+        keys.append(name)
     email = (c.get("email") or "").lower().strip()
     if email:
-        return email
-    return normalize_name(c.get("name", ""))
+        keys.append(email)
+    return keys
+
+
+def _is_duplicate(c: dict, seen_keys: set, excluded: set = None) -> bool:
+    keys = _dedup_keys(c)
+    if not keys:
+        return True
+    if any(k in seen_keys for k in keys):
+        return True
+    if excluded and any(k in excluded for k in keys):
+        return True
+    seen_keys.update(keys)
+    return False
 
 
 def _make_candidate(data: dict, source: str) -> dict:

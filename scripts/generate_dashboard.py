@@ -13,6 +13,8 @@ from reporting.cross_journal_report import (  # noqa: E402
     JOURNAL_NAMES,
     JOURNALS,
     PLATFORMS,
+    _dedup_referees,
+    _is_active_referee,
     compute_journal_stats,
     load_journal_data,
 )
@@ -86,7 +88,9 @@ def _load_pending_manuscripts():
         for ms in data.get("manuscripts", []):
             status = ms.get("status") or ""
             stage = ms.get("platform_specific", {}).get("metadata", {}).get("current_stage") or ""
-            n_refs = len(ms.get("referees", []))
+            n_refs = sum(
+                1 for r in _dedup_referees(ms.get("referees", [])) if _is_active_referee(r)
+            )
             is_pending = False
             if "Waiting for Potential Referee" in stage:
                 is_pending = True

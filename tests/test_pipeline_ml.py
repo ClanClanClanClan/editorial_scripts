@@ -105,22 +105,31 @@ class TestTfidfFallback:
 
 
 class TestExpertiseIndex:
-    def test_deduplicate_by_email(self):
+    def test_deduplicate_same_name_different_emails(self):
         refs = [
             {"name": "John Smith", "email": "john@mit.edu", "h_index": 10},
-            {"name": "J. Smith", "email": "john@mit.edu", "h_index": 15},
+            {"name": "John Smith", "email": "js@harvard.edu", "h_index": 15},
         ]
         deduped = _deduplicate(refs)
         assert len(deduped) == 1
         assert deduped[0]["h_index"] == 15
+        assert deduped[0]["email"] == "john@mit.edu"
 
-    def test_deduplicate_by_name(self):
+    def test_deduplicate_by_name_case_insensitive(self):
         refs = [
             {"name": "John Smith", "email": "", "h_index": 5},
             {"name": "john smith", "email": "", "h_index": 8},
         ]
         deduped = _deduplicate(refs)
         assert len(deduped) == 1
+
+    def test_deduplicate_different_names_not_merged(self):
+        refs = [
+            {"name": "John Smith", "email": "john@mit.edu", "h_index": 10},
+            {"name": "J. Smith", "email": "john@mit.edu", "h_index": 15},
+        ]
+        deduped = _deduplicate(refs)
+        assert len(deduped) == 2
 
     def test_build_with_no_data(self):
         idx = ExpertiseIndex()

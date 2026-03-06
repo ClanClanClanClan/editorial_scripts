@@ -36,9 +36,9 @@ def find_latest_output(journal: str) -> Optional[Path]:
     journal_dir = OUTPUTS_DIR / journal
     if not journal_dir.exists():
         return None
-    files = sorted(journal_dir.glob("*.json"), key=lambda f: f.stat().st_mtime, reverse=True)
+    files = sorted(journal_dir.glob("*.json"), key=lambda f: f.name, reverse=True)
     for f in files:
-        if "BASELINE" in f.name or "debug" in str(f):
+        if "BASELINE" in f.name or "debug" in str(f) or "rec_" in f.name or "partial" in f.name:
             continue
         return f
     return None
@@ -58,19 +58,53 @@ def load_journal_data(journal: str) -> Optional[dict]:
         return None
 
 
+INACTIVE_REFEREE_STATUSES = {
+    "Reviewer Declined",
+    "Declined",
+    "Un-invited Before Agreeing to Review",
+    "Un-assigned After Agreeing to Review",
+    "Terminated After Agreeing to Review",
+}
+
+
+def _dedup_referees(referees: list[dict]) -> list[dict]:
+    seen = set()
+    unique = []
+    for ref in referees:
+        name = (ref.get("name") or "").strip().lower()
+        if not name or name in seen:
+            continue
+        seen.add(name)
+        unique.append(ref)
+    return unique
+
+
+def _is_active_referee(ref: dict) -> bool:
+    status = ref.get("platform_specific", {}).get("status") or ref.get("status") or ""
+    return status not in INACTIVE_REFEREE_STATUSES
+
+
 def compute_journal_stats(journal: str, data: dict) -> dict:
     manuscripts = data.get("manuscripts", [])
     ms_count = len(manuscripts)
 
-    total_refs = sum(len(m.get("referees", [])) for m in manuscripts)
-    total_authors = sum(len(m.get("authors", [])) for m in manuscripts)
+    ms_deduped = {m.get("manuscript_id", id(m)): m for m in manuscripts}
+    manuscripts = list(ms_deduped.values())
+    ms_count = len(manuscripts)
 
-    enriched = sum(
-        1
-        for m in manuscripts
-        for p in m.get("referees", []) + m.get("authors", [])
-        if p.get("web_profile")
-    )
+    total_refs = 0
+    active_refs = 0
+    total_authors = 0
+    enriched = 0
+
+    for m in manuscripts:
+        refs = _dedup_referees(m.get("referees", []))
+        authors = m.get("authors", [])
+        total_refs += len(refs)
+        active_refs += sum(1 for r in refs if _is_active_referee(r))
+        total_authors += len(authors)
+        enriched += sum(1 for p in refs + authors if p.get("web_profile"))
+
     total_people = total_refs + total_authors
 
     span_days = []
@@ -103,7 +137,8 @@ def compute_journal_stats(journal: str, data: dict) -> dict:
         "journal_name": JOURNAL_NAMES.get(journal, journal),
         "platform": PLATFORMS.get(journal, ""),
         "manuscripts": ms_count,
-        "referees": total_refs,
+        "referees": active_refs,
+        "referees_all": total_refs,
         "authors": total_authors,
         "enriched": enriched,
         "total_people": total_people,

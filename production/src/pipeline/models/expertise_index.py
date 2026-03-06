@@ -122,15 +122,28 @@ def _manuscript_text(ms: dict) -> str:
 
 
 def _deduplicate(referees: list) -> list:
-    seen = {}
+    from pipeline import normalize_name
+
+    by_name: dict[str, dict] = {}
     for ref in referees:
-        key = (ref.get("email") or "").lower().strip() or (ref.get("name") or "").lower().strip()
-        if not key:
+        name_key = normalize_name(ref.get("name", ""))
+        if not name_key:
             continue
-        if key in seen:
-            existing = seen[key]
+        if name_key in by_name:
+            existing = by_name[name_key]
             if ref.get("h_index", 0) > existing.get("h_index", 0):
-                seen[key] = ref
+                existing["h_index"] = ref["h_index"]
+            if ref.get("email") and not existing.get("email"):
+                existing["email"] = ref["email"]
+            if ref.get("institution") and not existing.get("institution"):
+                existing["institution"] = ref["institution"]
+            extra = ref.get("text", "")
+            if extra:
+                existing["text"] = existing.get("text", "") + " " + extra
+            existing.setdefault("topics", [])
+            for t in ref.get("topics", []):
+                if t not in existing["topics"]:
+                    existing["topics"].append(t)
         else:
-            seen[key] = ref
-    return list(seen.values())
+            by_name[name_key] = dict(ref)
+    return list(by_name.values())

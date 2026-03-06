@@ -8,7 +8,7 @@ import time
 import requests
 from core.academic_apis import AcademicProfileEnricher
 
-from pipeline import JOURNALS, OUTPUTS_DIR, normalize_name
+from pipeline import H_INDEX_CAP, JOURNALS, OUTPUTS_DIR, normalize_name
 
 
 def find_referees(
@@ -355,7 +355,7 @@ def _compute_relevance(
         pub_score = min(1.0, best * 3)
 
     h = candidate.get("h_index") or 0
-    seniority_score = min(1.0, h / 30)
+    seniority_score = min(1.0, h / H_INDEX_CAP)
 
     source_trust = {
         "author_suggested": 1.0,

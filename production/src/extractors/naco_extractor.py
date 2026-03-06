@@ -78,6 +78,8 @@ class NACOExtractor(CachedExtractorMixin):
             self.logger.addHandler(handler)
             self.logger.setLevel(logging.INFO)
 
+        self.ae_filter = os.environ.get("NACO_AE_FILTER", "Possamai")
+
         self.init_cached_extractor(self.JOURNAL_CODE)
 
     def setup_driver(self):
@@ -241,7 +243,7 @@ class NACOExtractor(CachedExtractorMixin):
         for article in articles:
             try:
                 name_span = article.find("span", {"data-tooltip": "Associate Editor"})
-                if not name_span or "Possamai" not in name_span.text:
+                if not name_span or self.ae_filter not in name_span.text:
                     continue
 
                 h2 = article.find("h2")

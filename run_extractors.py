@@ -21,14 +21,13 @@ Usage:
     python3 run_extractors.py --status
 """
 
-import os
-import sys
-import json
 import argparse
+import json
 import logging
+import sys
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Optional
 
 # Add production extractors to path
 sys.path.insert(0, str(Path(__file__).parent / "production/src/extractors"))
@@ -160,7 +159,7 @@ class ExtractorOrchestrator:
         print(f"⚠️ TODO: {len(todo)} extractors ({', '.join(todo)})")
         print()
 
-    def run_extractor(self, journal_id: str, headless: bool = True) -> Optional[Dict]:
+    def run_extractor(self, journal_id: str, headless: bool = True) -> Optional[dict]:
         """Run a specific extractor.
 
         Args:
@@ -221,7 +220,7 @@ class ExtractorOrchestrator:
                 manuscript_count = len(extractor.manuscripts_data)
 
             if manuscript_count > 0:
-                self.logger.info(f"Extraction completed successfully")
+                self.logger.info("Extraction completed successfully")
                 self.logger.info(f"Duration: {duration:.1f} seconds")
                 self.logger.info(f"Manuscripts: {manuscript_count}")
 
@@ -252,7 +251,7 @@ class ExtractorOrchestrator:
             except Exception as e:
                 self.logger.warning(f"Cleanup error for {journal_id}: {e}")
 
-    def run_all_working(self, headless: bool = True) -> Dict[str, Optional[Dict]]:
+    def run_all_working(self, headless: bool = True) -> dict[str, Optional[dict]]:
         """Run all working extractors.
 
         Args:
@@ -288,7 +287,7 @@ class ExtractorOrchestrator:
 
         return results
 
-    def get_recent_results(self, journal_id: Optional[str] = None) -> List[Dict]:
+    def get_recent_results(self, journal_id: Optional[str] = None) -> list[dict]:
         """Get recent extraction results.
 
         Args:
@@ -348,6 +347,7 @@ def main():
     parser.add_argument("--status", action="store_true", help="Show status of all extractors")
     parser.add_argument("--report", action="store_true", help="Cross-journal summary report")
     parser.add_argument("--json", action="store_true", help="Save JSON output (use with --report)")
+    parser.add_argument("--dashboard", action="store_true", help="Generate HTML dashboard")
     parser.add_argument("--recent", action="store_true", help="Show recent extraction results")
     parser.add_argument("--retrain", action="store_true", help="Retrain ML models after extraction")
     parser.add_argument(
@@ -364,6 +364,14 @@ def main():
 
     if args.status:
         orchestrator.show_status()
+
+    elif args.dashboard:
+        import subprocess
+
+        subprocess.run(
+            [sys.executable, str(Path(__file__).parent / "scripts" / "generate_dashboard.py")],
+            check=True,
+        )
 
     elif args.report:
         sys.path.insert(0, str(Path(__file__).parent / "production/src"))
@@ -394,21 +402,21 @@ def main():
         result = orchestrator.run_extractor(args.journal, headless=headless)
 
         if result:
-            print(f"\n✅ EXTRACTION COMPLETED")
+            print("\n✅ EXTRACTION COMPLETED")
             print(f"Journal: {result['journal_name']}")
             print(f"Manuscripts: {result['manuscripts_count']}")
             print(f"Duration: {result['duration_seconds']:.1f} seconds")
             if args.retrain:
                 _retrain_models()
         else:
-            print(f"\n❌ EXTRACTION FAILED")
+            print("\n❌ EXTRACTION FAILED")
             sys.exit(1)
 
     elif args.all:
         headless = not args.visible
         results = orchestrator.run_all_working(headless=headless)
 
-        print(f"\n📊 ALL EXTRACTORS SUMMARY")
+        print("\n📊 ALL EXTRACTORS SUMMARY")
         print("=" * 40)
 
         total_manuscripts = 0

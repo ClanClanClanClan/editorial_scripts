@@ -20,14 +20,14 @@ def check_conflicts(
 
     for author in manuscript_authors:
         author_name = author.get("name", "")
-        if enricher._name_match(cand_name, author_name):
+        if enricher.name_match(cand_name, author_name):
             conflicts.append(f"Is manuscript author: {author_name}")
             break
 
     if not any("Is manuscript author" in c for c in conflicts):
         for author in manuscript_authors:
             author_inst = author.get("institution") or ""
-            if author_inst and cand_inst and enricher._institution_match(cand_inst, author_inst):
+            if author_inst and cand_inst and enricher.institution_match(cand_inst, author_inst):
                 conflicts.append(
                     f"Same institution as author {author.get('name', '?')}: "
                     f"{cand_inst} / {author_inst}"
@@ -40,13 +40,13 @@ def check_conflicts(
         if opp_email and cand_email and opp_email == cand_email:
             conflicts.append("Author-opposed referee (email match)")
             break
-        if opp_name and enricher._name_match(cand_name, opp_name):
+        if opp_name and enricher.name_match(cand_name, opp_name):
             conflicts.append("Author-opposed referee (name match)")
             break
 
     for editor in manuscript_editors:
         editor_name = editor.get("name", "")
-        if editor_name and enricher._name_match(cand_name, editor_name):
+        if editor_name and enricher.name_match(cand_name, editor_name):
             conflicts.append(f"Is manuscript editor: {editor_name}")
             break
 

@@ -10,6 +10,8 @@ MODELS_DIR = PRODUCTION_DIR / "models"
 
 JOURNALS = ["mf", "mor", "fs", "jota", "mafe", "sicon", "sifin", "naco"]
 
+H_INDEX_CAP = 40
+
 FREEMAIL_DOMAINS = {
     "gmail.com",
     "yahoo.com",

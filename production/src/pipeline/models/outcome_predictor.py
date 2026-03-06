@@ -2,7 +2,7 @@ from pathlib import Path
 
 import numpy as np
 
-from pipeline import FREEMAIL_DOMAINS, MODELS_DIR, OUTPUTS_DIR, _load_json
+from pipeline import FREEMAIL_DOMAINS, H_INDEX_CAP, MODELS_DIR, OUTPUTS_DIR, _load_json
 
 FINAL_STATUSES = {
     "accept": ["completed accept", "accept", "accepted"],
@@ -270,7 +270,7 @@ class ManuscriptOutcomePredictor:
             "abstract_length": min(len(abstract.split()) / 300.0, 1.0),
             "n_keywords": min(len(keywords) / 8.0, 1.0),
             "n_authors": min(len(authors) / 6.0, 1.0),
-            "author_h_index_max": min(max(h_indices) / 40.0, 1.0) if h_indices else 0.0,
+            "author_h_index_max": min(max(h_indices) / H_INDEX_CAP, 1.0) if h_indices else 0.0,
             "author_h_index_mean": min((sum(h_indices) / len(h_indices)) / 20.0, 1.0)
             if h_indices
             else 0.0,

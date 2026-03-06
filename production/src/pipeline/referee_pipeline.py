@@ -355,12 +355,12 @@ class RefereePipeline:
         suggested_status = {}
         for r in rec.get("recommended_referees", []):
             name = r.get("name", "?")
-            matched = any(self.enricher._name_match(c.get("name", ""), name) for c in top)
+            matched = any(self.enricher.name_match(c.get("name", ""), name) for c in top)
             if matched:
                 suggested_status[name] = "recommended"
             else:
                 in_conflicted = any(
-                    self.enricher._name_match(c.get("name", ""), name) for c in conflicted
+                    self.enricher.name_match(c.get("name", ""), name) for c in conflicted
                 )
                 suggested_status[name] = "conflict" if in_conflicted else "not_found"
 

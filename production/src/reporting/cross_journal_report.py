@@ -191,6 +191,28 @@ def generate_json_report(all_stats: list[dict]) -> dict:
     }
 
 
+def _get_feedback_summary() -> dict | None:
+    try:
+        from pipeline.training import ModelTrainer
+
+        trainer = ModelTrainer()
+        stats = trainer.get_feedback_stats()
+        if not stats:
+            return None
+        total = sum(s["total"] for s in stats.values())
+        return {"total": total, "journals": stats}
+    except (ImportError, OSError):
+        return None
+
+
+def _print_feedback_summary(feedback: dict):
+    print(f"  Feedback: {feedback['total']} outcomes recorded")
+    for journal, s in sorted(feedback["journals"].items()):
+        decisions = ", ".join(f"{k}: {v}" for k, v in s["decisions"].items())
+        print(f"    {journal.upper()}: {s['total']} — {decisions}")
+    print()
+
+
 def run_report(save_json: bool = False, output_dir: Optional[Path] = None) -> dict:
     all_stats = []
     for journal in JOURNALS:
@@ -221,7 +243,13 @@ def run_report(save_json: bool = False, output_dir: Optional[Path] = None) -> di
 
     print_terminal_report(all_stats)
 
+    feedback = _get_feedback_summary()
+    if feedback:
+        _print_feedback_summary(feedback)
+
     report = generate_json_report(all_stats)
+    if feedback:
+        report["feedback"] = feedback
 
     if save_json:
         out_dir = output_dir or OUTPUTS_DIR

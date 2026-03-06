@@ -2,7 +2,7 @@ from pathlib import Path
 
 import numpy as np
 
-from pipeline import MODELS_DIR, OUTPUTS_DIR, _load_json
+from pipeline import H_INDEX_CAP, MODELS_DIR, OUTPUTS_DIR, _load_json
 
 
 class RefereeResponsePredictor:
@@ -112,7 +112,7 @@ class RefereeResponsePredictor:
                     break
 
         features = {
-            "h_index": min(h_index / 30.0, 1.0),
+            "h_index": min(h_index / H_INDEX_CAP, 1.0),
             "acceptance_rate": stats.get("acceptance_rate", 0.5),
             "n_past_reviews": min(stats.get("n_reviews", 0) / 10.0, 1.0),
             "journal_match": 1.0 if (stats.get("journals") or {}).get(journal, 0) > 0 else 0.0,
@@ -255,7 +255,7 @@ class RefereeResponsePredictor:
             journal_count = (stats.get("journals") or {}).get(journal, 0)
             prior_journal_reviews = max(0, journal_count - 1)
             features = [
-                min(h_index / 30.0, 1.0),
+                min(h_index / H_INDEX_CAP, 1.0),
                 acceptance_rate,
                 min(n_inv / 10.0, 1.0),
                 1.0 if prior_journal_reviews > 0 else 0.0,

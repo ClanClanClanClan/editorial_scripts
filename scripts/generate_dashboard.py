@@ -1,20 +1,23 @@
 #!/usr/bin/env python3
-"""Generate a self-contained HTML dashboard from editorial extraction data."""
+"""Generate a self-contained HTML editorial command center."""
 
 import json
 import subprocess
 import sys
+from dataclasses import asdict
 from datetime import datetime
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "production" / "src"))
 
+from reporting.action_items import (  # noqa: E402
+    compute_action_items,
+    compute_manuscript_summaries,
+)
 from reporting.cross_journal_report import (  # noqa: E402
     JOURNAL_NAMES,
     JOURNALS,
     PLATFORMS,
-    _dedup_referees,
-    _is_active_referee,
     compute_journal_stats,
     load_journal_data,
 )
@@ -43,23 +46,13 @@ def _load_training_metadata():
         return None
 
 
-def _load_feedback_stats():
-    try:
-        from pipeline.training import ModelTrainer
-
-        trainer = ModelTrainer()
-        return trainer.get_feedback_stats()
-    except (ImportError, OSError):
-        return None
-
-
 def _load_recent_recommendations(limit=10):
     recs = []
     for journal in JOURNALS:
         rec_dir = OUTPUTS_DIR / journal / "recommendations"
         if not rec_dir.exists():
             continue
-        for f in sorted(rec_dir.glob("rec_*.json"), key=lambda p: p.stat().st_mtime, reverse=True):
+        for f in sorted(rec_dir.glob("rec_*.json"), key=lambda p: p.name, reverse=True):
             try:
                 with open(f) as fh:
                     data = json.load(fh)
@@ -77,38 +70,6 @@ def _load_recent_recommendations(limit=10):
             if len(unique) >= limit:
                 break
     return unique
-
-
-def _load_pending_manuscripts():
-    pending = []
-    for journal in JOURNALS:
-        data = load_journal_data(journal)
-        if not data:
-            continue
-        for ms in data.get("manuscripts", []):
-            status = ms.get("status") or ""
-            stage = ms.get("platform_specific", {}).get("metadata", {}).get("current_stage") or ""
-            n_refs = sum(
-                1 for r in _dedup_referees(ms.get("referees", [])) if _is_active_referee(r)
-            )
-            is_pending = False
-            if "Waiting for Potential Referee" in stage:
-                is_pending = True
-            elif "Requiring Assignment" in status:
-                is_pending = True
-            elif status in ("Under Review", "New Submission") and n_refs == 0:
-                is_pending = True
-            if is_pending:
-                pending.append(
-                    {
-                        "manuscript_id": ms.get("manuscript_id", "?"),
-                        "title": ms.get("title", "?"),
-                        "journal": journal.upper(),
-                        "status": stage or status,
-                        "authors": len(ms.get("authors", [])),
-                    }
-                )
-    return pending
 
 
 def _freshness_class(age_days):
@@ -131,64 +92,52 @@ def _freshness_label(age_days):
     return f"{age_days} days ago"
 
 
-def _model_status_class(status):
-    if status in ("trained", "built"):
-        return "status-good"
-    if status == "model_not_useful":
-        return "status-warn"
-    return "status-neutral"
-
-
 def build_dashboard_data():
     journal_stats = []
     for journal in JOURNALS:
         data = load_journal_data(journal)
         if data:
             stats = compute_journal_stats(journal, data)
+            stats["freshness_class"] = _freshness_class(stats.get("age_days"))
+            stats["freshness_label"] = _freshness_label(stats.get("age_days"))
+            journal_stats.append(stats)
         else:
-            stats = {
-                "journal": journal.upper(),
-                "journal_name": JOURNAL_NAMES.get(journal, journal),
-                "platform": PLATFORMS.get(journal, ""),
-                "manuscripts": 0,
-                "referees": 0,
-                "authors": 0,
-                "enriched": 0,
-                "total_people": 0,
-                "enrichment_pct": 0,
-                "avg_span_days": None,
-                "avg_response_days": None,
-                "extraction_date": "",
-                "age_days": None,
-                "source_file": "",
-                "schema_version": "",
-            }
-        stats["freshness_class"] = _freshness_class(stats.get("age_days"))
-        stats["freshness_label"] = _freshness_label(stats.get("age_days"))
-        journal_stats.append(stats)
+            journal_stats.append(
+                {
+                    "journal": journal,
+                    "journal_name": JOURNAL_NAMES.get(journal, journal.upper()),
+                    "platform": PLATFORMS.get(journal, ""),
+                    "manuscripts": 0,
+                    "referees": 0,
+                    "authors": 0,
+                    "freshness_class": "stale-grey",
+                    "freshness_label": "No data",
+                    "age_days": None,
+                    "extraction_date": None,
+                }
+            )
 
+    action_items = compute_action_items()
+    manuscript_summaries = compute_manuscript_summaries()
+    recommendations = _load_recent_recommendations(limit=8)
     training = _load_training_metadata()
-    feedback = _load_feedback_stats()
-    recommendations = _load_recent_recommendations(limit=10)
-    pending = _load_pending_manuscripts()
 
-    rec_summary = []
-    for r in recommendations:
-        candidates = r.get("referee_candidates", [])[:3]
-        rec_summary.append(
+    rec_summaries = []
+    for rec in recommendations:
+        candidates = rec.get("referee_candidates", [])[:3]
+        rec_summaries.append(
             {
-                "manuscript_id": r.get("manuscript_id", "?"),
-                "journal": r.get("journal", "?"),
-                "title": r.get("title", "?"),
-                "desk_reject": r.get("desk_rejection", {}).get("should_desk_reject", False),
-                "desk_confidence": r.get("desk_rejection", {}).get("confidence", 0),
-                "generated_at": r.get("generated_at", "")[:16].replace("T", " "),
-                "top_candidates": [
+                "manuscript_id": rec.get("manuscript_id", ""),
+                "title": (rec.get("title") or "")[:100],
+                "journal": (rec.get("journal") or "").upper(),
+                "generated_at": rec.get("generated_at", "")[:16],
+                "desk_rejection": rec.get("desk_rejection", {}),
+                "candidates": [
                     {
-                        "name": c.get("name", "?"),
-                        "score": round(c.get("relevance_score", 0), 2),
-                        "h_index": c.get("h_index", 0),
+                        "name": c.get("name", ""),
                         "institution": (c.get("institution") or "")[:40],
+                        "h_index": c.get("h_index"),
+                        "score": c.get("relevance_score", 0),
                         "source": c.get("source", ""),
                     }
                     for c in candidates
@@ -197,10 +146,13 @@ def build_dashboard_data():
         )
 
     totals = {
-        "manuscripts": sum(s["manuscripts"] for s in journal_stats),
-        "referees": sum(s["referees"] for s in journal_stats),
-        "authors": sum(s["authors"] for s in journal_stats),
-        "active_journals": sum(1 for s in journal_stats if s["manuscripts"] > 0),
+        "active_journals": sum(1 for s in journal_stats if s.get("manuscripts", 0) > 0),
+        "manuscripts": sum(s.get("manuscripts", 0) for s in journal_stats),
+        "active_manuscripts": len(manuscript_summaries),
+        "referees": sum(s.get("referees", 0) for s in journal_stats),
+        "action_items": len(action_items),
+        "critical": sum(1 for a in action_items if a.priority == "critical"),
+        "high": sum(1 for a in action_items if a.priority == "high"),
     }
 
     return {
@@ -208,413 +160,15 @@ def build_dashboard_data():
         "git_commit": _git_commit(),
         "journals": journal_stats,
         "totals": totals,
+        "action_items": [asdict(a) for a in action_items],
+        "manuscripts": [asdict(s) for s in manuscript_summaries],
+        "recommendations": rec_summaries,
         "training": training,
-        "feedback": feedback,
-        "recommendations": rec_summary,
-        "pending": pending,
     }
-
-
-CSS = """
-:root {
-    --bg: #f8f9fa;
-    --surface: #ffffff;
-    --text: #1a1a2e;
-    --text-secondary: #6c757d;
-    --border: #e9ecef;
-    --accent: #4361ee;
-    --accent-light: #eef2ff;
-    --green: #10b981;
-    --green-bg: #ecfdf5;
-    --amber: #f59e0b;
-    --amber-bg: #fffbeb;
-    --red: #ef4444;
-    --red-bg: #fef2f2;
-    --grey: #9ca3af;
-    --grey-bg: #f3f4f6;
-    --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
-    --shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
-    --shadow-lg: 0 4px 6px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.06);
-    --radius: 12px;
-    --radius-sm: 8px;
-}
-@media (prefers-color-scheme: dark) {
-    :root {
-        --bg: #0f172a;
-        --surface: #1e293b;
-        --text: #e2e8f0;
-        --text-secondary: #94a3b8;
-        --border: #334155;
-        --accent: #818cf8;
-        --accent-light: #1e1b4b;
-        --green-bg: #064e3b;
-        --amber-bg: #451a03;
-        --red-bg: #450a0a;
-        --grey-bg: #1f2937;
-        --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
-        --shadow: 0 1px 3px rgba(0,0,0,0.4);
-        --shadow-lg: 0 4px 6px rgba(0,0,0,0.4);
-    }
-}
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    line-height: 1.6;
-    -webkit-font-smoothing: antialiased;
-}
-.container { max-width: 1280px; margin: 0 auto; padding: 24px; }
-
-/* Header */
-.header {
-    text-align: center;
-    padding: 48px 24px 36px;
-    margin-bottom: 32px;
-}
-.header h1 {
-    font-size: 2rem;
-    font-weight: 700;
-    letter-spacing: -0.02em;
-    margin-bottom: 8px;
-}
-.header .subtitle {
-    color: var(--text-secondary);
-    font-size: 0.95rem;
-}
-.header .stats-row {
-    display: flex;
-    justify-content: center;
-    gap: 32px;
-    margin-top: 20px;
-    flex-wrap: wrap;
-}
-.header .stat-pill {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 100px;
-    padding: 8px 20px;
-    font-size: 0.9rem;
-    box-shadow: var(--shadow-sm);
-}
-.header .stat-pill strong { color: var(--accent); font-weight: 600; }
-
-/* Section */
-.section { margin-bottom: 36px; }
-.section-title {
-    font-size: 1.1rem;
-    font-weight: 600;
-    margin-bottom: 16px;
-    padding-bottom: 8px;
-    border-bottom: 2px solid var(--border);
-}
-
-/* Cards Grid */
-.cards-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 16px;
-}
-.card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 20px;
-    box-shadow: var(--shadow);
-    transition: box-shadow 0.2s, transform 0.2s;
-}
-.card:hover {
-    box-shadow: var(--shadow-lg);
-    transform: translateY(-1px);
-}
-.card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 12px;
-}
-.card-header h3 {
-    font-size: 1rem;
-    font-weight: 600;
-}
-.card-header .platform {
-    font-size: 0.75rem;
-    color: var(--text-secondary);
-    background: var(--grey-bg);
-    padding: 2px 8px;
-    border-radius: 100px;
-}
-.card-stats {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
-    margin-bottom: 12px;
-}
-.card-stat {
-    text-align: center;
-}
-.card-stat .val {
-    font-size: 1.3rem;
-    font-weight: 700;
-    color: var(--accent);
-}
-.card-stat .lbl {
-    font-size: 0.7rem;
-    color: var(--text-secondary);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-}
-.card-footer {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding-top: 8px;
-    border-top: 1px solid var(--border);
-    font-size: 0.8rem;
-    color: var(--text-secondary);
-}
-
-/* Freshness badges */
-.badge {
-    display: inline-block;
-    padding: 2px 10px;
-    border-radius: 100px;
-    font-size: 0.75rem;
-    font-weight: 500;
-}
-.fresh-green { background: var(--green-bg); color: var(--green); }
-.fresh-amber { background: var(--amber-bg); color: var(--amber); }
-.fresh-red { background: var(--red-bg); color: var(--red); }
-.stale-grey { background: var(--grey-bg); color: var(--grey); }
-.status-good { background: var(--green-bg); color: var(--green); }
-.status-warn { background: var(--amber-bg); color: var(--amber); }
-.status-neutral { background: var(--grey-bg); color: var(--grey); }
-
-/* Tables */
-.table-wrapper {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    overflow-x: auto;
-    box-shadow: var(--shadow);
-}
-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 0.88rem;
-}
-th {
-    text-align: left;
-    padding: 12px 16px;
-    font-weight: 600;
-    font-size: 0.78rem;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    color: var(--text-secondary);
-    background: var(--bg);
-    border-bottom: 1px solid var(--border);
-    cursor: pointer;
-    user-select: none;
-    white-space: nowrap;
-}
-th:hover { color: var(--accent); }
-th .sort-arrow { font-size: 0.65rem; margin-left: 4px; opacity: 0.4; }
-th.sorted .sort-arrow { opacity: 1; }
-td {
-    padding: 10px 16px;
-    border-bottom: 1px solid var(--border);
-    vertical-align: middle;
-}
-tr:last-child td { border-bottom: none; }
-tr:hover td { background: var(--accent-light); }
-
-/* Recommendation cards */
-.rec-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 20px;
-    box-shadow: var(--shadow);
-    margin-bottom: 12px;
-}
-.rec-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 12px;
-    gap: 16px;
-}
-.rec-header .ms-info h4 { font-size: 0.95rem; font-weight: 600; }
-.rec-header .ms-meta {
-    font-size: 0.8rem;
-    color: var(--text-secondary);
-    margin-top: 2px;
-}
-.rec-header .desk-badge {
-    flex-shrink: 0;
-    padding: 4px 12px;
-    border-radius: 100px;
-    font-size: 0.78rem;
-    font-weight: 500;
-}
-.desk-pass { background: var(--green-bg); color: var(--green); }
-.desk-reject { background: var(--red-bg); color: var(--red); }
-.candidates-list {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: 8px;
-}
-.candidate {
-    background: var(--bg);
-    border-radius: var(--radius-sm);
-    padding: 10px 14px;
-    font-size: 0.85rem;
-}
-.candidate .c-name { font-weight: 600; }
-.candidate .c-details {
-    color: var(--text-secondary);
-    font-size: 0.78rem;
-    margin-top: 2px;
-}
-.candidate .c-score {
-    display: inline-block;
-    background: var(--accent-light);
-    color: var(--accent);
-    padding: 1px 8px;
-    border-radius: 100px;
-    font-size: 0.72rem;
-    font-weight: 600;
-    margin-top: 4px;
-}
-
-/* Model cards */
-.model-cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 16px;
-}
-.model-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 20px;
-    box-shadow: var(--shadow);
-}
-.model-card h4 {
-    font-size: 0.95rem;
-    font-weight: 600;
-    margin-bottom: 12px;
-}
-.model-metric {
-    display: flex;
-    justify-content: space-between;
-    padding: 4px 0;
-    font-size: 0.85rem;
-}
-.model-metric .label { color: var(--text-secondary); }
-.model-metric .value { font-weight: 600; }
-
-/* Freshness bar chart */
-.freshness-bars {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 20px;
-    box-shadow: var(--shadow);
-}
-.bar-row {
-    display: flex;
-    align-items: center;
-    margin-bottom: 8px;
-    gap: 12px;
-}
-.bar-label {
-    width: 60px;
-    font-size: 0.85rem;
-    font-weight: 600;
-    flex-shrink: 0;
-}
-.bar-track {
-    flex: 1;
-    height: 24px;
-    background: var(--bg);
-    border-radius: 4px;
-    overflow: hidden;
-    position: relative;
-}
-.bar-fill {
-    height: 100%;
-    border-radius: 4px;
-    transition: width 0.3s;
-    min-width: 2px;
-}
-.bar-value {
-    width: 80px;
-    font-size: 0.8rem;
-    color: var(--text-secondary);
-    text-align: right;
-    flex-shrink: 0;
-}
-
-/* Footer */
-.footer {
-    text-align: center;
-    padding: 24px;
-    color: var(--text-secondary);
-    font-size: 0.8rem;
-    border-top: 1px solid var(--border);
-    margin-top: 24px;
-}
-
-/* Empty state */
-.empty-state {
-    text-align: center;
-    padding: 40px 20px;
-    color: var(--text-secondary);
-    font-size: 0.9rem;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-    .container { padding: 16px; }
-    .header h1 { font-size: 1.5rem; }
-    .header .stats-row { gap: 12px; }
-    .cards-grid { grid-template-columns: 1fr; }
-    .candidates-list { grid-template-columns: 1fr; }
-    .model-cards { grid-template-columns: 1fr; }
-    table { font-size: 0.8rem; }
-    th, td { padding: 8px 10px; }
-}
-"""
-
-JS = """
-function sortTable(tableId, colIdx) {
-    const table = document.getElementById(tableId);
-    if (!table) return;
-    const tbody = table.querySelector('tbody');
-    const rows = Array.from(tbody.querySelectorAll('tr'));
-    const th = table.querySelectorAll('th')[colIdx];
-    const asc = !th.classList.contains('sorted-asc');
-
-    table.querySelectorAll('th').forEach(h => {
-        h.classList.remove('sorted', 'sorted-asc', 'sorted-desc');
-    });
-    th.classList.add('sorted', asc ? 'sorted-asc' : 'sorted-desc');
-
-    rows.sort((a, b) => {
-        let va = a.cells[colIdx].getAttribute('data-sort') || a.cells[colIdx].textContent.trim();
-        let vb = b.cells[colIdx].getAttribute('data-sort') || b.cells[colIdx].textContent.trim();
-        const na = parseFloat(va), nb = parseFloat(vb);
-        if (!isNaN(na) && !isNaN(nb)) return asc ? na - nb : nb - na;
-        return asc ? va.localeCompare(vb) : vb.localeCompare(va);
-    });
-    rows.forEach(r => tbody.appendChild(r));
-}
-"""
 
 
 def _esc(s):
-    if s is None:
+    if not s:
         return ""
     return (
         str(s)
@@ -625,281 +179,528 @@ def _esc(s):
     )
 
 
+CSS = """
+:root {
+    --bg: #f8fafc; --surface: #ffffff; --text: #0f172a; --text-secondary: #64748b;
+    --border: #e2e8f0; --accent: #3b82f6; --accent-light: #dbeafe;
+    --critical: #dc2626; --critical-bg: #fef2f2;
+    --high: #ea580c; --high-bg: #fff7ed;
+    --medium: #ca8a04; --medium-bg: #fefce8;
+    --low: #16a34a; --low-bg: #f0fdf4;
+    --completed: #059669; --completed-bg: #ecfdf5;
+    --declined: #94a3b8; --declined-bg: #f1f5f9;
+    --shadow: 0 1px 3px rgba(0,0,0,.1); --shadow-lg: 0 4px 12px rgba(0,0,0,.1);
+    --radius: 10px; --radius-sm: 6px;
+}
+@media (prefers-color-scheme: dark) {
+    :root {
+        --bg: #0f172a; --surface: #1e293b; --text: #f1f5f9; --text-secondary: #94a3b8;
+        --border: #334155; --accent: #60a5fa; --accent-light: #1e3a5f;
+        --critical-bg: #450a0a; --high-bg: #431407; --medium-bg: #422006;
+        --low-bg: #052e16; --completed-bg: #064e3b; --declined-bg: #1e293b;
+        --shadow: 0 1px 3px rgba(0,0,0,.3); --shadow-lg: 0 4px 12px rgba(0,0,0,.4);
+    }
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg); color: var(--text); line-height: 1.5; padding: 20px 24px; }
+.header { text-align: center; margin-bottom: 24px; }
+.header h1 { font-size: 1.6rem; font-weight: 700; }
+.header .subtitle { color: var(--text-secondary); font-size: 0.85rem; margin-top: 4px; }
+.alert-banner { padding: 14px 20px; border-radius: var(--radius); margin-bottom: 20px;
+    display: flex; align-items: center; gap: 12px; font-weight: 600; font-size: 0.95rem; }
+.alert-critical { background: var(--critical-bg); border: 2px solid var(--critical); color: var(--critical); }
+.alert-high { background: var(--high-bg); border: 2px solid var(--high); color: var(--high); }
+.alert-clear { background: var(--low-bg); border: 2px solid var(--low); color: var(--low); }
+.stats-row { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin: 12px 0; }
+.stat-pill { background: var(--surface); border: 1px solid var(--border); border-radius: 20px;
+    padding: 6px 14px; font-size: 0.8rem; display: flex; align-items: center; gap: 6px; }
+.stat-pill .num { font-weight: 700; font-size: 0.95rem; }
+.section { margin-bottom: 24px; }
+.section-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 12px;
+    padding-bottom: 6px; border-bottom: 2px solid var(--border); }
+.action-list { display: flex; flex-direction: column; gap: 8px; }
+.action-item { display: flex; align-items: center; gap: 12px; padding: 10px 14px;
+    background: var(--surface); border-radius: var(--radius-sm); border-left: 4px solid;
+    box-shadow: var(--shadow); font-size: 0.87rem; }
+.action-item.critical { border-left-color: var(--critical); background: var(--critical-bg); }
+.action-item.high { border-left-color: var(--high); background: var(--high-bg); }
+.action-item.medium { border-left-color: var(--medium); background: var(--medium-bg); }
+.action-item.low { border-left-color: var(--low); background: var(--low-bg); }
+.action-badge { font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
+    padding: 2px 8px; border-radius: 4px; white-space: nowrap; min-width: 60px; text-align: center; }
+.action-badge.critical { background: var(--critical); color: white; }
+.action-badge.high { background: var(--high); color: white; }
+.action-badge.medium { background: var(--medium); color: white; }
+.action-badge.low { background: var(--low); color: white; }
+.action-ms { font-weight: 600; white-space: nowrap; min-width: 80px; }
+.action-journal { font-size: 0.75rem; font-weight: 600; color: var(--accent);
+    background: var(--accent-light); padding: 1px 6px; border-radius: 3px; }
+.action-msg { flex: 1; }
+.action-meta { color: var(--text-secondary); font-size: 0.78rem; white-space: nowrap; }
+.table-wrapper { overflow-x: auto; border-radius: var(--radius); box-shadow: var(--shadow); }
+table { width: 100%; border-collapse: collapse; background: var(--surface); font-size: 0.83rem; }
+th { background: var(--surface); border-bottom: 2px solid var(--border); padding: 8px 10px;
+    text-align: left; font-weight: 600; font-size: 0.78rem; color: var(--text-secondary);
+    text-transform: uppercase; letter-spacing: 0.03em; cursor: pointer; user-select: none;
+    white-space: nowrap; }
+th:hover { color: var(--accent); }
+td { padding: 8px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: var(--accent-light); }
+.ms-row { cursor: pointer; }
+.ms-row td:first-child::before { content: "▸ "; color: var(--text-secondary); }
+.ms-row.expanded td:first-child::before { content: "▾ "; }
+.detail-row { display: none; }
+.detail-row.show { display: table-row; }
+.detail-row td { padding: 0 10px 8px 30px; background: var(--bg); }
+.ref-table { width: 100%; font-size: 0.8rem; background: var(--surface);
+    border-radius: var(--radius-sm); }
+.ref-table th { font-size: 0.72rem; padding: 5px 8px; }
+.ref-table td { padding: 5px 8px; }
+.status-badge { font-size: 0.72rem; padding: 2px 6px; border-radius: 3px; font-weight: 600; }
+.status-agreed { background: var(--medium-bg); color: var(--medium); }
+.status-completed { background: var(--completed-bg); color: var(--completed); }
+.status-pending { background: var(--high-bg); color: var(--high); }
+.status-declined { background: var(--declined-bg); color: var(--declined); }
+.status-terminated { background: var(--declined-bg); color: var(--declined); }
+.status-overdue { background: var(--critical-bg); color: var(--critical); }
+.overdue-text { color: var(--critical); font-weight: 600; }
+.due-soon-text { color: var(--medium); font-weight: 600; }
+.on-track-text { color: var(--completed); }
+.reports-fmt { font-weight: 600; }
+.journal-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 8px; }
+.journal-mini { background: var(--surface); border-radius: var(--radius-sm); padding: 10px 12px;
+    box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 4px; }
+.journal-mini .jname { font-weight: 700; font-size: 0.9rem; }
+.journal-mini .jmeta { font-size: 0.75rem; color: var(--text-secondary); }
+.journal-mini .jstats { font-size: 0.78rem; display: flex; gap: 8px; }
+.badge { font-size: 0.7rem; padding: 2px 6px; border-radius: 3px; font-weight: 600; }
+.fresh-green { background: var(--low-bg); color: var(--low); }
+.fresh-amber { background: var(--medium-bg); color: var(--medium); }
+.fresh-red { background: var(--critical-bg); color: var(--critical); }
+.stale-grey { background: var(--declined-bg); color: var(--declined); }
+.rec-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 12px; }
+.rec-card { background: var(--surface); border-radius: var(--radius-sm); padding: 12px;
+    box-shadow: var(--shadow); }
+.rec-card h4 { font-size: 0.85rem; margin-bottom: 4px; }
+.rec-card .rec-meta { font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 8px; }
+.rec-card .cand { font-size: 0.8rem; padding: 3px 0;
+    display: flex; justify-content: space-between; align-items: center; }
+.rec-card .cand-name { font-weight: 600; }
+.rec-card .cand-score { font-size: 0.72rem; color: var(--text-secondary); }
+.collapsible-header { cursor: pointer; display: flex; align-items: center; gap: 8px; }
+.collapsible-header::before { content: "▸"; font-size: 0.8rem; color: var(--text-secondary); }
+.collapsible-header.open::before { content: "▾"; }
+.collapsible-body { display: none; margin-top: 8px; }
+.collapsible-body.show { display: block; }
+.footer { text-align: center; color: var(--text-secondary); font-size: 0.75rem;
+    margin-top: 24px; padding-top: 12px; border-top: 1px solid var(--border); }
+.filter-row { display: flex; gap: 6px; margin-bottom: 12px; flex-wrap: wrap; }
+.filter-btn { border: 1px solid var(--border); background: var(--surface); color: var(--text);
+    padding: 4px 12px; border-radius: 16px; font-size: 0.78rem; cursor: pointer; }
+.filter-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
+.empty-state { text-align: center; padding: 24px; color: var(--text-secondary); font-style: italic; }
+@media (max-width: 768px) {
+    body { padding: 12px; }
+    .action-item { flex-wrap: wrap; gap: 6px; }
+    .rec-grid { grid-template-columns: 1fr; }
+    .journal-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+}
+"""
+
+JS = """
+function sortTable(tableId, colIdx) {
+    var table = document.getElementById(tableId);
+    if (!table) return;
+    var tbody = table.querySelector('tbody');
+    var rows = Array.from(tbody.querySelectorAll('tr.ms-row'));
+    var header = table.querySelectorAll('th')[colIdx];
+    var asc = !header.classList.contains('sorted-asc');
+    table.querySelectorAll('th').forEach(function(h) {
+        h.classList.remove('sorted', 'sorted-asc', 'sorted-desc');
+    });
+    header.classList.add('sorted', asc ? 'sorted-asc' : 'sorted-desc');
+    rows.sort(function(a, b) {
+        var aVal = a.cells[colIdx].getAttribute('data-sort') || a.cells[colIdx].textContent.trim();
+        var bVal = b.cells[colIdx].getAttribute('data-sort') || b.cells[colIdx].textContent.trim();
+        var aNum = parseFloat(aVal), bNum = parseFloat(bVal);
+        if (!isNaN(aNum) && !isNaN(bNum)) return asc ? aNum - bNum : bNum - aNum;
+        return asc ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+    });
+    rows.forEach(function(row) {
+        var detailId = row.getAttribute('data-detail');
+        tbody.appendChild(row);
+        if (detailId) {
+            var detail = document.getElementById(detailId);
+            if (detail) tbody.appendChild(detail);
+        }
+    });
+}
+
+function toggleDetail(msId) {
+    var row = document.querySelector('tr[data-detail="detail-' + msId + '"]');
+    var detail = document.getElementById('detail-' + msId);
+    if (row && detail) {
+        row.classList.toggle('expanded');
+        detail.classList.toggle('show');
+    }
+}
+
+function filterActions(level) {
+    var btns = document.querySelectorAll('.filter-btn');
+    btns.forEach(function(b) { b.classList.remove('active'); });
+    event.target.classList.add('active');
+    var items = document.querySelectorAll('.action-item');
+    items.forEach(function(item) {
+        if (level === 'all') { item.style.display = ''; }
+        else { item.style.display = item.classList.contains(level) ? '' : 'none'; }
+    });
+}
+
+function toggleCollapsible(id) {
+    var header = document.querySelector('[data-collapse="' + id + '"]');
+    var body = document.getElementById(id);
+    if (header && body) {
+        header.classList.toggle('open');
+        body.classList.toggle('show');
+    }
+}
+"""
+
+
 def generate_html(data):
-    journals = data["journals"]
     totals = data["totals"]
-    training = data["training"]
-    feedback = data["feedback"]
-    recs = data["recommendations"]
-    pending = data["pending"]
+    items = data["action_items"]
+    manuscripts = data["manuscripts"]
+    journals = data["journals"]
+    recommendations = data["recommendations"]
+    training = data.get("training")
 
-    parts = []
-    parts.append(
-        f"""<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Editorial Dashboard</title>
-<style>{CSS}</style>
-</head>
-<body>
-<div class="container">
-"""
-    )
+    html = []
+    html.append("<!DOCTYPE html><html lang='en'><head><meta charset='utf-8'>")
+    html.append("<meta name='viewport' content='width=device-width, initial-scale=1'>")
+    html.append("<title>Editorial Command Center</title>")
+    html.append(f"<style>{CSS}</style></head><body>")
 
-    # Header
-    parts.append(
-        f"""
-<div class="header">
-    <h1>Editorial Dashboard</h1>
-    <div class="subtitle">Generated {_esc(data['generated_at'])}</div>
-    <div class="stats-row">
-        <span class="stat-pill"><strong>{totals['active_journals']}</strong> / {len(journals)} journals</span>
-        <span class="stat-pill"><strong>{totals['manuscripts']}</strong> manuscripts</span>
-        <span class="stat-pill"><strong>{totals['referees']}</strong> referees</span>
-        <span class="stat-pill"><strong>{totals['authors']}</strong> authors</span>
-    </div>
-</div>
-"""
-    )
+    html.append("<div class='header'>")
+    html.append("<h1>Editorial Command Center</h1>")
+    html.append(f"<div class='subtitle'>Updated {_esc(data['generated_at'])}</div>")
+    html.append("</div>")
 
-    # Journal status cards
-    parts.append(
-        '<div class="section"><div class="section-title">Journal Status</div><div class="cards-grid">'
-    )
-    for s in journals:
-        enrich = f"{s['enrichment_pct']:.0f}%" if s["total_people"] > 0 else "--"
-        parts.append(
-            f"""
-<div class="card">
-    <div class="card-header">
-        <h3>{_esc(s['journal_name'])}</h3>
-        <span class="platform">{_esc(s['platform'])}</span>
-    </div>
-    <div class="card-stats">
-        <div class="card-stat"><div class="val">{s['manuscripts']}</div><div class="lbl">Manuscripts</div></div>
-        <div class="card-stat"><div class="val">{s['referees']}</div><div class="lbl">Referees</div></div>
-        <div class="card-stat"><div class="val">{enrich}</div><div class="lbl">Enriched</div></div>
-    </div>
-    <div class="card-footer">
-        <span>{_esc(s['extraction_date']) or 'No extraction'}</span>
-        <span class="badge {s['freshness_class']}">{_esc(s['freshness_label'])}</span>
-    </div>
-</div>"""
+    if totals["critical"] > 0:
+        alert_class = "alert-critical"
+        alert_icon = "🔴"
+        alert_msg = (
+            f"{totals['critical']} critical + {totals['high']} high priority items need attention"
         )
-    parts.append("</div></div>")
+    elif totals["high"] > 0:
+        alert_class = "alert-high"
+        alert_icon = "🟠"
+        alert_msg = f"{totals['high']} items need attention"
+    else:
+        alert_class = "alert-clear"
+        alert_icon = "✅"
+        alert_msg = "All clear — no urgent items"
+    html.append(f"<div class='alert-banner {alert_class}'>{alert_icon} {alert_msg}</div>")
 
-    # Pending manuscripts
-    parts.append(
-        '<div class="section"><div class="section-title">Pending Manuscripts (Awaiting Referee Assignment)</div>'
+    html.append("<div class='stats-row'>")
+    html.append(
+        f"<span class='stat-pill'><span class='num'>{totals['active_manuscripts']}</span> active manuscripts</span>"
     )
-    if pending:
-        parts.append(
-            """<div class="table-wrapper"><table id="pending-table">
-<thead><tr>
-    <th onclick="sortTable('pending-table',0)">MS ID <span class="sort-arrow">&#9650;</span></th>
-    <th onclick="sortTable('pending-table',1)">Title <span class="sort-arrow">&#9650;</span></th>
-    <th onclick="sortTable('pending-table',2)">Journal <span class="sort-arrow">&#9650;</span></th>
-    <th onclick="sortTable('pending-table',3)">Status <span class="sort-arrow">&#9650;</span></th>
-</tr></thead><tbody>"""
+    html.append(
+        f"<span class='stat-pill'><span class='num'>{totals['action_items']}</span> action items</span>"
+    )
+    html.append(
+        f"<span class='stat-pill'><span class='num'>{totals['active_journals']}</span> journals</span>"
+    )
+    html.append(
+        f"<span class='stat-pill'><span class='num'>{totals['referees']}</span> referees</span>"
+    )
+    html.append("</div>")
+
+    # --- Section 1: Action Items ---
+    html.append("<div class='section'>")
+    html.append("<div class='section-title'>Action Items</div>")
+
+    if items:
+        priorities = {"critical": 0, "high": 0, "medium": 0, "low": 0}
+        for it in items:
+            priorities[it["priority"]] = priorities.get(it["priority"], 0) + 1
+
+        html.append("<div class='filter-row'>")
+        html.append(
+            "<button class='filter-btn active' onclick='filterActions(\"all\")'>All</button>"
         )
-        for m in pending:
-            title_short = m["title"][:80] + ("..." if len(m["title"]) > 80 else "")
-            parts.append(
-                f"""<tr>
-    <td><strong>{_esc(m['manuscript_id'])}</strong></td>
-    <td>{_esc(title_short)}</td>
-    <td>{_esc(m['journal'])}</td>
-    <td>{_esc(m['status'])}</td>
-</tr>"""
+        if priorities["critical"]:
+            html.append(
+                f"<button class='filter-btn' onclick='filterActions(\"critical\")'>Critical ({priorities['critical']})</button>"
             )
-        parts.append("</tbody></table></div>")
-    else:
-        parts.append(
-            '<div class="empty-state">No manuscripts currently awaiting referee assignment.</div>'
-        )
-    parts.append("</div>")
-
-    # Recent recommendations
-    parts.append(
-        '<div class="section"><div class="section-title">Recent Pipeline Recommendations</div>'
-    )
-    if recs:
-        for r in recs:
-            desk_class = "desk-reject" if r["desk_reject"] else "desk-pass"
-            desk_text = "Desk Reject" if r["desk_reject"] else "Pass"
-            title_short = r["title"][:90] + ("..." if len(r["title"]) > 90 else "")
-            parts.append(
-                f"""
-<div class="rec-card">
-    <div class="rec-header">
-        <div class="ms-info">
-            <h4>{_esc(r['manuscript_id'])} &mdash; {_esc(title_short)}</h4>
-            <div class="ms-meta">{_esc(r['journal'])} &middot; {_esc(r['generated_at'])}</div>
-        </div>
-        <span class="desk-badge {desk_class}">{desk_text}</span>
-    </div>
-    <div class="candidates-list">"""
+        if priorities["high"]:
+            html.append(
+                f"<button class='filter-btn' onclick='filterActions(\"high\")'>High ({priorities['high']})</button>"
             )
-            for i, c in enumerate(r["top_candidates"]):
-                parts.append(
-                    f"""
-        <div class="candidate">
-            <div class="c-name">#{i+1} {_esc(c['name'])}</div>
-            <div class="c-details">{_esc(c['institution'])} &middot; h={c['h_index']}</div>
-            <span class="c-score">{c['score']:.2f} &middot; {_esc(c['source'])}</span>
-        </div>"""
-                )
-            parts.append("</div></div>")
+        if priorities["medium"]:
+            html.append(
+                f"<button class='filter-btn' onclick='filterActions(\"medium\")'>Medium ({priorities['medium']})</button>"
+            )
+        if priorities["low"]:
+            html.append(
+                f"<button class='filter-btn' onclick='filterActions(\"low\")'>Low ({priorities['low']})</button>"
+            )
+        html.append("</div>")
+
+        html.append("<div class='action-list'>")
+        for it in items:
+            p = it["priority"]
+            type_labels = {
+                "overdue_report": "Overdue",
+                "needs_ae_decision": "Decision",
+                "pending_invitation": "No Reply",
+                "needs_more_referees": "Few Refs",
+                "due_soon": "Due Soon",
+                "needs_assignment": "Assign",
+            }
+            type_label = type_labels.get(it["action_type"], it["action_type"])
+
+            meta_parts = []
+            if it.get("due_date"):
+                meta_parts.append(f"due {it['due_date']}")
+            if it.get("reminders_sent"):
+                meta_parts.append(f"{it['reminders_sent']} reminders")
+            meta = " · ".join(meta_parts)
+
+            html.append(f"<div class='action-item {p}'>")
+            html.append(f"<span class='action-badge {p}'>{type_label}</span>")
+            html.append(f"<span class='action-journal'>{_esc(it['journal'])}</span>")
+            html.append(f"<span class='action-ms'>{_esc(it['manuscript_id'])}</span>")
+            html.append(f"<span class='action-msg'>{_esc(it['message'])}</span>")
+            if meta:
+                html.append(f"<span class='action-meta'>{_esc(meta)}</span>")
+            html.append("</div>")
+        html.append("</div>")
     else:
-        parts.append(
-            '<div class="empty-state">No recommendations generated yet. Run: python3 run_pipeline.py --journal sicon --pending</div>'
-        )
-    parts.append("</div>")
+        html.append("<div class='empty-state'>No action items — everything is on track!</div>")
+    html.append("</div>")
 
-    # ML Model Training
-    parts.append(
-        '<div class="section"><div class="section-title">ML Model Training</div><div class="model-cards">'
-    )
-    if training:
-        trained_at = training.get("trained_at", "?")[:16].replace("T", " ")
-        commit = training.get("commit", "?")
+    # --- Section 2: Active Manuscripts ---
+    html.append("<div class='section'>")
+    html.append("<div class='section-title'>Active Manuscripts</div>")
 
-        # Expertise Index
-        ei = training.get("expertise_index", {})
-        ei_status = ei.get("status", "unknown")
-        parts.append(
-            f"""
-<div class="model-card">
-    <h4>Expertise Index (FAISS)</h4>
-    <div class="model-metric"><span class="label">Status</span><span class="badge {_model_status_class(ei_status)}">{_esc(ei_status)}</span></div>
-    <div class="model-metric"><span class="label">Referees indexed</span><span class="value">{ei.get('n_referees', 0)}</span></div>
-    <div class="model-metric"><span class="label">Trained</span><span class="value">{_esc(trained_at)}</span></div>
-</div>"""
-        )
+    if manuscripts:
+        html.append("<div class='table-wrapper'>")
+        cols = ["Journal", "Manuscript", "Title", "Status", "Reports", "Next Due", "Days", "Refs"]
+        html.append("<table id='ms-table'><thead><tr>")
+        for i, col in enumerate(cols):
+            html.append(f"<th onclick=\"sortTable('ms-table',{i})\">{col}</th>")
+        html.append("</tr></thead><tbody>")
 
-        # Response Predictor
-        rp = training.get("response_predictor", {})
-        rp_status = rp.get("status", "unknown")
-        cv_acc = f"{rp.get('cv_accuracy', 0):.1%}" if rp.get("cv_accuracy") else "--"
-        parts.append(
-            f"""
-<div class="model-card">
-    <h4>Response Predictor</h4>
-    <div class="model-metric"><span class="label">Status</span><span class="badge {_model_status_class(rp_status)}">{_esc(rp_status)}</span></div>
-    <div class="model-metric"><span class="label">CV Accuracy</span><span class="value">{cv_acc}</span></div>
-    <div class="model-metric"><span class="label">Training samples</span><span class="value">{rp.get('n_samples', 0)}</span></div>
-    <div class="model-metric"><span class="label">Positive rate</span><span class="value">{rp.get('positive_rate', 0):.1%}</span></div>
-    <div class="model-metric"><span class="label">Completion accuracy</span><span class="value">{rp.get('completion_cv_accuracy', 0):.1%}</span></div>
-</div>"""
-        )
+        for ms in manuscripts:
+            safe_id = ms["manuscript_id"].replace(".", "_").replace("-", "_")
+            reports_str = (
+                f"{ms['reports_received']}/{ms['reports_received'] + ms['reports_pending']}"
+            )
 
-        # Outcome Predictor
-        op = training.get("outcome_predictor", {})
-        op_status = op.get("status", "unknown")
-        op_acc = f"{op.get('cv_accuracy', 0):.1%}" if op.get("cv_accuracy") else "--"
-        parts.append(
-            f"""
-<div class="model-card">
-    <h4>Outcome Predictor</h4>
-    <div class="model-metric"><span class="label">Status</span><span class="badge {_model_status_class(op_status)}">{_esc(op_status)}</span></div>
-    <div class="model-metric"><span class="label">CV Accuracy</span><span class="value">{op_acc}</span></div>
-    <div class="model-metric"><span class="label">Baseline accuracy</span><span class="value">{op.get('baseline_accuracy', 0):.1%}</span></div>
-    <div class="model-metric"><span class="label">Training samples</span><span class="value">{op.get('n_samples', 0)}</span></div>
-    <div class="model-metric"><span class="label">Commit</span><span class="value">{_esc(commit)}</span></div>
-</div>"""
-        )
-    else:
-        parts.append(
-            '<div class="empty-state">No training metadata found. Run: python3 run_pipeline.py --train</div>'
-        )
-    parts.append("</div></div>")
-
-    # Extraction Freshness
-    parts.append(
-        '<div class="section"><div class="section-title">Extraction Freshness</div><div class="freshness-bars">'
-    )
-    max_age = max((s.get("age_days") or 0) for s in journals) or 1
-    for s in sorted(journals, key=lambda x: x.get("age_days") or 999):
-        age = s.get("age_days")
-        if age is None:
-            pct = 0
-            color = "var(--grey)"
-        else:
-            pct = min(100, (age / max(max_age, 1)) * 100)
-            if age <= 7:
-                color = "var(--green)"
-            elif age <= 14:
-                color = "var(--amber)"
+            if ms.get("days_until_next_due") is not None:
+                days = ms["days_until_next_due"]
+                if days < 0:
+                    due_class = "overdue-text"
+                    due_str = f"{abs(days)}d overdue"
+                elif days <= 14:
+                    due_class = "due-soon-text"
+                    due_str = f"{days}d left"
+                else:
+                    due_class = "on-track-text"
+                    due_str = f"{days}d left"
             else:
-                color = "var(--red)"
-        parts.append(
-            f"""
-<div class="bar-row">
-    <span class="bar-label">{_esc(s['journal'])}</span>
-    <div class="bar-track"><div class="bar-fill" style="width:{pct:.0f}%;background:{color}"></div></div>
-    <span class="bar-value">{_esc(s['freshness_label'])}</span>
-</div>"""
-        )
-    parts.append("</div></div>")
+                due_class = ""
+                due_str = "—"
 
-    # Feedback Summary
-    parts.append('<div class="section"><div class="section-title">Feedback Summary</div>')
-    if feedback:
-        total_fb = sum(s["total"] for s in feedback.values())
-        parts.append(
-            """<div class="table-wrapper"><table id="feedback-table">
-<thead><tr>
-    <th onclick="sortTable('feedback-table',0)">Journal <span class="sort-arrow">&#9650;</span></th>
-    <th onclick="sortTable('feedback-table',1)">Total <span class="sort-arrow">&#9650;</span></th>
-    <th>Decisions</th>
-</tr></thead><tbody>"""
-        )
-        for journal, s in sorted(feedback.items()):
-            decisions = ", ".join(f"{k}: {v}" for k, v in s["decisions"].items())
-            parts.append(
-                f"""<tr>
-    <td><strong>{_esc(journal.upper())}</strong></td>
-    <td data-sort="{s['total']}">{s['total']}</td>
-    <td>{_esc(decisions)}</td>
-</tr>"""
+            next_due_display = due_str if ms.get("next_due_date") else "—"
+            days_in = ms.get("days_in_system") or "—"
+
+            flags = []
+            if ms["needs_ae_decision"]:
+                flags.append("<span class='status-badge status-completed'>AE Decision</span>")
+            if ms["needs_referee_assignment"]:
+                flags.append("<span class='status-badge status-pending'>Assign Refs</span>")
+
+            flag_str = " ".join(flags)
+
+            total_refs = (
+                ms["referees_agreed"] + ms["referees_completed"] + ms["referees_pending_response"]
             )
-        parts.append(
-            f"""</tbody></table></div>
-<div style="text-align:center;padding:12px;color:var(--text-secondary);font-size:0.85rem">{total_fb} outcomes recorded</div>"""
-        )
+
+            html.append(
+                f"<tr class='ms-row' data-detail='detail-{safe_id}' onclick=\"toggleDetail('{safe_id}')\">"
+            )
+            html.append(f"<td><span class='action-journal'>{_esc(ms['journal'])}</span></td>")
+            html.append(f"<td>{_esc(ms['manuscript_id'])}</td>")
+            html.append(f"<td>{_esc(ms['title'][:60])}{'…' if len(ms['title']) > 60 else ''}</td>")
+            html.append(f"<td>{_esc(ms['status'])} {flag_str}</td>")
+            html.append(
+                f"<td class='reports-fmt' data-sort='{ms['reports_received']}'>{reports_str}</td>"
+            )
+            html.append(
+                f"<td data-sort='{ms.get('days_until_next_due', 9999)}'><span class='{due_class}'>{next_due_display}</span></td>"
+            )
+            html.append(f"<td data-sort='{ms.get('days_in_system', 0)}'>{days_in}</td>")
+            html.append(f"<td>{total_refs}</td>")
+            html.append("</tr>")
+
+            ref_details = ms.get("referee_details", [])
+            html.append(f"<tr class='detail-row' id='detail-{safe_id}'><td colspan='{len(cols)}'>")
+            if ref_details:
+                html.append("<table class='ref-table'><thead><tr>")
+                html.append(
+                    "<th>Referee</th><th>Status</th><th>Invited</th><th>Agreed</th><th>Due</th><th>Returned</th><th>Reminders</th><th>Timeline</th>"
+                )
+                html.append("</tr></thead><tbody>")
+                for rd in ref_details:
+                    st = rd["normalized_status"]
+                    badge_class = f"status-{st}"
+
+                    timeline = ""
+                    if rd.get("days_overdue"):
+                        timeline = (
+                            f"<span class='overdue-text'>{rd['days_overdue']}d overdue</span>"
+                        )
+                        badge_class = "status-overdue"
+                    elif rd.get("days_remaining") is not None:
+                        d = rd["days_remaining"]
+                        if d <= 14:
+                            timeline = f"<span class='due-soon-text'>{d}d left</span>"
+                        else:
+                            timeline = f"<span class='on-track-text'>{d}d left</span>"
+                    elif st == "completed":
+                        timeline = "✓"
+                    elif st in ("declined", "terminated"):
+                        timeline = "—"
+
+                    html.append("<tr>")
+                    html.append(f"<td>{_esc(rd['name'])}</td>")
+                    html.append(
+                        f"<td><span class='status-badge {badge_class}'>{_esc(st)}</span></td>"
+                    )
+                    html.append(f"<td>{_esc(rd.get('invited') or '—')}</td>")
+                    html.append(f"<td>{_esc(rd.get('agreed') or '—')}</td>")
+                    html.append(f"<td>{_esc(rd.get('due') or '—')}</td>")
+                    html.append(f"<td>{_esc(rd.get('returned') or '—')}</td>")
+                    html.append(f"<td>{rd['reminders']}</td>")
+                    html.append(f"<td>{timeline}</td>")
+                    html.append("</tr>")
+                html.append("</tbody></table>")
+            else:
+                html.append(
+                    "<div class='empty-state' style='padding:8px'>No referees assigned</div>"
+                )
+            html.append("</td></tr>")
+
+        html.append("</tbody></table></div>")
     else:
-        parts.append(
-            '<div class="empty-state">No feedback recorded yet. Record decisions with: python3 run_pipeline.py --record-outcome -j sicon -m M178221 --decision accept</div>'
+        html.append("<div class='empty-state'>No active manuscripts</div>")
+    html.append("</div>")
+
+    # --- Section 3: Journal Overview ---
+    html.append("<div class='section'>")
+    html.append("<div class='section-title'>Journal Overview</div>")
+    html.append("<div class='journal-grid'>")
+    for js in journals:
+        j = js["journal"].upper()
+        n_ms = js.get("manuscripts", 0)
+        n_ref = js.get("referees", 0)
+        fc = js.get("freshness_class", "stale-grey")
+        fl = js.get("freshness_label", "No data")
+        html.append("<div class='journal-mini'>")
+        html.append(
+            f"<div class='jname'>{_esc(j)} <span class='badge {fc}'>{_esc(fl)}</span></div>"
         )
-    parts.append("</div>")
+        html.append(f"<div class='jmeta'>{_esc(js.get('platform', ''))}</div>")
+        html.append(f"<div class='jstats'><span>{n_ms} mss</span><span>{n_ref} refs</span></div>")
+        html.append("</div>")
+    html.append("</div></div>")
 
-    # Footer
-    parts.append(
-        f"""
-<div class="footer">
-    Generated {_esc(data['generated_at'])} &middot; git {_esc(data['git_commit'])} &middot; editorial-scripts
-</div>
-</div>
-<script>{JS}</script>
-</body>
-</html>"""
+    # --- Section 4: Pipeline Recommendations ---
+    if recommendations:
+        html.append("<div class='section'>")
+        html.append("<div class='section-title'>Pipeline Recommendations</div>")
+        html.append("<div class='rec-grid'>")
+        for rec in recommendations:
+            html.append("<div class='rec-card'>")
+            html.append(f"<h4>{_esc(rec['journal'])} / {_esc(rec['manuscript_id'])}</h4>")
+            html.append(
+                f"<div class='rec-meta'>{_esc(rec['title'])} · {_esc(rec['generated_at'])}</div>"
+            )
+            for i, c in enumerate(rec.get("candidates", [])):
+                h = c.get("h_index") or "?"
+                inst = c.get("institution") or ""
+                html.append(
+                    f"<div class='cand'><span class='cand-name'>#{i+1} {_esc(c['name'])}</span>"
+                )
+                html.append(
+                    f"<span class='cand-score'>{inst} · h={h} · {c['score']:.2f}</span></div>"
+                )
+            html.append("</div>")
+        html.append("</div></div>")
+
+    # --- Section 5: Model Health (collapsible) ---
+    if training:
+        html.append("<div class='section'>")
+        html.append(
+            "<div class='collapsible-header' data-collapse='model-health' onclick=\"toggleCollapsible('model-health')\">"
+        )
+        html.append(
+            "<span class='section-title' style='border:none;margin:0;padding:0'>Model Health</span></div>"
+        )
+        html.append("<div class='collapsible-body' id='model-health'>")
+        html.append("<div class='journal-grid'>")
+        for model_key, label in [
+            ("expertise_index", "Expertise Index"),
+            ("response_predictor", "Response Predictor"),
+            ("outcome_predictor", "Outcome Predictor"),
+        ]:
+            m = training.get(model_key, {})
+            status = m.get("status", "not_trained")
+            html.append("<div class='journal-mini'>")
+            html.append(f"<div class='jname'>{_esc(label)}</div>")
+            html.append(f"<div class='jmeta'>Status: {_esc(status)}</div>")
+            if m.get("cv_accuracy"):
+                html.append(f"<div class='jstats'>CV: {m['cv_accuracy']:.1%}</div>")
+            if m.get("n_referees"):
+                html.append(f"<div class='jstats'>{m['n_referees']} referees</div>")
+            if m.get("n_samples"):
+                html.append(f"<div class='jstats'>{m['n_samples']} samples</div>")
+            html.append("</div>")
+        html.append("</div></div></div>")
+
+    # --- Footer ---
+    html.append("<div class='footer'>")
+    html.append(
+        f"Generated {_esc(data['generated_at'])} · commit {_esc(data['git_commit'])} · Editorial Scripts"
     )
+    html.append("</div>")
 
-    return "".join(parts)
+    html.append(f"<script>{JS}</script></body></html>")
+    return "\n".join(html)
 
 
 def main():
     data = build_dashboard_data()
     html = generate_html(data)
     out_path = OUTPUTS_DIR / "dashboard.html"
-    out_path.write_text(html, encoding="utf-8")
+    with open(out_path, "w") as f:
+        f.write(html)
+
+    totals = data["totals"]
     print(f"Dashboard generated: {out_path}")
-    print(f"  Journals: {data['totals']['active_journals']}/{len(data['journals'])}")
-    print(f"  Manuscripts: {data['totals']['manuscripts']}")
-    print(f"  Recommendations: {len(data['recommendations'])}")
-    print(f"  Pending: {len(data['pending'])}")
+    print(
+        f"  Action items: {totals['action_items']} ({totals['critical']} critical, {totals['high']} high)"
+    )
+    print(f"  Active manuscripts: {totals['active_manuscripts']}")
+    print(f"  Journals: {totals['active_journals']}/8")
+    if data["recommendations"]:
+        print(f"  Recommendations: {len(data['recommendations'])}")
 
 
 if __name__ == "__main__":

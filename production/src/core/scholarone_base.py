@@ -10,6 +10,7 @@ MF and MOR both inherit from this class and override only journal-specific logic
 import atexit
 import os
 import re
+import subprocess
 import sys
 import time
 from datetime import UTC, datetime, timedelta
@@ -17,14 +18,12 @@ from pathlib import Path
 from typing import Any, Optional
 
 import requests
+import undetected_chromedriver as uc
 from core.web_enrichment import enrich_people_from_web
-from selenium import webdriver
 from selenium.common.exceptions import (
     TimeoutException,
     WebDriverException,
 )
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
@@ -119,22 +118,10 @@ class ScholarOneBaseExtractor(CachedExtractorMixin):
     # ------------------------------------------------------------------
 
     def setup_chrome_options(self):
-        self.chrome_options = Options()
-        self.chrome_options.add_argument("--disable-blink-features=AutomationControlled")
-        self.chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
-        self.chrome_options.add_experimental_option("useAutomationExtension", False)
+        self.chrome_options = uc.ChromeOptions()
         self.chrome_options.add_argument("--no-sandbox")
         self.chrome_options.add_argument("--disable-dev-shm-usage")
-
-        if self.headless:
-            self.chrome_options.add_argument("--headless=new")
-            self.chrome_options.add_argument("--disable-gpu")
-            self.chrome_options.add_argument(
-                "--user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
-                "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
-            )
-
-        self.chrome_options.add_argument("--window-size=800,600")
+        self.chrome_options.add_argument("--window-size=1200,800")
 
         download_dir = str(
             Path(__file__).parent.parent.parent / "downloads" / self.JOURNAL_CODE.lower()
@@ -159,22 +146,51 @@ class ScholarOneBaseExtractor(CachedExtractorMixin):
         for directory in [self.download_dir, self.output_dir, self.log_dir, self.cache_dir]:
             directory.mkdir(parents=True, exist_ok=True)
 
-    def setup_driver(self):
+    def _detect_chrome_version(self):
         try:
-            from webdriver_manager.chrome import ChromeDriverManager
+            result = subprocess.run(
+                ["/Applications/Google Chrome.app/Contents/MacOS/Google Chrome", "--version"],
+                capture_output=True,
+                text=True,
+            )
+            ver = result.stdout.strip().split()[-1].split(".")[0]
+            return int(ver)
+        except Exception:
+            return None
 
-            self.service = Service(ChromeDriverManager().install())
-        except ImportError:
-            self.service = Service()
-        self.driver = webdriver.Chrome(service=self.service, options=self.chrome_options)
-        self.driver.execute_cdp_cmd(
-            "Page.addScriptToEvaluateOnNewDocument",
-            {"source": "Object.defineProperty(navigator, 'webdriver', {get: () => undefined})"},
+    def setup_driver(self):
+        chrome_version = self._detect_chrome_version()
+        self.driver = uc.Chrome(
+            options=self.chrome_options,
+            headless=self.headless,
+            version_main=chrome_version,
         )
-        self.driver.set_page_load_timeout(45)
+        if not self.headless:
+            try:
+                self.driver.set_window_position(-2000, 0)
+                self.driver.set_window_size(1200, 800)
+            except Exception:
+                pass
+        self.driver.set_page_load_timeout(120)
         self.driver.implicitly_wait(10)
         self.wait = WebDriverWait(self.driver, 20)
         self.original_window = self.driver.current_window_handle
+        print(f"\U0001f5a5\ufe0f  Browser configured for {self.JOURNAL_CODE}")
+
+    def _wait_for_cloudflare(self, timeout=180):
+        for i in range(timeout):
+            try:
+                title = self.driver.title.lower()
+            except Exception:
+                time.sleep(1)
+                continue
+            if "just a moment" in title or title in ("404 not found", ""):
+                if i % 15 == 0:
+                    print(f"   \u23f3 Cloudflare challenge... ({i}s)")
+                time.sleep(1)
+                continue
+            return True
+        return False
 
     # ------------------------------------------------------------------
     # Utility wrappers (delegate to module-level utils)
@@ -296,7 +312,9 @@ class ScholarOneBaseExtractor(CachedExtractorMixin):
             print(f"🔐 Logging in to {self.JOURNAL_CODE}...")
 
             self.driver.get(self.LOGIN_URL)
-            self.smart_wait(5)
+            if not self._wait_for_cloudflare(180):
+                print("   ❌ Cloudflare challenge not resolved")
+                return False
 
             try:
                 reject_btn = self.wait.until(

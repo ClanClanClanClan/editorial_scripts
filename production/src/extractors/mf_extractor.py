@@ -979,9 +979,9 @@ class ComprehensiveMFExtractor(ScholarOneBaseExtractor):
             try:
                 print(f"🔐 Login attempt {attempt + 1}/{MAX_LOGIN_ATTEMPTS}...")
 
-                # Navigate to login page
                 self.driver.get("https://mc.manuscriptcentral.com/mafi")
-                time.sleep(5)  # Give more time for initial page load
+                if not self._wait_for_cloudflare(180):
+                    raise Exception("Cloudflare challenge not resolved")
 
                 # Handle cookie banner
                 try:
@@ -995,7 +995,6 @@ class ComprehensiveMFExtractor(ScholarOneBaseExtractor):
                     # Wait for login form to be present
                     userid_field = self.wait_for_element(By.ID, "USERID", timeout=10)
                     if not userid_field:
-                        # Debug HTML write removed - was polluting working directory
                         raise Exception("Login form not found")
 
                     userid_field = self.driver.find_element(By.ID, "USERID")
@@ -10033,6 +10032,7 @@ if __name__ == "__main__":
         "--force-refresh", action="store_true", help="Ignore cache, re-extract everything"
     )
     args = parser.parse_args()
-    extractor = ComprehensiveMFExtractor(headless=not args.visible, capture_html=args.capture_html)
+    headless = os.environ.get("EXTRACTOR_HEADLESS", "true").lower() == "true" and not args.visible
+    extractor = ComprehensiveMFExtractor(headless=headless, capture_html=args.capture_html)
     extractor.force_refresh = args.force_refresh
     extractor.run()

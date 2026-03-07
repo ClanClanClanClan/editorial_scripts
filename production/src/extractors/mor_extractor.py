@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import json
+import os
 import re
 import sys
 import time
@@ -3082,6 +3083,5 @@ if __name__ == "__main__":
         "--force-refresh", action="store_true", help="Ignore cache, re-extract everything"
     )
     args = parser.parse_args()
-    main(
-        headless=not args.visible, capture_html=args.capture_html, force_refresh=args.force_refresh
-    )
+    headless = os.environ.get("EXTRACTOR_HEADLESS", "true").lower() == "true" and not args.visible
+    main(headless=headless, capture_html=args.capture_html, force_refresh=args.force_refresh)

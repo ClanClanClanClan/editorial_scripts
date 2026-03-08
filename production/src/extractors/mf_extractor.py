@@ -980,8 +980,7 @@ class ComprehensiveMFExtractor(ScholarOneBaseExtractor):
                 print(f"🔐 Login attempt {attempt + 1}/{MAX_LOGIN_ATTEMPTS}...")
 
                 self.driver.get("https://mc.manuscriptcentral.com/mafi")
-                if not self._wait_for_cloudflare(180):
-                    raise Exception("Cloudflare challenge not resolved")
+                self._wait_for_cloudflare(180)
 
                 # Handle cookie banner
                 try:
@@ -10032,7 +10031,7 @@ if __name__ == "__main__":
         "--force-refresh", action="store_true", help="Ignore cache, re-extract everything"
     )
     args = parser.parse_args()
-    headless = os.environ.get("EXTRACTOR_HEADLESS", "true").lower() == "true" and not args.visible
+    headless = not args.visible
     extractor = ComprehensiveMFExtractor(headless=headless, capture_html=args.capture_html)
     extractor.force_refresh = args.force_refresh
     extractor.run()

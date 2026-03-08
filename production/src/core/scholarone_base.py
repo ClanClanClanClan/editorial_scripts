@@ -117,11 +117,22 @@ class ScholarOneBaseExtractor(CachedExtractorMixin):
     # Setup
     # ------------------------------------------------------------------
 
+    def _detect_chrome_version(self):
+        try:
+            result = subprocess.run(
+                ["/Applications/Google Chrome.app/Contents/MacOS/Google Chrome", "--version"],
+                capture_output=True,
+                text=True,
+            )
+            return int(result.stdout.strip().split()[-1].split(".")[0])
+        except Exception:
+            return None
+
     def setup_chrome_options(self):
         self.chrome_options = uc.ChromeOptions()
         self.chrome_options.add_argument("--no-sandbox")
         self.chrome_options.add_argument("--disable-dev-shm-usage")
-        self.chrome_options.add_argument("--window-size=1200,800")
+        self.chrome_options.add_argument("--window-size=800,600")
 
         download_dir = str(
             Path(__file__).parent.parent.parent / "downloads" / self.JOURNAL_CODE.lower()
@@ -146,31 +157,18 @@ class ScholarOneBaseExtractor(CachedExtractorMixin):
         for directory in [self.download_dir, self.output_dir, self.log_dir, self.cache_dir]:
             directory.mkdir(parents=True, exist_ok=True)
 
-    def _detect_chrome_version(self):
-        try:
-            result = subprocess.run(
-                ["/Applications/Google Chrome.app/Contents/MacOS/Google Chrome", "--version"],
-                capture_output=True,
-                text=True,
-            )
-            ver = result.stdout.strip().split()[-1].split(".")[0]
-            return int(ver)
-        except Exception:
-            return None
-
     def setup_driver(self):
         chrome_version = self._detect_chrome_version()
         self.driver = uc.Chrome(
             options=self.chrome_options,
-            headless=self.headless,
+            headless=False,
             version_main=chrome_version,
         )
-        if not self.headless:
-            try:
-                self.driver.set_window_position(-2000, 0)
-                self.driver.set_window_size(1200, 800)
-            except Exception:
-                pass
+        try:
+            self.driver.set_window_position(-2000, 0)
+            self.driver.set_window_size(800, 600)
+        except Exception:
+            pass
         self.driver.set_page_load_timeout(120)
         self.driver.implicitly_wait(10)
         self.wait = WebDriverWait(self.driver, 20)
@@ -312,9 +310,7 @@ class ScholarOneBaseExtractor(CachedExtractorMixin):
             print(f"🔐 Logging in to {self.JOURNAL_CODE}...")
 
             self.driver.get(self.LOGIN_URL)
-            if not self._wait_for_cloudflare(180):
-                print("   ❌ Cloudflare challenge not resolved")
-                return False
+            self._wait_for_cloudflare(180)
 
             try:
                 reject_btn = self.wait.until(

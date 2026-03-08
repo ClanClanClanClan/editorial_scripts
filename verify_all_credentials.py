@@ -54,20 +54,20 @@ class CredentialVerifier:
             "JOTA": {
                 "name": "Journal of Optimization Theory and Applications",
                 "platform": "Editorial Manager",
-                "email_env": "JOTA_EMAIL",
+                "email_env": "JOTA_USERNAME",
                 "password_env": "JOTA_PASSWORD",
             },
             "MAFE": {
                 "name": "Mathematics and Financial Economics",
                 "platform": "Editorial Manager",
-                "email_env": "MAFE_EMAIL",
+                "email_env": "MAFE_USERNAME",
                 "password_env": "MAFE_PASSWORD",
             },
             "FS": {
                 "name": "Finance and Stochastics",
                 "platform": "Email (Gmail)",
-                "email_env": "FS_EMAIL",  # Not used for Gmail OAuth
-                "password_env": "FS_PASSWORD",  # Not used for Gmail OAuth
+                "email_env": None,
+                "password_env": None,
             },
         }
 
@@ -82,8 +82,14 @@ class CredentialVerifier:
             email_var = journal_info["email_env"]
             password_var = journal_info["password_env"]
 
-            email_present = bool(os.getenv(email_var))
-            password_present = bool(os.getenv(password_var))
+            if email_var is None and password_var is None:
+                print(
+                    f"  {journal_code:6} ({journal_info['platform']:16}): ✅ OAuth (no env vars needed)"
+                )
+                continue
+
+            email_present = bool(os.getenv(email_var)) if email_var else True
+            password_present = bool(os.getenv(password_var)) if password_var else True
 
             status_email = "✅" if email_present else "❌"
             status_password = "✅" if password_present else "❌"
@@ -200,7 +206,7 @@ class CredentialVerifier:
                     elif journal == "MOR":
                         import mor_extractor
 
-                        extractor = mor_extractor.ComprehensiveMORExtractor()
+                        extractor = mor_extractor.MORExtractor()
                         print(f"  ✅ {journal}: Extractor imports and instantiates")
 
                     # Cleanup

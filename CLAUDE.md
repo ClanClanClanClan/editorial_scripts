@@ -71,7 +71,7 @@ editorial_scripts/
 
 | Platform | Journals | Base Class | WebDriver | Auth Method |
 |----------|----------|------------|-----------|-------------|
-| **ScholarOne** | MF, MOR | `ScholarOneBaseExtractor` | `webdriver-manager` | Email/password + Gmail 2FA |
+| **ScholarOne** | MF, MOR | `ScholarOneBaseExtractor` | `undetected_chromedriver` | Email/password + Gmail 2FA |
 | **Editorial Manager** | JOTA, MAFE | `EMExtractor` | `undetected_chromedriver` | Username/password, role switch |
 | **SIAM** | SICON, SIFIN | `SIAMExtractor` | `undetected_chromedriver` | ORCID OAuth, Cloudflare challenge |
 | **EditFlow (MSP)** | NACO | standalone | `webdriver-manager` | Username/password (NOT email) |
@@ -84,26 +84,33 @@ editorial_scripts/
 | **Login URL** | mc.manuscriptcentral.com/mafi | mc.manuscriptcentral.com/mathor | N/A (API) | editorialmanager.com/jota | editorialmanager.com/mafe | sicon.siam.org | sifin.siam.org | ef.msp.org/login.php |
 | **Cred env vars** | `MF_EMAIL` `MF_PASSWORD` | `MOR_EMAIL` `MOR_PASSWORD` | OAuth token | `JOTA_USERNAME` `JOTA_PASSWORD` | `MAFE_USERNAME` `MAFE_PASSWORD` | `SICON_EMAIL` `SICON_PASSWORD` | `SIFIN_EMAIL` `SIFIN_PASSWORD` | `NACO_USERNAME` `NACO_PASSWORD` |
 | **2FA** | Gmail code | Gmail code | N/A | None | None | ORCID SSO | ORCID SSO | None |
-| **Cloudflare** | No | No | No | No | No | **Yes (180s)** | **Yes (180s)** | No |
+| **Cloudflare** | **Yes (180s)** | **Yes (180s)** | No | No | No | **Yes (180s)** | **Yes (180s)** | No |
 | **Downloads** | Yes | Yes | No | Yes | Yes | Yes | Yes | No |
-| **Headless default** | Yes | Yes | N/A | Yes | Yes | Yes | Yes | Yes (always) |
+| **Headless default** | No (off-screen) | No (off-screen) | N/A | Yes | Yes | Yes | Yes | Yes (always) |
 
-### CRITICAL: Running SIAM Extractors (SICON, SIFIN)
+### CRITICAL: Cloudflare Bot Protection (ScholarOne + SIAM)
 
-SIAM sites use Cloudflare bot detection. These extractors **MUST** run in headful mode:
+ScholarOne (mc.manuscriptcentral.com) and SIAM sites use Cloudflare bot detection.
+All four extractors (MF, MOR, SICON, SIFIN) run in **off-screen headful mode** automatically.
 
+**ScholarOne (MF, MOR)** — always off-screen headful (hardcoded `headless=False`):
+```bash
+PYTHONUNBUFFERED=1 python3 production/src/extractors/mf_extractor.py
+PYTHONUNBUFFERED=1 python3 production/src/extractors/mor_extractor.py
+```
+
+**SIAM (SICON, SIFIN)** — must set `EXTRACTOR_HEADLESS=false`:
 ```bash
 EXTRACTOR_HEADLESS=false PYTHONUNBUFFERED=1 python3 production/src/extractors/sicon_extractor.py
 EXTRACTOR_HEADLESS=false PYTHONUNBUFFERED=1 python3 production/src/extractors/sifin_extractor.py
 ```
 
-**What happens in headful mode:**
+**What happens:**
 1. Browser window opens off-screen at position (-2000, 0) — invisible to you
 2. Cloudflare challenge resolves automatically (up to 180s)
-3. Window auto-minimizes after dashboard loads
-4. You are NOT disturbed — do NOT kill the window
+3. You are NOT disturbed — do NOT kill the window
 
-**What goes wrong in headless mode:** Cloudflare blocks headless Chrome. The extractor hangs for 180s then times out.
+**Why not headless:** Cloudflare blocks all headless Chrome variants (standard, undetected, headless=new). No workaround exists.
 
 ### CRITICAL: NACO Uses Username, NOT Email
 
@@ -121,7 +128,7 @@ MOR env vars are `MOR_EMAIL` and `MOR_PASSWORD` (not `MOR_USERNAME`).
 
 ### EXTRACTOR_HEADLESS
 
-Controls browser visibility. Read by all Selenium-based extractors.
+Controls browser visibility. Read by EM and SIAM extractors.
 
 ```bash
 EXTRACTOR_HEADLESS=true   # Default. Headless (invisible) browser.
@@ -129,8 +136,9 @@ EXTRACTOR_HEADLESS=false  # Headful. Required for SICON/SIFIN (Cloudflare).
 ```
 
 **Which extractors need headful mode:**
+- **MF, MOR**: Always off-screen headful (hardcoded, env var ignored) — Cloudflare blocks headless
 - **SICON, SIFIN**: MUST be headful (`EXTRACTOR_HEADLESS=false`) — Cloudflare blocks headless
-- **All others**: Can run headless (default)
+- **JOTA, MAFE**: Can run headless (default)
 - **FS**: No browser at all (Gmail API)
 - **NACO**: Always headless (env var not checked)
 
@@ -194,7 +202,7 @@ python3 verify_all_credentials.py
 # Run production extractors (from project root)
 cd production/src/extractors
 
-# ScholarOne (headless OK)
+# ScholarOne (off-screen headful — Cloudflare)
 PYTHONUNBUFFERED=1 python3 mf_extractor.py
 PYTHONUNBUFFERED=1 python3 mor_extractor.py
 
@@ -235,28 +243,27 @@ python3 run_mf_dev.py  # All outputs in dev/mf/
 
 | Driver | Used By | Manager | Binary Location |
 |--------|---------|---------|-----------------|
-| `webdriver-manager` | MF, MOR, NACO | Auto-downloads matching ChromeDriver | `~/.wdm/drivers/chromedriver/` |
-| `undetected_chromedriver` | JOTA, MAFE, SICON, SIFIN | Patches ChromeDriver to evade detection | `~/Library/Application Support/undetected_chromedriver/` |
+| `webdriver-manager` | NACO | Auto-downloads matching ChromeDriver | `~/.wdm/drivers/chromedriver/` |
+| `undetected_chromedriver` | MF, MOR, JOTA, MAFE, SICON, SIFIN | Patches ChromeDriver to evade detection | `~/Library/Application Support/undetected_chromedriver/` |
 
 ### Bot Detection Evasion
 
-**ScholarOne + NACO** (webdriver-manager):
+**NACO** (webdriver-manager):
 - CDP webdriver spoofing (`navigator.webdriver = undefined`)
 - `--disable-blink-features=AutomationControlled`
 - `excludeSwitches=["enable-automation"]`, `useAutomationExtension=False`
 - Custom user-agent string
 
-**EM + SIAM** (undetected_chromedriver):
+**ScholarOne + EM + SIAM** (undetected_chromedriver):
 - Built-in evasion (patched ChromeDriver binary)
 - Auto Chrome version detection via subprocess
 - No explicit user-agent override needed
 
 ### Window Behavior (Headful Mode)
 
-When `EXTRACTOR_HEADLESS=false`:
-- **EM (JOTA, MAFE)**: Window opens at (-2000, 0) off-screen, sized 1400x900
-- **SIAM (SICON, SIFIN)**: Window opens at (-2000, 0) off-screen, sized 1200x800, auto-minimizes after dashboard load
-- **ScholarOne (MF, MOR)**: Not designed for headful — use headless
+- **ScholarOne (MF, MOR)**: Always off-screen headful at (-2000, 0), sized 800x600. Cloudflare challenge resolves in ~120s
+- **EM (JOTA, MAFE)**: Window opens at (-2000, 0) off-screen when headful, sized 1400x900
+- **SIAM (SICON, SIFIN)**: Window opens at (-2000, 0) off-screen when headful, sized 1200x800, auto-minimizes after dashboard load
 
 ---
 
@@ -268,15 +275,18 @@ When `EXTRACTOR_HEADLESS=false`:
 
 **Cause**: After `kill -9 chromedriver`, macOS quarantine attributes corrupt the binary.
 
-**Fix for undetected_chromedriver (JOTA, MAFE, SICON, SIFIN):**
+**Fix for undetected_chromedriver (MF, MOR, JOTA, MAFE, SICON, SIFIN):**
 ```bash
 xattr -c ~/Library/Application\ Support/undetected_chromedriver/undetected_chromedriver
 ```
 
-**Fix for webdriver-manager (MF, MOR, NACO):**
+**Fix for webdriver-manager (NACO):**
 ```bash
 rm -rf ~/.wdm/drivers/chromedriver/
 # webdriver-manager re-downloads on next run
+# After re-download, clear quarantine + re-sign:
+xattr -c ~/.wdm/drivers/chromedriver/mac64/*/chromedriver-mac-arm64/chromedriver
+codesign -fs - ~/.wdm/drivers/chromedriver/mac64/*/chromedriver-mac-arm64/chromedriver
 ```
 
 ### Cloudflare Timeout (SICON, SIFIN)
@@ -316,7 +326,7 @@ pkill -9 chromedriver          # OK — kills chromedriver processes only
 
 ### undetected_chromedriver Binary Contention
 
-Running two extractors that use `undetected_chromedriver` simultaneously causes binary contention. Run EM/SIAM extractors sequentially.
+Running two extractors that use `undetected_chromedriver` simultaneously causes binary contention. Run ScholarOne/EM/SIAM extractors sequentially (not in parallel).
 
 ### EM Split Tables (JOTA, MAFE)
 
@@ -386,4 +396,4 @@ python3 run_mf_dev.py  # All outputs contained in dev/mf/
 
 ---
 
-**Last Updated**: 2026-02-23
+**Last Updated**: 2026-03-08

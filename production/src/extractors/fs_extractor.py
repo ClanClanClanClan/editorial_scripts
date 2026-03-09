@@ -2313,37 +2313,39 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
 
             # Update referee status — context-aware to avoid false positives
             body_lower = body.lower()[:3000]
+            subject_lower = subject.lower()
+            is_reply = any(prefix in subject_lower for prefix in ["re:", "r:", "aw:", "sv:"])
+            decline_keywords = [
+                "unable to review",
+                "cannot review",
+                "can't review",
+                "decline",
+                "regret",
+                "unable to referee",
+                "won't be able",
+                "not able to",
+                "cannot take",
+                "can't take",
+                "too busy",
+                "conflict of interest",
+                "pas possible",
+                "pas disponible",
+                "ne peux pas",
+                "malheureusement",
+            ]
             for referee_name in list(manuscript["referees"].keys()):
                 ref_data = manuscript["referees"][referee_name]
                 if sender_name and referee_name == sender_name:
-                    if any(
-                        kw in body_lower
-                        for kw in [
-                            "happy to review",
-                            "agree to review",
-                            "accept to review",
-                            "glad to",
-                            "pleased to review",
-                            "happy to referee",
-                        ]
-                    ):
-                        ref_data["response"] = "Accepted"
-                        ref_data["response_date"] = date
-                        event["details"]["referee_accepted"] = referee_name
-                    elif any(
-                        kw in body_lower
-                        for kw in [
-                            "unable to review",
-                            "cannot review",
-                            "decline",
-                            "regret",
-                            "unable to referee",
-                        ]
-                    ):
+                    is_decline = any(kw in body_lower for kw in decline_keywords)
+                    if is_decline:
                         ref_data["response"] = "Declined"
                         ref_data["response_date"] = date
                         event["details"]["referee_declined"] = referee_name
-                    if "submitted" in subject.lower() and "report" in body_lower:
+                    elif ref_data["response"] is None and is_reply:
+                        ref_data["response"] = "Accepted"
+                        ref_data["response_date"] = date
+                        event["details"]["referee_accepted"] = referee_name
+                    if "submitted" in subject_lower and "report" in body_lower:
                         ref_data["report_submitted"] = True
                         ref_data["report_date"] = date
                         event["details"]["report_submitted_by"] = referee_name
@@ -5090,7 +5092,8 @@ def main():
             print("\n📊 EXTRACTION SUMMARY:")
             print(f"Total manuscripts: {len(manuscripts)}")
             for i, ms in enumerate(manuscripts[:10]):  # Show first 10
-                print(f"  {i+1}. {ms['id']}: {ms['title'][:70]}... [{ms['status']}]")
+                ms_id = ms.get("id") or ms.get("manuscript_id", "?")
+                print(f"  {i+1}. {ms_id}: {ms['title'][:70]}... [{ms['status']}]")
         else:
             print("❌ No manuscripts extracted")
 

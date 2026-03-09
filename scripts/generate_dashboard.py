@@ -74,12 +74,12 @@ def _load_recent_recommendations(limit=10):
 
 def _freshness_class(age_days):
     if age_days is None:
-        return "stale-grey"
+        return "stale"
     if age_days <= 7:
-        return "fresh-green"
+        return "fresh"
     if age_days <= 14:
-        return "fresh-amber"
-    return "fresh-red"
+        return "aging"
+    return "stale"
 
 
 def _freshness_label(age_days):
@@ -140,8 +140,8 @@ def _clean_institution(name, inst):
             return ""
     if inst.isupper():
         return ""
-    if len(inst) > 35:
-        inst = inst[:33] + "…"
+    if len(inst) > 40:
+        inst = inst[:38] + "…"
     return inst
 
 
@@ -163,7 +163,7 @@ def build_dashboard_data():
                     "manuscripts": 0,
                     "referees": 0,
                     "authors": 0,
-                    "freshness_class": "stale-grey",
+                    "freshness_class": "stale",
                     "freshness_label": "No data",
                     "age_days": None,
                     "extraction_date": None,
@@ -238,159 +238,236 @@ def _esc(s):
 
 CSS = """
 :root {
-    --bg: #f8fafc; --surface: #fff; --surface2: #f1f5f9; --text: #1e293b;
-    --text2: #64748b; --border: #e2e8f0; --accent: #3b82f6; --accent-bg: #eff6ff;
-    --crit: #dc2626; --crit-bg: #fef2f2; --crit-border: #fca5a5;
-    --high: #ea580c; --high-bg: #fff7ed; --high-border: #fdba74;
-    --med: #b45309; --med-bg: #fffbeb; --med-border: #fcd34d;
-    --low: #16a34a; --low-bg: #f0fdf4; --low-border: #86efac;
+    --bg: #f8fafc; --surface: #ffffff; --surface2: #f1f5f9;
+    --text: #1e293b; --text2: #64748b; --text3: #94a3b8;
+    --border: #e2e8f0; --border2: #cbd5e1;
+    --accent: #3b82f6; --accent-bg: #eff6ff;
+    --crit: #dc2626; --crit-bg: #fef2f2; --crit-border: #fecaca;
+    --high: #ea580c; --high-bg: #fff7ed; --high-border: #fed7aa;
+    --med: #b45309; --med-bg: #fffbeb; --med-border: #fde68a;
+    --low: #16a34a; --low-bg: #f0fdf4; --low-border: #bbf7d0;
     --done: #059669; --done-bg: #ecfdf5;
     --muted: #94a3b8; --muted-bg: #f1f5f9;
-    --radius: 8px; --shadow: 0 1px 2px rgba(0,0,0,.06);
 }
 @media (prefers-color-scheme: dark) {
     :root {
-        --bg: #0c1222; --surface: #1a2332; --surface2: #243044; --text: #e2e8f0;
-        --text2: #94a3b8; --border: #2d3d52; --accent: #60a5fa; --accent-bg: #1e3a5f;
-        --crit: #f87171; --crit-bg: #2d1215; --crit-border: #7f1d1d;
-        --high: #fb923c; --high-bg: #2d1a0a; --high-border: #7c2d12;
-        --med: #fbbf24; --med-bg: #2d2305; --med-border: #78350f;
-        --low: #4ade80; --low-bg: #0d2818; --low-border: #14532d;
-        --done: #34d399; --done-bg: #0d2818;
+        --bg: #0f172a; --surface: #1e293b; --surface2: #334155;
+        --text: #f1f5f9; --text2: #94a3b8; --text3: #64748b;
+        --border: #334155; --border2: #475569;
+        --accent: #60a5fa; --accent-bg: #1e3a5f;
+        --crit: #f87171; --crit-bg: #450a0a; --crit-border: #7f1d1d;
+        --high: #fb923c; --high-bg: #431407; --high-border: #7c2d12;
+        --med: #fbbf24; --med-bg: #422006; --med-border: #78350f;
+        --low: #4ade80; --low-bg: #052e16; --low-border: #14532d;
+        --done: #34d399; --done-bg: #052e16;
         --muted: #64748b; --muted-bg: #1e293b;
-        --shadow: 0 1px 2px rgba(0,0,0,.2);
     }
 }
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-body { font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif;
-    background: var(--bg); color: var(--text); font-size: 13px; line-height: 1.4;
-    padding: 16px 20px; max-width: 1200px; margin: 0 auto; }
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif;
+    background: var(--bg); color: var(--text); font-size: 14px; line-height: 1.5;
+    padding: 24px; max-width: 1100px; margin: 0 auto;
+}
+h1 { font-size: 1.5rem; font-weight: 700; text-align: center; margin-bottom: 4px; }
+.subtitle { text-align: center; color: var(--text2); font-size: 0.8rem; margin-bottom: 16px; }
 
-.hdr { text-align: center; margin-bottom: 16px; }
-.hdr h1 { font-size: 1.3rem; font-weight: 700; letter-spacing: -0.02em; }
-.hdr .sub { color: var(--text2); font-size: 0.75rem; margin-top: 2px; }
-
-.alert { padding: 10px 16px; border-radius: var(--radius); margin-bottom: 14px;
-    font-weight: 600; font-size: 0.85rem; border: 1.5px solid; display: flex; align-items: center; gap: 8px; }
+/* Alert bar */
+.alert {
+    padding: 12px 16px; border-radius: 8px; margin-bottom: 16px;
+    font-weight: 600; font-size: 0.9rem; display: flex; align-items: center; gap: 8px;
+    border: 1px solid;
+}
 .alert-crit { background: var(--crit-bg); border-color: var(--crit-border); color: var(--crit); }
 .alert-high { background: var(--high-bg); border-color: var(--high-border); color: var(--high); }
 .alert-ok { background: var(--low-bg); border-color: var(--low-border); color: var(--low); }
 
-.pills { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; margin-bottom: 16px; }
-.pill { background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
-    padding: 4px 12px; font-size: 0.75rem; display: inline-flex; align-items: center; gap: 4px; }
-.pill b { font-size: 0.85rem; }
+/* Stats pills */
+.stats { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-bottom: 20px; }
+.stat {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 20px;
+    padding: 5px 14px; font-size: 0.8rem;
+}
+.stat b { font-size: 0.9rem; }
 
-.sec { margin-bottom: 20px; }
-.sec-title { font-size: 0.9rem; font-weight: 700; margin-bottom: 8px;
-    padding-bottom: 4px; border-bottom: 2px solid var(--border); }
+/* Section */
+.section { margin-bottom: 28px; }
+.section-hdr {
+    font-size: 1rem; font-weight: 700; margin-bottom: 10px;
+    padding-bottom: 6px; border-bottom: 2px solid var(--border);
+}
+
+/* Filters */
+.filters { display: flex; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; }
+.fbtn {
+    border: 1px solid var(--border); background: var(--surface); color: var(--text2);
+    padding: 3px 12px; border-radius: 14px; font-size: 0.75rem; cursor: pointer;
+}
+.fbtn:hover { border-color: var(--accent); color: var(--accent); }
+.fbtn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
 
 /* Action items */
-.acts { display: flex; flex-direction: column; gap: 4px; }
-.act { display: grid; grid-template-columns: 60px 44px auto 1fr auto; align-items: center;
-    gap: 8px; padding: 6px 10px; border-radius: 5px; border-left: 3px solid;
-    font-size: 0.8rem; background: var(--surface); }
-.act.crit { border-left-color: var(--crit); background: var(--crit-bg); }
-.act.high { border-left-color: var(--high); background: var(--high-bg); }
-.act.med { border-left-color: var(--med); background: var(--med-bg); }
-.act.low { border-left-color: var(--low); background: var(--low-bg); }
-.act-badge { font-size: 0.65rem; font-weight: 700; text-transform: uppercase;
-    padding: 1px 6px; border-radius: 3px; text-align: center; color: #fff; white-space: nowrap; }
-.act-badge.crit { background: var(--crit); }
-.act-badge.high { background: var(--high); }
-.act-badge.med { background: var(--med); }
-.act-badge.low { background: var(--low); }
-.act-j { font-size: 0.7rem; font-weight: 600; color: var(--accent);
-    background: var(--accent-bg); padding: 1px 5px; border-radius: 3px; text-align: center; }
-.act-ms { font-weight: 600; white-space: nowrap; font-size: 0.78rem; }
-.act-msg { color: var(--text); }
-.act-meta { color: var(--text2); font-size: 0.72rem; white-space: nowrap; text-align: right; }
+.action-list { display: flex; flex-direction: column; gap: 6px; }
+.action-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 12px; border-radius: 6px;
+    border-left: 4px solid; background: var(--surface); font-size: 0.85rem;
+}
+.action-item.p-crit { border-left-color: var(--crit); background: var(--crit-bg); }
+.action-item.p-high { border-left-color: var(--high); background: var(--high-bg); }
+.action-item.p-med { border-left-color: var(--med); background: var(--med-bg); }
+.action-item.p-low { border-left-color: var(--low); background: var(--low-bg); }
+.action-type {
+    font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
+    padding: 2px 8px; border-radius: 3px; color: #fff; white-space: nowrap;
+    min-width: 62px; text-align: center;
+}
+.action-type.t-crit { background: var(--crit); }
+.action-type.t-high { background: var(--high); }
+.action-type.t-med { background: var(--med); }
+.action-type.t-low { background: var(--low); }
+.action-journal {
+    font-size: 0.72rem; font-weight: 700; color: var(--accent);
+    background: var(--accent-bg); padding: 2px 6px; border-radius: 3px;
+    white-space: nowrap;
+}
+.action-msid { font-weight: 700; white-space: nowrap; }
+.action-msg { flex: 1; min-width: 0; }
+.action-extra { color: var(--text2); font-size: 0.75rem; white-space: nowrap; }
 
-.filter-row { display: flex; gap: 4px; margin-bottom: 8px; flex-wrap: wrap; }
-.fbtn { border: 1px solid var(--border); background: var(--surface); color: var(--text);
-    padding: 2px 10px; border-radius: 12px; font-size: 0.72rem; cursor: pointer; }
-.fbtn.on { background: var(--accent); color: #fff; border-color: var(--accent); }
-
-/* Manuscripts table */
-.tw { overflow-x: auto; border-radius: var(--radius); box-shadow: var(--shadow);
-    border: 1px solid var(--border); }
-table { width: 100%; border-collapse: collapse; background: var(--surface); font-size: 0.78rem;
-    table-layout: fixed; }
-th { background: var(--surface2); border-bottom: 2px solid var(--border); padding: 6px 8px;
-    text-align: left; font-weight: 600; font-size: 0.7rem; color: var(--text2);
-    text-transform: uppercase; letter-spacing: 0.04em; cursor: pointer;
-    user-select: none; white-space: nowrap; }
-th:hover { color: var(--accent); }
-td { padding: 5px 8px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+/* Table */
+.table-wrap {
+    overflow-x: auto; border-radius: 8px;
+    border: 1px solid var(--border);
+}
+table {
+    width: 100%; border-collapse: collapse; background: var(--surface);
+    font-size: 0.82rem; table-layout: fixed;
+}
+thead th {
+    background: var(--surface2); padding: 8px 10px; text-align: left;
+    font-weight: 600; font-size: 0.72rem; color: var(--text2);
+    text-transform: uppercase; letter-spacing: 0.03em;
+    border-bottom: 2px solid var(--border); cursor: pointer;
+    white-space: nowrap; user-select: none;
+}
+thead th:hover { color: var(--accent); }
+td {
+    padding: 7px 10px; border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+}
 tr:last-child td { border-bottom: none; }
-.ms-row { cursor: pointer; }
+.ms-row { cursor: pointer; transition: background 0.1s; }
 .ms-row:hover td { background: var(--accent-bg); }
-.ms-row td:first-child::before { content: "▸ "; color: var(--text2); font-size: 0.7rem; }
-.ms-row.exp td:first-child::before { content: "▾ "; }
-.td-title { overflow: hidden; text-overflow: ellipsis; }
-.td-status { overflow: hidden; text-overflow: ellipsis; font-size: 0.73rem; }
-.detail-row { display: none; }
-.detail-row.show { display: table-row; }
-.detail-row td { padding: 2px 8px 8px 24px; background: var(--bg); }
+.ms-row td:first-child { padding-left: 20px; position: relative; }
+.ms-row td:first-child::before {
+    content: "\\25B8"; position: absolute; left: 6px; top: 50%;
+    transform: translateY(-50%); color: var(--text3); font-size: 0.65rem;
+}
+.ms-row.expanded td:first-child::before { content: "\\25BE"; }
+.td-title {
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.td-id { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; }
+.td-status { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.td-reports { text-align: center; font-weight: 700; }
+.td-due { white-space: nowrap; text-align: right; }
+.td-days { text-align: right; white-space: nowrap; }
 
-.rt { width: 100%; font-size: 0.75rem; background: var(--surface); border-radius: 5px;
-    border: 1px solid var(--border); }
-.rt th { font-size: 0.68rem; padding: 4px 6px; background: var(--surface2); }
-.rt td { padding: 4px 6px; }
-
-.badge { font-size: 0.68rem; padding: 1px 5px; border-radius: 3px; font-weight: 600; white-space: nowrap; }
-.b-agreed { background: var(--med-bg); color: var(--med); border: 1px solid var(--med-border); }
-.b-done { background: var(--done-bg); color: var(--done); }
-.b-pending { background: var(--high-bg); color: var(--high); border: 1px solid var(--high-border); }
-.b-declined { background: var(--muted-bg); color: var(--muted); }
-.b-term { background: var(--muted-bg); color: var(--muted); }
-.b-overdue { background: var(--crit-bg); color: var(--crit); border: 1px solid var(--crit-border); }
-.b-flag { background: var(--accent-bg); color: var(--accent); font-size: 0.68rem;
-    padding: 1px 5px; border-radius: 3px; font-weight: 600; }
 .overdue { color: var(--crit); font-weight: 600; }
 .due-soon { color: var(--med); font-weight: 600; }
 .on-track { color: var(--done); }
-.rpt { font-weight: 700; font-size: 0.82rem; }
 
-/* Journal overview */
-.jgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(135px, 1fr)); gap: 6px; }
-.jcard { background: var(--surface); border-radius: 6px; padding: 8px 10px;
-    box-shadow: var(--shadow); border: 1px solid var(--border); }
-.jcard .jn { font-weight: 700; font-size: 0.85rem; display: flex; align-items: center; gap: 6px; }
-.jcard .jm { font-size: 0.7rem; color: var(--text2); }
-.jcard .js { font-size: 0.72rem; margin-top: 2px; }
-.fresh-green { background: var(--low-bg); color: var(--low); }
-.fresh-amber { background: var(--med-bg); color: var(--med); }
-.fresh-red { background: var(--crit-bg); color: var(--crit); }
-.stale-grey { background: var(--muted-bg); color: var(--muted); }
+.flag {
+    display: inline-block; font-size: 0.68rem; font-weight: 600;
+    padding: 1px 6px; border-radius: 3px; margin-left: 4px;
+    background: var(--crit-bg); color: var(--crit); border: 1px solid var(--crit-border);
+}
+
+/* Detail rows */
+.detail-row { display: none; }
+.detail-row.show { display: table-row; }
+.detail-row td { background: var(--bg); padding: 4px 10px 10px 20px; }
+.ref-table {
+    width: 100%; font-size: 0.78rem; border-collapse: collapse;
+    background: var(--surface); border-radius: 6px; border: 1px solid var(--border);
+}
+.ref-table th {
+    font-size: 0.68rem; padding: 5px 8px; background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+}
+.ref-table td { padding: 5px 8px; border-bottom: 1px solid var(--border); }
+.ref-table tr:last-child td { border-bottom: none; }
+
+.badge {
+    display: inline-block; font-size: 0.68rem; padding: 1px 6px;
+    border-radius: 3px; font-weight: 600;
+}
+.b-agreed { background: var(--med-bg); color: var(--med); border: 1px solid var(--med-border); }
+.b-completed { background: var(--done-bg); color: var(--done); }
+.b-pending { background: var(--high-bg); color: var(--high); border: 1px solid var(--high-border); }
+.b-declined { background: var(--muted-bg); color: var(--muted); }
+.b-terminated { background: var(--muted-bg); color: var(--muted); }
+.b-overdue { background: var(--crit-bg); color: var(--crit); border: 1px solid var(--crit-border); }
+
+/* Journal grid */
+.journal-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 8px;
+}
+.jcard {
+    background: var(--surface); border-radius: 6px; padding: 10px;
+    border: 1px solid var(--border);
+}
+.jcard-name { font-weight: 700; font-size: 0.9rem; margin-bottom: 2px; }
+.jcard-platform { font-size: 0.72rem; color: var(--text2); }
+.jcard-stats { font-size: 0.78rem; margin-top: 4px; }
+.jcard-fresh {
+    display: inline-block; font-size: 0.68rem; padding: 1px 6px;
+    border-radius: 3px; font-weight: 600; margin-top: 4px;
+}
+.jcard-fresh.fresh { background: var(--low-bg); color: var(--low); }
+.jcard-fresh.aging { background: var(--med-bg); color: var(--med); }
+.jcard-fresh.stale { background: var(--crit-bg); color: var(--crit); }
 
 /* Recommendations */
-.rgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 8px; }
-.rcard { background: var(--surface); border-radius: 6px; padding: 10px 12px;
-    box-shadow: var(--shadow); border: 1px solid var(--border); }
-.rcard h4 { font-size: 0.8rem; margin-bottom: 2px; }
-.rcard .rmeta { font-size: 0.7rem; color: var(--text2); margin-bottom: 6px; }
-.rcard .cand { font-size: 0.75rem; padding: 2px 0;
-    display: flex; justify-content: space-between; gap: 8px; }
-.rcard .cn { font-weight: 600; white-space: nowrap; }
-.rcard .ci { font-size: 0.68rem; color: var(--text2); text-align: right; }
+.rec-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 10px; }
+.rec-card {
+    background: var(--surface); border-radius: 6px; padding: 12px;
+    border: 1px solid var(--border);
+}
+.rec-card h4 { font-size: 0.85rem; margin-bottom: 2px; }
+.rec-meta { font-size: 0.72rem; color: var(--text2); margin-bottom: 8px; }
+.rec-cand {
+    font-size: 0.78rem; padding: 3px 0;
+    display: flex; justify-content: space-between; gap: 8px;
+}
+.rec-name { font-weight: 600; }
+.rec-info { font-size: 0.72rem; color: var(--text2); text-align: right; white-space: nowrap; }
 
-.collap-hdr { cursor: pointer; display: flex; align-items: center; gap: 6px; }
-.collap-hdr::before { content: "▸"; font-size: 0.7rem; color: var(--text2); }
-.collap-hdr.open::before { content: "▾"; }
-.collap-body { display: none; margin-top: 6px; }
-.collap-body.show { display: block; }
+/* Collapsible */
+.collapsible-hdr {
+    cursor: pointer; display: flex; align-items: center; gap: 6px;
+}
+.collapsible-hdr::before { content: "\\25B8"; font-size: 0.7rem; color: var(--text2); }
+.collapsible-hdr.open::before { content: "\\25BE"; }
+.collapsible-body { display: none; margin-top: 8px; }
+.collapsible-body.show { display: block; }
 
-.footer { text-align: center; color: var(--text2); font-size: 0.7rem;
-    margin-top: 20px; padding-top: 8px; border-top: 1px solid var(--border); }
-.empty { text-align: center; padding: 16px; color: var(--text2); font-style: italic; font-size: 0.8rem; }
+.footer {
+    text-align: center; color: var(--text3); font-size: 0.72rem;
+    margin-top: 24px; padding-top: 10px; border-top: 1px solid var(--border);
+}
+.empty {
+    text-align: center; padding: 20px; color: var(--text2);
+    font-style: italic; font-size: 0.85rem;
+}
 
 @media (max-width: 768px) {
-    body { padding: 8px; font-size: 12px; }
-    .act { grid-template-columns: 50px 36px auto 1fr; }
-    .act-meta { display: none; }
-    .rgrid { grid-template-columns: 1fr; }
-    .jgrid { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); }
+    body { padding: 12px; font-size: 13px; }
+    .action-item { flex-wrap: wrap; }
+    .action-extra { display: none; }
+    .td-title { max-width: 180px; }
+    .rec-grid { grid-template-columns: 1fr; }
 }
 """
 
@@ -400,10 +477,12 @@ function sortTable(tid, ci) {
     if (!t) return;
     var tb = t.querySelector('tbody');
     var rows = Array.from(tb.querySelectorAll('tr.ms-row'));
-    var h = t.querySelectorAll('th')[ci];
-    var asc = !h.classList.contains('sa');
-    t.querySelectorAll('th').forEach(function(x) { x.classList.remove('sa','sd'); });
-    h.classList.add(asc ? 'sa' : 'sd');
+    var h = t.querySelectorAll('thead th')[ci];
+    var asc = !h.classList.contains('sort-asc');
+    t.querySelectorAll('thead th').forEach(function(x) {
+        x.classList.remove('sort-asc', 'sort-desc');
+    });
+    h.classList.add(asc ? 'sort-asc' : 'sort-desc');
     rows.sort(function(a, b) {
         var av = a.cells[ci].getAttribute('data-sort') || a.cells[ci].textContent.trim();
         var bv = b.cells[ci].getAttribute('data-sort') || b.cells[ci].textContent.trim();
@@ -420,17 +499,17 @@ function sortTable(tid, ci) {
 function toggleDetail(id) {
     var r = document.querySelector('tr[data-detail="d-' + id + '"]');
     var d = document.getElementById('d-' + id);
-    if (r && d) { r.classList.toggle('exp'); d.classList.toggle('show'); }
+    if (r && d) { r.classList.toggle('expanded'); d.classList.toggle('show'); }
 }
 function filterActs(lvl) {
-    document.querySelectorAll('.fbtn').forEach(function(b) { b.classList.remove('on'); });
-    event.target.classList.add('on');
-    document.querySelectorAll('.act').forEach(function(a) {
+    document.querySelectorAll('.fbtn').forEach(function(b) { b.classList.remove('active'); });
+    event.target.classList.add('active');
+    document.querySelectorAll('.action-item').forEach(function(a) {
         a.style.display = (lvl === 'all' || a.classList.contains(lvl)) ? '' : 'none';
     });
 }
-function toggleC(id) {
-    var h = document.querySelector('[data-c="' + id + '"]');
+function toggleCollapsible(id) {
+    var h = document.querySelector('[data-collapse="' + id + '"]');
     var b = document.getElementById(id);
     if (h && b) { h.classList.toggle('open'); b.classList.toggle('show'); }
 }
@@ -446,136 +525,142 @@ def generate_html(data):
     training = data.get("training")
 
     h = []
+
     h.append("<!DOCTYPE html><html lang='en'><head><meta charset='utf-8'>")
     h.append("<meta name='viewport' content='width=device-width,initial-scale=1'>")
     h.append("<title>Editorial Command Center</title>")
     h.append(f"<style>{CSS}</style></head><body>")
 
-    h.append("<div class='hdr'>")
     h.append("<h1>Editorial Command Center</h1>")
-    h.append(f"<div class='sub'>{_esc(data['generated_at'])}</div>")
-    h.append("</div>")
+    h.append(f"<div class='subtitle'>{_esc(data['generated_at'])}</div>")
 
     if totals["critical"] > 0:
-        ac, ai = "alert-crit", "🔴"
-        am = f"{totals['critical']} critical + {totals['high']} high priority items"
+        cls = "alert-crit"
+        msg = f"🔴 {totals['critical']} critical + {totals['high']} high priority items"
     elif totals["high"] > 0:
-        ac, ai = "alert-high", "🟠"
-        am = f"{totals['high']} high priority items"
+        cls = "alert-high"
+        msg = f"🟠 {totals['high']} high priority items"
     else:
-        ac, ai = "alert-ok", "✅"
-        am = "All clear"
-    h.append(f"<div class='alert {ac}'>{ai} {am}</div>")
+        cls = "alert-ok"
+        msg = "✅ All clear — no action needed"
+    h.append(f"<div class='alert {cls}'>{msg}</div>")
 
-    h.append("<div class='pills'>")
-    h.append(f"<span class='pill'><b>{totals['active_manuscripts']}</b> manuscripts</span>")
-    h.append(f"<span class='pill'><b>{totals['action_items']}</b> actions</span>")
-    h.append(f"<span class='pill'><b>{totals['active_journals']}</b> journals</span>")
-    h.append(f"<span class='pill'><b>{totals['referees']}</b> active refs</span>")
+    h.append("<div class='stats'>")
+    h.append(f"<span class='stat'><b>{totals['active_manuscripts']}</b> manuscripts</span>")
+    h.append(f"<span class='stat'><b>{totals['action_items']}</b> actions</span>")
+    h.append(f"<span class='stat'><b>{totals['active_journals']}</b> journals</span>")
+    h.append(f"<span class='stat'><b>{totals['referees']}</b> active refs</span>")
     h.append("</div>")
 
-    # --- Action Items ---
-    h.append("<div class='sec'>")
-    h.append("<div class='sec-title'>Action Items</div>")
+    # ── Action Items ──────────────────────────────────────────────
+    h.append("<div class='section'>")
+    h.append("<div class='section-hdr'>Action Items</div>")
 
     if items:
-        counts = {"critical": 0, "high": 0, "medium": 0, "low": 0}
+        counts = {}
         for it in items:
             counts[it["priority"]] = counts.get(it["priority"], 0) + 1
 
-        h.append("<div class='filter-row'>")
-        h.append("<button class='fbtn on' onclick='filterActs(\"all\")'>All</button>")
-        for lvl, cls in [("critical", "crit"), ("high", "high"), ("medium", "med"), ("low", "low")]:
-            if counts[lvl]:
+        h.append("<div class='filters'>")
+        h.append("<button class='fbtn active' onclick='filterActs(\"all\")'>All</button>")
+        for lvl, css in [
+            ("critical", "p-crit"),
+            ("high", "p-high"),
+            ("medium", "p-med"),
+            ("low", "p-low"),
+        ]:
+            if counts.get(lvl, 0):
                 h.append(
-                    f"<button class='fbtn' onclick='filterActs(\"{cls}\")'>"
+                    f"<button class='fbtn' onclick='filterActs(\"{css}\")'>"
                     f"{lvl.title()} ({counts[lvl]})</button>"
                 )
         h.append("</div>")
 
         type_labels = {
-            "overdue_report": "Overdue",
-            "needs_ae_decision": "Decision",
-            "pending_invitation": "No Reply",
-            "needs_more_referees": "Few Refs",
-            "due_soon": "Due Soon",
-            "needs_assignment": "Assign",
+            "overdue_report": "OVERDUE",
+            "needs_ae_decision": "DECISION",
+            "pending_invitation": "NO REPLY",
+            "needs_more_referees": "FEW REFS",
+            "due_soon": "DUE SOON",
+            "needs_assignment": "ASSIGN",
         }
         pmap = {"critical": "crit", "high": "high", "medium": "med", "low": "low"}
 
-        h.append("<div class='acts'>")
+        h.append("<div class='action-list'>")
         for it in items:
-            p = pmap.get(it["priority"], it["priority"])
-            tl = type_labels.get(it["action_type"], it["action_type"])
+            p = pmap.get(it["priority"], "low")
+            label = type_labels.get(it["action_type"], it["action_type"])
 
-            meta_parts = []
+            extra_parts = []
             if it.get("due_date"):
-                meta_parts.append(f"due {it['due_date']}")
+                extra_parts.append(f"due {it['due_date']}")
             if it.get("reminders_sent"):
-                meta_parts.append(f"{it['reminders_sent']}r")
-            meta = " · ".join(meta_parts)
+                extra_parts.append(f"{it['reminders_sent']} rem")
+            extra = " · ".join(extra_parts)
 
-            h.append(f"<div class='act {p}'>")
-            h.append(f"<span class='act-badge {p}'>{tl}</span>")
-            h.append(f"<span class='act-j'>{_esc(it['journal'])}</span>")
-            h.append(f"<span class='act-ms'>{_esc(it['manuscript_id'])}</span>")
-            h.append(f"<span class='act-msg'>{_esc(it['message'])}</span>")
-            if meta:
-                h.append(f"<span class='act-meta'>{_esc(meta)}</span>")
+            h.append(f"<div class='action-item p-{p} {p}'>")
+            h.append(f"<span class='action-type t-{p}'>{label}</span>")
+            h.append(f"<span class='action-journal'>{_esc(it['journal'])}</span>")
+            h.append(f"<span class='action-msid'>{_esc(it['manuscript_id'])}</span>")
+            h.append(f"<span class='action-msg'>{_esc(it['message'])}</span>")
+            if extra:
+                h.append(f"<span class='action-extra'>{_esc(extra)}</span>")
             h.append("</div>")
         h.append("</div>")
     else:
         h.append("<div class='empty'>No action items — all clear</div>")
     h.append("</div>")
 
-    # --- Active Manuscripts ---
-    h.append("<div class='sec'>")
-    h.append("<div class='sec-title'>Active Manuscripts</div>")
+    # ── Active Manuscripts ────────────────────────────────────────
+    h.append("<div class='section'>")
+    h.append("<div class='section-hdr'>Active Manuscripts</div>")
 
     if manuscripts:
-        h.append("<div class='tw'>")
-        cols = ["Journal", "MS ID", "Title", "Status", "Rpts", "Due", "Days"]
-        col_widths = ["54px", "105px", "auto", "140px", "42px", "62px", "38px"]
-        h.append("<table id='mt'>")
+        h.append("<div class='table-wrap'>")
+        h.append("<table id='ms-table'>")
         h.append("<colgroup>")
-        for w in col_widths:
-            h.append(f"<col style='width:{w}'>")
+        h.append("<col style='width:24%'>")
+        h.append("<col style='width:26%'>")
+        h.append("<col style='width:18%'>")
+        h.append("<col style='width:8%'>")
+        h.append("<col style='width:14%'>")
+        h.append("<col style='width:10%'>")
         h.append("</colgroup>")
         h.append("<thead><tr>")
-        for i, col in enumerate(cols):
-            h.append(f"<th onclick=\"sortTable('mt',{i})\">{col}</th>")
+        for i, col in enumerate(["Manuscript", "Title", "Status", "Rpts", "Next Due", "Days"]):
+            h.append(f"<th onclick=\"sortTable('ms-table',{i})\">{col}</th>")
         h.append("</tr></thead><tbody>")
 
         for ms in manuscripts:
             safe_id = ms["manuscript_id"].replace(".", "_").replace("-", "_")
 
-            completed = ms["reports_received"]
-            reviewing = ms["reports_pending"]
-            total_active = completed + reviewing
-            rpt_str = f"{completed}/{total_active}" if total_active > 0 else "—"
+            completed = ms["referees_completed"]
+            agreed = ms["referees_agreed"]
+            pending = ms["referees_pending_response"]
+            total_assigned = completed + agreed + pending
+            rpt_str = f"{completed}/{total_assigned}" if total_assigned > 0 else "—"
 
             if ms.get("days_until_next_due") is not None:
                 dd = ms["days_until_next_due"]
                 if dd < 0:
-                    dc, ds = "overdue", f"{abs(dd)}d over"
+                    due_cls = "overdue"
+                    due_str = f"{abs(dd)}d overdue"
                 elif dd <= 14:
-                    dc, ds = "due-soon", f"{dd}d"
+                    due_cls = "due-soon"
+                    due_str = f"{dd}d"
                 else:
-                    dc, ds = "on-track", f"{dd}d"
+                    due_cls = "on-track"
+                    due_str = f"{dd}d"
             else:
-                dc, ds = "", "—"
+                due_cls = ""
+                due_str = "—"
 
-            ndd = ds if ms.get("next_due_date") else "—"
             din = ms.get("days_in_system") or "—"
 
-            flags = []
+            flags_html = ""
             if ms["needs_ae_decision"]:
-                flags.append("<span class='b-flag'>Decision</span>")
-            if ms["needs_referee_assignment"]:
-                flags.append("<span class='b-flag'>Assign</span>")
-            flag_str = " ".join(flags)
+                flags_html += " <span class='flag'>Decision</span>"
 
-            status_display = ms["status"]
             status_abbrevs = {
                 "All Referees Assigned": "Refs Assigned",
                 "Awaiting Reviewer Scores": "Awaiting Scores",
@@ -584,69 +669,81 @@ def generate_html(data):
                 "Potential Referees Assigned": "Potential Refs",
                 "Revision R1 Under Review": "R1 Under Review",
             }
-            status_display = status_abbrevs.get(status_display, status_display)
+            status_display = status_abbrevs.get(ms["status"], ms["status"])
+
+            sort_due = (
+                ms.get("days_until_next_due") if ms.get("days_until_next_due") is not None else 9999
+            )
 
             h.append(
                 f"<tr class='ms-row' data-detail='d-{safe_id}' "
                 f"onclick=\"toggleDetail('{safe_id}')\">"
             )
-            h.append(f"<td><span class='act-j'>{_esc(ms['journal'])}</span></td>")
-            h.append(f"<td>{_esc(ms['manuscript_id'])}</td>")
-            title_display = ms["title"][:70] + ("…" if len(ms["title"]) > 70 else "")
-            h.append(f"<td class='td-title'>{_esc(title_display)}</td>")
-            h.append(f"<td class='td-status'>{_esc(status_display)} {flag_str}</td>")
-            h.append(f"<td class='rpt' data-sort='{completed}'>{rpt_str}</td>")
-            sort_due = (
-                ms.get("days_until_next_due") if ms.get("days_until_next_due") is not None else 9999
+            h.append(
+                f"<td class='td-id' data-sort='{_esc(ms['journal'] + ms['manuscript_id'])}'>"
+                f"<span class='action-journal'>{_esc(ms['journal'])}</span> "
+                f"{_esc(ms['manuscript_id'])}</td>"
             )
-            h.append(f"<td data-sort='{sort_due}'><span class='{dc}'>{ndd}</span></td>")
-            h.append(f"<td data-sort='{ms.get('days_in_system', 0)}'>{din}</td>")
+            h.append(f"<td class='td-title' title='{_esc(ms['title'])}'>{_esc(ms['title'])}</td>")
+            h.append(f"<td class='td-status'>{_esc(status_display)}{flags_html}</td>")
+            h.append(f"<td class='td-reports' data-sort='{completed}'>{rpt_str}</td>")
+            h.append(
+                f"<td class='td-due' data-sort='{sort_due}'>"
+                f"<span class='{due_cls}'>{due_str}</span></td>"
+            )
+            h.append(f"<td class='td-days' data-sort='{ms.get('days_in_system', 0)}'>{din}</td>")
             h.append("</tr>")
 
             ref_details = ms.get("referee_details", [])
-            h.append(f"<tr class='detail-row' id='d-{safe_id}'><td colspan='{len(cols)}'>")
+            h.append(f"<tr class='detail-row' id='d-{safe_id}'>" f"<td colspan='6'>")
             if ref_details:
-                h.append("<table class='rt'><thead><tr>")
+                h.append("<table class='ref-table'><thead><tr>")
                 h.append(
                     "<th>Referee</th><th>Status</th><th>Invited</th>"
                     "<th>Agreed</th><th>Due</th><th>Returned</th>"
-                    "<th>Rem.</th><th>Timeline</th>"
+                    "<th>Reminders</th><th>Timeline</th>"
                 )
                 h.append("</tr></thead><tbody>")
                 for rd in ref_details:
                     st = rd["normalized_status"]
-                    bc = f"b-{st}" if st in ("agreed", "pending", "declined") else ""
-                    if st == "completed":
-                        bc = "b-done"
-                    elif st == "terminated":
-                        bc = "b-term"
                     if rd.get("days_overdue"):
-                        bc = "b-overdue"
+                        badge_cls = "b-overdue"
+                    elif st == "completed":
+                        badge_cls = "b-completed"
+                    elif st == "agreed":
+                        badge_cls = "b-agreed"
+                    elif st == "pending":
+                        badge_cls = "b-pending"
+                    elif st in ("declined", "terminated"):
+                        badge_cls = "b-" + st
+                    else:
+                        badge_cls = ""
 
-                    tl = ""
+                    timeline = ""
                     if rd.get("days_overdue"):
-                        tl = f"<span class='overdue'>{rd['days_overdue']}d overdue</span>"
+                        timeline = f"<span class='overdue'>{rd['days_overdue']}d overdue</span>"
                     elif rd.get("days_remaining") is not None:
                         d = rd["days_remaining"]
-                        tl = f"<span class='{'due-soon' if d <= 14 else 'on-track'}'>{d}d</span>"
+                        cls = "due-soon" if d <= 14 else "on-track"
+                        timeline = f"<span class='{cls}'>{d}d left</span>"
                     elif st == "completed":
-                        tl = "✓"
+                        timeline = "✓ done"
                     elif st in ("declined", "terminated"):
-                        tl = "—"
+                        timeline = "—"
 
                     h.append("<tr>")
                     h.append(f"<td>{_esc(rd['name'])}</td>")
-                    h.append(f"<td><span class='badge {bc}'>{_esc(st)}</span></td>")
+                    h.append(f"<td><span class='badge {badge_cls}'>{_esc(st)}</span></td>")
                     h.append(f"<td>{_esc(rd.get('invited') or '—')}</td>")
                     h.append(f"<td>{_esc(rd.get('agreed') or '—')}</td>")
                     h.append(f"<td>{_esc(rd.get('due') or '—')}</td>")
                     h.append(f"<td>{_esc(rd.get('returned') or '—')}</td>")
-                    h.append(f"<td>{rd['reminders']}</td>")
-                    h.append(f"<td>{tl}</td>")
+                    h.append(f"<td>{rd.get('reminders', 0)}</td>")
+                    h.append(f"<td>{timeline}</td>")
                     h.append("</tr>")
                 h.append("</tbody></table>")
             else:
-                h.append("<div class='empty' style='padding:6px'>No referees assigned</div>")
+                h.append("<div class='empty' style='padding:8px'>No referees assigned</div>")
             h.append("</td></tr>")
 
         h.append("</tbody></table></div>")
@@ -654,52 +751,64 @@ def generate_html(data):
         h.append("<div class='empty'>No active manuscripts</div>")
     h.append("</div>")
 
-    # --- Journal Overview ---
-    h.append("<div class='sec'>")
-    h.append("<div class='sec-title'>Journal Overview</div>")
-    h.append("<div class='jgrid'>")
+    # ── Journal Overview ──────────────────────────────────────────
+    h.append("<div class='section'>")
+    h.append("<div class='section-hdr'>Journal Overview</div>")
+    h.append("<div class='journal-grid'>")
     for js in journals:
         j = js["journal"].upper()
         n_ms = js.get("manuscripts", 0)
         n_ref = js.get("referees", 0)
-        fc = js.get("freshness_class", "stale-grey")
+        fc = js.get("freshness_class", "stale")
         fl = js.get("freshness_label", "No data")
         h.append("<div class='jcard'>")
-        h.append(f"<div class='jn'>{_esc(j)} <span class='badge {fc}'>{_esc(fl)}</span></div>")
-        h.append(f"<div class='jm'>{_esc(js.get('platform', ''))}</div>")
-        h.append(f"<div class='js'>{n_ms} mss · {n_ref} refs</div>")
+        h.append(f"<div class='jcard-name'>{_esc(j)}</div>")
+        h.append(f"<div class='jcard-platform'>{_esc(js.get('platform', ''))}</div>")
+        h.append(f"<div class='jcard-stats'>{n_ms} mss · {n_ref} refs</div>")
+        h.append(f"<span class='jcard-fresh {fc}'>{_esc(fl)}</span>")
         h.append("</div>")
     h.append("</div></div>")
 
-    # --- Pipeline Recommendations ---
+    # ── Pipeline Recommendations ──────────────────────────────────
     if recommendations:
-        h.append("<div class='sec'>")
-        h.append("<div class='sec-title'>Pipeline Recommendations</div>")
-        h.append("<div class='rgrid'>")
+        h.append("<div class='section'>")
+        h.append("<div class='section-hdr'>Pipeline Recommendations</div>")
+        h.append("<div class='rec-grid'>")
         for rec in recommendations:
-            h.append("<div class='rcard'>")
+            h.append("<div class='rec-card'>")
             h.append(f"<h4>{_esc(rec['journal'])} / {_esc(rec['manuscript_id'])}</h4>")
-            h.append(f"<div class='rmeta'>{_esc(rec['title'])} · {_esc(rec['generated_at'])}</div>")
+            h.append(
+                f"<div class='rec-meta'>{_esc(rec['title'])} · {_esc(rec['generated_at'])}</div>"
+            )
             for i, c in enumerate(rec.get("candidates", [])):
                 hi = c.get("h_index") or "?"
                 inst = c.get("institution") or ""
                 score = c.get("score", 0)
+                info_parts = []
+                if inst:
+                    info_parts.append(inst)
+                info_parts.append(f"h={hi}")
+                info_parts.append(f"{score:.2f}")
+                info_str = " · ".join(info_parts)
                 h.append(
-                    f"<div class='cand'><span class='cn'>#{i+1} {_esc(c['name'])}</span>"
-                    f"<span class='ci'>{_esc(inst)} · h={hi} · {score:.2f}</span></div>"
+                    f"<div class='rec-cand'>"
+                    f"<span class='rec-name'>#{i + 1} {_esc(c['name'])}</span>"
+                    f"<span class='rec-info'>{_esc(info_str)}</span></div>"
                 )
             h.append("</div>")
         h.append("</div></div>")
 
-    # --- Model Health ---
+    # ── Model Health (collapsed) ──────────────────────────────────
     if training:
-        h.append("<div class='sec'>")
+        h.append("<div class='section'>")
         h.append(
-            "<div class='collap-hdr' data-c='mh' onclick=\"toggleC('mh')\">"
-            "<span class='sec-title' style='border:none;margin:0;padding:0'>Model Health</span></div>"
+            "<div class='collapsible-hdr' data-collapse='model-health' "
+            "onclick=\"toggleCollapsible('model-health')\">"
+            "<span class='section-hdr' style='border:none;margin:0;padding:0'>"
+            "Model Health</span></div>"
         )
-        h.append("<div class='collap-body' id='mh'>")
-        h.append("<div class='jgrid'>")
+        h.append("<div class='collapsible-body' id='model-health'>")
+        h.append("<div class='journal-grid'>")
         for mk, ml in [
             ("expertise_index", "Expertise Index"),
             ("response_predictor", "Response Predictor"),
@@ -708,14 +817,14 @@ def generate_html(data):
             m = training.get(mk, {})
             st = m.get("status", "not_trained")
             h.append("<div class='jcard'>")
-            h.append(f"<div class='jn'>{_esc(ml)}</div>")
-            h.append(f"<div class='jm'>Status: {_esc(st)}</div>")
+            h.append(f"<div class='jcard-name'>{_esc(ml)}</div>")
+            h.append(f"<div class='jcard-platform'>Status: {_esc(st)}</div>")
             if m.get("cv_accuracy"):
-                h.append(f"<div class='js'>CV: {m['cv_accuracy']:.1%}</div>")
+                h.append(f"<div class='jcard-stats'>CV: {m['cv_accuracy']:.1%}</div>")
             if m.get("n_referees"):
-                h.append(f"<div class='js'>{m['n_referees']} refs</div>")
+                h.append(f"<div class='jcard-stats'>{m['n_referees']} refs</div>")
             if m.get("n_samples"):
-                h.append(f"<div class='js'>{m['n_samples']} samples</div>")
+                h.append(f"<div class='jcard-stats'>{m['n_samples']} samples</div>")
             h.append("</div>")
         h.append("</div></div></div>")
 
@@ -737,7 +846,8 @@ def main():
     totals = data["totals"]
     print(f"Dashboard generated: {out_path}")
     print(
-        f"  Action items: {totals['action_items']} ({totals['critical']} critical, {totals['high']} high)"
+        f"  Action items: {totals['action_items']} "
+        f"({totals['critical']} critical, {totals['high']} high)"
     )
     print(f"  Active manuscripts: {totals['active_manuscripts']}")
     print(f"  Journals: {totals['active_journals']}/8")

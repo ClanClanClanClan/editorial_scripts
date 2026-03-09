@@ -204,10 +204,10 @@ def _get_manuscript_status(ms: dict) -> str:
     status = ms.get("status")
     if status:
         return status
+    cat = ms.get("category")
+    if cat:
+        return cat
     ps = ms.get("platform_specific") or {}
-    sd = ps.get("status_details") or {}
-    if sd.get("main_status"):
-        return sd["main_status"]
     meta = ps.get("metadata") or {}
     if meta.get("current_stage"):
         return meta["current_stage"]

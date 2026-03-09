@@ -120,12 +120,12 @@ class TestManuscriptStatus:
         ms = {"status": "Under Review"}
         assert _get_manuscript_status(ms) == "Under Review"
 
-    def test_from_status_details(self):
+    def test_from_category(self):
         ms = {
             "status": None,
-            "platform_specific": {"status_details": {"main_status": "Awaiting Reviewer Scores"}},
+            "category": "Awaiting Reviewer Reports",
         }
-        assert _get_manuscript_status(ms) == "Awaiting Reviewer Scores"
+        assert _get_manuscript_status(ms) == "Awaiting Reviewer Reports"
 
     def test_from_metadata(self):
         ms = {

@@ -66,9 +66,9 @@ class SIAMExtractor(CachedExtractorMixin):
 
     def setup_chrome_options(self):
         self.chrome_options = uc.ChromeOptions()
-        self.chrome_options.add_argument("--no-sandbox")
         self.chrome_options.add_argument("--disable-dev-shm-usage")
         self.chrome_options.add_argument("--window-size=1200,800")
+        self.chrome_options.add_argument("--window-position=-2000,0")
 
     def setup_directories(self):
         self.base_dir = Path(__file__).parent.parent.parent
@@ -107,6 +107,20 @@ class SIAMExtractor(CachedExtractorMixin):
             try:
                 self.driver.set_window_position(-2000, 0)
                 self.driver.set_window_size(1200, 800)
+            except Exception:
+                pass
+            try:
+                import subprocess
+
+                subprocess.Popen(
+                    [
+                        "osascript",
+                        "-e",
+                        'tell application "System Events" to set visible of process "Google Chrome" to false',
+                    ],
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                )
             except Exception:
                 pass
         self.driver.set_page_load_timeout(120)
@@ -2066,7 +2080,10 @@ class SIAMExtractor(CachedExtractorMixin):
     def _backfill_referee_dates_from_trail(self, manuscript: dict):
         referees = manuscript.get("referees", [])
         audit = manuscript.get("audit_trail", [])
-        if not referees or not audit:
+        if not referees:
+            return
+        if not audit:
+            self._normalize_referee_dates(referees)
             return
 
         invitation_events = sorted(
@@ -2139,13 +2156,56 @@ class SIAMExtractor(CachedExtractorMixin):
                 best_ref["acceptance_date"] = acc_date
                 used_acceptances.add(best_ref.get("name", ""))
 
-        backfilled = sum(
+        for acc_ev in acceptance_events:
+            acc_date = acc_ev.get("date", "")
+            triggered_by = (acc_ev.get("from") or "").strip().lower()
+            if not acc_date or not triggered_by:
+                continue
+            for ref in referees:
+                if ref.get("acceptance_date"):
+                    continue
+                if ref.get("name", "").lower() in declined_names:
+                    continue
+                ref_name = ref.get("name", "").strip().lower()
+                ref_email = ref.get("email", "").strip().lower()
+                if not ref_name:
+                    continue
+                if (ref_email and ref_email == triggered_by) or ref_name == triggered_by:
+                    ref["acceptance_date"] = acc_date
+                    break
+                ref_parts = ref_name.split()
+                trig_parts = triggered_by.split()
+                if ref_parts and trig_parts:
+                    ref_surname = ref_parts[-1]
+                    trig_surname = trig_parts[-1]
+                    if (len(ref_surname) > 2 and ref_surname in triggered_by) or (
+                        len(trig_surname) > 2 and trig_surname in ref_name
+                    ):
+                        ref["acceptance_date"] = acc_date
+                        break
+
+        self._normalize_referee_dates(referees)
+
+        backfilled_contact = sum(
             1 for r in referees if r.get("contact_date") and r.get("section") == "active"
         )
-        if backfilled:
+        backfilled_accept = sum(1 for r in referees if r.get("acceptance_date"))
+        if backfilled_contact or backfilled_accept:
             print(
-                f"         📅 Backfilled dates: {backfilled} active referees got contact_date from email log"
+                f"         📅 Backfilled dates: {backfilled_contact} contact, {backfilled_accept} acceptance"
             )
+
+    def _normalize_referee_dates(self, referees: list):
+        for ref in referees:
+            dates = ref.setdefault("dates", {})
+            if not dates.get("invited") and ref.get("contact_date"):
+                dates["invited"] = ref["contact_date"]
+            if not dates.get("agreed") and ref.get("acceptance_date"):
+                dates["agreed"] = ref["acceptance_date"]
+            if not dates.get("due") and ref.get("due_date"):
+                dates["due"] = ref["due_date"]
+            if not dates.get("returned") and ref.get("received_date"):
+                dates["returned"] = ref["received_date"]
 
     def _populate_editors(self, manuscript: dict):
         metadata = manuscript.get("metadata", {})

@@ -70,6 +70,7 @@ class ComprehensiveMFExtractor(ScholarOneBaseExtractor):
         self.manuscripts = []
         self.processed_manuscript_ids = set()
         self._all_page_emails = set()
+        self._dashboard_manifest = {"scanned": {}, "failed": []}
         self._setup_secure_credentials()
         self.setup_driver()
 
@@ -6929,6 +6930,7 @@ class ComprehensiveMFExtractor(ScholarOneBaseExtractor):
 
         if not take_action_links:
             print("   📭 No manuscripts in this category")
+            self._dashboard_manifest["scanned"].setdefault(category_name, [])
             return
 
         actual_count = len(take_action_links)
@@ -6949,6 +6951,8 @@ class ComprehensiveMFExtractor(ScholarOneBaseExtractor):
                         print(f"      📄 Found manuscript in table: {manuscript_id}")
             except Exception:
                 continue
+
+        self._dashboard_manifest["scanned"][category_name] = list(manuscript_ids_in_category)
 
         # Store manuscript IDs in category for 3-pass processing
         category["manuscript_ids"] = manuscript_ids_in_category
@@ -7989,14 +7993,20 @@ class ComprehensiveMFExtractor(ScholarOneBaseExtractor):
             return
 
         for category in categories:
+            cat_name = (
+                category.get("name", str(category)) if isinstance(category, dict) else str(category)
+            )
             try:
                 if self._is_session_dead():
                     if not self._recover_session():
-                        print(f"   ❌ Session dead before '{category}', recovery failed")
+                        print(f"   ❌ Session dead before '{cat_name}', recovery failed")
+                        self._dashboard_manifest["failed"].append(cat_name)
                         continue
                 self.process_category(category)
             except Exception as e:
                 print(f"   ❌ Error in category: {str(e)[:100]}")
+                if cat_name not in self._dashboard_manifest["scanned"]:
+                    self._dashboard_manifest["failed"].append(cat_name)
                 err_lower = str(e).lower()
                 if any(kw in err_lower for kw in self.SESSION_DEAD_KEYWORDS):
                     if not self._recover_session():
@@ -8088,6 +8098,7 @@ class ComprehensiveMFExtractor(ScholarOneBaseExtractor):
                 },
             },
             "errors": [],
+            "dashboard_manifest": self._dashboard_manifest,
         }
 
         from core.output_schema import normalize_wrapper

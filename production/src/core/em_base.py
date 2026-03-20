@@ -69,7 +69,6 @@ class EMExtractor(CachedExtractorMixin):
 
     def setup_chrome_options(self):
         self.chrome_options = uc.ChromeOptions()
-        self.chrome_options.add_argument("--no-sandbox")
         self.chrome_options.add_argument("--disable-dev-shm-usage")
         self.chrome_options.add_argument("--disable-popup-blocking")
         self.chrome_options.add_argument("--window-size=1400,900")

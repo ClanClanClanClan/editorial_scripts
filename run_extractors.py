@@ -159,6 +159,22 @@ class ExtractorOrchestrator:
         print(f"⚠️ TODO: {len(todo)} extractors ({', '.join(todo)})")
         print()
 
+    def _dispatch_events(self, journal_id: str):
+        try:
+            from core.event_dispatcher import process_extraction
+
+            journal_dir = self.output_dir / journal_id
+            files = sorted(journal_dir.glob(f"{journal_id}_extraction_*.json"))
+            if not files:
+                return
+            with open(files[-1]) as f:
+                data = json.load(f)
+            events = process_extraction(data, journal_id)
+            if events:
+                self.logger.info(f"{len(events)} state change(s) detected")
+        except Exception as e:
+            self.logger.warning(f"Event dispatch failed: {e}")
+
     def run_extractor(self, journal_id: str, headless: bool = True) -> Optional[dict]:
         """Run a specific extractor.
 
@@ -231,6 +247,8 @@ class ExtractorOrchestrator:
                     "duration_seconds": duration,
                     "manuscripts_count": manuscript_count,
                 }
+
+                self._dispatch_events(journal_id)
 
                 return extraction_data
 

@@ -175,6 +175,13 @@ def build_dashboard_data():
     recommendations = _load_recent_recommendations(limit=8)
     training = _load_training_metadata()
 
+    manuscripts_by_journal = {}
+    for ms in manuscript_summaries:
+        j = ms.journal
+        if j not in manuscripts_by_journal:
+            manuscripts_by_journal[j] = []
+        manuscripts_by_journal[j].append(ms)
+
     rec_summaries = []
     for rec in recommendations:
         candidates = rec.get("referee_candidates", [])[:3]
@@ -219,6 +226,9 @@ def build_dashboard_data():
         "totals": totals,
         "action_items": [asdict(a) for a in action_items],
         "manuscripts": [asdict(s) for s in manuscript_summaries],
+        "manuscripts_by_journal": {
+            k: [asdict(m) for m in v] for k, v in manuscripts_by_journal.items()
+        },
         "recommendations": rec_summaries,
         "training": training,
     }
@@ -334,6 +344,11 @@ h1 { font-size: 1.5rem; font-weight: 700; text-align: center; margin-bottom: 4px
 .action-msid { font-weight: 700; white-space: nowrap; }
 .action-msg { flex: 1; min-width: 0; }
 .action-extra { color: var(--text2); font-size: 0.75rem; white-space: nowrap; }
+.btn-ae { padding: 3px 10px; font-size: 0.75rem; border-radius: 4px; border: 1px solid var(--accent); background: var(--accent); color: #fff; cursor: pointer; white-space: nowrap; }
+.btn-ae:hover { opacity: 0.85; }
+.btn-ae:disabled { opacity: 0.5; cursor: wait; }
+.btn-ae.btn-view { background: transparent; color: var(--accent); }
+.btn-ae.btn-done { background: #22c55e; border-color: #22c55e; }
 
 /* Table */
 .table-wrap {
@@ -462,6 +477,29 @@ tr:last-child td { border-bottom: none; }
     font-style: italic; font-size: 0.85rem;
 }
 
+/* Journal sections */
+.journal-sections { display: flex; flex-direction: column; gap: 14px; }
+.jsec {
+    border: 1px solid var(--border); border-radius: 8px;
+    overflow: hidden; background: var(--surface);
+}
+.jsec-hdr {
+    cursor: pointer; display: flex; align-items: center; gap: 8px;
+    padding: 10px 14px; background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+    font-weight: 700; font-size: 0.9rem; user-select: none;
+}
+.jsec-hdr::before { content: "\\25BE"; font-size: 0.7rem; color: var(--text2); }
+.jsec-hdr.collapsed::before { content: "\\25B8"; }
+.jsec-badge {
+    font-size: 0.72rem; font-weight: 500; color: var(--accent);
+    background: var(--accent-bg); padding: 1px 7px; border-radius: 3px;
+    margin-left: auto;
+}
+.jsec-body { display: block; }
+.jsec-body.hidden { display: none; }
+.jsec .table-wrap { border: none; border-radius: 0; }
+
 @media (max-width: 768px) {
     body { padding: 12px; font-size: 13px; }
     .action-item { flex-wrap: wrap; }
@@ -508,10 +546,60 @@ function filterActs(lvl) {
         a.style.display = (lvl === 'all' || a.classList.contains(lvl)) ? '' : 'none';
     });
 }
+function toggleJsec(id) {
+    var h = document.getElementById('jh-' + id);
+    var b = document.getElementById('jb-' + id);
+    if (h && b) { h.classList.toggle('collapsed'); b.classList.toggle('hidden'); }
+}
 function toggleCollapsible(id) {
     var h = document.querySelector('[data-collapse="' + id + '"]');
     var b = document.getElementById(id);
     if (h && b) { h.classList.toggle('open'); b.classList.toggle('show'); }
+}
+var API = window.location.origin + '/api';
+function generateAE(j, m) {
+    var btn = event.target;
+    btn.textContent = 'Generating...';
+    btn.disabled = true;
+    fetch(API + '/ae-report', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({journal: j, manuscript_id: m})
+    }).then(function(r) { return r.json(); })
+    .then(function(d) {
+        if (d.recommendation) {
+            btn.textContent = d.recommendation;
+            btn.classList.add('btn-done');
+            alert('AE Report: ' + d.recommendation + '\\nConfidence: ' + d.confidence + '\\n\\n' + (d.summary || ''));
+        } else if (d.status === 'awaiting_paste') {
+            btn.textContent = 'Copied!';
+            alert('Prompt copied to clipboard. Paste into ChatGPT Pro.');
+        } else {
+            btn.textContent = 'Error';
+            alert('Error: ' + (d.error || 'unknown'));
+        }
+    }).catch(function(e) {
+        btn.textContent = 'Server offline';
+        btn.disabled = false;
+        alert('Dashboard server not running. Start with:\\npython3 scripts/dashboard_server.py');
+    });
+}
+function viewAE(j, m) {
+    fetch(API + '/ae-reports/' + j + '/' + m)
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+        if (d.error) { alert('Error: ' + d.error); return; }
+        var msg = 'Recommendation: ' + d.recommendation;
+        msg += '\\nConfidence: ' + d.confidence;
+        msg += '\\n\\n' + (d.summary || '');
+        if (d.revision_points && d.revision_points.length) {
+            msg += '\\n\\nRevision Points:\\n';
+            d.revision_points.forEach(function(p, i) { msg += (i+1) + '. ' + p + '\\n'; });
+        }
+        alert(msg);
+    }).catch(function() {
+        alert('Dashboard server not running. Start with:\\npython3 scripts/dashboard_server.py');
+    });
 }
 """
 
@@ -579,6 +667,7 @@ def generate_html(data):
         type_labels = {
             "overdue_report": "OVERDUE",
             "needs_ae_decision": "DECISION",
+            "ae_report_ready": "AE READY",
             "pending_invitation": "NO REPLY",
             "needs_more_referees": "FEW REFS",
             "due_soon": "DUE SOON",
@@ -605,6 +694,20 @@ def generate_html(data):
             h.append(f"<span class='action-msg'>{_esc(it['message'])}</span>")
             if extra:
                 h.append(f"<span class='action-extra'>{_esc(extra)}</span>")
+            if it["action_type"] == "needs_ae_decision":
+                j = it["journal"].lower()
+                m = _esc(it["manuscript_id"])
+                h.append(
+                    f"<button class='btn-ae' onclick=\"generateAE('{j}','{m}')\">"
+                    f"Generate AE Report</button>"
+                )
+            elif it["action_type"] == "ae_report_ready":
+                j = it["journal"].lower()
+                m = _esc(it["manuscript_id"])
+                h.append(
+                    f"<button class='btn-ae btn-view' onclick=\"viewAE('{j}','{m}')\">"
+                    f"View Report</button>"
+                )
             h.append("</div>")
         h.append("</div>")
     else:
@@ -615,138 +718,152 @@ def generate_html(data):
     h.append("<div class='section'>")
     h.append("<div class='section-hdr'>Active Manuscripts</div>")
 
-    if manuscripts:
-        h.append("<div class='table-wrap'>")
-        h.append("<table id='ms-table'>")
-        h.append("<colgroup>")
-        h.append("<col style='width:24%'>")
-        h.append("<col style='width:26%'>")
-        h.append("<col style='width:18%'>")
-        h.append("<col style='width:8%'>")
-        h.append("<col style='width:14%'>")
-        h.append("<col style='width:10%'>")
-        h.append("</colgroup>")
-        h.append("<thead><tr>")
-        for i, col in enumerate(["Manuscript", "Title", "Status", "Rpts", "Next Due", "Days"]):
-            h.append(f"<th onclick=\"sortTable('ms-table',{i})\">{col}</th>")
-        h.append("</tr></thead><tbody>")
+    ms_by_journal = data.get("manuscripts_by_journal", {})
+    if ms_by_journal:
+        h.append("<div class='journal-sections'>")
+        for journal_code in sorted(ms_by_journal.keys()):
+            j_manuscripts = ms_by_journal[journal_code]
+            j_name = JOURNAL_NAMES.get(journal_code.lower(), journal_code)
+            j_slug = journal_code.lower().replace(" ", "")
+            tid = f"ms-table-{j_slug}"
 
-        for ms in manuscripts:
-            safe_id = ms["manuscript_id"].replace(".", "_").replace("-", "_")
-
-            completed = ms["referees_completed"]
-            agreed = ms["referees_agreed"]
-            pending = ms["referees_pending_response"]
-            total_assigned = completed + agreed + pending
-            rpt_str = f"{completed}/{total_assigned}" if total_assigned > 0 else "—"
-
-            if ms.get("days_until_next_due") is not None:
-                dd = ms["days_until_next_due"]
-                if dd < 0:
-                    due_cls = "overdue"
-                    due_str = f"{abs(dd)}d overdue"
-                elif dd <= 14:
-                    due_cls = "due-soon"
-                    due_str = f"{dd}d"
-                else:
-                    due_cls = "on-track"
-                    due_str = f"{dd}d"
-            else:
-                due_cls = ""
-                due_str = "—"
-
-            din = ms.get("days_in_system") or "—"
-
-            flags_html = ""
-            if ms["needs_ae_decision"]:
-                flags_html += " <span class='flag'>Decision</span>"
-
-            status_abbrevs = {
-                "All Referees Assigned": "Refs Assigned",
-                "Awaiting Reviewer Scores": "Awaiting Scores",
-                "Awaiting Reviewer Reports": "Awaiting Reports",
-                "Overdue Reviewer Reports": "Overdue Reports",
-                "Potential Referees Assigned": "Potential Refs",
-                "Revision R1 Under Review": "R1 Under Review",
-            }
-            status_display = status_abbrevs.get(ms["status"], ms["status"])
-
-            sort_due = (
-                ms.get("days_until_next_due") if ms.get("days_until_next_due") is not None else 9999
-            )
-
+            h.append("<div class='jsec'>")
             h.append(
-                f"<tr class='ms-row' data-detail='d-{safe_id}' "
-                f"onclick=\"toggleDetail('{safe_id}')\">"
+                f"<div class='jsec-hdr' id='jh-{j_slug}' onclick=\"toggleJsec('{j_slug}')\">"
+                f"{_esc(journal_code)} — {_esc(j_name)}"
+                f"<span class='jsec-badge'>{len(j_manuscripts)}</span></div>"
             )
-            h.append(
-                f"<td class='td-id' data-sort='{_esc(ms['journal'] + ms['manuscript_id'])}'>"
-                f"<span class='action-journal'>{_esc(ms['journal'])}</span> "
-                f"{_esc(ms['manuscript_id'])}</td>"
-            )
-            h.append(f"<td class='td-title' title='{_esc(ms['title'])}'>{_esc(ms['title'])}</td>")
-            h.append(f"<td class='td-status'>{_esc(status_display)}{flags_html}</td>")
-            h.append(f"<td class='td-reports' data-sort='{completed}'>{rpt_str}</td>")
-            h.append(
-                f"<td class='td-due' data-sort='{sort_due}'>"
-                f"<span class='{due_cls}'>{due_str}</span></td>"
-            )
-            h.append(f"<td class='td-days' data-sort='{ms.get('days_in_system', 0)}'>{din}</td>")
-            h.append("</tr>")
+            h.append(f"<div class='jsec-body' id='jb-{j_slug}'>")
+            h.append("<div class='table-wrap'>")
+            h.append(f"<table id='{tid}'>")
+            h.append("<colgroup>")
+            h.append("<col style='width:28%'>")
+            h.append("<col style='width:30%'>")
+            h.append("<col style='width:18%'>")
+            h.append("<col style='width:8%'>")
+            h.append("<col style='width:10%'>")
+            h.append("<col style='width:6%'>")
+            h.append("</colgroup>")
+            h.append("<thead><tr>")
+            for i, col in enumerate(["Manuscript", "Title", "Status", "Rpts", "Due", "Days"]):
+                h.append(f"<th onclick=\"sortTable('{tid}',{i})\">{col}</th>")
+            h.append("</tr></thead><tbody>")
 
-            ref_details = ms.get("referee_details", [])
-            h.append(f"<tr class='detail-row' id='d-{safe_id}'>" f"<td colspan='6'>")
-            if ref_details:
-                h.append("<table class='ref-table'><thead><tr>")
-                h.append(
-                    "<th>Referee</th><th>Status</th><th>Invited</th>"
-                    "<th>Agreed</th><th>Due</th><th>Returned</th>"
-                    "<th>Reminders</th><th>Timeline</th>"
-                )
-                h.append("</tr></thead><tbody>")
-                for rd in ref_details:
-                    st = rd["normalized_status"]
-                    if rd.get("days_overdue"):
-                        badge_cls = "b-overdue"
-                    elif st == "completed":
-                        badge_cls = "b-completed"
-                    elif st == "agreed":
-                        badge_cls = "b-agreed"
-                    elif st == "pending":
-                        badge_cls = "b-pending"
-                    elif st in ("declined", "terminated"):
-                        badge_cls = "b-" + st
+            for ms in j_manuscripts:
+                safe_id = ms["manuscript_id"].replace(".", "_").replace("-", "_")
+
+                completed = ms["referees_completed"]
+                agreed = ms["referees_agreed"]
+                pending = ms["referees_pending_response"]
+                total_assigned = completed + agreed + pending
+                rpt_str = f"{completed}/{total_assigned}" if total_assigned > 0 else "—"
+
+                if ms.get("days_until_next_due") is not None:
+                    dd = ms["days_until_next_due"]
+                    if dd < 0:
+                        due_cls = "overdue"
+                        due_str = f"{abs(dd)}d overdue"
+                    elif dd <= 14:
+                        due_cls = "due-soon"
+                        due_str = f"{dd}d"
                     else:
-                        badge_cls = ""
+                        due_cls = "on-track"
+                        due_str = f"{dd}d"
+                else:
+                    due_cls = ""
+                    due_str = "—"
 
-                    timeline = ""
-                    if rd.get("days_overdue"):
-                        timeline = f"<span class='overdue'>{rd['days_overdue']}d overdue</span>"
-                    elif rd.get("days_remaining") is not None:
-                        d = rd["days_remaining"]
-                        cls = "due-soon" if d <= 14 else "on-track"
-                        timeline = f"<span class='{cls}'>{d}d left</span>"
-                    elif st == "completed":
-                        timeline = "✓ done"
-                    elif st in ("declined", "terminated"):
-                        timeline = "—"
+                din = ms.get("days_in_system") or "—"
 
-                    h.append("<tr>")
-                    h.append(f"<td>{_esc(rd['name'])}</td>")
-                    h.append(f"<td><span class='badge {badge_cls}'>{_esc(st)}</span></td>")
-                    h.append(f"<td>{_esc(rd.get('invited') or '—')}</td>")
-                    h.append(f"<td>{_esc(rd.get('agreed') or '—')}</td>")
-                    h.append(f"<td>{_esc(rd.get('due') or '—')}</td>")
-                    h.append(f"<td>{_esc(rd.get('returned') or '—')}</td>")
-                    h.append(f"<td>{rd.get('reminders', 0)}</td>")
-                    h.append(f"<td>{timeline}</td>")
-                    h.append("</tr>")
-                h.append("</tbody></table>")
-            else:
-                h.append("<div class='empty' style='padding:8px'>No referees assigned</div>")
-            h.append("</td></tr>")
+                flags_html = ""
+                if ms["needs_ae_decision"]:
+                    flags_html += " <span class='flag'>Decision</span>"
 
-        h.append("</tbody></table></div>")
+                status_display = ms["status"]
+
+                sort_due = (
+                    ms.get("days_until_next_due")
+                    if ms.get("days_until_next_due") is not None
+                    else 9999
+                )
+
+                h.append(
+                    f"<tr class='ms-row' data-detail='d-{safe_id}' "
+                    f"onclick=\"toggleDetail('{safe_id}')\">"
+                )
+                h.append(
+                    f"<td class='td-id' data-sort='{_esc(ms['manuscript_id'])}'>"
+                    f"{_esc(ms['manuscript_id'])}</td>"
+                )
+                h.append(
+                    f"<td class='td-title' title='{_esc(ms['title'])}'>{_esc(ms['title'])}</td>"
+                )
+                h.append(f"<td class='td-status'>{_esc(status_display)}{flags_html}</td>")
+                h.append(f"<td class='td-reports' data-sort='{completed}'>{rpt_str}</td>")
+                h.append(
+                    f"<td class='td-due' data-sort='{sort_due}'>"
+                    f"<span class='{due_cls}'>{due_str}</span></td>"
+                )
+                h.append(
+                    f"<td class='td-days' data-sort='{ms.get('days_in_system', 0)}'>{din}</td>"
+                )
+                h.append("</tr>")
+
+                ref_details = ms.get("referee_details", [])
+                h.append(f"<tr class='detail-row' id='d-{safe_id}'><td colspan='6'>")
+                if ref_details:
+                    h.append("<table class='ref-table'><thead><tr>")
+                    h.append(
+                        "<th>Referee</th><th>Status</th><th>Invited</th>"
+                        "<th>Agreed</th><th>Due</th><th>Returned</th>"
+                        "<th>Rem</th><th>Timeline</th>"
+                    )
+                    h.append("</tr></thead><tbody>")
+                    for rd in ref_details:
+                        st = rd["normalized_status"]
+                        if rd.get("days_overdue"):
+                            badge_cls = "b-overdue"
+                        elif st == "completed":
+                            badge_cls = "b-completed"
+                        elif st == "agreed":
+                            badge_cls = "b-agreed"
+                        elif st == "pending":
+                            badge_cls = "b-pending"
+                        elif st in ("declined", "terminated"):
+                            badge_cls = "b-" + st
+                        else:
+                            badge_cls = ""
+
+                        timeline = ""
+                        if rd.get("days_overdue"):
+                            timeline = f"<span class='overdue'>{rd['days_overdue']}d overdue</span>"
+                        elif rd.get("days_remaining") is not None:
+                            d = rd["days_remaining"]
+                            cls = "due-soon" if d <= 14 else "on-track"
+                            timeline = f"<span class='{cls}'>{d}d left</span>"
+                        elif st == "completed":
+                            timeline = "✓ done"
+                        elif st in ("declined", "terminated"):
+                            timeline = "—"
+
+                        h.append("<tr>")
+                        h.append(f"<td>{_esc(rd['name'])}</td>")
+                        h.append(f"<td><span class='badge {badge_cls}'>{_esc(st)}</span></td>")
+                        h.append(f"<td>{_esc(rd.get('invited') or '—')}</td>")
+                        h.append(f"<td>{_esc(rd.get('agreed') or '—')}</td>")
+                        h.append(f"<td>{_esc(rd.get('due') or '—')}</td>")
+                        h.append(f"<td>{_esc(rd.get('returned') or '—')}</td>")
+                        h.append(f"<td>{rd.get('reminders', 0)}</td>")
+                        h.append(f"<td>{timeline}</td>")
+                        h.append("</tr>")
+                    h.append("</tbody></table>")
+                else:
+                    h.append("<div class='empty' style='padding:8px'>No referees assigned</div>")
+                h.append("</td></tr>")
+
+            h.append("</tbody></table></div>")
+            h.append("</div></div>")
+        h.append("</div>")
     else:
         h.append("<div class='empty'>No active manuscripts</div>")
     h.append("</div>")
@@ -783,7 +900,7 @@ def generate_html(data):
             for i, c in enumerate(rec.get("candidates", [])):
                 hi = c.get("h_index") or "?"
                 inst = c.get("institution") or ""
-                score = c.get("score", 0)
+                score = c.get("score") or 0
                 info_parts = []
                 if inst:
                     info_parts.append(inst)

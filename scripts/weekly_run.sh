@@ -74,10 +74,27 @@ for j in $PIPELINE_JOURNALS; do
     run_step "Pipeline: $j" python3 run_pipeline.py -j "$j" --pending || true
 done
 
-# Step 5: Generate dashboard
+# Step 5: Process events (detect state changes, auto-generate AE reports)
+run_step "Process events" python3 -c "
+import sys; sys.path.insert(0, 'production/src')
+from core.event_processor import process_all
+process_all(provider='claude')
+"
+
+# Step 6: Update referee performance database
+run_step "Update referee DB" python3 -c "
+import sys; sys.path.insert(0, 'production/src')
+from pipeline.referee_db_backfill import backfill
+backfill(incremental=True)
+"
+
+# Step 7: Auto-generate AE reports for ready manuscripts
+run_step "Auto AE reports" python3 run_pipeline.py --ae-auto --provider claude
+
+# Step 8: Generate dashboard
 run_step "Generate dashboard" python3 scripts/generate_dashboard.py
 
-# Step 6: Send email digest (skip if Gmail scope not upgraded)
+# Step 9: Send email digest (skip if Gmail scope not upgraded)
 if python3 -c "from pathlib import Path; import json; t=json.load(open(Path.home()/'.editorial_scripts'/'gmail_token.json' if (Path.home()/'.editorial_scripts'/'gmail_token.json').exists() else Path('config/gmail_token.json'))); exit(0 if 'gmail.send' in t.get('scopes',[]) else 1)" 2>/dev/null; then
     run_step "Send email digest" python3 scripts/send_digest.py
 else
@@ -87,7 +104,7 @@ else
     STEP=$((STEP + 1))
 fi
 
-# Step 7: Rotate old logs (keep 90 days)
+# Step 10: Rotate old logs (keep 90 days)
 echo ""
 echo "--- Log rotation ---"
 find "$LOG_DIR" -name "weekly_*.log" -mtime +90 -delete 2>/dev/null || true

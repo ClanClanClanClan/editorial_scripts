@@ -401,6 +401,33 @@ def _compute_relevance(
         except (ValueError, RuntimeError) as e:
             print(f"   Warning: response prediction failed: {e}")
 
+    try:
+        from pipeline.referee_db import RefereeDB
+
+        db = RefereeDB()
+        tr = db.get_track_record(candidate.get("name", ""))
+        if tr and tr.get("invitations", 0) >= 2:
+            candidate["referee_history"] = tr
+            track_bonus = 0.0
+            acc_rate = tr.get("acceptance_rate", 0)
+            if acc_rate >= 0.7:
+                track_bonus += 0.04
+            elif acc_rate >= 0.5:
+                track_bonus += 0.02
+            elif acc_rate < 0.3:
+                track_bonus -= 0.05
+            avg_days = tr.get("avg_review_days")
+            if avg_days and avg_days < 35:
+                track_bonus += 0.03
+            elif avg_days and avg_days > 90:
+                track_bonus -= 0.03
+            quality = tr.get("avg_quality")
+            if quality and quality > 0.5:
+                track_bonus += 0.03
+            score += track_bonus
+    except Exception:
+        pass
+
     return round(min(1.0, score), 3)
 
 

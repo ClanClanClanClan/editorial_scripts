@@ -130,9 +130,9 @@ class ScholarOneBaseExtractor(CachedExtractorMixin):
 
     def setup_chrome_options(self):
         self.chrome_options = uc.ChromeOptions()
-        self.chrome_options.add_argument("--no-sandbox")
         self.chrome_options.add_argument("--disable-dev-shm-usage")
         self.chrome_options.add_argument("--window-size=800,600")
+        self.chrome_options.add_argument("--window-position=-2000,0")
 
         download_dir = str(
             Path(__file__).parent.parent.parent / "downloads" / self.JOURNAL_CODE.lower()
@@ -142,7 +142,6 @@ class ScholarOneBaseExtractor(CachedExtractorMixin):
             "download.prompt_for_download": False,
             "download.directory_upgrade": True,
             "safebrowsing.enabled": True,
-            "plugins.always_open_pdf_externally": True,
         }
         self.chrome_options.add_experimental_option("prefs", prefs)
 
@@ -169,11 +168,29 @@ class ScholarOneBaseExtractor(CachedExtractorMixin):
             self.driver.set_window_size(800, 600)
         except Exception:
             pass
+        self._minimize_chrome()
         self.driver.set_page_load_timeout(120)
         self.driver.implicitly_wait(10)
         self.wait = WebDriverWait(self.driver, 20)
         self.original_window = self.driver.current_window_handle
         print(f"\U0001f5a5\ufe0f  Browser configured for {self.JOURNAL_CODE}")
+
+    @staticmethod
+    def _minimize_chrome():
+        try:
+            import subprocess
+
+            subprocess.Popen(
+                [
+                    "osascript",
+                    "-e",
+                    'tell application "System Events" to set visible of process "Google Chrome" to false',
+                ],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+            )
+        except Exception:
+            pass
 
     def _wait_for_cloudflare(self, timeout=180):
         for i in range(timeout):

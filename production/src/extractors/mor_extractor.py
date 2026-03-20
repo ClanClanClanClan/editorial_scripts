@@ -1680,15 +1680,19 @@ class MORExtractor(ScholarOneBaseExtractor):
             # Extract status
             status = ""
             status_keywords = [
+                "No Response",
                 "Declined",
+                "Un-invited",
+                "Un-assigned",
+                "Terminated",
                 "Agreed",
-                "Invited",
-                "Pending",
-                "Overdue",
                 "Complete",
                 "Major Revision",
                 "Minor Revision",
                 "In Review",
+                "Overdue",
+                "Invited",
+                "Pending",
             ]
             for keyword in status_keywords:
                 if keyword in row_text:
@@ -1701,24 +1705,41 @@ class MORExtractor(ScholarOneBaseExtractor):
             review_returned_date = ""
             time_in_review = ""
             decision_letter_number = ""
-            date_tds = row.find_elements(By.XPATH, ".//table//tr/td")
-            i = 0
-            while i < len(date_tds) - 1:
-                label = date_tds[i].text.strip().rstrip(":").lower()
-                value = date_tds[i + 1].text.strip()
-                if "invited" in label:
-                    invitation_date = value
-                elif "agreed" in label:
-                    response_date = value
-                elif "due date" in label:
-                    due_date = value
-                elif "review returned" in label:
-                    review_returned_date = value
-                elif "time in review" in label:
-                    time_in_review = value
-                elif "decision letter" in label:
-                    decision_letter_number = value
-                i += 2
+            date_cell = None
+            try:
+                tl_cells = row.find_elements(By.XPATH, ".//td[@class='tablelightcolor']")
+                if len(tl_cells) > 3:
+                    date_cell = tl_cells[3]
+            except Exception:
+                pass
+
+            if not date_cell:
+                for td in row.find_elements(By.XPATH, ".//td"):
+                    td_text = self.safe_get_text(td)
+                    if any(kw in td_text for kw in ["Invited:", "Due Date:", "Agreed:"]):
+                        date_cell = td
+                        break
+
+            if date_cell:
+                date_rows = date_cell.find_elements(By.XPATH, ".//table//tr")
+                for dr in date_rows:
+                    cells = dr.find_elements(By.TAG_NAME, "td")
+                    if len(cells) >= 2:
+                        label = self.safe_get_text(cells[0]).strip().rstrip(":").lower()
+                        value = self.safe_get_text(cells[1]).strip()
+                        if "invited" in label:
+                            invitation_date = value
+                        elif "agreed" in label:
+                            response_date = value
+                        elif "due date" in label:
+                            due_date = value
+                        elif "review returned" in label:
+                            review_returned_date = value
+                        elif "time in review" in label:
+                            time_in_review = value
+                        elif "decision letter" in label:
+                            decision_letter_number = value
+
             if not invitation_date:
                 date_matches = re.findall(r"\d{2}-\w{3}-\d{4}", row_text)
                 if date_matches:
@@ -2624,6 +2645,8 @@ class MORExtractor(ScholarOneBaseExtractor):
 
         self.setup_driver()
 
+        self._dashboard_manifest = {"scanned": {}, "failed": []}
+
         results = {
             "extraction_timestamp": datetime.now().isoformat(),
             "journal": "MOR",
@@ -2660,6 +2683,7 @@ class MORExtractor(ScholarOneBaseExtractor):
                             results["errors"].append(
                                 f"Session dead before '{category}', recovery failed"
                             )
+                            self._dashboard_manifest["failed"].append(category)
                             continue
                     manuscripts = self.process_category(category)
                     results["manuscripts"].extend(manuscripts)
@@ -2667,6 +2691,8 @@ class MORExtractor(ScholarOneBaseExtractor):
                     error_msg = f"Error in category '{category}': {str(e)[:100]}"
                     print(f"   ❌ {error_msg}")
                     results["errors"].append(error_msg)
+                    if category not in self._dashboard_manifest["scanned"]:
+                        self._dashboard_manifest["failed"].append(category)
                     err_lower = str(e).lower()
                     session_dead_keywords = [
                         "invalid session id",
@@ -2679,6 +2705,8 @@ class MORExtractor(ScholarOneBaseExtractor):
                         if not self._recover_session():
                             results["errors"].append("Session recovery failed, stopping")
                             break
+
+            results["dashboard_manifest"] = self._dashboard_manifest
 
             # Generate comprehensive summary
             results["summary"] = self.generate_summary(results["manuscripts"])
@@ -2785,6 +2813,7 @@ class MORExtractor(ScholarOneBaseExtractor):
             # Collect unique manuscript IDs up-front
             all_ids = self._collect_manuscript_ids()
             total_manuscripts = len(all_ids)
+            self._dashboard_manifest["scanned"][category] = list(all_ids)
 
             print(f"   📊 Found {total_manuscripts} manuscripts")
 
@@ -2921,6 +2950,7 @@ class MORExtractor(ScholarOneBaseExtractor):
 
         except TimeoutException:
             print(f"   ⚠️ Category '{category}' not found or empty")
+            self._dashboard_manifest["scanned"].setdefault(category, [])
         except Exception as e:
             error_str = str(e).lower()
             print(f"   ❌ Category error: {str(e)[:50]}")

@@ -2103,8 +2103,18 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
                 {"email": email, "date": date, "subject": subject, "from": from_header}
             )
 
-        # Sort chronologically
-        emails_with_dates.sort(key=lambda x: x["date"])
+        # Sort chronologically by parsed date
+        import email.utils as _email_utils
+
+        def _parse_email_date(d):
+            try:
+                return _email_utils.parsedate_to_datetime(d).timestamp()
+            except Exception:
+                return 0.0
+
+        emails_with_dates.sort(key=lambda x: _parse_email_date(x["date"]))
+
+        revision_started = False
 
         # Process each email in chronological order
         for email_data in emails_with_dates:
@@ -2345,7 +2355,19 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
                         ref_data["response"] = "Accepted"
                         ref_data["response_date"] = date
                         event["details"]["referee_accepted"] = referee_name
-                    if "submitted" in subject_lower and "report" in body_lower:
+                    report_keywords = [
+                        "submitted" in subject_lower and "report" in body_lower,
+                        "here are my comments" in body_lower,
+                        "here is my report" in body_lower,
+                        "find my report" in body_lower,
+                        "attached my report" in body_lower,
+                        "my comments for the revision" in body_lower,
+                        "my review" in body_lower and "attached" in body_lower,
+                        "comments on the paper" in body_lower,
+                        "comments on the manuscript" in body_lower,
+                        "comments for the revision" in body_lower,
+                    ]
+                    if any(report_keywords):
                         ref_data["report_submitted"] = True
                         ref_data["report_date"] = date
                         event["details"]["report_submitted_by"] = referee_name
@@ -2592,11 +2614,25 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
                     manuscript["decision_date"] = date
                 elif "revision" in body.lower():
                     manuscript["status"] = "Revision Requested"
+                    revision_started = True
+                    for ref_data in manuscript["referees"].values():
+                        ref_data["response"] = None
+                        ref_data["response_date"] = None
+                        ref_data["report_submitted"] = False
+                        ref_data["report_date"] = None
             elif "new submission" in subject.lower():
                 manuscript["status"] = "New Submission"
                 manuscript["submission_date"] = date
             elif "under review" in body.lower():
                 manuscript["status"] = "Under Review"
+
+            if not revision_started and re.search(rf"{re.escape(manuscript_id)}-R\d+", subject):
+                revision_started = True
+                for ref_data in manuscript["referees"].values():
+                    ref_data["response"] = None
+                    ref_data["response_date"] = None
+                    ref_data["report_submitted"] = False
+                    ref_data["report_date"] = None
 
             # Add event to timeline
             manuscript["timeline"].append(event)
@@ -3411,6 +3447,11 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
                         f"Corresponding author error for {manuscript.get('id', '?')}: {str(e)[:100]}"
                     )
 
+            # Strip body_snippet from timeline after metrics are computed
+            for manuscript in self.manuscripts:
+                for event in manuscript.get("timeline", []):
+                    event.pop("body_snippet", None)
+
             # Sort by whether current and by date
             self.manuscripts.sort(
                 key=lambda x: (not x["is_current"], x["submission_date"] or ""), reverse=True
@@ -4208,9 +4249,6 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
         }
 
     def _normalize_output(self, manuscript):
-        for event in manuscript.get("timeline", []):
-            event.pop("body_snippet", None)
-
         if manuscript.get("abstract"):
             manuscript["abstract"] = self._clean_pdf_text(manuscript["abstract"])
 
@@ -4498,14 +4536,52 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
 
             ref_name_lower = ref_name.lower()
             ref_last = ref_name_lower.split()[-1] if ref_name_lower.split() else ""
+
+            agreed_cutoff = None
+            agreed_str = (referee.get("dates") or {}).get("agreed")
+            if agreed_str:
+                try:
+                    agreed_cutoff = datetime.strptime(agreed_str, "%Y-%m-%d")
+                except (ValueError, TypeError):
+                    pass
+            if not agreed_cutoff:
+                resp_date_str = referee.get("response_date")
+                if resp_date_str:
+                    agreed_cutoff = parse_date(resp_date_str)
+
+            FOLLOWUP_TYPES = {"Reminder", "Status Inquiry"}
+            REMINDER_KEYWORDS = {
+                "reminder",
+                "status",
+                "overdue",
+                "follow up",
+                "following up",
+                "checking in",
+                "any update",
+                "any news",
+            }
+            USER_SENDERS = {"dylansmb@gmail.com", "dylan.possamai"}
             reminder_count = 0
             for event in timeline:
-                if event.get("type") == "Reminder":
-                    ev_text = (event.get("subject", "") + " " + event.get("body", "")[:500]).lower()
+                ev_type = event.get("type", "")
+                if agreed_cutoff:
+                    ev_date = parse_date(event.get("date", ""))
+                    if not ev_date or ev_date <= agreed_cutoff:
+                        continue
+                ev_text = (event.get("subject", "") + " " + event.get("body_snippet", "")).lower()
+                if ev_type in FOLLOWUP_TYPES:
                     if ref_last and len(ref_last) > 2 and ref_last in ev_text:
+                        reminder_count += 1
+                    elif ev_type == "Status Inquiry":
                         reminder_count += 1
                     elif not ref_last and "reminder" in (event.get("subject") or "").lower():
                         reminder_count += 1
+                elif ev_type == "Reply":
+                    sender = (event.get("from") or "").lower()
+                    if any(u in sender for u in USER_SENDERS):
+                        if ref_last and len(ref_last) > 2 and ref_last in ev_text:
+                            if any(kw in ev_text for kw in REMINDER_KEYWORDS):
+                                reminder_count += 1
             metrics["reminders_received"][ref_name] = reminder_count
 
         # Calculate average review time

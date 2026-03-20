@@ -32,30 +32,77 @@ PLATFORMS = {
 }
 
 
-def find_latest_output(journal: str) -> Optional[Path]:
+def _list_extraction_files(journal: str) -> list[Path]:
     journal_dir = OUTPUTS_DIR / journal
     if not journal_dir.exists():
+        return []
+    skip = ("BASELINE", "debug", "rec_", "partial")
+    return sorted(
+        [f for f in journal_dir.glob("*.json") if not any(s in f.name for s in skip)],
+        key=lambda f: f.name,
+        reverse=True,
+    )
+
+
+def find_latest_output(journal: str) -> Optional[Path]:
+    files = _list_extraction_files(journal)
+    return files[0] if files else None
+
+
+def _load_json(path: Path) -> Optional[dict]:
+    try:
+        with open(path) as f:
+            return json.load(f)
+    except (json.JSONDecodeError, OSError):
         return None
-    files = sorted(journal_dir.glob("*.json"), key=lambda f: f.name, reverse=True)
-    for f in files:
-        if "BASELINE" in f.name or "debug" in str(f) or "rec_" in f.name or "partial" in f.name:
-            continue
-        return f
-    return None
 
 
 def load_journal_data(journal: str) -> Optional[dict]:
-    path = find_latest_output(journal)
-    if not path:
+    files = _list_extraction_files(journal)
+    if not files:
         return None
-    try:
-        with open(path) as f:
-            data = json.load(f)
-        data["_source_file"] = path.name
-        data["_source_path"] = str(path)
-        return data
-    except (json.JSONDecodeError, OSError):
+
+    latest = _load_json(files[0])
+    if not latest:
         return None
+
+    latest["_source_file"] = files[0].name
+    latest["_source_path"] = str(files[0])
+
+    manifest = latest.get("dashboard_manifest")
+    if not manifest or not manifest.get("scanned"):
+        return latest
+
+    discovered_ids = set()
+    for ids in manifest["scanned"].values():
+        discovered_ids.update(ids)
+    failed_categories = set(manifest.get("failed", []))
+
+    latest_ids = {m.get("manuscript_id") for m in latest.get("manuscripts", [])}
+    ms_by_id = {m.get("manuscript_id"): m for m in latest.get("manuscripts", [])}
+
+    need_from_older = discovered_ids - latest_ids
+    if need_from_older or failed_categories:
+        for older_path in files[1:]:
+            older = _load_json(older_path)
+            if not older:
+                continue
+            for m in older.get("manuscripts", []):
+                ms_id = m.get("manuscript_id")
+                if not ms_id or ms_id in ms_by_id:
+                    continue
+                if ms_id in need_from_older:
+                    ms_by_id[ms_id] = m
+                    need_from_older.discard(ms_id)
+                elif failed_categories:
+                    ms_cat = (m.get("category") or "").strip()
+                    if ms_cat in failed_categories:
+                        ms_by_id[ms_id] = m
+            if not need_from_older:
+                break
+
+    latest["manuscripts"] = list(ms_by_id.values())
+    return latest
 
 
 INACTIVE_REFEREE_STATUSES = {
@@ -64,7 +111,14 @@ INACTIVE_REFEREE_STATUSES = {
     "Un-invited Before Agreeing to Review",
     "Un-assigned After Agreeing to Review",
     "Terminated After Agreeing to Review",
+    "No Response",
+    "No response",
+    "Un-invited",
+    "Un-assigned",
+    "Terminated",
 }
+
+_INACTIVE_LOWER = {s.lower() for s in INACTIVE_REFEREE_STATUSES}
 
 
 def _dedup_referees(referees: list[dict]) -> list[dict]:
@@ -81,7 +135,7 @@ def _dedup_referees(referees: list[dict]) -> list[dict]:
 
 def _is_active_referee(ref: dict) -> bool:
     status = ref.get("platform_specific", {}).get("status") or ref.get("status") or ""
-    return status not in INACTIVE_REFEREE_STATUSES
+    return status.strip().lower() not in _INACTIVE_LOWER
 
 
 def compute_journal_stats(journal: str, data: dict) -> dict:

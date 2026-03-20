@@ -178,7 +178,55 @@ def main():
     parser.add_argument(
         "--feedback-stats", action="store_true", help="Show recorded feedback statistics"
     )
+    parser.add_argument(
+        "--ae-report", action="store_true", help="Generate AE recommendation report"
+    )
+    parser.add_argument(
+        "--ae-list", action="store_true", help="List manuscripts needing AE reports"
+    )
+    parser.add_argument(
+        "--ae-auto", action="store_true", help="Auto-generate AE reports for all ready manuscripts"
+    )
+    parser.add_argument(
+        "--provider",
+        choices=["claude", "clipboard"],
+        default="claude",
+        help="LLM provider for AE reports (default: claude)",
+    )
     args = parser.parse_args()
+
+    if args.ae_list:
+        from pipeline.ae_report import find_manuscripts_needing_ae_report
+
+        candidates = find_manuscripts_needing_ae_report(args.journal)
+        if not candidates:
+            print("No manuscripts currently need AE reports.")
+        else:
+            print(f"\n📋 Manuscripts needing AE reports ({len(candidates)}):\n")
+            for c in candidates:
+                flag = " ✅" if c["has_ae_report"] else ""
+                print(
+                    f"  {c['journal']}/{c['manuscript_id']}: "
+                    f"{c['completed_reports']} reports — {c['title'][:60]}{flag}"
+                )
+        return
+
+    if args.ae_auto:
+        from pipeline.ae_report import auto_generate
+
+        results = auto_generate(provider=args.provider)
+        print(f"\n📊 Generated {len(results)} AE report(s)")
+        return
+
+    if args.ae_report:
+        from pipeline.ae_report import generate
+
+        if not args.journal or not args.manuscript:
+            parser.error("--ae-report requires --journal and --manuscript")
+        result = generate(args.journal, args.manuscript, provider=args.provider)
+        if not result:
+            sys.exit(1)
+        return
 
     if args.feedback_stats:
         _print_feedback_stats()

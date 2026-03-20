@@ -3,6 +3,7 @@
 import datetime
 import re
 from dataclasses import asdict, dataclass, field
+from email.utils import parsedate_to_datetime
 
 from reporting.cross_journal_report import (
     INACTIVE_REFEREE_STATUSES,
@@ -12,6 +13,8 @@ from reporting.cross_journal_report import (
 )
 
 FS_REVIEW_DEADLINE_DAYS = 90
+DEFAULT_REVIEW_DEADLINE_DAYS = 42
+STALE_INVITATION_DAYS = 45
 
 PRIORITY_ORDER = {"critical": 0, "high": 1, "medium": 2, "low": 3}
 
@@ -28,6 +31,22 @@ TERMINAL_MS_STATUSES = {
     "completed accept",
     "completed withdrawn",
     "completed",
+    "my assignments with final disposition",
+}
+
+HARMONIZED_MS_STATUSES = {
+    "all referees assigned": "Under Review",
+    "awaiting reviewer scores": "Under Review",
+    "awaiting reviewer reports": "Under Review",
+    "overdue reviewer reports": "Under Review (Overdue)",
+    "potential referees assigned": "Under Review",
+    "revision r1 under review": "R1 Under Review",
+    "revision r2 under review": "R2 Under Review",
+    "waiting for potential referee assignment": "Awaiting Assignment",
+    "new submission": "Awaiting Assignment",
+    "under review": "Under Review",
+    "submissions under review": "Under Review",
+    "refs assigned": "Under Review",
 }
 
 
@@ -116,19 +135,64 @@ def _parse_date(s: str | None) -> datetime.date | None:
             ).date()
         except ValueError:
             pass
+    try:
+        return parsedate_to_datetime(s).date()
+    except Exception:
+        pass
     return None
+
+
+def _display_name(ref: dict) -> str:
+    oa = (ref.get("web_profile") or {}).get("openalex") or {}
+    display = oa.get("display_name")
+    if display:
+        return display
+    raw = ref.get("name") or "Unknown"
+    if "," in raw:
+        parts = raw.split(",", 1)
+        return f"{parts[1].strip()} {parts[0].strip()}"
+    return raw
+
+
+def _clean_raw_status(raw: str) -> str:
+    if not raw:
+        return ""
+    first_line = raw.split("\n")[0].strip()
+    first_line = re.sub(r"\s+", " ", first_line)
+    return first_line
+
+
+def _effective_dates(ref: dict) -> dict:
+    dates = ref.get("dates") or {}
+    ps = ref.get("platform_specific") or {}
+    return {
+        "invited": dates.get("invited") or ps.get("contact_date"),
+        "agreed": dates.get("agreed") or ps.get("acceptance_date"),
+        "due": dates.get("due") or ps.get("due_date"),
+        "returned": dates.get("returned") or ps.get("received_date"),
+    }
 
 
 def _normalize_referee_status(ref: dict, journal: str) -> str:
     ps = ref.get("platform_specific") or {}
-    raw = ps.get("status") or ref.get("status") or ""
-    raw_lower = raw.lower().strip()
-    dates = ref.get("dates") or {}
     sd = ref.get("status_details") or {}
+    raw = ps.get("status") or ref.get("status") or sd.get("status") or ""
+    raw = _clean_raw_status(raw)
+    raw_lower = raw.lower().strip()
+    dates = _effective_dates(ref)
 
     if raw_lower in INACTIVE_REFEREE_STATUSES or raw_lower in {
         s.lower() for s in INACTIVE_REFEREE_STATUSES
     }:
+        if "terminated" in raw_lower:
+            return "terminated"
+        return "declined"
+    if (
+        "declined" in raw_lower
+        or "un-invited" in raw_lower
+        or "un-assigned" in raw_lower
+        or "no response" in raw_lower
+    ):
         if "terminated" in raw_lower:
             return "terminated"
         return "declined"
@@ -141,63 +205,166 @@ def _normalize_referee_status(ref: dict, journal: str) -> str:
         return "completed"
     if dates.get("returned"):
         return "completed"
+    rec = ref.get("recommendation") or ""
+    if (rec.lower() not in ("unknown", "n/a", "none", "")) or ps.get("reports"):
+        return "completed"
 
-    if raw_lower in ("agreed", "awaiting report"):
+    if raw_lower in ("agreed", "awaiting report", "accepted"):
         return "agreed"
     if sd.get("agreed_to_review"):
         return "agreed"
     if dates.get("agreed") and not dates.get("returned"):
         return "agreed"
 
-    if raw_lower == "declined":
-        return "declined"
     if sd.get("declined"):
         return "declined"
 
-    if sd.get("no_response"):
+    if raw_lower in ("invited", "contacted", "pending"):
         return "pending"
+    if sd.get("no_response"):
+        return "declined"
     if dates.get("invited") and not dates.get("agreed") and not dates.get("returned"):
         return "pending"
+
+    if raw_lower in ("overdue",):
+        return "agreed"
 
     if raw_lower:
         return raw_lower
     return "unknown"
 
 
-def _get_due_date(ref: dict, journal: str) -> datetime.date | None:
-    dates = ref.get("dates") or {}
+def _get_revision_date(ms: dict) -> datetime.date | None:
+    ps = ms.get("platform_specific") or {}
+    rev_hist = ps.get("revision_history")
+    if not rev_hist:
+        return None
+    latest = rev_hist[-1]
+    sub_date = latest.get("submitted_date")
+    if sub_date:
+        return _parse_date(sub_date)
+    return None
+
+
+def _has_current_round_report(ref: dict, ms: dict, revision_date: datetime.date) -> bool:
+    ref_name = (ref.get("name") or "").lower().strip()
+    if not ref_name:
+        return False
+    ps = ms.get("platform_specific") or {}
+    reports = ps.get("referee_reports", [])
+    for rpt in reports:
+        rpt_referee = (rpt.get("referee") or "").lower().strip()
+        if not rpt_referee:
+            continue
+        name_parts = ref_name.split()
+        rpt_parts = rpt_referee.split()
+        if not (set(name_parts) & set(rpt_parts)):
+            continue
+        rpt_date = _parse_date(rpt.get("date"))
+        if rpt_date and rpt_date >= revision_date:
+            return True
+    return False
+
+
+def _apply_revision_awareness(norm: str, ref: dict, ms: dict, journal: str) -> str:
+    if journal != "fs":
+        return norm
+    if norm != "completed":
+        return norm
+    ps = ms.get("platform_specific") or {}
+    rev_round = ps.get("revision_round")
+    if not rev_round or rev_round < 1:
+        return norm
+    revision_date = _get_revision_date(ms)
+    if not revision_date:
+        return norm
+    if _has_current_round_report(ref, ms, revision_date):
+        return "completed"
+    returned = _parse_date((ref.get("dates") or {}).get("returned"))
+    if returned and returned < revision_date:
+        return "agreed"
+    if not returned:
+        return "agreed"
+    return norm
+
+
+def _get_due_date(ref: dict, journal: str, ms: dict | None = None) -> datetime.date | None:
+    dates = _effective_dates(ref)
     if dates.get("due"):
         d = _parse_date(dates["due"])
         if d:
             return d
 
-    ps = ref.get("platform_specific") or {}
-    if ps.get("due_date"):
-        d = _parse_date(str(ps["due_date"]))
+    ps_ref = ref.get("platform_specific") or {}
+    if ps_ref.get("due_date"):
+        d = _parse_date(str(ps_ref["due_date"]))
         if d:
             return d
 
     if journal == "fs":
+        revision_date = _get_revision_date(ms) if ms else None
         agreed_str = dates.get("agreed")
         if agreed_str:
             agreed = _parse_date(agreed_str)
             if agreed:
-                return agreed + datetime.timedelta(days=FS_REVIEW_DEADLINE_DAYS)
+                base = agreed
+                if revision_date and agreed < revision_date:
+                    response_str = ps_ref.get("response_date")
+                    response = _parse_date(response_str) if response_str else None
+                    if response and response >= revision_date:
+                        base = response
+                    else:
+                        base = revision_date
+                return base + datetime.timedelta(days=FS_REVIEW_DEADLINE_DAYS)
         invited_str = dates.get("invited")
         if invited_str:
             invited = _parse_date(invited_str)
             if invited:
                 return invited + datetime.timedelta(days=FS_REVIEW_DEADLINE_DAYS)
+        return None
+
+    agreed_str = dates.get("agreed")
+    if agreed_str:
+        agreed = _parse_date(agreed_str)
+        if agreed:
+            return agreed + datetime.timedelta(days=DEFAULT_REVIEW_DEADLINE_DAYS)
 
     return None
 
 
-def _get_reminders(ref: dict) -> int:
+def _get_reminders(ref: dict, ms: dict | None = None, journal: str = "") -> int:
+    counts: list[int] = []
+
     stats = ref.get("statistics") or {}
     r = stats.get("reminders_received")
     if r is not None:
-        return r
-    return 0
+        counts.append(r)
+
+    if ms and journal == "fs":
+        ps = ms.get("platform_specific") or {}
+        tm = ps.get("timeline_metrics") or {}
+        rr = tm.get("reminders_received") or {}
+        ref_name = ref.get("name", "")
+        if ref_name in rr:
+            counts.append(rr[ref_name])
+
+    if ms:
+        ta = ms.get("timeline_analytics") or {}
+        rm = ta.get("referee_metrics") or {}
+        if rm:
+            ref_email = (ref.get("email") or "").strip().lower()
+            ref_name_lower = (ref.get("name") or "").strip().lower()
+            for key, val in rm.items():
+                if not isinstance(val, dict):
+                    continue
+                k = key.strip().lower()
+                if (ref_email and k == ref_email) or (ref_name_lower and k == ref_name_lower):
+                    v = val.get("reminders_received", 0)
+                    if v:
+                        counts.append(v)
+                    break
+
+    return max(counts) if counts else 0
 
 
 def _get_manuscript_status(ms: dict) -> str:
@@ -214,7 +381,26 @@ def _get_manuscript_status(ms: dict) -> str:
     return "Unknown"
 
 
+def harmonize_status(raw_status: str) -> str:
+    key = raw_status.lower().strip()
+    return HARMONIZED_MS_STATUSES.get(key, raw_status)
+
+
+def _has_ae_report(journal: str, manuscript_id: str) -> bool:
+    from pathlib import Path
+
+    ae_dir = Path(__file__).resolve().parents[2] / "outputs" / journal / "ae_reports"
+    return any(ae_dir.glob(f"ae_{manuscript_id}_*.json"))
+
+
 def _is_terminal(ms: dict) -> bool:
+    ps = ms.get("platform_specific") or {}
+    is_current = ps.get("is_current")
+    if is_current is not None and not is_current:
+        return True
+    cat = (ms.get("category") or "").lower().strip()
+    if cat in TERMINAL_MS_STATUSES:
+        return True
     status = _get_manuscript_status(ms).lower().strip()
     return status in TERMINAL_MS_STATUSES
 
@@ -239,11 +425,21 @@ def compute_action_items(journals: list[str] | None = None) -> list[RefereeActio
             active_refs = []
             completed_count = 0
             agreed_count = 0
+            stale_pending_count = 0
 
             for ref in referees:
                 norm = _normalize_referee_status(ref, journal)
                 if norm in ("declined", "terminated"):
                     continue
+
+                norm = _apply_revision_awareness(norm, ref, ms, journal)
+
+                if norm == "pending":
+                    inv_str = _effective_dates(ref).get("invited")
+                    inv_d = _parse_date(inv_str)
+                    if inv_d and (today - inv_d).days > STALE_INVITATION_DAYS:
+                        stale_pending_count += 1
+                        continue
 
                 active_refs.append((ref, norm))
                 if norm == "completed":
@@ -251,9 +447,9 @@ def compute_action_items(journals: list[str] | None = None) -> list[RefereeActio
                 elif norm == "agreed":
                     agreed_count += 1
 
-                due = _get_due_date(ref, journal)
-                reminders = _get_reminders(ref)
-                ref_name = ref.get("name", "Unknown")
+                due = _get_due_date(ref, journal, ms)
+                reminders = _get_reminders(ref, ms, journal)
+                ref_name = _display_name(ref)
                 ref_email = ref.get("email")
 
                 if norm == "agreed" and due:
@@ -294,8 +490,7 @@ def compute_action_items(journals: list[str] | None = None) -> list[RefereeActio
                         )
 
                 elif norm == "pending":
-                    dates = ref.get("dates") or {}
-                    invited_str = dates.get("invited")
+                    invited_str = _effective_dates(ref).get("invited")
                     invited = _parse_date(invited_str)
                     if invited:
                         wait_days = (today - invited).days
@@ -318,15 +513,22 @@ def compute_action_items(journals: list[str] | None = None) -> list[RefereeActio
 
             total_expected = completed_count + agreed_count
             if completed_count >= 2 and agreed_count == 0 and total_expected >= 2:
+                ae_report_exists = _has_ae_report(journal, ms_id)
+                if ae_report_exists:
+                    msg = f"All {completed_count} reports received — AE draft ready"
+                    action = "ae_report_ready"
+                else:
+                    msg = f"All {completed_count} reports received — AE recommendation needed"
+                    action = "needs_ae_decision"
                 items.append(
                     RefereeAction(
                         priority="critical",
-                        action_type="needs_ae_decision",
+                        action_type=action,
                         journal=journal.upper(),
                         manuscript_id=ms_id,
                         manuscript_title=ms_title,
                         status=ms_status,
-                        message=f"All {completed_count} reports received — AE recommendation needed",
+                        message=msg,
                     )
                 )
 
@@ -351,7 +553,12 @@ def compute_action_items(journals: list[str] | None = None) -> list[RefereeActio
                         )
                     )
 
-            if total_expected > 0 and total_expected < 2 and "under review" in ms_status.lower():
+            total_assigned = total_expected + stale_pending_count
+            if total_expected > 0 and total_assigned < 2 and "under review" in ms_status.lower():
+                if stale_pending_count > 0:
+                    msg = f"{stale_pending_count} referee(s) haven't responded"
+                else:
+                    msg = f"Only {total_expected} active referee(s) — consider assigning more"
                 items.append(
                     RefereeAction(
                         priority="high",
@@ -360,7 +567,7 @@ def compute_action_items(journals: list[str] | None = None) -> list[RefereeActio
                         manuscript_id=ms_id,
                         manuscript_title=ms_title,
                         status=ms_status,
-                        message=f"Only {total_expected} active referee(s) — consider assigning more",
+                        message=msg,
                     )
                 )
 
@@ -402,10 +609,12 @@ def compute_manuscript_summaries(
 
             for ref in referees:
                 norm = _normalize_referee_status(ref, journal)
+                norm = _apply_revision_awareness(norm, ref, ms, journal)
                 raw = (ref.get("platform_specific") or {}).get("status") or ref.get("status", "")
-                dates = ref.get("dates") or {}
-                due = _get_due_date(ref, journal)
-                reminders = _get_reminders(ref)
+                raw = _clean_raw_status(raw)
+                eff_dates = _effective_dates(ref)
+                due = _get_due_date(ref, journal, ms)
+                reminders = _get_reminders(ref, ms, journal)
 
                 days_remaining = None
                 days_overdue = None
@@ -431,14 +640,14 @@ def compute_manuscript_summaries(
                 ref_details.append(
                     asdict(
                         RefereeDetail(
-                            name=ref.get("name", "Unknown"),
+                            name=_display_name(ref),
                             email=ref.get("email"),
                             normalized_status=norm,
                             raw_status=raw or norm,
-                            invited=dates.get("invited"),
-                            agreed=dates.get("agreed"),
+                            invited=eff_dates.get("invited"),
+                            agreed=eff_dates.get("agreed"),
                             due=due.isoformat() if due else None,
-                            returned=dates.get("returned"),
+                            returned=eff_dates.get("returned"),
                             reminders=reminders,
                             days_remaining=days_remaining,
                             days_overdue=days_overdue,
@@ -459,7 +668,7 @@ def compute_manuscript_summaries(
                     journal=journal.upper(),
                     manuscript_id=ms_id,
                     title=ms_title,
-                    status=ms_status,
+                    status=harmonize_status(ms_status),
                     submission_date=sub_date_str,
                     days_in_system=days_in,
                     referees_agreed=agreed,

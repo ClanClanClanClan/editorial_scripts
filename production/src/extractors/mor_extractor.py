@@ -1865,9 +1865,9 @@ class MORExtractor(ScholarOneBaseExtractor):
                 "decision_letter_number": decision_letter_number,
                 "orcid": orcid_link,
                 "email": email,
-                "email_domain": f"@{email.split('@')[1]}"
-                if "@" in email
-                else (f"@{domain}" if domain else ""),
+                "email_domain": (
+                    f"@{email.split('@')[1]}" if "@" in email else (f"@{domain}" if domain else "")
+                ),
                 "author_recommended": author_recommended,
                 "recommendation": recommendation,
                 "report_url": report_url,
@@ -2901,6 +2901,8 @@ class MORExtractor(ScholarOneBaseExtractor):
                     print("      3️⃣ Extracting comprehensive details...")
                     manuscript_data = self.extract_manuscript_comprehensive(manuscript_id)
                     manuscript_data["category"] = category
+                    if not manuscript_data.get("status"):
+                        manuscript_data["status"] = category
                     manuscript_data["id"] = manuscript_id
 
                     if category == "Awaiting AE Recommendation":

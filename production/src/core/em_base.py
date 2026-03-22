@@ -2312,9 +2312,9 @@ class EMExtractor(CachedExtractorMixin):
                                     attachment_urls.append(
                                         {
                                             "url": dl_link.get("href", ""),
-                                            "description": att_texts[1]
-                                            if len(att_texts) > 1
-                                            else "",
+                                            "description": (
+                                                att_texts[1] if len(att_texts) > 1 else ""
+                                            ),
                                             "filename": att_texts[2] if len(att_texts) > 2 else "",
                                         }
                                     )

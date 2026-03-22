@@ -271,12 +271,12 @@ class ManuscriptOutcomePredictor:
             "n_keywords": min(len(keywords) / 8.0, 1.0),
             "n_authors": min(len(authors) / 6.0, 1.0),
             "author_h_index_max": min(max(h_indices) / H_INDEX_CAP, 1.0) if h_indices else 0.0,
-            "author_h_index_mean": min((sum(h_indices) / len(h_indices)) / 20.0, 1.0)
-            if h_indices
-            else 0.0,
-            "author_citation_max": min(max(citation_counts) / 5000.0, 1.0)
-            if citation_counts
-            else 0.0,
+            "author_h_index_mean": (
+                min((sum(h_indices) / len(h_indices)) / 20.0, 1.0) if h_indices else 0.0
+            ),
+            "author_citation_max": (
+                min(max(citation_counts) / 5000.0, 1.0) if citation_counts else 0.0
+            ),
             "has_freemail": 1.0 if has_freemail else 0.0,
             "keyword_scope_overlap": keyword_overlap,
             "article_type_encoded": article_type_val,

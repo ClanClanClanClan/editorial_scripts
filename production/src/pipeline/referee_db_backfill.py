@@ -96,9 +96,9 @@ def backfill(incremental: bool = False):
                         manuscript_id=ms_id,
                         dates=dates,
                         status=status,
-                        recommendation=rec
-                        if rec and rec.lower() not in ("unknown", "n/a")
-                        else None,
+                        recommendation=(
+                            rec if rec and rec.lower() not in ("unknown", "n/a") else None
+                        ),
                         institution=ref.get("institution"),
                         orcid=ref.get("orcid"),
                         h_index=h_index,

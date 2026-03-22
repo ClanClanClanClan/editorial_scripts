@@ -2284,9 +2284,9 @@ class ScholarOneBaseExtractor(CachedExtractorMixin):
             analytics["reminder_effectiveness"] = {
                 "total_reminders": total_reminders,
                 "effective_reminders": effective_reminders,
-                "effectiveness_rate": effective_reminders / total_reminders
-                if total_reminders > 0
-                else 0,
+                "effectiveness_rate": (
+                    effective_reminders / total_reminders if total_reminders > 0 else 0
+                ),
             }
 
         print(

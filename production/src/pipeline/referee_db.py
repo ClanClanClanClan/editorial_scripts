@@ -291,15 +291,15 @@ class RefereeDB:
                 if profile["total_accepted"]
                 else 0
             ),
-            "avg_response_days": round(profile["avg_response_days"], 1)
-            if profile["avg_response_days"]
-            else None,
-            "avg_review_days": round(profile["avg_review_days"], 1)
-            if profile["avg_review_days"]
-            else None,
-            "avg_quality": round(profile["avg_report_quality"], 2)
-            if profile["avg_report_quality"]
-            else None,
+            "avg_response_days": (
+                round(profile["avg_response_days"], 1) if profile["avg_response_days"] else None
+            ),
+            "avg_review_days": (
+                round(profile["avg_review_days"], 1) if profile["avg_review_days"] else None
+            ),
+            "avg_quality": (
+                round(profile["avg_report_quality"], 2) if profile["avg_report_quality"] else None
+            ),
             "journals": profile["journals_served"],
         }
 

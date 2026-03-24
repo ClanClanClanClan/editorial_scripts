@@ -36,8 +36,6 @@ _load_all()
 
 
 def _journal_ids():
-    if not AVAILABLE_JOURNALS:
-        pytest.skip("No output files found")
     return AVAILABLE_JOURNALS
 
 

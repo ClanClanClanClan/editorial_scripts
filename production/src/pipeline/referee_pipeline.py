@@ -11,6 +11,7 @@ from pathlib import Path
 
 import requests
 from core.academic_apis import AcademicProfileEnricher
+from core.file_utils import load_latest_extraction as load_journal_data
 from core.output_schema import JOURNAL_NAME_MAP, PLATFORM_MAP
 
 from pipeline import JOURNALS, OUTPUTS_DIR, normalize_name
@@ -90,29 +91,6 @@ def is_awaiting_referee(manuscript: dict, platform: str) -> bool:
                 break
 
     return False
-
-
-def find_latest_output(journal: str) -> Path | None:
-    journal_dir = OUTPUTS_DIR / journal.lower()
-    if not journal_dir.exists():
-        return None
-    files = sorted(journal_dir.glob("*.json"), key=lambda f: f.stat().st_mtime, reverse=True)
-    for f in files:
-        if "BASELINE" in f.name or "debug" in str(f) or "recommendation" in str(f):
-            continue
-        return f
-    return None
-
-
-def load_journal_data(journal: str) -> dict | None:
-    path = find_latest_output(journal)
-    if not path:
-        return None
-    try:
-        with open(path) as f:
-            return json.load(f)
-    except (json.JSONDecodeError, OSError):
-        return None
 
 
 class RefereePipeline:

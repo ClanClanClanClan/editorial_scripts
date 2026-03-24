@@ -62,9 +62,23 @@ def process_all(provider: str = "claude") -> list[dict]:
         print(f"\n📝 {len(new_manuscripts)} new manuscript(s) detected:")
         for journal, ms_id in new_manuscripts:
             print(f"   {journal.upper()}/{ms_id}")
+
+        try:
+            from pipeline.referee_pipeline import RefereePipeline
+
+            pipeline = RefereePipeline(use_llm=False)
+            for journal, ms_id in new_manuscripts:
+                print(f"\n🔍 Running referee pipeline for {journal.upper()}/{ms_id}...")
+                try:
+                    pipeline.run_single(journal, ms_id)
+                except Exception as e:
+                    print(f"   Pipeline error for {journal.upper()}/{ms_id}: {e}")
+        except ImportError:
+            print("   (referee pipeline not available — skipping auto-pipeline)")
+
         _notify(
             "New Manuscripts",
-            f"{len(new_manuscripts)} new manuscript(s) across journals",
+            f"{len(new_manuscripts)} new manuscript(s) processed",
         )
 
     mark_processed(processed)

@@ -118,8 +118,138 @@ def get_referee_profile(name):
     db = RefereeDB()
     profile = db.get_profile(name)
     if profile:
+        profile["assignments"] = db.get_referee_assignments(name, limit=10)
         return jsonify(profile)
     return jsonify({"error": "Referee not found"}), 404
+
+
+@app.route("/api/referee/search")
+def search_referees():
+    from pipeline.referee_db import RefereeDB
+
+    q = request.args.get("q", "")
+    if not q or len(q) < 2:
+        return jsonify({"error": "query too short"}), 400
+    db = RefereeDB()
+    return jsonify(db.search_referees(q))
+
+
+@app.route("/api/referee/<name>/assignments")
+def get_referee_assignments(name):
+    from pipeline.referee_db import RefereeDB
+
+    db = RefereeDB()
+    return jsonify(db.get_referee_assignments(name))
+
+
+@app.route("/api/referee/<name>/journal-stats")
+def get_referee_journal_stats(name):
+    from pipeline.referee_db import RefereeDB
+
+    journal = request.args.get("journal")
+    db = RefereeDB()
+    if journal:
+        stats = db.get_journal_stats(name, journal)
+        return jsonify(stats or {})
+    with db._lock:
+        conn = db._conn()
+        rows = conn.execute(
+            "SELECT * FROM referee_journal_stats WHERE referee_key=?",
+            (name.lower().replace(",", "").replace(".", "").replace(" ", ""),),
+        ).fetchall()
+        conn.close()
+    return jsonify([dict(r) for r in rows])
+
+
+@app.route("/api/referee/top")
+def get_top_referees():
+    from pipeline.referee_db import RefereeDB
+
+    db = RefereeDB()
+    return jsonify(db.get_top_referees(min_invitations=2, limit=20))
+
+
+@app.route("/api/referee/decliners")
+def get_chronic_decliners():
+    from pipeline.referee_db import RefereeDB
+
+    db = RefereeDB()
+    return jsonify(db.get_chronic_decliners(min_invitations=2))
+
+
+@app.route("/api/referee/overdue")
+def get_overdue_offenders():
+    from pipeline.referee_db import RefereeDB
+
+    db = RefereeDB()
+    return jsonify(db.get_overdue_repeat_offenders(min_overdue=2))
+
+
+@app.route("/api/pipeline/run", methods=["POST"])
+def run_pipeline():
+    data = request.get_json() or {}
+    journal = data.get("journal", "").lower()
+    manuscript_id = data.get("manuscript_id", "")
+    if not journal or not manuscript_id:
+        return jsonify({"error": "journal and manuscript_id required"}), 400
+
+    def _run():
+        try:
+            from pipeline.referee_pipeline import RefereePipeline
+
+            pipeline = RefereePipeline(use_llm=False)
+            pipeline.run_single(journal, manuscript_id)
+        except Exception as e:
+            print(f"Pipeline error for {journal}/{manuscript_id}: {e}")
+
+    thread = threading.Thread(target=_run, daemon=True)
+    thread.start()
+    return jsonify({"status": "started", "journal": journal, "manuscript_id": manuscript_id})
+
+
+@app.route("/api/pipeline/recommendations/<journal>/<manuscript_id>")
+def get_pipeline_recommendation(journal, manuscript_id):
+    rec_dir = PROJECT_DIR / "production" / "outputs" / journal.lower() / "recommendations"
+    files = sorted(rec_dir.glob(f"rec_{manuscript_id}_*.json"), reverse=True)
+    if not files:
+        return jsonify({"error": "No recommendation found"}), 404
+    with open(files[0]) as f:
+        return jsonify(json.load(f))
+
+
+@app.route("/api/manuscripts/search")
+def search_manuscripts():
+    q = (request.args.get("q", "") or "").lower()
+    if not q or len(q) < 2:
+        return jsonify({"error": "query too short"}), 400
+
+    results = []
+    outputs_dir = PROJECT_DIR / "production" / "outputs"
+    for journal_dir in outputs_dir.iterdir():
+        if not journal_dir.is_dir():
+            continue
+        journal = journal_dir.name
+        files = sorted(journal_dir.glob(f"{journal}_extraction_*.json"))
+        if not files:
+            continue
+        try:
+            with open(files[-1]) as f:
+                data = json.load(f)
+        except (json.JSONDecodeError, OSError):
+            continue
+        for ms in data.get("manuscripts", []):
+            ms_id = ms.get("manuscript_id", "")
+            title = ms.get("title", "")
+            if q in ms_id.lower() or q in title.lower():
+                results.append(
+                    {
+                        "journal": journal.upper(),
+                        "manuscript_id": ms_id,
+                        "title": title,
+                        "status": ms.get("status", ""),
+                    }
+                )
+    return jsonify(results)
 
 
 @app.route("/api/events")

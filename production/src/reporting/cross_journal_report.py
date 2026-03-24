@@ -36,7 +36,7 @@ def _list_extraction_files(journal: str) -> list[Path]:
     journal_dir = OUTPUTS_DIR / journal
     if not journal_dir.exists():
         return []
-    skip = ("BASELINE", "debug", "rec_", "partial")
+    skip = ("BASELINE", "debug", "rec_", "partial", "ae_", "recommendation")
     return sorted(
         [f for f in journal_dir.glob("*.json") if not any(s in f.name for s in skip)],
         key=lambda f: f.name,

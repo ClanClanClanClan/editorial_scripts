@@ -72,6 +72,20 @@ def _load_recent_recommendations(limit=10):
     return unique
 
 
+def _load_referee_intelligence():
+    try:
+        from pipeline.referee_db import RefereeDB
+
+        db = RefereeDB()
+        return {
+            "top": db.get_top_referees(min_invitations=2, limit=15),
+            "decliners": db.get_chronic_decliners(min_invitations=2),
+            "overdue": db.get_overdue_repeat_offenders(min_overdue=2),
+        }
+    except Exception:
+        return {"top": [], "decliners": [], "overdue": []}
+
+
 def _freshness_class(age_days):
     if age_days is None:
         return "stale"
@@ -121,7 +135,7 @@ def _clean_institution(name, inst):
     if name:
         parts = [name, name.split(",")[0].strip()]
         parts += name.split()
-        parts = sorted(set(p for p in parts if len(p) > 2), key=len, reverse=True)
+        parts = sorted({p for p in parts if len(p) > 2}, key=len, reverse=True)
         for n in parts:
             if inst.startswith(n):
                 inst = inst[len(n) :].strip()
@@ -219,6 +233,13 @@ def build_dashboard_data():
         "high": sum(1 for a in action_items if a.priority == "high"),
     }
 
+    referee_intelligence = _load_referee_intelligence()
+
+    rec_by_ms = {}
+    for rec in rec_summaries:
+        key = (rec["journal"].lower(), rec["manuscript_id"])
+        rec_by_ms[key] = rec
+
     return {
         "generated_at": datetime.now().strftime("%Y-%m-%d %H:%M"),
         "git_commit": _git_commit(),
@@ -230,6 +251,8 @@ def build_dashboard_data():
             k: [asdict(m) for m in v] for k, v in manuscripts_by_journal.items()
         },
         "recommendations": rec_summaries,
+        "rec_by_ms": rec_by_ms,
+        "referee_intelligence": referee_intelligence,
         "training": training,
     }
 
@@ -500,6 +523,82 @@ tr:last-child td { border-bottom: none; }
 .jsec-body.hidden { display: none; }
 .jsec .table-wrap { border: none; border-radius: 0; }
 
+/* Search */
+.ms-search {
+    width: 100%; padding: 6px 12px; border: 1px solid var(--border);
+    border-radius: 6px; font-size: 0.85rem; margin-bottom: 10px;
+    background: var(--surface); color: var(--text);
+}
+.ms-search:focus { outline: none; border-color: var(--accent); }
+
+/* AE Panel (inline) */
+.ae-panel {
+    position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%);
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 20px; max-width: 600px; width: 90%; max-height: 80vh; overflow-y: auto;
+    z-index: 1000; box-shadow: 0 4px 24px rgba(0,0,0,0.15);
+}
+.ae-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 999;
+}
+.ae-panel h3 { font-size: 1rem; margin-bottom: 8px; }
+.ae-rec-badge {
+    display: inline-block; padding: 3px 10px; border-radius: 4px;
+    font-weight: 700; font-size: 0.85rem; margin-bottom: 8px;
+}
+.ae-accept { background: var(--low-bg); color: var(--low); border: 1px solid var(--low-border); }
+.ae-reject { background: var(--crit-bg); color: var(--crit); border: 1px solid var(--crit-border); }
+.ae-revise { background: var(--med-bg); color: var(--med); border: 1px solid var(--med-border); }
+.ae-panel .ae-summary { color: var(--text2); font-size: 0.85rem; margin: 8px 0; }
+.ae-panel ol { margin: 8px 0 8px 20px; font-size: 0.82rem; }
+.ae-panel .ae-close {
+    position: absolute; top: 10px; right: 14px; cursor: pointer;
+    font-size: 1.2rem; color: var(--text2); border: none; background: none;
+}
+
+/* Referee card overlay */
+.ref-card-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 999; }
+.ref-card {
+    position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%);
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 20px; max-width: 500px; width: 90%; max-height: 80vh; overflow-y: auto;
+    z-index: 1000; box-shadow: 0 4px 24px rgba(0,0,0,0.15);
+}
+.ref-card h3 { font-size: 1rem; margin-bottom: 4px; }
+.ref-card .ref-meta { font-size: 0.78rem; color: var(--text2); margin-bottom: 10px; }
+.ref-card .ref-stat-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 10px;
+}
+.ref-card .ref-stat {
+    background: var(--surface2); padding: 6px 10px; border-radius: 4px; font-size: 0.78rem;
+}
+.ref-card .ref-stat b { display: block; font-size: 0.85rem; }
+.ref-card .ref-close {
+    position: absolute; top: 10px; right: 14px; cursor: pointer;
+    font-size: 1.2rem; color: var(--text2); border: none; background: none;
+}
+.ref-clickable { cursor: pointer; color: var(--accent); text-decoration: underline; }
+.ref-clickable:hover { opacity: 0.8; }
+
+/* Detail sub-sections */
+.detail-subsection {
+    margin-top: 8px; padding: 8px 10px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 6px; font-size: 0.78rem;
+}
+.detail-subsection h5 { font-size: 0.75rem; font-weight: 700; margin-bottom: 4px; color: var(--text2); text-transform: uppercase; }
+
+/* Referee intelligence tables */
+.ri-table {
+    width: 100%; font-size: 0.78rem; border-collapse: collapse;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 6px;
+}
+.ri-table th {
+    font-size: 0.68rem; padding: 5px 8px; background: var(--surface2);
+    border-bottom: 1px solid var(--border); text-align: left;
+}
+.ri-table td { padding: 5px 8px; border-bottom: 1px solid var(--border); }
+.ri-table tr:last-child td { border-bottom: none; }
+
 @media (max-width: 768px) {
     body { padding: 12px; font-size: 13px; }
     .action-item { flex-wrap: wrap; }
@@ -540,10 +639,34 @@ function toggleDetail(id) {
     if (r && d) { r.classList.toggle('expanded'); d.classList.toggle('show'); }
 }
 function filterActs(lvl) {
-    document.querySelectorAll('.fbtn').forEach(function(b) { b.classList.remove('active'); });
+    document.querySelectorAll('.fbtn-priority').forEach(function(b) { b.classList.remove('active'); });
     event.target.classList.add('active');
+    document.querySelectorAll('.fbtn-journal').forEach(function(b) { b.classList.remove('active'); });
     document.querySelectorAll('.action-item').forEach(function(a) {
         a.style.display = (lvl === 'all' || a.classList.contains(lvl)) ? '' : 'none';
+    });
+}
+function filterActsJournal(j) {
+    document.querySelectorAll('.fbtn-journal').forEach(function(b) { b.classList.remove('active'); });
+    document.querySelectorAll('.fbtn-priority').forEach(function(b) { b.classList.remove('active'); });
+    event.target.classList.add('active');
+    document.querySelectorAll('.action-item').forEach(function(a) {
+        var aj = a.querySelector('.action-journal');
+        a.style.display = (j === 'all' || (aj && aj.textContent.trim() === j)) ? '' : 'none';
+    });
+}
+function searchManuscripts(q) {
+    q = q.toLowerCase();
+    document.querySelectorAll('.ms-row').forEach(function(r) {
+        var id = (r.querySelector('.td-id') || {}).textContent || '';
+        var title = (r.querySelector('.td-title') || {}).textContent || '';
+        var show = !q || id.toLowerCase().indexOf(q) >= 0 || title.toLowerCase().indexOf(q) >= 0;
+        r.style.display = show ? '' : 'none';
+        var did = r.getAttribute('data-detail');
+        if (did) {
+            var d = document.getElementById(did);
+            if (d && !show) d.classList.remove('show');
+        }
     });
 }
 function toggleJsec(id) {
@@ -557,6 +680,36 @@ function toggleCollapsible(id) {
     if (h && b) { h.classList.toggle('open'); b.classList.toggle('show'); }
 }
 var API = window.location.origin + '/api';
+function _showAEPanel(d) {
+    _closeOverlays();
+    var rec = (d.recommendation || '').toLowerCase();
+    var cls = 'ae-revise';
+    if (rec.indexOf('accept') >= 0) cls = 'ae-accept';
+    else if (rec.indexOf('reject') >= 0) cls = 'ae-reject';
+    var html = '<div class="ae-overlay" onclick="_closeOverlays()"></div>';
+    html += '<div class="ae-panel">';
+    html += '<button class="ae-close" onclick="_closeOverlays()">&times;</button>';
+    html += '<h3>AE Report: ' + (d.manuscript_id || '') + '</h3>';
+    html += '<div class="ae-rec-badge ' + cls + '">' + (d.recommendation || 'N/A') + '</div>';
+    if (d.confidence) html += ' <span style="font-size:0.78rem;color:var(--text2)">Confidence: ' + d.confidence + '</span>';
+    if (d.summary) html += '<div class="ae-summary">' + d.summary + '</div>';
+    if (d.revision_points && d.revision_points.length) {
+        html += '<ol>';
+        d.revision_points.forEach(function(p) { html += '<li>' + p + '</li>'; });
+        html += '</ol>';
+    }
+    if (d.referee_recommendations && d.referee_recommendations.length) {
+        html += '<h5 style="margin-top:10px;font-size:0.75rem;color:var(--text2)">REFEREE CONSENSUS</h5>';
+        d.referee_recommendations.forEach(function(r) {
+            html += '<div style="font-size:0.78rem">' + r.name + ': <b>' + r.recommendation + '</b></div>';
+        });
+    }
+    html += '</div>';
+    document.body.insertAdjacentHTML('beforeend', html);
+}
+function _closeOverlays() {
+    document.querySelectorAll('.ae-overlay,.ae-panel,.ref-card-overlay,.ref-card').forEach(function(e) { e.remove(); });
+}
 function generateAE(j, m) {
     var btn = event.target;
     btn.textContent = 'Generating...';
@@ -570,35 +723,78 @@ function generateAE(j, m) {
         if (d.recommendation) {
             btn.textContent = d.recommendation;
             btn.classList.add('btn-done');
-            alert('AE Report: ' + d.recommendation + '\\nConfidence: ' + d.confidence + '\\n\\n' + (d.summary || ''));
+            _showAEPanel(d);
         } else if (d.status === 'awaiting_paste') {
             btn.textContent = 'Copied!';
-            alert('Prompt copied to clipboard. Paste into ChatGPT Pro.');
         } else {
             btn.textContent = 'Error';
-            alert('Error: ' + (d.error || 'unknown'));
         }
-    }).catch(function(e) {
+    }).catch(function() {
         btn.textContent = 'Server offline';
         btn.disabled = false;
-        alert('Dashboard server not running. Start with:\\npython3 scripts/dashboard_server.py');
     });
 }
 function viewAE(j, m) {
     fetch(API + '/ae-reports/' + j + '/' + m)
     .then(function(r) { return r.json(); })
     .then(function(d) {
-        if (d.error) { alert('Error: ' + d.error); return; }
-        var msg = 'Recommendation: ' + d.recommendation;
-        msg += '\\nConfidence: ' + d.confidence;
-        msg += '\\n\\n' + (d.summary || '');
-        if (d.revision_points && d.revision_points.length) {
-            msg += '\\n\\nRevision Points:\\n';
-            d.revision_points.forEach(function(p, i) { msg += (i+1) + '. ' + p + '\\n'; });
+        if (d.error) return;
+        _showAEPanel(d);
+    }).catch(function() {});
+}
+function showRefereeCard(name) {
+    fetch(API + '/referee/' + encodeURIComponent(name))
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+        if (d.error) return;
+        _closeOverlays();
+        var html = '<div class="ref-card-overlay" onclick="_closeOverlays()"></div>';
+        html += '<div class="ref-card">';
+        html += '<button class="ref-close" onclick="_closeOverlays()">&times;</button>';
+        html += '<h3>' + (d.display_name || name) + '</h3>';
+        var meta = [];
+        if (d.email) meta.push(d.email);
+        if (d.institution) meta.push(d.institution);
+        if (d.orcid) meta.push('ORCID: ' + d.orcid);
+        html += '<div class="ref-meta">' + meta.join(' · ') + '</div>';
+        var total = d.total_invitations || 0;
+        var acc = total ? ((d.total_accepted || 0) / total * 100).toFixed(0) : '—';
+        var comp = d.total_accepted ? ((d.total_completed || 0) / d.total_accepted * 100).toFixed(0) : '—';
+        html += '<div class="ref-stat-grid">';
+        html += '<div class="ref-stat"><b>' + total + '</b>Invitations</div>';
+        html += '<div class="ref-stat"><b>' + acc + '%</b>Accept rate</div>';
+        html += '<div class="ref-stat"><b>' + comp + '%</b>Completion</div>';
+        html += '<div class="ref-stat"><b>' + (d.avg_review_days ? d.avg_review_days.toFixed(0) + 'd' : '—') + '</b>Avg review</div>';
+        html += '<div class="ref-stat"><b>' + (d.overdue_rate ? (d.overdue_rate * 100).toFixed(0) + '%' : '0%') + '</b>Overdue rate</div>';
+        html += '<div class="ref-stat"><b>' + ((d.journals_served || []).join(', ') || '—') + '</b>Journals</div>';
+        html += '</div>';
+        if (d.assignments && d.assignments.length) {
+            html += '<h5 style="font-size:0.72rem;color:var(--text2);margin:8px 0 4px">RECENT ASSIGNMENTS</h5>';
+            html += '<table class="ri-table"><thead><tr><th>Journal</th><th>Manuscript</th><th>Response</th><th>Days</th></tr></thead><tbody>';
+            d.assignments.slice(0, 8).forEach(function(a) {
+                html += '<tr><td>' + (a.journal||'').toUpperCase() + '</td><td>' + (a.manuscript_id||'') + '</td>';
+                html += '<td>' + (a.response||'') + '</td><td>' + (a.days_to_complete || '—') + '</td></tr>';
+            });
+            html += '</tbody></table>';
         }
-        alert(msg);
+        html += '</div>';
+        document.body.insertAdjacentHTML('beforeend', html);
+    }).catch(function() {});
+}
+function runPipeline(j, m) {
+    var btn = event.target;
+    btn.textContent = 'Running...';
+    btn.disabled = true;
+    fetch(API + '/pipeline/run', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({journal: j, manuscript_id: m})
+    }).then(function(r) { return r.json(); })
+    .then(function(d) {
+        btn.textContent = d.status === 'started' ? 'Started' : 'Error';
     }).catch(function() {
-        alert('Dashboard server not running. Start with:\\npython3 scripts/dashboard_server.py');
+        btn.textContent = 'Offline';
+        btn.disabled = false;
     });
 }
 """
@@ -607,7 +803,6 @@ function viewAE(j, m) {
 def generate_html(data):
     totals = data["totals"]
     items = data["action_items"]
-    manuscripts = data["manuscripts"]
     journals = data["journals"]
     recommendations = data["recommendations"]
     training = data.get("training")
@@ -650,7 +845,9 @@ def generate_html(data):
             counts[it["priority"]] = counts.get(it["priority"], 0) + 1
 
         h.append("<div class='filters'>")
-        h.append("<button class='fbtn active' onclick='filterActs(\"all\")'>All</button>")
+        h.append(
+            "<button class='fbtn fbtn-priority active' onclick='filterActs(\"all\")'>All</button>"
+        )
         for lvl, css in [
             ("critical", "p-crit"),
             ("high", "p-high"),
@@ -659,8 +856,16 @@ def generate_html(data):
         ]:
             if counts.get(lvl, 0):
                 h.append(
-                    f"<button class='fbtn' onclick='filterActs(\"{css}\")'>"
+                    f"<button class='fbtn fbtn-priority' onclick='filterActs(\"{css}\")'>"
                     f"{lvl.title()} ({counts[lvl]})</button>"
+                )
+        journals_in_items = sorted({it["journal"] for it in items})
+        if len(journals_in_items) > 1:
+            h.append("<span style='border-left:1px solid var(--border);margin:0 4px'></span>")
+            for j in journals_in_items:
+                h.append(
+                    f"<button class='fbtn fbtn-journal' "
+                    f"onclick='filterActsJournal(\"{_esc(j)}\")'>{_esc(j)}</button>"
                 )
         h.append("</div>")
 
@@ -717,6 +922,10 @@ def generate_html(data):
     # ── Active Manuscripts ────────────────────────────────────────
     h.append("<div class='section'>")
     h.append("<div class='section-hdr'>Active Manuscripts</div>")
+    h.append(
+        "<input type='text' class='ms-search' placeholder='Search by manuscript ID or title...' "
+        "oninput='searchManuscripts(this.value)'>"
+    )
 
     ms_by_journal = data.get("manuscripts_by_journal", {})
     if ms_by_journal:
@@ -846,8 +1055,13 @@ def generate_html(data):
                         elif st in ("declined", "terminated"):
                             timeline = "—"
 
+                        ref_name_esc = _esc(rd["name"])
                         h.append("<tr>")
-                        h.append(f"<td>{_esc(rd['name'])}</td>")
+                        h.append(
+                            f"<td><span class='ref-clickable' "
+                            f"onclick=\"showRefereeCard('{ref_name_esc}')\">"
+                            f"{ref_name_esc}</span></td>"
+                        )
                         h.append(f"<td><span class='badge {badge_cls}'>{_esc(st)}</span></td>")
                         h.append(f"<td>{_esc(rd.get('invited') or '—')}</td>")
                         h.append(f"<td>{_esc(rd.get('agreed') or '—')}</td>")
@@ -859,6 +1073,49 @@ def generate_html(data):
                     h.append("</tbody></table>")
                 else:
                     h.append("<div class='empty' style='padding:8px'>No referees assigned</div>")
+
+                rec_by_ms = data.get("rec_by_ms", {})
+                rec_key = (journal_code.lower(), ms["manuscript_id"])
+                rec_data = rec_by_ms.get(rec_key)
+                if rec_data:
+                    dr = rec_data.get("desk_rejection", {})
+                    candidates = rec_data.get("candidates", [])
+                    if dr:
+                        verdict = dr.get("verdict", "")
+                        conf = dr.get("confidence", "")
+                        h.append("<div class='detail-subsection'>")
+                        h.append("<h5>Desk Rejection Assessment</h5>")
+                        h.append(
+                            f"<span class='badge {'b-completed' if verdict == 'no' else 'b-overdue'}'>"
+                            f"{_esc(verdict or 'N/A')}</span> "
+                            f"<span style='font-size:0.72rem;color:var(--text2)'>"
+                            f"Confidence: {_esc(str(conf))}</span>"
+                        )
+                        h.append("</div>")
+                    if candidates:
+                        h.append("<div class='detail-subsection'>")
+                        h.append("<h5>Recommended Referees</h5>")
+                        for i, c in enumerate(candidates[:3]):
+                            hi = c.get("h_index") or "?"
+                            inst = c.get("institution") or ""
+                            sc = c.get("score", 0)
+                            h.append(
+                                f"<div class='rec-cand'>"
+                                f"<span class='rec-name'>#{i + 1} {_esc(c['name'])}</span>"
+                                f"<span class='rec-info'>"
+                                f"{_esc(inst)}{' · ' if inst else ''}h={hi} · {sc:.2f}</span></div>"
+                            )
+                        h.append("</div>")
+                elif ms.get("needs_referee_assignment"):
+                    j_lower = journal_code.lower()
+                    ms_id_esc = _esc(ms["manuscript_id"])
+                    h.append("<div class='detail-subsection'>")
+                    h.append(
+                        f"<button class='btn-ae' onclick=\"runPipeline('{j_lower}','{ms_id_esc}')\">"
+                        f"Find Referees</button>"
+                    )
+                    h.append("</div>")
+
                 h.append("</td></tr>")
 
             h.append("</tbody></table></div>")
@@ -913,6 +1170,96 @@ def generate_html(data):
                     f"<span class='rec-info'>{_esc(info_str)}</span></div>"
                 )
             h.append("</div>")
+        h.append("</div></div>")
+
+    # ── Referee Intelligence ────────────────────────────────────────
+    ri = data.get("referee_intelligence", {})
+    ri_top = ri.get("top", [])
+    ri_decl = ri.get("decliners", [])
+    ri_overdue = ri.get("overdue", [])
+    if ri_top or ri_decl or ri_overdue:
+        h.append("<div class='section'>")
+        h.append(
+            "<div class='collapsible-hdr' data-collapse='ref-intel' "
+            "onclick=\"toggleCollapsible('ref-intel')\">"
+            "<span class='section-hdr' style='border:none;margin:0;padding:0'>"
+            "Referee Intelligence</span></div>"
+        )
+        h.append("<div class='collapsible-body' id='ref-intel'>")
+
+        if ri_top:
+            h.append(
+                "<h5 style='font-size:0.75rem;color:var(--text2);margin:8px 0 4px'>TOP PERFORMERS</h5>"
+            )
+            h.append("<div class='table-wrap'><table class='ri-table'>")
+            h.append(
+                "<thead><tr><th>Name</th><th>Institution</th><th>Inv</th>"
+                "<th>Accept%</th><th>Avg Days</th><th>Quality</th><th>Journals</th></tr></thead><tbody>"
+            )
+            for r in ri_top[:10]:
+                total = r.get("total_invitations", 0)
+                acc = f"{r['total_accepted'] / total * 100:.0f}%" if total else "—"
+                avg_d = f"{r['avg_review_days']:.0f}" if r.get("avg_review_days") else "—"
+                qual = f"{r['avg_report_quality']:.2f}" if r.get("avg_report_quality") else "—"
+                journals = ", ".join(
+                    j.upper()
+                    for j in (
+                        json.loads(r["journals_served"])
+                        if isinstance(r.get("journals_served"), str)
+                        else (r.get("journals_served") or [])
+                    )
+                )
+                name_esc = _esc(r.get("display_name", ""))
+                h.append(
+                    f"<tr><td><span class='ref-clickable' onclick=\"showRefereeCard('{name_esc}')\">"
+                    f"{name_esc}</span></td>"
+                    f"<td>{_esc(r.get('institution') or '')}</td>"
+                    f"<td>{total}</td><td>{acc}</td><td>{avg_d}</td><td>{qual}</td>"
+                    f"<td>{_esc(journals)}</td></tr>"
+                )
+            h.append("</tbody></table></div>")
+
+        if ri_decl:
+            h.append(
+                "<h5 style='font-size:0.75rem;color:var(--text2);margin:12px 0 4px'>CHRONIC DECLINERS</h5>"
+            )
+            h.append("<div class='table-wrap'><table class='ri-table'>")
+            h.append(
+                "<thead><tr><th>Name</th><th>Institution</th><th>Inv</th>"
+                "<th>Declined</th><th>Decline%</th></tr></thead><tbody>"
+            )
+            for r in ri_decl[:10]:
+                total = r.get("total_invitations", 0)
+                decl = r.get("total_declined", 0)
+                pct = f"{decl / total * 100:.0f}%" if total else "—"
+                name_esc = _esc(r.get("display_name", ""))
+                h.append(
+                    f"<tr><td>{name_esc}</td>"
+                    f"<td>{_esc(r.get('institution') or '')}</td>"
+                    f"<td>{total}</td><td>{decl}</td><td>{pct}</td></tr>"
+                )
+            h.append("</tbody></table></div>")
+
+        if ri_overdue:
+            h.append(
+                "<h5 style='font-size:0.75rem;color:var(--text2);margin:12px 0 4px'>OVERDUE REPEAT OFFENDERS</h5>"
+            )
+            h.append("<div class='table-wrap'><table class='ri-table'>")
+            h.append(
+                "<thead><tr><th>Name</th><th>Institution</th><th>Overdue</th>"
+                "<th>Overdue%</th><th>Avg Days</th></tr></thead><tbody>"
+            )
+            for r in ri_overdue[:10]:
+                rate = f"{r['overdue_rate'] * 100:.0f}%" if r.get("overdue_rate") else "—"
+                avg_d = f"{r['avg_review_days']:.0f}" if r.get("avg_review_days") else "—"
+                name_esc = _esc(r.get("display_name", ""))
+                h.append(
+                    f"<tr><td>{name_esc}</td>"
+                    f"<td>{_esc(r.get('institution') or '')}</td>"
+                    f"<td>{r.get('overdue_count', 0)}</td><td>{rate}</td><td>{avg_d}</td></tr>"
+                )
+            h.append("</tbody></table></div>")
+
         h.append("</div></div>")
 
     # ── Model Health (collapsed) ──────────────────────────────────

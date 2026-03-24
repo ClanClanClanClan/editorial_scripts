@@ -119,6 +119,12 @@ def backfill(incremental: bool = False):
     print(
         f"\n✅ Backfill complete: {total_assignments} assignments, {total_refs} unique referee-journal pairs"
     )
+
+    print("📊 Computing derived metrics...")
+    db.compute_all_journal_stats()
+    db.compute_percentiles()
+    print("✅ Derived metrics computed (journal stats + percentiles)")
+
     return total_assignments
 
 

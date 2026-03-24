@@ -424,6 +424,28 @@ def _compute_relevance(
             quality = tr.get("avg_quality")
             if quality and quality > 0.5:
                 track_bonus += 0.03
+
+            if journal_code:
+                j_stats = db.get_journal_stats(candidate.get("name", ""), journal_code)
+                if j_stats and j_stats.get("total_invitations", 0) >= 2:
+                    j_acc = j_stats["total_accepted"] / j_stats["total_invitations"]
+                    if j_acc >= 0.7:
+                        track_bonus += 0.03
+
+            overdue_rate = tr.get("overdue_rate")
+            if overdue_rate and overdue_rate > 0.5:
+                track_bonus -= 0.05
+
+            qt = tr.get("quality_trend", [])
+            if len(qt) >= 2 and qt[-1] > qt[0]:
+                track_bonus += 0.02
+
+            profile = db.get_profile(candidate.get("name", ""))
+            if profile:
+                pq = profile.get("percentile_quality")
+                if pq is not None and pq >= 75:
+                    track_bonus += 0.03
+
             score += track_bonus
     except Exception:
         pass

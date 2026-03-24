@@ -11,17 +11,11 @@ import subprocess
 import sys
 from datetime import datetime
 
-from . import JOURNALS, OUTPUTS_DIR, _load_json
+from core.file_utils import load_latest_extraction as _latest_extraction
+
+from . import JOURNALS, OUTPUTS_DIR
 from .ae_prompt_template import build_prompt
 from .report_quality import assess_report_quality
-
-
-def _latest_extraction(journal: str) -> dict | None:
-    journal_dir = OUTPUTS_DIR / journal
-    files = sorted(journal_dir.glob(f"{journal}_extraction_*.json"))
-    if not files:
-        return None
-    return _load_json(files[-1])
 
 
 def _extract_pdf_text(path: str, max_chars: int = 15000) -> str:

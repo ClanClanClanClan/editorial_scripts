@@ -130,6 +130,21 @@ After each extraction, the system detects state changes and emits typed events:
 | `ALL_REPORTS_IN` | All assigned referees submitted reports | Auto-generate AE recommendation report |
 | `STATUS_CHANGED` | New reports, acceptances, declines, or status change | Notification |
 
+### How State Detection Works
+
+1. Each manuscript is hashed: `SHA256(JSON(status + referees[name, status, dates, recommendation]))`
+2. Hash stored in SQLite (`production/cache/manuscript_state.db`) keyed by `(journal, manuscript_id)`
+3. On extraction, new hash compared to stored → if different, classify the change type
+4. NEW_MANUSCRIPT: no prior entry exists
+5. ALL_REPORTS_IN: all active (non-declined) referees have `returned` date or `report_submitted` status
+6. STATUS_CHANGED: hash differs but doesn't match ALL_REPORTS_IN criteria
+
+### Auto-Actions on Events
+
+- **NEW_MANUSCRIPT** → `RefereePipeline.run_single(journal, ms_id)` — runs desk rejection assessment + referee candidate search. Output saved to `production/outputs/{journal}/recommendations/`
+- **ALL_REPORTS_IN** → `ae_report.generate(journal, ms_id)` — assembles referee reports, calls Claude API (or copies prompt to clipboard). Output saved to `production/outputs/{journal}/ae_reports/`
+- **STATUS_CHANGED** → macOS notification only (no auto-action)
+
 ### Quick Commands
 ```bash
 # Events are auto-dispatched by run_extractors.py after extraction
@@ -148,7 +163,14 @@ For each manuscript awaiting referee assignment:
 2. **Desk Rejection** → Heuristic signals + optional outcome predictor + optional LLM (Claude Sonnet)
 3. **Referee Search** → FAISS expertise index + OpenAlex + Semantic Scholar + historical cross-journal + author-suggested
 4. **Conflict Check** → Institution match, coauthorship, opposed list, editor overlap
-5. **Ranking** → Weighted relevance score (30% topic, 25% publication, 15% seniority, 15% source trust, 15% recency) + track record bonuses
+5. **Ranking** → Weighted relevance score + track record bonuses:
+   - `0.30 * topic_similarity` (FAISS cosine distance to manuscript abstract)
+   - `0.25 * publication_similarity` (overlap in research keywords/topics)
+   - `0.15 * seniority_score` (h-index normalized, capped at H_INDEX_CAP=50)
+   - `0.15 * source_trust` (historical > OpenAlex > Semantic Scholar > author-suggested)
+   - `0.15 * recency_score` (recent publications weighted higher)
+   - Track record bonuses: journal-specific acceptance rate (+0.05), top-quartile quality (+0.03), trending quality (+0.02)
+   - Penalties: overdue rate >0.5 (-0.05), chronic decliner (-0.10)
 
 ### 3 ML Models
 
@@ -172,7 +194,14 @@ SQLite database tracking referee behavior across all journals:
 - `referee_assignments`: Per-assignment tracking (dates, response, quality score, was_overdue)
 - `referee_journal_stats`: Per-journal breakdown of referee performance
 
-**Key Methods:** `get_track_record()`, `get_journal_stats()`, `search_referees()`, `get_overdue_repeat_offenders()`, `compute_percentiles()`
+**Learning Features:**
+- `overdue_count` / `overdue_rate`: tracks chronic lateness
+- `quality_trend` / `response_trend`: last 5 values for detecting improvement/decline
+- `percentile_response` / `percentile_quality` / `percentile_speed`: global ranking vs all referees
+- `referee_journal_stats`: per-journal breakdown (a referee may accept for SICON but decline for MF)
+- Feedback loop: `record_feedback(name, journal, ms_id, was_used, score)` tracks whether recommendations were followed
+
+**Key Methods:** `get_track_record()`, `get_journal_stats()`, `search_referees()`, `get_overdue_repeat_offenders()`, `compute_percentiles()`, `get_quality_trend()`, `get_referee_assignments()`, `record_feedback()`
 
 ### AE Report Generation (`production/src/pipeline/ae_report.py`)
 
@@ -236,6 +265,30 @@ python3 scripts/dashboard_server.py --port 9000
 | `/api/pipeline/recommendations/<j>/<ms>` | GET | Get recommendation |
 | `/api/manuscripts/search?q=` | GET | Search manuscripts by ID/title |
 | `/api/events` | GET | List pending events |
+
+### API Request/Response Examples
+
+```bash
+# Generate AE report
+curl -X POST localhost:8421/api/ae-report -H 'Content-Type: application/json' \
+  -d '{"journal":"sicon","manuscript_id":"M181987"}'
+# → {"recommendation":"Minor Revision","confidence":0.85,"summary":"...","revision_points":[...]}
+
+# Search referees
+curl 'localhost:8421/api/referee/search?q=smith'
+# → [{"referee_key":"smith_john","display_name":"John Smith","institution":"MIT",...}]
+
+# Trigger pipeline
+curl -X POST localhost:8421/api/pipeline/run -H 'Content-Type: application/json' \
+  -d '{"journal":"sicon","manuscript_id":"M186000"}'
+# → {"status":"started","journal":"sicon","manuscript_id":"M186000"}
+
+# Search manuscripts
+curl 'localhost:8421/api/manuscripts/search?q=stochastic'
+# → [{"journal":"SICON","manuscript_id":"M181987","title":"...","status":"Under Review"}]
+```
+
+All error responses: `{"error": "message"}` with appropriate HTTP status code (400/404/500).
 
 ### Dashboard Features (`scripts/generate_dashboard.py`)
 - Alert bar (critical/high priority action items)
@@ -406,4 +459,4 @@ python3 -m pytest tests/test_referee_db.py -v  # Specific module
 
 ---
 
-**Last Updated**: 2026-03-23
+**Last Updated**: 2026-03-25

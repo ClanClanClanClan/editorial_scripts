@@ -8,7 +8,7 @@
     <key>ProgramArguments</key>
     <array>
         <string>/bin/bash</string>
-        <string>/Users/dylanpossamai/Library/CloudStorage/Dropbox/Work/editorial_scripts/scripts/weekly_run.sh</string>
+        <string>/Users/dylanpossamai/.editorial_scripts/run_weekly.sh</string>
     </array>
 
     <key>StartCalendarInterval</key>
@@ -22,18 +22,15 @@
     </dict>
 
     <key>StandardOutPath</key>
-    <string>/Users/dylanpossamai/Library/CloudStorage/Dropbox/Work/editorial_scripts/results/logs/launchd_stdout.log</string>
+    <string>/tmp/editorial-weekly-stdout.log</string>
 
     <key>StandardErrorPath</key>
-    <string>/Users/dylanpossamai/Library/CloudStorage/Dropbox/Work/editorial_scripts/results/logs/launchd_stderr.log</string>
+    <string>/tmp/editorial-weekly-stderr.log</string>
 
     <key>EnvironmentVariables</key>
     <dict>
         <key>PATH</key>
-        <string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+        <string>/Library/Frameworks/Python.framework/Versions/3.12/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
     </dict>
-
-    <key>WorkingDirectory</key>
-    <string>/Users/dylanpossamai/Library/CloudStorage/Dropbox/Work/editorial_scripts</string>
 </dict>
 </plist>

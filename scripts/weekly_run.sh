@@ -37,8 +37,10 @@ else
     echo "WARNING: Credential loader not found."
 fi
 
-# Ensure PATH includes homebrew + poetry
-export PATH="/opt/homebrew/bin:/usr/local/bin:$HOME/.local/bin:$PATH"
+# Ensure PATH includes Python 3.12 + homebrew
+export PATH="/Library/Frameworks/Python.framework/Versions/3.12/bin:/opt/homebrew/bin:/usr/local/bin:$HOME/.local/bin:$PATH"
+export PYTHONPATH="$PROJECT_DIR/production/src"
+PYTHON="/Library/Frameworks/Python.framework/Versions/3.12/bin/python3.12"
 
 FAILED=0
 STEP=0
@@ -60,43 +62,41 @@ run_step() {
 # Step 1: Extract all journals
 # SIAM needs headful mode for Cloudflare
 export EXTRACTOR_HEADLESS=false
-run_step "Extract all journals" python3 run_extractors.py --all
+run_step "Extract all journals" $PYTHON run_extractors.py --all
 
 # Step 2: Cross-journal report
-run_step "Cross-journal report" python3 run_extractors.py --report --json
+run_step "Cross-journal report" $PYTHON run_extractors.py --report --json
 
 # Step 3: Train ML models
-run_step "Train ML models" python3 run_pipeline.py --train
+run_step "Train ML models" $PYTHON run_pipeline.py --train
 
 # Step 4: Run referee pipeline for all journals
 PIPELINE_JOURNALS="mf mor sicon sifin jota mafe naco"
 for j in $PIPELINE_JOURNALS; do
-    run_step "Pipeline: $j" python3 run_pipeline.py -j "$j" --pending || true
+    run_step "Pipeline: $j" $PYTHON run_pipeline.py -j "$j" --pending || true
 done
 
 # Step 5: Process events (detect state changes, auto-generate AE reports)
-run_step "Process events" python3 -c "
-import sys; sys.path.insert(0, 'production/src')
+run_step "Process events" $PYTHON -c "
 from core.event_processor import process_all
-process_all(provider='claude')
+process_all(provider='clipboard')
 "
 
 # Step 6: Update referee performance database
-run_step "Update referee DB" python3 -c "
-import sys; sys.path.insert(0, 'production/src')
+run_step "Update referee DB" $PYTHON -c "
 from pipeline.referee_db_backfill import backfill
 backfill(incremental=True)
 "
 
 # Step 7: Auto-generate AE reports for ready manuscripts
-run_step "Auto AE reports" python3 run_pipeline.py --ae-auto --provider claude
+run_step "Auto AE reports" $PYTHON run_pipeline.py --ae-auto --provider clipboard
 
 # Step 8: Generate dashboard
-run_step "Generate dashboard" python3 scripts/generate_dashboard.py
+run_step "Generate dashboard" $PYTHON scripts/generate_dashboard.py
 
 # Step 9: Send email digest (skip if Gmail scope not upgraded)
-if python3 -c "from pathlib import Path; import json; t=json.load(open(Path.home()/'.editorial_scripts'/'gmail_token.json' if (Path.home()/'.editorial_scripts'/'gmail_token.json').exists() else Path('config/gmail_token.json'))); exit(0 if 'gmail.send' in t.get('scopes',[]) else 1)" 2>/dev/null; then
-    run_step "Send email digest" python3 scripts/send_digest.py
+if $PYTHON -c "from pathlib import Path; import json; t=json.load(open(Path.home()/'.editorial_scripts'/'gmail_token.json' if (Path.home()/'.editorial_scripts'/'gmail_token.json').exists() else Path('config/gmail_token.json'))); exit(0 if 'gmail.send' in t.get('scopes',[]) else 1)" 2>/dev/null; then
+    run_step "Send email digest" $PYTHON scripts/send_digest.py
 else
     echo ""
     echo "--- Step $((STEP + 1)): Send email digest ---"

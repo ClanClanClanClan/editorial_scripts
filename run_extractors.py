@@ -29,7 +29,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
-# Add production extractors to path
+# Add production source to path
+sys.path.insert(0, str(Path(__file__).parent / "production/src"))
 sys.path.insert(0, str(Path(__file__).parent / "production/src/extractors"))
 
 
@@ -172,8 +173,17 @@ class ExtractorOrchestrator:
             events = process_extraction(data, journal_id)
             if events:
                 self.logger.info(f"{len(events)} state change(s) detected")
+            self._backfill_referee_db()
         except Exception as e:
             self.logger.warning(f"Event dispatch failed: {e}")
+
+    def _backfill_referee_db(self):
+        try:
+            from pipeline.referee_db_backfill import backfill
+
+            backfill(incremental=True)
+        except Exception as e:
+            self.logger.warning(f"Referee DB backfill failed: {e}")
 
     def run_extractor(self, journal_id: str, headless: bool = True) -> Optional[dict]:
         """Run a specific extractor.

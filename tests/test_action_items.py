@@ -1621,6 +1621,29 @@ class TestSeasonalMode:
         assert result is not None
         assert result["label"] == "Summer Mode"
 
+    def test_summer_boundary_june30_not_summer(self):
+        from reporting.action_items import get_seasonal_mode
+
+        assert get_seasonal_mode(datetime.date(2026, 6, 30)) is None
+
+    def test_summer_boundary_july1_is_summer(self):
+        from reporting.action_items import get_seasonal_mode
+
+        result = get_seasonal_mode(datetime.date(2026, 7, 1))
+        assert result is not None
+        assert result["label"] == "Summer Mode"
+
+    def test_summer_boundary_aug31_is_summer(self):
+        from reporting.action_items import get_seasonal_mode
+
+        result = get_seasonal_mode(datetime.date(2026, 8, 31))
+        assert result is not None
+
+    def test_summer_boundary_sep1_not_summer(self):
+        from reporting.action_items import get_seasonal_mode
+
+        assert get_seasonal_mode(datetime.date(2026, 9, 1)) is None
+
     def test_holiday_mode(self):
         from reporting.action_items import get_seasonal_mode
 
@@ -1633,13 +1656,26 @@ class TestSeasonalMode:
 
         result = get_seasonal_mode(datetime.date(2027, 1, 3))
         assert result is not None
+        assert result["label"] == "Holiday Mode"
+
+    def test_holiday_boundary_dec19_not_holiday(self):
+        from reporting.action_items import get_seasonal_mode
+
+        assert get_seasonal_mode(datetime.date(2026, 12, 19)) is None
+
+    def test_holiday_boundary_jan6_not_holiday(self):
+        from reporting.action_items import get_seasonal_mode
+
+        assert get_seasonal_mode(datetime.date(2027, 1, 6)) is None
 
     def test_no_seasonal_march(self):
         from reporting.action_items import get_seasonal_mode
 
         assert get_seasonal_mode(datetime.date(2026, 3, 15)) is None
 
-    def test_seasonal_extra_days_constant(self):
-        from reporting.action_items import SEASONAL_EXTRA_DAYS
+    def test_seasonal_extends_overdue_threshold(self):
+        from reporting.action_items import SEASONAL_EXTRA_DAYS, get_seasonal_mode
 
+        seasonal = get_seasonal_mode(datetime.date(2026, 7, 15))
+        assert seasonal is not None
         assert SEASONAL_EXTRA_DAYS == 14

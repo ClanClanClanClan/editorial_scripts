@@ -85,6 +85,9 @@ class TestManuscriptIndexSearch:
                 "Stochastic Optimal Control", "We study control problems.", top_k=5
             )
         assert len(results) >= 1
+        ms_ids = [r["manuscript_id"] for r in results]
+        if "M100" in ms_ids and "M200" in ms_ids:
+            assert ms_ids.index("M100") < ms_ids.index("M200")
 
     @patch("pipeline.embeddings.get_engine")
     def test_excludes_exact_match(self, mock_get_engine, fake_engine, extraction_dir):

@@ -61,11 +61,24 @@ class TestExtractAuthorNames:
         entry = "Smith, A. and Jones, B. (2023). A paper."
         names = _extract_author_names(entry)
         assert len(names) >= 2
+        assert any("Smith" in n for n in names)
+        assert any("Jones" in n for n in names)
 
     def test_comma_format(self):
         entry = "Smith A, Jones B, 2021. Some paper title here."
         names = _extract_author_names(entry)
         assert len(names) >= 1
+
+    def test_single_author(self):
+        entry = "Dupont, E. (2024). Solo work."
+        names = _extract_author_names(entry)
+        assert len(names) >= 1
+        assert any("Dupont" in n for n in names)
+
+    def test_three_authors(self):
+        entry = "Smith, A., Jones, B. and Brown, C. (2023). Joint paper."
+        names = _extract_author_names(entry)
+        assert len(names) >= 2
 
 
 class TestExtractReferences:

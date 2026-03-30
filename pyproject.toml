@@ -1,96 +1,51 @@
 [tool.poetry]
-name = "editorial-command-center"
+name = "editorial-scripts"
 version = "2.0.0"
-description = "Editorial Command Center - AI-powered journal manuscript extraction and management system"
+description = "Journal manuscript extraction and referee recommendation system"
 authors = ["Dylan Possamaï <dylan.possamai@math.ethz.ch>"]
 readme = "README.md"
-# Production code lives in production/src/ (not installed as packages)
-packages = []
+package-mode = false
 
 [tool.poetry.dependencies]
 python = "^3.11"
-# FastAPI and web framework
-fastapi = "^0.109.0"
-uvicorn = {extras = ["standard"], version = "^0.25.0"}
-pydantic = {extras = ["email"], version = "^2.11.9"}
-
-# Database
-sqlalchemy = "^2.0.25"
-asyncpg = "^0.29.0"
-alembic = "^1.13.0"
 
 # Browser automation
-playwright = "^1.40.0"
-beautifulsoup4 = "^4.12.0"
-
-# Legacy Selenium support
 selenium = "^4.16.0"
 webdriver-manager = "^4.0.0"
+beautifulsoup4 = "^4.12.0"
+lxml = "^5.0.0"
 
-# AI and analysis
-openai = "^1.8.0"
-numpy = "^1.26.3"
-
-# Caching and queue
-redis = "^5.0.0"
-celery = "^5.3.0"
-
-# Authentication and security
-python-jose = {extras = ["cryptography"], version = "^3.3.0"}
-passlib = {extras = ["bcrypt"], version = "^1.7.4"}
-python-multipart = "^0.0.6"
-
-# Monitoring and observability
-prometheus-client = "^0.19.0"
-opentelemetry-api = "^1.21.0"
-opentelemetry-sdk = "^1.21.0"
-opentelemetry-instrumentation-fastapi = "^0.42b0"
-opentelemetry-instrumentation-sqlalchemy = "^0.42b0"
-opentelemetry-exporter-jaeger = "^1.21.0"
-
-# Utilities
-python-dotenv = "^1.0.0"
-click = "^8.1.0"
-rich = "^13.7.0"
-typer = "^0.9.0"
-tenacity = "^8.2.0"
-
-# Document processing
-PyPDF2 = "^3.0.0"
-python-docx = "^1.1.0"
-
-# Data processing
-pandas = "^2.1.0"
-requests = "^2.31.0"
+# Google API
 google-api-python-client = "^2.141.0"
 google-auth = "^2.35.0"
 google-auth-oauthlib = "^1.2.1"
 
-[tool.poetry.group.dev.dependencies]
-# Testing
-pytest = "^7.4.4"
-pytest-asyncio = "^0.23.2"
-pytest-cov = "^4.1.0"
-pytest-mock = "^3.12.0"
-pytest-xdist = "^3.5.0"
-faker = "^21.0.0"
-httpx = "^0.26.0"
+# HTTP and data
+requests = "^2.31.0"
+python-dateutil = "^2.8.0"
+numpy = "^1.26.3"
 
-# Code quality
+# ML pipeline
+scikit-learn = "^1.4.0"
+joblib = "^1.3.0"
+faiss-cpu = "^1.7.0"
+sentence-transformers = "^2.2.0"
+
+# Optional
+undetected-chromedriver = "^3.5.0"
+anthropic = "^0.39.0"
+PyMuPDF = ">=1.24"
+flask = "^3.1.3"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.4.4"
 black = "^23.12.1"
-isort = "^5.13.2"
-flake8 = "^7.0.0"
+ruff = "^0.1.0"
 mypy = "^1.8.0"
 pre-commit = "^3.6.0"
-ruff = "^0.1.0"
-
-# Documentation
-mkdocs = "^1.5.3"
-mkdocs-material = "^9.5.3"
-
-# Development tools
-ipython = "^8.18.0"
-jupyter = "^1.0.0"
+bandit = "^1.7.0"
+pip-audit = "^2.7.0"
+detect-secrets = "^1.5.0"
 
 [build-system]
 requires = ["poetry-core"]
@@ -100,7 +55,6 @@ build-backend = "poetry.core.masonry.api"
 minversion = "7.0"
 testpaths = ["tests"]
 pythonpath = ["production/src", "."]
-asyncio_mode = "auto"
 addopts = [
     "--strict-markers",
     "--tb=short",
@@ -108,7 +62,7 @@ addopts = [
 markers = [
     "slow: marks tests as slow (deselect with '-m \"not slow\"')",
     "integration: marks tests as integration tests",
-    "unit: marks tests as unit tests",
+    "live_only: requires live extraction (cannot be tested offline)",
 ]
 
 [tool.black]
@@ -133,47 +87,34 @@ extend-exclude = '''
 [tool.isort]
 profile = "black"
 line_length = 100
-multi_line_output = 3
-include_trailing_comma = true
-force_grid_wrap = 0
-use_parentheses = true
-ensure_newline_before_comments = true
 
 [tool.mypy]
 python_version = "3.11"
 warn_return_any = true
 warn_unused_configs = true
-disallow_untyped_defs = true
-disallow_incomplete_defs = true
 check_untyped_defs = true
-disallow_untyped_decorators = true
 no_implicit_optional = true
 warn_redundant_casts = true
 warn_unused_ignores = true
 warn_no_return = true
-warn_unreachable = true
 strict_equality = true
 explicit_package_bases = true
 namespace_packages = true
-# Analyze code under src/ (mypy understands source directories via files)
-files = ["production/src/core"]
+files = ["production/src/pipeline"]
 
 [[tool.mypy.overrides]]
 module = [
-    "playwright.*",
     "bs4.*",
-    "PyPDF2.*",
-    "redis.*",
-    "prometheus_client.*",
     "selenium.*",
     "webdriver_manager.*",
     "googleapiclient.*",
     "google_auth_oauthlib.*",
     "google.oauth2.*",
     "google.auth.*",
-    "passlib.*",
-    "celery.*",
-    "aiosmtplib.*",
+    "faiss.*",
+    "sentence_transformers.*",
+    "anthropic.*",
+    "sklearn.*",
 ]
 ignore_missing_imports = true
 
@@ -182,8 +123,6 @@ target-version = "py311"
 line-length = 100
 extend-exclude = [
   "archive",
-  "production",
-  "editorial_assistant",
   "dev",
   "docs",
 ]
@@ -202,8 +141,14 @@ ignore = [
     "E501",  # line too long, handled by black
     "B008",  # do not perform function calls in argument defaults
     "C901",  # too complex
+    "UP007", # Optional[X] → X | None — too noisy in large extractors
+    "UP038", # isinstance(x, (A, B)) → isinstance(x, A | B) — cosmetic
 ]
 
 [tool.ruff.lint.per-file-ignores]
 "__init__.py" = ["F401"]
 "tests/**/*" = ["F401", "F811"]
+"production/src/core/*_base.py" = ["E402", "E731", "E741", "B023"]
+"production/src/core/em_base.py" = ["E402", "E731", "B023"]
+"production/src/core/academic_apis.py" = ["E731"]
+"production/src/extractors/*.py" = ["E402", "E731", "E741", "E712", "B023", "B904", "C401"]

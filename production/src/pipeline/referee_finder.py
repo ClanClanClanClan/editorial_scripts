@@ -365,6 +365,7 @@ def _compute_relevance(
 
     source_trust = {
         "author_suggested": 1.0,
+        "cited_author": 0.6,
         "expertise_index": 0.85,
         "historical_referee": 0.7,
         "openalex_search": 0.4,
@@ -445,6 +446,18 @@ def _compute_relevance(
                 pq = profile.get("percentile_quality")
                 if pq is not None and pq >= 75:
                     track_bonus += 0.03
+
+            if profile and profile.get("last_invited_date"):
+                try:
+                    last_inv = datetime.datetime.strptime(
+                        profile["last_invited_date"][:10], "%Y-%m-%d"
+                    ).date()
+                    days_since = (datetime.datetime.now().date() - last_inv).days
+                    if days_since < 60:
+                        score -= 0.05
+                        candidate["_cooling_off_days"] = days_since
+                except (ValueError, TypeError):
+                    pass
 
             score += track_bonus
     except Exception:

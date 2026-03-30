@@ -8,6 +8,7 @@ import pytest
 from reporting.cross_journal_report import (
     _is_active_referee,
     compute_journal_stats,
+    find_author_across_journals,
     find_latest_output,
     generate_json_report,
     load_journal_data,
@@ -377,3 +378,61 @@ class TestIsActiveReferee:
     def test_agreed_is_active(self):
         ref = {"platform_specific": {"status": "Agreed"}}
         assert _is_active_referee(ref)
+
+
+class TestFindAuthorAcrossJournals:
+    @patch("reporting.cross_journal_report.load_journal_data")
+    def test_finds_author(self, mock_load):
+        mock_load.return_value = {
+            "manuscripts": [
+                {
+                    "manuscript_id": "M1",
+                    "title": "Test",
+                    "status": "Under Review",
+                    "authors": [{"name": "John Smith"}],
+                }
+            ]
+        }
+        results = find_author_across_journals("John Smith")
+        assert len(results) >= 1
+
+    @patch("reporting.cross_journal_report.load_journal_data")
+    def test_excludes_journal(self, mock_load):
+        mock_load.return_value = {
+            "manuscripts": [
+                {
+                    "manuscript_id": "M1",
+                    "title": "Test",
+                    "status": "OK",
+                    "authors": [{"name": "Smith"}],
+                }
+            ]
+        }
+        results = find_author_across_journals("Smith", exclude_journal="mf")
+        assert isinstance(results, list)
+
+    @patch("reporting.cross_journal_report.load_journal_data")
+    def test_not_found(self, mock_load):
+        mock_load.return_value = {
+            "manuscripts": [{"manuscript_id": "M1", "authors": [{"name": "Alice"}]}]
+        }
+        results = find_author_across_journals("Bob")
+        assert len(results) == 0
+
+    def test_empty_name(self):
+        assert find_author_across_journals("") == []
+
+    @patch("reporting.cross_journal_report.load_journal_data")
+    def test_normalized_matching(self, mock_load):
+        mock_load.return_value = {
+            "manuscripts": [
+                {
+                    "manuscript_id": "M1",
+                    "title": "T",
+                    "status": "OK",
+                    "authors": [{"name": "Muller, Hans"}],
+                }
+            ]
+        }
+        results = find_author_across_journals("muller, hans")
+        assert len(results) >= 1

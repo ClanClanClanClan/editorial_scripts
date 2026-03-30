@@ -164,7 +164,8 @@ class ExtractorOrchestrator:
         try:
             from core.event_dispatcher import process_extraction
 
-            journal_dir = self.output_dir / journal_id
+            outputs_dir = Path(__file__).parent / "production" / "outputs"
+            journal_dir = outputs_dir / journal_id
             files = sorted(journal_dir.glob(f"{journal_id}_extraction_*.json"))
             if not files:
                 return
@@ -296,13 +297,13 @@ class ExtractorOrchestrator:
 
         self.logger.info(f"Running all working extractors: {working_extractors}")
 
-        siam_journals = {"sicon", "sifin"}
+        headful_journals = {"sicon", "sifin", "mf", "mor"}
         results = {}
         for journal_id in working_extractors:
             print(f"\n🚀 STARTING {journal_id.upper()} EXTRACTION")
             print("-" * 50)
 
-            journal_headless = False if journal_id in siam_journals else headless
+            journal_headless = False if journal_id in headful_journals else headless
             result = self.run_extractor(journal_id, headless=journal_headless)
             results[journal_id] = result
 

@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import json
 import sys
+import unicodedata
 from datetime import datetime
 from pathlib import Path
 from typing import Optional
@@ -349,6 +350,46 @@ def run_report(save_json: bool = False, output_dir: Optional[Path] = None) -> di
         print(f"  💾 JSON report saved: {out_file}")
 
     return report
+
+
+def _normalize_name(s: str) -> str:
+    return unicodedata.normalize("NFKD", s).encode("ascii", "ignore").decode().lower().strip()
+
+
+def find_author_across_journals(author_name, exclude_journal=None, exclude_manuscript_id=None):
+    target = _normalize_name(author_name)
+    if not target:
+        return []
+
+    results = []
+    for journal in JOURNALS:
+        if exclude_journal and journal.lower() == exclude_journal.lower():
+            continue
+        data = load_journal_data(journal)
+        if not data:
+            continue
+        for ms in data.get("manuscripts", []):
+            ms_id = ms.get("manuscript_id", "")
+            if exclude_manuscript_id and ms_id == exclude_manuscript_id:
+                continue
+            authors = ms.get("authors", [])
+            matched = False
+            for author in authors:
+                name = author.get("name") or author.get("display_name") or ""
+                if _normalize_name(name) == target:
+                    matched = True
+                    break
+            if matched:
+                results.append(
+                    {
+                        "journal": journal.upper(),
+                        "manuscript_id": ms_id,
+                        "title": ms.get("title", ""),
+                        "status": ms.get("status", ""),
+                        "submission_date": ms.get("submission_date"),
+                    }
+                )
+    return results
 
 
 if __name__ == "__main__":

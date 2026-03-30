@@ -777,6 +777,10 @@ function showRefereeCard(name) {
             });
             html += '</tbody></table>';
         }
+        html += '<div style="margin-top:8px"><b>Notes:</b><br>';
+        var noteId = 'ref-note-' + name.replace(/[^a-zA-Z0-9]/g, '_');
+        html += '<textarea id="' + noteId + '" style="width:100%;height:60px;font-size:0.78rem;border:1px solid var(--border);border-radius:4px;padding:4px">' + _escHtml(d.notes || '') + '</textarea>';
+        html += '<button class="btn-ae" style="margin-top:4px" onclick="saveRefereeNote(\'' + name.replace(/'/g, "\\\\'") + '\')">Save Note</button></div>';
         html += '</div>';
         document.body.insertAdjacentHTML('beforeend', html);
     }).catch(function() {});
@@ -795,6 +799,91 @@ function runPipeline(j, m) {
     }).catch(function() {
         btn.textContent = 'Offline';
         btn.disabled = false;
+    });
+}
+function _escHtml(s) {
+    if (!s) return '';
+    var d = document.createElement('div');
+    d.appendChild(document.createTextNode(s));
+    return d.innerHTML;
+}
+function recordDecision(j, m) {
+    var sel = document.getElementById('dec-' + m);
+    if (!sel || !sel.value) { alert('Select a decision first'); return; }
+    var btn = (event && event.target) || this;
+    if (btn) { btn.disabled = true; btn.textContent = 'Submitting...'; }
+    fetch(API + '/record-decision', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({journal: j, manuscript_id: m, decision: sel.value})
+    }).then(function(r) { return r.json(); })
+    .then(function(d) {
+        if (btn) { btn.textContent = d.status === 'ok' ? 'Recorded' : 'Error'; if (d.status === 'ok') btn.classList.add('btn-done'); }
+    });
+}
+function checkAuthorHistory(msId) {
+    var div = document.getElementById('author-hist-' + msId);
+    if (!div) return;
+    div.style.display = 'block';
+    div.innerHTML = 'Loading...';
+    fetch(API + '/manuscripts/search?q=' + encodeURIComponent(msId))
+    .then(function(r) { return r.json(); })
+    .then(function(results) {
+        if (results.length > 0 && results[0].authors && results[0].authors.length > 0) {
+            return fetch(API + '/author-history/' + encodeURIComponent(results[0].authors[0]));
+        }
+        div.innerHTML = 'No author data available';
+        return null;
+    })
+    .then(function(r) { return r ? r.json() : []; })
+    .then(function(hist) {
+        if (!hist || hist.length === 0) { div.innerHTML = 'No cross-journal submissions found'; return; }
+        var html = '<b>Author submissions across journals:</b><ul style="margin:4px 0;padding-left:16px">';
+        hist.forEach(function(h) { html += '<li>' + _escHtml(h.journal) + '/' + _escHtml(h.manuscript_id) + ' - ' + _escHtml((h.title||'').substr(0,60)) + ' [' + _escHtml(h.status||'') + ']</li>'; });
+        html += '</ul>';
+        div.innerHTML = html;
+    });
+}
+function sendAllReminders() {
+    if (!confirm('Send reminder emails to all overdue referees?')) return;
+    var btn = (event && event.target) || this;
+    if (btn) { btn.disabled = true; btn.textContent = 'Sending...'; }
+    fetch(API + '/send-reminders', { method: 'POST' })
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+        alert('Sent: ' + (d.reminders_sent || 0) + ' reminders');
+        if (btn) { btn.textContent = 'Done'; btn.classList.add('btn-done'); }
+    });
+}
+function saveRefereeNote(name) {
+    var ta = document.getElementById('ref-note-' + name.replace(/[^a-zA-Z0-9]/g, '_'));
+    if (!ta) return;
+    fetch(API + '/referee/' + encodeURIComponent(name) + '/note', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({note: ta.value})
+    }).then(function(r) { return r.json(); })
+    .then(function(d) { if (d.status === 'ok') alert('Note saved'); });
+}
+function generateAnnualReport() {
+    var s = document.getElementById('report-start').value;
+    var e = document.getElementById('report-end').value;
+    if (!s || !e) { alert('Select date range'); return; }
+    var out = document.getElementById('annual-report-output');
+    out.innerHTML = 'Generating...';
+    fetch(API + '/annual-report', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({start_date: s, end_date: e})
+    }).then(function(r) { return r.json(); })
+    .then(function(d) {
+        if (d.error) { out.innerHTML = 'Error: ' + _escHtml(d.error); return; }
+        var html = '<b>Report: ' + _escHtml(s) + ' to ' + _escHtml(e) + '</b><br>';
+        if (d.summary) {
+            html += 'Total manuscripts: ' + (d.summary.total_manuscripts || 0) + '<br>';
+            html += 'Journals active: ' + (d.summary.journals_active || 0) + '<br>';
+        }
+        out.innerHTML = html;
     });
 }
 """
@@ -817,6 +906,13 @@ def generate_html(data):
     h.append("<h1>Editorial Command Center</h1>")
     h.append(f"<div class='subtitle'>{_esc(data['generated_at'])}</div>")
 
+    try:
+        from reporting.action_items import get_seasonal_mode
+
+        seasonal = get_seasonal_mode()
+    except Exception:
+        seasonal = None
+
     if totals["critical"] > 0:
         cls = "alert-crit"
         msg = f"🔴 {totals['critical']} critical + {totals['high']} high priority items"
@@ -826,6 +922,8 @@ def generate_html(data):
     else:
         cls = "alert-ok"
         msg = "✅ All clear — no action needed"
+    if seasonal:
+        msg += f" · {seasonal['label']}"
     h.append(f"<div class='alert {cls}'>{msg}</div>")
 
     h.append("<div class='stats'>")
@@ -914,6 +1012,9 @@ def generate_html(data):
                     f"View Report</button>"
                 )
             h.append("</div>")
+        h.append(
+            "<button class='btn-ae' style='margin-top:6px' onclick='sendAllReminders()'>Send All Reminders</button>"
+        )
         h.append("</div>")
     else:
         h.append("<div class='empty'>No action items — all clear</div>")
@@ -1116,6 +1217,31 @@ def generate_html(data):
                     )
                     h.append("</div>")
 
+                h.append("<div class='detail-subsection'>")
+                h.append("<h5>Record Decision</h5>")
+                j_esc = _esc(journal_code.lower())
+                ms_esc = _esc(ms["manuscript_id"])
+                h.append(
+                    f"<select id='dec-{ms_esc}' class='rate-select' style='width:auto;font-size:0.78rem'>"
+                    f"<option value=''>Select...</option>"
+                    f"<option value='accept'>Accept</option>"
+                    f"<option value='minor_revision'>Minor Revision</option>"
+                    f"<option value='major_revision'>Major Revision</option>"
+                    f"<option value='reject'>Reject</option>"
+                    f"</select> "
+                    f"<button class='btn-ae' onclick=\"recordDecision('{j_esc}','{ms_esc}')\">Submit</button>"
+                )
+                h.append("</div>")
+
+                h.append("<div class='detail-subsection'>")
+                h.append(
+                    f"<button class='btn-ae btn-view' onclick=\"checkAuthorHistory('{ms_esc}')\">Check Author History</button>"
+                )
+                h.append(
+                    f"<div id='author-hist-{ms_esc}' style='display:none;font-size:0.78rem;margin-top:4px'></div>"
+                )
+                h.append("</div>")
+
                 h.append("</td></tr>")
 
             h.append("</tbody></table></div>")
@@ -1291,6 +1417,24 @@ def generate_html(data):
                 h.append(f"<div class='jcard-stats'>{m['n_samples']} samples</div>")
             h.append("</div>")
         h.append("</div></div></div>")
+
+    h.append("<div class='section'>")
+    h.append(
+        "<div class='collapsible-hdr' data-collapse='reports' onclick=\"toggleCollapsible('reports')\"><span class='section-hdr' style='border:none;margin:0;padding:0'>Reports</span></div>"
+    )
+    h.append("<div class='collapsible-body' id='reports'>")
+    h.append("<div style='display:flex;gap:8px;align-items:center;margin-bottom:8px'>")
+    h.append(
+        "<input type='date' id='report-start' style='font-size:0.78rem;padding:4px;border:1px solid var(--border);border-radius:4px'>"
+    )
+    h.append(" to ")
+    h.append(
+        "<input type='date' id='report-end' style='font-size:0.78rem;padding:4px;border:1px solid var(--border);border-radius:4px'>"
+    )
+    h.append(" <button class='btn-ae' onclick='generateAnnualReport()'>Generate Report</button>")
+    h.append("</div>")
+    h.append("<div id='annual-report-output' style='font-size:0.78rem'></div>")
+    h.append("</div></div>")
 
     h.append("<div class='footer'>")
     h.append(f"{_esc(data['generated_at'])} · {_esc(data['git_commit'])} · Editorial Scripts")

@@ -297,3 +297,71 @@ class TestEvents:
         data = resp.get_json()
         assert len(data) == 1
         assert data[0]["type"] == "NEW_MANUSCRIPT"
+
+
+class TestRecordDecision:
+    def test_missing_params(self, client):
+        resp = client.post("/api/record-decision", json={})
+        assert resp.status_code == 400
+
+    def test_invalid_decision(self, client):
+        resp = client.post(
+            "/api/record-decision",
+            json={"journal": "sicon", "manuscript_id": "M1", "decision": "maybe"},
+        )
+        assert resp.status_code == 400
+
+
+class TestAuthorHistory:
+    def test_short_name(self, client):
+        resp = client.get("/api/author-history/X")
+        assert resp.status_code == 400
+
+
+class TestNotificationConfig:
+    def test_get_default(self, client):
+        with patch(
+            "core.email_notifications._load_config",
+            return_value={"ALL_REPORTS_IN": True, "NEW_MANUSCRIPT": True},
+        ):
+            resp = client.get("/api/notification-config")
+        assert resp.status_code == 200
+        assert isinstance(resp.get_json(), dict)
+
+
+class TestSendReminders:
+    @patch("reporting.action_items.compute_action_items", return_value=[])
+    def test_no_overdue(self, mock_items, client):
+        resp = client.post("/api/send-reminders")
+        assert resp.status_code == 200
+        assert resp.get_json()["reminders_sent"] == 0
+
+
+class TestRefereeNote:
+    def test_get_empty(self, client):
+        with patch("pipeline.referee_db.RefereeDB") as MockDB:
+            MockDB.return_value.get_referee_note.return_value = None
+            resp = client.get("/api/referee/nobody/note")
+        assert resp.status_code == 200
+        assert resp.get_json()["note"] == ""
+
+
+class TestAnnualReport:
+    def test_missing_dates(self, client):
+        resp = client.post("/api/annual-report", json={})
+        assert resp.status_code == 400
+
+
+class TestSimilarity:
+    def test_invalid_params(self, client):
+        resp = client.get("/api/similarity/../../etc/passwd")
+        assert resp.status_code in (400, 404)
+
+
+class TestGetSimilarity:
+    def test_no_extraction(self, client, tmp_path):
+        outputs = tmp_path / "production" / "outputs" / "sicon"
+        outputs.mkdir(parents=True)
+        with patch("scripts.dashboard_server.PROJECT_DIR", tmp_path):
+            resp = client.get("/api/similarity/sicon/M123")
+        assert resp.status_code == 404

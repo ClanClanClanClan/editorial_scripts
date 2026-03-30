@@ -54,8 +54,9 @@ class TestPipelineIntegration:
         mock_enricher.institution_match = MagicMock(return_value=False)
         mock_enricher.enrich = MagicMock(return_value={})
 
-        with patch("pipeline.referee_pipeline.OUTPUTS_DIR", tmp_path), patch(
-            "core.file_utils.OUTPUTS_DIR", tmp_path
+        with (
+            patch("pipeline.referee_pipeline.OUTPUTS_DIR", tmp_path),
+            patch("core.file_utils.OUTPUTS_DIR", tmp_path),
         ):
             from pipeline.referee_pipeline import RefereePipeline
 

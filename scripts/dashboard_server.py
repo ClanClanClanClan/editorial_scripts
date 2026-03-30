@@ -25,6 +25,14 @@ DASHBOARD_PATH = PROJECT_DIR / "production" / "outputs" / "dashboard.html"
 app = Flask(__name__)
 
 
+def _validate_params(journal: str = "", manuscript_id: str = "") -> bool:
+    if journal and not journal.replace("_", "").isalnum():
+        return False
+    if manuscript_id and not manuscript_id.replace("-", "").replace("_", "").isalnum():
+        return False
+    return True
+
+
 @app.route("/")
 def serve_dashboard():
     if DASHBOARD_PATH.exists():
@@ -258,6 +266,146 @@ def get_events():
 
     events = get_pending_events()
     return jsonify(events)
+
+
+@app.route("/api/record-decision", methods=["POST"])
+def record_decision():
+    data = request.get_json() or {}
+    journal = data.get("journal", "").lower()
+    manuscript_id = data.get("manuscript_id", "")
+    decision = data.get("decision", "")
+    notes = data.get("notes", "")
+    if not journal or not manuscript_id or not decision:
+        return jsonify({"error": "journal, manuscript_id, and decision required"}), 400
+    valid = {"accept", "minor_revision", "major_revision", "reject", "desk_reject"}
+    if decision.lower() not in valid:
+        return jsonify({"error": f"Invalid decision. Must be one of: {valid}"}), 400
+    try:
+        from pipeline.decision_letters import draft_letters
+
+        result = draft_letters(journal, manuscript_id, decision.replace("_", " ").title(), notes)
+        return jsonify({"status": "ok", "letters": result})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/author-history/<name>")
+def get_author_history(name):
+    if len(name) < 2:
+        return jsonify({"error": "Name too short"}), 400
+    from reporting.cross_journal_report import find_author_across_journals
+
+    results = find_author_across_journals(name)
+    return jsonify(results)
+
+
+@app.route("/api/notification-config", methods=["GET", "POST"])
+def notification_config():
+    from core.email_notifications import _load_config, _save_config
+
+    if request.method == "POST":
+        data = request.get_json() or {}
+        config = _load_config()
+        config.update(data)
+        _save_config(config)
+        return jsonify({"status": "ok"})
+    return jsonify(_load_config())
+
+
+@app.route("/api/send-reminders", methods=["POST"])
+def send_reminders():
+    from reporting.action_items import compute_action_items
+
+    items = compute_action_items()
+    overdue = [i for i in items if i.action_type == "overdue_report" and i.referee_email]
+    sent = 0
+    failed = 0
+    for item in overdue:
+        try:
+            from core.email_notifications import send_notification
+
+            subject = f"Reminder: Review for {item.manuscript_id} ({item.journal})"
+            body = (
+                f"Dear {item.referee_name},\n\n"
+                f"This is a gentle reminder regarding your review of {item.manuscript_id}.\n"
+                f"The report was due {item.days_overdue} days ago.\n\n"
+                f"Best regards"
+            )
+            if send_notification(subject, body, item.referee_email):
+                from pipeline.referee_db import RefereeDB
+
+                RefereeDB().increment_reminder(
+                    item.referee_name,
+                    item.journal.lower(),
+                    item.manuscript_id,
+                )
+                sent += 1
+            else:
+                failed += 1
+        except Exception:
+            failed += 1
+    return jsonify({"status": "ok", "reminders_sent": sent, "reminders_failed": failed})
+
+
+@app.route("/api/referee/<name>/note", methods=["GET", "POST"])
+def referee_note(name):
+    from pipeline.referee_db import RefereeDB
+
+    db = RefereeDB()
+    if request.method == "POST":
+        data = request.get_json() or {}
+        note = data.get("note", "")
+        db.set_referee_note(name, note)
+        return jsonify({"status": "ok"})
+    note = db.get_referee_note(name)
+    return jsonify({"note": note or ""})
+
+
+@app.route("/api/annual-report", methods=["POST"])
+def annual_report():
+    data = request.get_json() or {}
+    start = data.get("start_date", "")
+    end = data.get("end_date", "")
+    if not start or not end:
+        return jsonify({"error": "start_date and end_date required"}), 400
+    try:
+        from reporting.annual_report import generate_annual_report
+
+        report = generate_annual_report(start, end)
+        return jsonify(report)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/similarity/<journal>/<manuscript_id>")
+def get_similarity(journal, manuscript_id):
+    if not _validate_params(journal=journal, manuscript_id=manuscript_id):
+        return jsonify({"error": "Invalid parameters"}), 400
+    outputs_dir = PROJECT_DIR / "production" / "outputs"
+    journal_dir = outputs_dir / journal.lower()
+    files = (
+        sorted(journal_dir.glob(f"{journal.lower()}_extraction_*.json"))
+        if journal_dir.exists()
+        else []
+    )
+    if not files:
+        return jsonify({"error": "No extraction data"}), 404
+    try:
+        with open(files[-1]) as f:
+            data = json.load(f)
+        ms = None
+        for m in data.get("manuscripts", []):
+            if m.get("manuscript_id") == manuscript_id:
+                ms = m
+                break
+        if not ms:
+            return jsonify({"error": "Manuscript not found"}), 404
+        from pipeline.manuscript_similarity import find_similar_manuscripts
+
+        results = find_similar_manuscripts(ms.get("title", ""), ms.get("abstract", ""))
+        return jsonify(results)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 
 def main():

@@ -1611,3 +1611,35 @@ class TestEdgeCasesFromRealData:
         items = compute_action_items(journals=["fs"])
         names = [i.referee_name for i in items]
         assert "Ghost" not in names
+
+
+class TestSeasonalMode:
+    def test_summer_mode(self):
+        from reporting.action_items import get_seasonal_mode
+
+        result = get_seasonal_mode(datetime.date(2026, 7, 15))
+        assert result is not None
+        assert result["label"] == "Summer Mode"
+
+    def test_holiday_mode(self):
+        from reporting.action_items import get_seasonal_mode
+
+        result = get_seasonal_mode(datetime.date(2026, 12, 25))
+        assert result is not None
+        assert result["label"] == "Holiday Mode"
+
+    def test_holiday_wraps_year(self):
+        from reporting.action_items import get_seasonal_mode
+
+        result = get_seasonal_mode(datetime.date(2027, 1, 3))
+        assert result is not None
+
+    def test_no_seasonal_march(self):
+        from reporting.action_items import get_seasonal_mode
+
+        assert get_seasonal_mode(datetime.date(2026, 3, 15)) is None
+
+    def test_seasonal_extra_days_constant(self):
+        from reporting.action_items import SEASONAL_EXTRA_DAYS
+
+        assert SEASONAL_EXTRA_DAYS == 14

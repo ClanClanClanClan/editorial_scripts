@@ -57,6 +57,18 @@ def process_all(provider: str = "claude") -> list[dict]:
                     "AE Report Ready",
                     f"{journal.upper()}/{ms_id}: {result['recommendation']}",
                 )
+                try:
+                    from core.email_notifications import send_event_notification
+
+                    send_event_notification(
+                        {
+                            "type": "ALL_REPORTS_IN",
+                            "journal": journal,
+                            "manuscript_id": ms_id,
+                        }
+                    )
+                except Exception:
+                    pass
 
     if new_manuscripts:
         print(f"\n📝 {len(new_manuscripts)} new manuscript(s) detected:")
@@ -71,10 +83,44 @@ def process_all(provider: str = "claude") -> list[dict]:
                 print(f"\n🔍 Running referee pipeline for {journal.upper()}/{ms_id}...")
                 try:
                     pipeline.run_single(journal, ms_id)
+                    try:
+                        from pipeline.manuscript_similarity import (
+                            find_similar_manuscripts,
+                        )
+                        from reporting.cross_journal_report import load_journal_data
+
+                        ms_data = load_journal_data(journal)
+                        if ms_data:
+                            for ms in ms_data.get("manuscripts", []):
+                                if ms.get("manuscript_id") == ms_id:
+                                    similar = find_similar_manuscripts(
+                                        ms.get("title", ""),
+                                        ms.get("abstract", ""),
+                                        top_k=3,
+                                    )
+                                    if similar:
+                                        print(f"   Similar manuscripts: {len(similar)} found")
+                                    break
+                    except Exception:
+                        pass
                 except Exception as e:
                     print(f"   Pipeline error for {journal.upper()}/{ms_id}: {e}")
         except ImportError:
             print("   (referee pipeline not available — skipping auto-pipeline)")
+
+        for journal, ms_id in new_manuscripts:
+            try:
+                from core.email_notifications import send_event_notification
+
+                send_event_notification(
+                    {
+                        "type": "NEW_MANUSCRIPT",
+                        "journal": journal,
+                        "manuscript_id": ms_id,
+                    }
+                )
+            except Exception:
+                pass
 
         _notify(
             "New Manuscripts",

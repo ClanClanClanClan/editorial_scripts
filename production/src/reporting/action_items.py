@@ -34,6 +34,46 @@ TERMINAL_MS_STATUSES = {
     "my assignments with final disposition",
 }
 
+SEASONAL_SLOWDOWN = {
+    "summer": {
+        "start_month": 7,
+        "start_day": 1,
+        "end_month": 8,
+        "end_day": 31,
+        "label": "Summer Mode",
+    },
+    "holiday": {
+        "start_month": 12,
+        "start_day": 20,
+        "end_month": 1,
+        "end_day": 5,
+        "label": "Holiday Mode",
+    },
+}
+SEASONAL_EXTRA_DAYS = 14
+
+
+def get_seasonal_mode(today=None):
+    if today is None:
+        today = datetime.date.today()
+    for _key, period in SEASONAL_SLOWDOWN.items():
+        sm, sd = period["start_month"], period["start_day"]
+        em, ed = period["end_month"], period["end_day"]
+        if sm <= em:
+            if (today.month, today.day) >= (sm, sd) and (today.month, today.day) <= (
+                em,
+                ed,
+            ):
+                return {"label": period["label"]}
+        else:
+            if (today.month, today.day) >= (sm, sd) or (today.month, today.day) <= (
+                em,
+                ed,
+            ):
+                return {"label": period["label"]}
+    return None
+
+
 HARMONIZED_MS_STATUSES = {
     "all referees assigned": "Under Review",
     "awaiting reviewer scores": "Under Review",
@@ -407,6 +447,8 @@ def _is_terminal(ms: dict) -> bool:
 
 def compute_action_items(journals: list[str] | None = None) -> list[RefereeAction]:
     today = datetime.date.today()
+    seasonal = get_seasonal_mode(today)
+    extra_days = SEASONAL_EXTRA_DAYS if seasonal else 0
     items = []
     target = journals or JOURNALS
 
@@ -454,10 +496,10 @@ def compute_action_items(journals: list[str] | None = None) -> list[RefereeActio
 
                 if norm == "agreed" and due:
                     days_left = (due - today).days
-                    if days_left < 0:
+                    if days_left < -extra_days:
                         items.append(
                             RefereeAction(
-                                priority="critical",
+                                priority="high" if seasonal else "critical",
                                 action_type="overdue_report",
                                 journal=journal.upper(),
                                 manuscript_id=ms_id,

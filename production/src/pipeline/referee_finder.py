@@ -1,18 +1,25 @@
 #!/usr/bin/env python3
 """Referee candidate search: OpenAlex, Semantic Scholar, historical DB, author suggestions."""
 
+import datetime
 import json
 import time
-import unicodedata
-from pathlib import Path
-from typing import Dict, List, Optional
 
 import requests
-
 from core.academic_apis import AcademicProfileEnricher
 
-OUTPUTS_DIR = Path(__file__).parent.parent.parent / "outputs"
-JOURNALS = ["mf", "mor", "fs", "jota", "mafe", "sicon", "sifin", "naco"]
+from pipeline import H_INDEX_CAP, JOURNALS, OUTPUTS_DIR, normalize_name
+
+_JOURNAL_WEIGHTS = {
+    "sicon": {"topic": 0.35, "pub": 0.25, "seniority": 0.10, "trust": 0.15, "recency": 0.15},
+    "sifin": {"topic": 0.35, "pub": 0.25, "seniority": 0.10, "trust": 0.15, "recency": 0.15},
+    "mf": {"topic": 0.30, "pub": 0.25, "seniority": 0.15, "trust": 0.15, "recency": 0.15},
+    "mor": {"topic": 0.30, "pub": 0.25, "seniority": 0.15, "trust": 0.15, "recency": 0.15},
+    "fs": {"topic": 0.30, "pub": 0.20, "seniority": 0.10, "trust": 0.15, "recency": 0.25},
+    "jota": {"topic": 0.35, "pub": 0.25, "seniority": 0.10, "trust": 0.15, "recency": 0.15},
+    "mafe": {"topic": 0.30, "pub": 0.20, "seniority": 0.10, "trust": 0.15, "recency": 0.25},
+}
+_DEFAULT_WEIGHTS = {"topic": 0.30, "pub": 0.25, "seniority": 0.15, "trust": 0.15, "recency": 0.15}
 
 
 def find_referees(
@@ -21,50 +28,62 @@ def find_referees(
     enricher: AcademicProfileEnricher,
     session: requests.Session,
     max_candidates: int = 15,
-) -> list:
+    expertise_index=None,
+    response_predictor=None,
+) -> tuple:
     keywords = manuscript.get("keywords", [])
     title = manuscript.get("title", "")
     abstract = manuscript.get("abstract", "")
     authors = manuscript.get("authors", [])
-    editors = manuscript.get("editors", [])
-    author_names = {_normalize(a.get("name", "")) for a in authors if a.get("name")}
+    author_names = {normalize_name(a.get("name", "")) for a in authors if a.get("name")}
 
     rec = manuscript.get("referee_recommendations", {})
     if not rec:
-        rec = manuscript.get("platform_specific", {}).get("referee_recommendations", {})
+        rec = (manuscript.get("platform_specific") or {}).get("referee_recommendations") or {}
     recommended = rec.get("recommended_referees", [])
-    opposed = rec.get("opposed_referees", [])
 
     candidates = []
     seen_keys = set()
+    api_calls = {"openalex": 0, "semantic_scholar": 0, "enrichment": 0}
 
     for ref in recommended:
         c = _make_candidate(ref, source="author_suggested")
         c["author_suggested"] = True
-        key = _dedup_key(c)
-        if key and key not in seen_keys and key not in author_names:
-            seen_keys.add(key)
+        if not _is_duplicate(c, seen_keys, author_names):
             candidates.append(c)
 
+    if expertise_index is not None:
+        try:
+            idx_results = expertise_index.search(manuscript, k=30)
+            for ref in idx_results:
+                c = _make_candidate(ref, source="expertise_index")
+                c["semantic_similarity"] = ref.get("semantic_similarity", 0.0)
+                if ref.get("h_index"):
+                    c["h_index"] = ref["h_index"]
+                if ref.get("topics"):
+                    c["research_topics"] = ref["topics"]
+                if not _is_duplicate(c, seen_keys, author_names):
+                    candidates.append(c)
+        except (ValueError, RuntimeError) as e:
+            print(f"   Warning: expertise_index search failed: {e}")
+
     oa_candidates = _search_openalex_works(keywords, title, session, author_names)
-    for c in oa_candidates:
-        key = _dedup_key(c)
-        if key and key not in seen_keys:
-            seen_keys.add(key)
+    if oa_candidates is not None:
+        api_calls["openalex"] += 1
+    for c in oa_candidates or []:
+        if not _is_duplicate(c, seen_keys):
             candidates.append(c)
 
     s2_candidates = _search_semantic_scholar(keywords, title, session, author_names)
-    for c in s2_candidates:
-        key = _dedup_key(c)
-        if key and key not in seen_keys:
-            seen_keys.add(key)
+    if s2_candidates is not None:
+        api_calls["semantic_scholar"] += 1
+    for c in s2_candidates or []:
+        if not _is_duplicate(c, seen_keys):
             candidates.append(c)
 
     hist_candidates = _search_historical(keywords, journal_code, author_names)
     for c in hist_candidates:
-        key = _dedup_key(c)
-        if key and key not in seen_keys:
-            seen_keys.add(key)
+        if not _is_duplicate(c, seen_keys):
             candidates.append(c)
 
     for c in candidates:
@@ -75,6 +94,7 @@ def find_referees(
                     orcid_id=c.get("orcid"),
                     institution=c.get("institution"),
                 )
+                api_calls["enrichment"] += 1
                 if profile:
                     c["web_profile"] = profile
                     c["h_index"] = profile.get("h_index")
@@ -82,26 +102,48 @@ def find_referees(
                     c["research_topics"] = profile.get("research_topics", [])
                     s2 = profile.get("semantic_scholar", {})
                     c["relevant_papers"] = s2.get("top_papers", [])[:5]
-            except Exception:
-                pass
+            except (requests.RequestException, ValueError, RuntimeError) as e:
+                print(f"   Warning: enrichment failed for {c.get('name', 'unknown')}: {e}")
+
+    _referee_db = None
+    try:
+        from pipeline.referee_db import RefereeDB
+
+        _referee_db = RefereeDB()
+    except Exception:
+        pass
 
     for c in candidates:
-        c["relevance_score"] = _compute_relevance(c, keywords, title, abstract)
+        c["relevance_score"] = _compute_relevance(
+            c, keywords, title, abstract, response_predictor, journal_code, manuscript, _referee_db
+        )
         c["topic_overlap"] = _compute_topic_overlap(c, keywords)
 
     candidates.sort(key=lambda x: -x["relevance_score"])
-    return candidates[: max_candidates * 2]
+    return candidates[:max_candidates], api_calls
 
 
-def _normalize(s: str) -> str:
-    return unicodedata.normalize("NFKD", s).encode("ascii", "ignore").decode().lower().strip()
-
-
-def _dedup_key(c: dict) -> str:
+def _dedup_keys(c: dict) -> list[str]:
+    keys = []
+    name = normalize_name(c.get("name", ""))
+    if name:
+        keys.append(name)
     email = (c.get("email") or "").lower().strip()
     if email:
-        return email
-    return _normalize(c.get("name", ""))
+        keys.append(email)
+    return keys
+
+
+def _is_duplicate(c: dict, seen_keys: set, excluded: set = None) -> bool:
+    keys = _dedup_keys(c)
+    if not keys:
+        return True
+    if any(k in seen_keys for k in keys):
+        return True
+    if excluded and any(k in excluded for k in keys):
+        return True
+    seen_keys.update(keys)
+    return False
 
 
 def _make_candidate(data: dict, source: str) -> dict:
@@ -127,7 +169,7 @@ def _make_candidate(data: dict, source: str) -> dict:
 
 
 def _search_openalex_works(
-    keywords: List[str],
+    keywords: list[str],
     title: str,
     session: requests.Session,
     exclude_names: set,
@@ -156,7 +198,7 @@ def _search_openalex_works(
             for authorship in work.get("authorships", []):
                 author = authorship.get("author", {})
                 name = author.get("display_name", "")
-                if not name or _normalize(name) in exclude_names:
+                if not name or normalize_name(name) in exclude_names:
                     continue
 
                 orcid_url = author.get("orcid")
@@ -179,14 +221,14 @@ def _search_openalex_works(
 
                 candidates.append(c)
 
-    except Exception as e:
+    except (requests.RequestException, KeyError, ValueError) as e:
         print(f"   [OpenAlex works] search error: {e}")
 
     return candidates
 
 
 def _search_semantic_scholar(
-    keywords: List[str],
+    keywords: list[str],
     title: str,
     session: requests.Session,
     exclude_names: set,
@@ -213,19 +255,19 @@ def _search_semantic_scholar(
         for paper in resp.json().get("data", []):
             for author in paper.get("authors", []):
                 name = author.get("name", "")
-                if not name or _normalize(name) in exclude_names:
+                if not name or normalize_name(name) in exclude_names:
                     continue
                 c = _make_candidate({"name": name}, source="semantic_scholar_search")
                 candidates.append(c)
 
-    except Exception as e:
+    except (requests.RequestException, KeyError, ValueError) as e:
         print(f"   [S2 papers] search error: {e}")
 
     return candidates
 
 
 def _search_historical(
-    keywords: List[str],
+    keywords: list[str],
     current_journal: str,
     exclude_names: set,
 ) -> list:
@@ -254,7 +296,8 @@ def _search_historical(
             continue
 
         try:
-            data = json.load(open(latest))
+            with open(latest) as _f:
+                data = json.load(_f)
         except (json.JSONDecodeError, OSError):
             continue
 
@@ -266,7 +309,7 @@ def _search_historical(
 
             for ref in ms.get("referees", []):
                 name = ref.get("name", "")
-                if not name or _normalize(name) in exclude_names:
+                if not name or normalize_name(name) in exclude_names:
                     continue
 
                 c = _make_candidate(
@@ -292,29 +335,39 @@ def _search_historical(
     return candidates
 
 
-def _compute_relevance(candidate: dict, keywords: list, title: str, abstract: str) -> float:
-    score = 0.0
+def _compute_relevance(
+    candidate: dict,
+    keywords: list,
+    title: str,
+    abstract: str,
+    response_predictor=None,
+    journal_code: str = None,
+    manuscript: dict = None,
+    referee_db=None,
+) -> float:
+    # Spec weights: 30% topic, 25% publication, 15% seniority, 15% source trust, 15% recency
+    topic_score = 0.0
+    semantic_sim = candidate.get("semantic_similarity")
+    if semantic_sim is not None:
+        topic_score = min(1.0, max(0.0, semantic_sim))
+    else:
+        topics = candidate.get("research_topics", [])
+        if topics and keywords:
+            kw_words = set()
+            for k in keywords:
+                kw_words.update(k.lower().split())
+            topic_words = set()
+            for t in topics:
+                topic_words.update(t.lower().split())
+            common = kw_words & topic_words
+            union = kw_words | topic_words
+            if union:
+                topic_score = min(1.0, len(common) / len(union) * 3)
 
-    topics = candidate.get("research_topics", [])
-    if topics and keywords:
-        kw_lower = {k.lower() for k in keywords}
-        topic_lower = {t.lower() for t in topics}
-        kw_words = set()
-        for k in kw_lower:
-            kw_words.update(k.split())
-        topic_words = set()
-        for t in topic_lower:
-            topic_words.update(t.split())
-        common = kw_words & topic_words
-        union = kw_words | topic_words
-        if union:
-            word_overlap = len(common) / len(union)
-            score += 0.30 * min(1.0, word_overlap * 3)
-
+    pub_score = 0.0
     papers = candidate.get("relevant_papers", [])
     if papers and title:
-        title_lower = title.lower()
-        title_words = set(title_lower.split())
+        title_words = set(title.lower().split())
         best = 0.0
         for p in papers:
             ptitle = (p.get("title") or "").lower()
@@ -324,25 +377,118 @@ def _compute_relevance(candidate: dict, keywords: list, title: str, abstract: st
             common = title_words & p_words
             union = title_words | p_words
             if union:
-                sim = len(common) / len(union)
-                best = max(best, sim)
-        score += 0.25 * min(1.0, best * 3)
+                best = max(best, len(common) / len(union))
+        pub_score = min(1.0, best * 3)
 
     h = candidate.get("h_index") or 0
-    score += 0.15 * min(1.0, h / 25)
+    seniority_score = min(1.0, h / H_INDEX_CAP)
 
-    source_weights = {
-        "author_suggested": 0.15,
-        "historical_referee": 0.12,
-        "openalex_search": 0.08,
-        "semantic_scholar_search": 0.08,
+    source_trust = {
+        "author_suggested": 1.0,
+        "expertise_index": 0.85,
+        "historical_referee": 0.7,
+        "cited_author": 0.6,
+        "openalex_search": 0.4,
+        "semantic_scholar_search": 0.4,
     }
-    score += source_weights.get(candidate.get("source", ""), 0.05)
+    trust_score = source_trust.get(candidate.get("source", ""), 0.3)
 
+    recency_score = 0.0
     if papers:
-        recent = any(p.get("year") and p["year"] >= 2023 for p in papers)
-        if recent:
-            score += 0.05
+        years = [p.get("year") or 0 for p in papers]
+        max_year = max(years) if years else 0
+        current_year = datetime.datetime.now().year
+        if max_year >= current_year - 2:
+            recency_score = 1.0
+        elif max_year >= current_year - 4:
+            recency_score = 0.6
+        elif max_year >= current_year - 6:
+            recency_score = 0.3
+
+    w = _JOURNAL_WEIGHTS.get(journal_code, _DEFAULT_WEIGHTS) if journal_code else _DEFAULT_WEIGHTS
+    score = (
+        w["topic"] * topic_score
+        + w["pub"] * pub_score
+        + w["seniority"] * seniority_score
+        + w["trust"] * trust_score
+        + w["recency"] * recency_score
+    )
+
+    if response_predictor is not None and manuscript is not None:
+        try:
+            p_accept = response_predictor.predict_for_candidate(
+                candidate, manuscript, journal_code or ""
+            )
+            candidate["_predicted_p_accept"] = p_accept
+            score += 0.05 * p_accept
+        except (ValueError, RuntimeError) as e:
+            print(f"   Warning: response prediction failed: {e}")
+
+    try:
+        db = referee_db
+        if db is None:
+            from pipeline.referee_db import RefereeDB
+
+            db = RefereeDB()
+        tr = db.get_track_record(candidate.get("name", ""))
+        if tr and tr.get("invitations", 0) >= 2:
+            candidate["referee_history"] = tr
+            track_bonus = 0.0
+            acc_rate = tr.get("acceptance_rate", 0)
+            if acc_rate >= 0.7:
+                track_bonus += 0.04
+            elif acc_rate >= 0.5:
+                track_bonus += 0.02
+            elif acc_rate < 0.3:
+                track_bonus -= 0.05
+            avg_days = tr.get("avg_review_days")
+            if avg_days and avg_days < 35:
+                track_bonus += 0.03
+            elif avg_days and avg_days > 90:
+                track_bonus -= 0.03
+            quality = tr.get("avg_quality")
+            if quality and quality > 0.5:
+                track_bonus += 0.03
+
+            if journal_code:
+                j_stats = db.get_journal_stats(candidate.get("name", ""), journal_code)
+                if j_stats and j_stats.get("total_invitations", 0) >= 2:
+                    j_acc = j_stats["total_accepted"] / j_stats["total_invitations"]
+                    if j_acc >= 0.7:
+                        track_bonus += 0.03
+
+            overdue_rate = tr.get("overdue_rate")
+            if overdue_rate and overdue_rate > 0.5:
+                track_bonus -= 0.05
+
+            qt = tr.get("quality_trend", [])
+            if len(qt) >= 2 and qt[-1] > qt[0]:
+                track_bonus += 0.02
+
+            profile = db.get_profile(candidate.get("name", ""))
+            if profile:
+                pq = profile.get("percentile_quality")
+                if pq is not None:
+                    track_bonus += 0.06 * (pq / 100.0)
+                ps = profile.get("percentile_speed")
+                if ps is not None:
+                    track_bonus += 0.03 * (1.0 - ps / 100.0)
+
+                if profile.get("last_invited_date"):
+                    try:
+                        last_inv = datetime.datetime.strptime(
+                            profile["last_invited_date"][:10], "%Y-%m-%d"
+                        ).date()
+                        days_since = (datetime.datetime.now().date() - last_inv).days
+                        if days_since < 60:
+                            score -= 0.05
+                            candidate["_cooling_off_days"] = days_since
+                    except (ValueError, TypeError):
+                        pass
+
+            score += track_bonus
+    except Exception:
+        pass
 
     return round(min(1.0, score), 3)
 

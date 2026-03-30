@@ -8,20 +8,18 @@ checks conflicts, and produces a recommendation report.
 import json
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional
 
 import requests
-
 from core.academic_apis import AcademicProfileEnricher
+from core.file_utils import load_latest_extraction as load_journal_data
 from core.output_schema import JOURNAL_NAME_MAP, PLATFORM_MAP
+
+from pipeline import JOURNALS, OUTPUTS_DIR, normalize_name
 from pipeline.conflict_checker import check_conflicts
 from pipeline.desk_rejection import assess_desk_rejection
 from pipeline.referee_finder import find_referees
 
 PIPELINE_VERSION = "0.1.0"
-
-OUTPUTS_DIR = Path(__file__).parent.parent.parent / "outputs"
-JOURNALS = ["mf", "mor", "fs", "jota", "mafe", "sicon", "sifin", "naco"]
 
 AWAITING_REFEREE_CONFIG = {
     "ScholarOne": {
@@ -36,7 +34,7 @@ AWAITING_REFEREE_CONFIG = {
         ],
     },
     "Editorial Manager": {
-        "status_needs_referee_check": ["Under Review", "With Referees", "Submitted to Journal"],
+        "status_needs_referee_check": ["Under Review", "With Referees"],
     },
     "EditFlow (MSP)": {
         "status_needs_referee_check": ["Under Review"],
@@ -63,11 +61,11 @@ def is_awaiting_referee(manuscript: dict, platform: str) -> bool:
     for pattern in config.get("status_contains", []):
         if pattern.lower() in status.lower():
             return True
-        main_status = (ps.get("status_details", {}).get("main_status") or "").strip()
+        main_status = ((ps.get("status_details") or {}).get("main_status") or "").strip()
         if pattern.lower() in main_status.lower():
             return True
 
-    current_stage = (ps.get("metadata", {}).get("current_stage") or "").strip()
+    current_stage = ((ps.get("metadata") or {}).get("current_stage") or "").strip()
     for val in config.get("stage_values", []):
         if val.lower() == current_stage.lower():
             return True
@@ -95,29 +93,6 @@ def is_awaiting_referee(manuscript: dict, platform: str) -> bool:
     return False
 
 
-def find_latest_output(journal: str) -> Optional[Path]:
-    journal_dir = OUTPUTS_DIR / journal.lower()
-    if not journal_dir.exists():
-        return None
-    files = sorted(journal_dir.glob("*.json"), key=lambda f: f.stat().st_mtime, reverse=True)
-    for f in files:
-        if "BASELINE" in f.name or "debug" in str(f) or "recommendation" in str(f):
-            continue
-        return f
-    return None
-
-
-def load_journal_data(journal: str) -> Optional[dict]:
-    path = find_latest_output(journal)
-    if not path:
-        return None
-    try:
-        with open(path) as f:
-            return json.load(f)
-    except (json.JSONDecodeError, OSError):
-        return None
-
-
 class RefereePipeline:
     def __init__(self, use_llm: bool = False, max_candidates: int = 15):
         self.use_llm = use_llm
@@ -127,14 +102,87 @@ class RefereePipeline:
             {"User-Agent": "Editorial-Scripts/1.0 (mailto:dylansmb@gmail.com)"}
         )
         self.enricher = AcademicProfileEnricher(self.session)
+        self.expertise_index = None
+        self.response_predictor = None
+        self.outcome_predictor = None
+        self._load_models()
 
-    def run_single(self, journal_code: str, manuscript_id: str) -> dict:
+    def _load_models(self):
+        if self._models_are_stale():
+            print("   Models are stale — retraining...")
+            try:
+                from pipeline.training import ModelTrainer
+
+                trainer = ModelTrainer()
+                trainer.train_all()
+            except (ImportError, AttributeError, RuntimeError, ValueError) as e:
+                print(f"   Auto-retrain failed: {e}")
+
+        try:
+            from pipeline.models.expertise_index import ExpertiseIndex
+
+            idx = ExpertiseIndex()
+            if idx.load():
+                self.expertise_index = idx
+                print(f"   Loaded expertise index ({len(idx.referees)} referees)")
+        except (ImportError, AttributeError, OSError, RuntimeError) as e:
+            print(f"   Expertise index not available: {e}")
+        try:
+            from pipeline.models.response_predictor import RefereeResponsePredictor
+
+            rp = RefereeResponsePredictor()
+            if rp.load():
+                self.response_predictor = rp
+                print("   Loaded response predictor")
+        except (ImportError, AttributeError, OSError, RuntimeError) as e:
+            print(f"   Response predictor not available: {e}")
+        try:
+            from pipeline.models.outcome_predictor import ManuscriptOutcomePredictor
+
+            op = ManuscriptOutcomePredictor()
+            if op.load():
+                self.outcome_predictor = op
+                print("   Loaded outcome predictor")
+        except (ImportError, AttributeError, OSError, RuntimeError) as e:
+            print(f"   Outcome predictor not available: {e}")
+
+    def _models_are_stale(self) -> bool:
+        models_dir = OUTPUTS_DIR.parent / "models"
+        marker = models_dir / ".last_trained"
+        if not marker.exists():
+            return True
+        marker_mtime = marker.stat().st_mtime
+        latest_extraction = 0.0
+        for journal_dir in OUTPUTS_DIR.iterdir():
+            if not journal_dir.is_dir():
+                continue
+            for json_path in journal_dir.glob("*_extraction_*.json"):
+                mtime = json_path.stat().st_mtime
+                if mtime > latest_extraction:
+                    latest_extraction = mtime
+        if latest_extraction == 0.0:
+            return False
+        return latest_extraction > marker_mtime
+
+    def run_single(
+        self, journal_code: str, manuscript_id: str, extraction_path: str | None = None
+    ) -> dict:
         jc = journal_code.upper()
         print(f"\n{'='*60}")
         print(f"Pipeline: {jc} / {manuscript_id}")
         print(f"{'='*60}")
 
-        data = load_journal_data(journal_code)
+        data = None
+        if extraction_path:
+            import json as _json
+            from pathlib import Path as _Path
+
+            try:
+                data = _json.loads(_Path(extraction_path).read_text())
+            except Exception as e:
+                print(f"   Could not load source file {extraction_path}: {e}")
+        if not data:
+            data = load_journal_data(journal_code)
         if not data:
             print(f"   No extraction data found for {jc}")
             return {}
@@ -169,46 +217,79 @@ class RefereePipeline:
             return []
 
         print(f"Found {len(pending)} manuscript(s) awaiting referee assignment in {jc}")
-        reports = []
-        for ms in pending:
-            report = self._process_manuscript(ms, jc)
-            if report:
-                reports.append(report)
-        return reports
-
-    def _process_manuscript(self, manuscript: dict, journal_code: str) -> dict:
-        ms_id = manuscript.get("manuscript_id", "?")
-        title = manuscript.get("title", "?")
-        print(f"\n   Processing: {ms_id}")
-        print(f"   Title: {title[:80]}{'...' if len(title) > 80 else ''}")
-
         all_journals = {}
         for j in JOURNALS:
             jd = load_journal_data(j)
             if jd:
                 all_journals[j] = jd
+        reports = []
+        for ms in pending:
+            report = self._process_manuscript(ms, jc, all_journals)
+            if report:
+                reports.append(report)
+        return reports
 
-        print("   [1/4] Desk rejection assessment...")
-        desk = assess_desk_rejection(manuscript, journal_code, all_journals, use_llm=self.use_llm)
+    def _process_manuscript(
+        self, manuscript: dict, journal_code: str, all_journals: dict | None = None
+    ) -> dict:
+        ms_id = manuscript.get("manuscript_id", "?")
+        title = manuscript.get("title", "?")
+        print(f"\n   Processing: {ms_id}")
+        print(f"   Title: {title[:80]}{'...' if len(title) > 80 else ''}")
+
+        if all_journals is None:
+            all_journals = {}
+            for j in JOURNALS:
+                jd = load_journal_data(j)
+                if jd:
+                    all_journals[j] = jd
+
+        from pipeline.report_quality import assess_report_quality
+
+        print("   [1/5] Report quality assessment...")
+        rq = assess_report_quality(manuscript)
+        if rq["n_reports"] > 0:
+            print(f"   >> {rq['n_reports']} reports, quality={rq['overall_quality']:.2f}")
+        else:
+            print("   >> No reports available")
+
+        print("   [2/5] Desk rejection assessment...")
+        desk = assess_desk_rejection(
+            manuscript,
+            journal_code,
+            all_journals,
+            use_llm=self.use_llm,
+            outcome_predictor=self.outcome_predictor,
+            report_quality=rq,
+        )
         if desk["should_desk_reject"]:
             print(f"   >> DESK REJECT (confidence={desk['confidence']}): {desk['summary']}")
         else:
             print(f"   >> Pass (confidence={desk['confidence']})")
 
         candidates = []
+        api_calls = {}
         if not desk["should_desk_reject"] or desk["confidence"] < 0.8:
-            print("   [2/4] Searching for referee candidates...")
-            candidates = find_referees(
-                manuscript, journal_code, self.enricher, self.session, self.max_candidates
+            print("   [3/5] Searching for referee candidates...")
+            candidates, api_calls = find_referees(
+                manuscript,
+                journal_code,
+                self.enricher,
+                self.session,
+                self.max_candidates,
+                expertise_index=self.expertise_index,
+                response_predictor=self.response_predictor,
             )
             print(f"   >> Found {len(candidates)} candidates")
 
             rec = manuscript.get("referee_recommendations", {})
             if not rec:
-                rec = manuscript.get("platform_specific", {}).get("referee_recommendations", {})
+                rec = (manuscript.get("platform_specific") or {}).get(
+                    "referee_recommendations"
+                ) or {}
             opposed = rec.get("opposed_referees", [])
 
-            print("   [3/4] Checking conflicts...")
+            print("   [4/5] Checking conflicts...")
             for c in candidates:
                 conflicts = check_conflicts(
                     c,
@@ -220,22 +301,36 @@ class RefereePipeline:
                 c["conflicts"] = conflicts
                 c["is_conflicted"] = len(conflicts) > 0
 
-                opp_names = {_norm(o.get("name", "")) for o in opposed if o.get("name")}
+                opp_names = {normalize_name(o.get("name", "")) for o in opposed if o.get("name")}
                 opp_emails = {(o.get("email") or "").lower() for o in opposed if o.get("email")}
-                c["author_opposed"] = (c.get("email") or "").lower() in opp_emails or _norm(
-                    c.get("name", "")
-                ) in opp_names
+                c["author_opposed"] = (
+                    c.get("email") or ""
+                ).lower() in opp_emails or normalize_name(c.get("name", "")) in opp_names
 
             conflicted_count = sum(1 for c in candidates if c["is_conflicted"])
             print(
                 f"   >> {conflicted_count} conflicted, {len(candidates) - conflicted_count} clean"
             )
         else:
-            print("   [2/4] Skipping referee search (desk rejection recommended)")
-            print("   [3/4] Skipping conflict check")
+            print("   [3/5] Skipping referee search (desk rejection recommended)")
+            print("   [4/5] Skipping conflict check")
 
-        print("   [4/4] Building report...")
-        report = self._build_report(manuscript, journal_code, desk, candidates)
+        try:
+            from pipeline.referee_db import RefereeDB
+
+            db = RefereeDB()
+            ms_id = manuscript.get("manuscript_id", "unknown")
+            for c in candidates:
+                if c.get("is_conflicted"):
+                    continue
+                p_accept = c.get("_predicted_p_accept")
+                if p_accept is not None:
+                    db.store_prediction(c["name"], journal_code, ms_id, p_accept)
+        except Exception:
+            pass
+
+        print("   [5/5] Building report...")
+        report = self._build_report(manuscript, journal_code, desk, candidates, rq, api_calls)
         self._save_report(report, journal_code)
         self._print_summary(report)
         return report
@@ -246,27 +341,30 @@ class RefereePipeline:
         journal_code: str,
         desk: dict,
         candidates: list,
+        report_quality: dict = None,
+        api_calls: dict = None,
     ) -> dict:
         clean = [c for c in candidates if not c["is_conflicted"]]
         conflicted = [c for c in candidates if c["is_conflicted"]]
 
         clean.sort(key=lambda x: -x["relevance_score"])
+        conflicted.sort(key=lambda x: -x["relevance_score"])
         top = clean[: self.max_candidates]
         for i, c in enumerate(top, 1):
             c["rank"] = i
 
         rec = manuscript.get("referee_recommendations", {})
         if not rec:
-            rec = manuscript.get("platform_specific", {}).get("referee_recommendations", {})
+            rec = (manuscript.get("platform_specific") or {}).get("referee_recommendations") or {}
         suggested_status = {}
         for r in rec.get("recommended_referees", []):
             name = r.get("name", "?")
-            matched = any(self.enricher._name_match(c.get("name", ""), name) for c in top)
+            matched = any(self.enricher.name_match(c.get("name", ""), name) for c in top)
             if matched:
                 suggested_status[name] = "recommended"
             else:
                 in_conflicted = any(
-                    self.enricher._name_match(c.get("name", ""), name) for c in conflicted
+                    self.enricher.name_match(c.get("name", ""), name) for c in conflicted
                 )
                 suggested_status[name] = "conflict" if in_conflicted else "not_found"
 
@@ -281,13 +379,30 @@ class RefereePipeline:
             "referee_candidates": _sanitize_candidates(top),
             "conflicted_candidates": _sanitize_candidates(conflicted[:10]),
             "author_suggested_status": suggested_status,
+            "report_quality": report_quality or {},
             "metadata": {
+                "api_calls": api_calls or {},
                 "candidates_found": len(candidates),
-                "candidates_clean": len(clean),
+                "candidates_after_conflict_filter": len(clean),
                 "candidates_conflicted": len(conflicted),
                 "top_returned": len(top),
+                "models": self._model_metadata(),
             },
         }
+
+    def _model_metadata(self) -> dict:
+        info = {
+            "expertise_index": None,
+            "response_predictor": None,
+            "outcome_predictor": None,
+        }
+        if self.expertise_index is not None:
+            info["expertise_index"] = {"n_referees": len(self.expertise_index.referees)}
+        if self.response_predictor is not None:
+            info["response_predictor"] = {"loaded": True}
+        if self.outcome_predictor is not None:
+            info["outcome_predictor"] = {"loaded": True}
+        return info
 
     def _save_report(self, report: dict, journal_code: str) -> Path:
         rec_dir = OUTPUTS_DIR / journal_code.lower() / "recommendations"
@@ -340,22 +455,23 @@ class RefereePipeline:
 
         suggested = report.get("author_suggested_status", {})
         if suggested:
-            print(f"\n  Author-suggested referees:")
+            print("\n  Author-suggested referees:")
             for name, status in suggested.items():
                 print(f"    {name}: {status}")
 
         print()
 
 
-def _norm(s: str) -> str:
-    import unicodedata
-
-    return unicodedata.normalize("NFKD", s).encode("ascii", "ignore").decode().lower().strip()
-
-
 def _sanitize_candidates(candidates: list) -> list:
     clean = []
-    skip_keys = {"web_profile", "_hist_journal", "_hist_ms", "_hist_overlap"}
+    skip_keys = {
+        "web_profile",
+        "_hist_journal",
+        "_hist_ms",
+        "_hist_overlap",
+        "_predicted_p_accept",
+        "_referee_stats",
+    }
     for c in candidates:
         out = {k: v for k, v in c.items() if k not in skip_keys}
         clean.append(out)

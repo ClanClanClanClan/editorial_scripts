@@ -21,16 +21,16 @@ Usage:
     python3 run_extractors.py --status
 """
 
-import os
-import sys
-import json
 import argparse
+import json
 import logging
+import sys
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Optional
 
-# Add production extractors to path
+# Add production source to path
+sys.path.insert(0, str(Path(__file__).parent / "production/src"))
 sys.path.insert(0, str(Path(__file__).parent / "production/src/extractors"))
 
 
@@ -160,7 +160,34 @@ class ExtractorOrchestrator:
         print(f"⚠️ TODO: {len(todo)} extractors ({', '.join(todo)})")
         print()
 
-    def run_extractor(self, journal_id: str, headless: bool = True) -> Optional[Dict]:
+    def _dispatch_events(self, journal_id: str):
+        try:
+            from core.event_dispatcher import process_extraction
+
+            outputs_dir = Path(__file__).parent / "production" / "outputs"
+            journal_dir = outputs_dir / journal_id
+            files = sorted(journal_dir.glob(f"{journal_id}_extraction_*.json"))
+            if not files:
+                return
+            source_path = str(files[-1])
+            with open(files[-1]) as f:
+                data = json.load(f)
+            events = process_extraction(data, journal_id, source_file=source_path)
+            if events:
+                self.logger.info(f"{len(events)} state change(s) detected")
+            self._backfill_referee_db()
+        except Exception as e:
+            self.logger.warning(f"Event dispatch failed: {e}")
+
+    def _backfill_referee_db(self):
+        try:
+            from pipeline.referee_db_backfill import backfill
+
+            backfill(incremental=True)
+        except Exception as e:
+            self.logger.warning(f"Referee DB backfill failed: {e}")
+
+    def run_extractor(self, journal_id: str, headless: bool = True) -> Optional[dict]:
         """Run a specific extractor.
 
         Args:
@@ -221,7 +248,7 @@ class ExtractorOrchestrator:
                 manuscript_count = len(extractor.manuscripts_data)
 
             if manuscript_count > 0:
-                self.logger.info(f"Extraction completed successfully")
+                self.logger.info("Extraction completed successfully")
                 self.logger.info(f"Duration: {duration:.1f} seconds")
                 self.logger.info(f"Manuscripts: {manuscript_count}")
 
@@ -232,6 +259,8 @@ class ExtractorOrchestrator:
                     "duration_seconds": duration,
                     "manuscripts_count": manuscript_count,
                 }
+
+                self._dispatch_events(journal_id)
 
                 return extraction_data
 
@@ -252,7 +281,7 @@ class ExtractorOrchestrator:
             except Exception as e:
                 self.logger.warning(f"Cleanup error for {journal_id}: {e}")
 
-    def run_all_working(self, headless: bool = True) -> Dict[str, Optional[Dict]]:
+    def run_all_working(self, headless: bool = True) -> dict[str, Optional[dict]]:
         """Run all working extractors.
 
         Args:
@@ -269,12 +298,14 @@ class ExtractorOrchestrator:
 
         self.logger.info(f"Running all working extractors: {working_extractors}")
 
+        headful_journals = {"sicon", "sifin", "mf", "mor"}
         results = {}
         for journal_id in working_extractors:
             print(f"\n🚀 STARTING {journal_id.upper()} EXTRACTION")
             print("-" * 50)
 
-            result = self.run_extractor(journal_id, headless=headless)
+            journal_headless = False if journal_id in headful_journals else headless
+            result = self.run_extractor(journal_id, headless=journal_headless)
             results[journal_id] = result
 
             if result:
@@ -286,7 +317,7 @@ class ExtractorOrchestrator:
 
         return results
 
-    def get_recent_results(self, journal_id: Optional[str] = None) -> List[Dict]:
+    def get_recent_results(self, journal_id: Optional[str] = None) -> list[dict]:
         """Get recent extraction results.
 
         Args:
@@ -320,6 +351,19 @@ class ExtractorOrchestrator:
         return results
 
 
+def _retrain_models():
+    print("\n🔄 RETRAINING ML MODELS")
+    print("=" * 40)
+    try:
+        sys.path.insert(0, str(Path(__file__).parent / "production/src"))
+        from pipeline.training import ModelTrainer
+
+        trainer = ModelTrainer()
+        trainer.train_all()
+    except Exception as e:
+        print(f"❌ Retrain failed: {e}")
+
+
 def main():
     """Main entry point."""
     parser = argparse.ArgumentParser(description="Editorial Extractors Runner")
@@ -333,7 +377,9 @@ def main():
     parser.add_argument("--status", action="store_true", help="Show status of all extractors")
     parser.add_argument("--report", action="store_true", help="Cross-journal summary report")
     parser.add_argument("--json", action="store_true", help="Save JSON output (use with --report)")
+    parser.add_argument("--dashboard", action="store_true", help="Generate HTML dashboard")
     parser.add_argument("--recent", action="store_true", help="Show recent extraction results")
+    parser.add_argument("--retrain", action="store_true", help="Retrain ML models after extraction")
     parser.add_argument(
         "--visible", action="store_true", help="Run with visible browser (default: headless)"
     )
@@ -348,6 +394,14 @@ def main():
 
     if args.status:
         orchestrator.show_status()
+
+    elif args.dashboard:
+        import subprocess
+
+        subprocess.run(
+            [sys.executable, str(Path(__file__).parent / "scripts" / "generate_dashboard.py")],
+            check=True,
+        )
 
     elif args.report:
         sys.path.insert(0, str(Path(__file__).parent / "production/src"))
@@ -378,19 +432,21 @@ def main():
         result = orchestrator.run_extractor(args.journal, headless=headless)
 
         if result:
-            print(f"\n✅ EXTRACTION COMPLETED")
+            print("\n✅ EXTRACTION COMPLETED")
             print(f"Journal: {result['journal_name']}")
             print(f"Manuscripts: {result['manuscripts_count']}")
             print(f"Duration: {result['duration_seconds']:.1f} seconds")
+            if args.retrain:
+                _retrain_models()
         else:
-            print(f"\n❌ EXTRACTION FAILED")
+            print("\n❌ EXTRACTION FAILED")
             sys.exit(1)
 
     elif args.all:
         headless = not args.visible
         results = orchestrator.run_all_working(headless=headless)
 
-        print(f"\n📊 ALL EXTRACTORS SUMMARY")
+        print("\n📊 ALL EXTRACTORS SUMMARY")
         print("=" * 40)
 
         total_manuscripts = 0
@@ -407,6 +463,11 @@ def main():
                 print(f"❌ {journal_id.upper():6}: FAILED")
 
         print(f"\nTotal: {successful}/{len(results)} successful, {total_manuscripts} manuscripts")
+        if args.retrain and successful > 0:
+            _retrain_models()
+
+    elif args.retrain:
+        _retrain_models()
 
     else:
         parser.print_help()

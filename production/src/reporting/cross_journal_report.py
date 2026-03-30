@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 import json
 import sys
+import unicodedata
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Optional
 
 OUTPUTS_DIR = Path(__file__).parent.parent.parent / "outputs"
 
@@ -32,45 +33,133 @@ PLATFORMS = {
 }
 
 
-def find_latest_output(journal: str) -> Optional[Path]:
+def _list_extraction_files(journal: str) -> list[Path]:
     journal_dir = OUTPUTS_DIR / journal
     if not journal_dir.exists():
-        return None
-    files = sorted(journal_dir.glob("*.json"), key=lambda f: f.stat().st_mtime, reverse=True)
-    for f in files:
-        if "BASELINE" in f.name or "debug" in str(f):
-            continue
-        return f
-    return None
+        return []
+    skip = ("BASELINE", "debug", "rec_", "partial", "ae_", "recommendation")
+    return sorted(
+        [f for f in journal_dir.glob("*.json") if not any(s in f.name for s in skip)],
+        key=lambda f: f.name,
+        reverse=True,
+    )
 
 
-def load_journal_data(journal: str) -> Optional[Dict]:
-    path = find_latest_output(journal)
-    if not path:
-        return None
+def find_latest_output(journal: str) -> Optional[Path]:
+    files = _list_extraction_files(journal)
+    return files[0] if files else None
+
+
+def _load_json(path: Path) -> Optional[dict]:
     try:
         with open(path) as f:
-            data = json.load(f)
-        data["_source_file"] = path.name
-        data["_source_path"] = str(path)
-        return data
+            return json.load(f)
     except (json.JSONDecodeError, OSError):
         return None
 
 
-def compute_journal_stats(journal: str, data: Dict) -> Dict:
+def load_journal_data(journal: str) -> Optional[dict]:
+    files = _list_extraction_files(journal)
+    if not files:
+        return None
+
+    latest = _load_json(files[0])
+    if not latest:
+        return None
+
+    latest["_source_file"] = files[0].name
+    latest["_source_path"] = str(files[0])
+
+    manifest = latest.get("dashboard_manifest")
+    if not manifest or not manifest.get("scanned"):
+        return latest
+
+    discovered_ids = set()
+    for ids in manifest["scanned"].values():
+        discovered_ids.update(ids)
+    failed_categories = set(manifest.get("failed", []))
+
+    latest_ids = {m.get("manuscript_id") for m in latest.get("manuscripts", [])}
+    ms_by_id = {m.get("manuscript_id"): m for m in latest.get("manuscripts", [])}
+
+    need_from_older = discovered_ids - latest_ids
+    if need_from_older or failed_categories:
+        for older_path in files[1:]:
+            older = _load_json(older_path)
+            if not older:
+                continue
+            for m in older.get("manuscripts", []):
+                ms_id = m.get("manuscript_id")
+                if not ms_id or ms_id in ms_by_id:
+                    continue
+                if ms_id in need_from_older:
+                    ms_by_id[ms_id] = m
+                    need_from_older.discard(ms_id)
+                elif failed_categories:
+                    ms_cat = (m.get("category") or "").strip()
+                    if ms_cat in failed_categories:
+                        ms_by_id[ms_id] = m
+            if not need_from_older:
+                break
+
+    latest["manuscripts"] = list(ms_by_id.values())
+    return latest
+
+
+INACTIVE_REFEREE_STATUSES = {
+    "Reviewer Declined",
+    "Declined",
+    "Un-invited Before Agreeing to Review",
+    "Un-assigned After Agreeing to Review",
+    "Terminated After Agreeing to Review",
+    "No Response",
+    "No response",
+    "Un-invited",
+    "Un-assigned",
+    "Terminated",
+}
+
+_INACTIVE_LOWER = {s.lower() for s in INACTIVE_REFEREE_STATUSES}
+
+
+def _dedup_referees(referees: list[dict]) -> list[dict]:
+    seen = set()
+    unique = []
+    for ref in referees:
+        name = (ref.get("name") or "").strip().lower()
+        if not name or name in seen:
+            continue
+        seen.add(name)
+        unique.append(ref)
+    return unique
+
+
+def _is_active_referee(ref: dict) -> bool:
+    status = ref.get("platform_specific", {}).get("status") or ref.get("status") or ""
+    return status.strip().lower() not in _INACTIVE_LOWER
+
+
+def compute_journal_stats(journal: str, data: dict) -> dict:
     manuscripts = data.get("manuscripts", [])
     ms_count = len(manuscripts)
 
-    total_refs = sum(len(m.get("referees", [])) for m in manuscripts)
-    total_authors = sum(len(m.get("authors", [])) for m in manuscripts)
+    ms_deduped = {m.get("manuscript_id", id(m)): m for m in manuscripts}
+    manuscripts = list(ms_deduped.values())
+    ms_count = len(manuscripts)
 
-    enriched = sum(
-        1
-        for m in manuscripts
-        for p in m.get("referees", []) + m.get("authors", [])
-        if p.get("web_profile")
-    )
+    total_refs = 0
+    active_refs = 0
+    total_authors = 0
+    enriched = 0
+
+    for m in manuscripts:
+        refs = _dedup_referees(m.get("referees", []))
+        authors = m.get("authors", [])
+        total_refs += len(refs)
+        active_refs += sum(1 for r in refs if _is_active_referee(r))
+        total_authors += len(authors)
+        enriched += sum(1 for p in refs + authors if p.get("web_profile"))
+
     total_people = total_refs + total_authors
 
     span_days = []
@@ -103,7 +192,8 @@ def compute_journal_stats(journal: str, data: Dict) -> Dict:
         "journal_name": JOURNAL_NAMES.get(journal, journal),
         "platform": PLATFORMS.get(journal, ""),
         "manuscripts": ms_count,
-        "referees": total_refs,
+        "referees": active_refs,
+        "referees_all": total_refs,
         "authors": total_authors,
         "enriched": enriched,
         "total_people": total_people,
@@ -117,7 +207,7 @@ def compute_journal_stats(journal: str, data: Dict) -> Dict:
     }
 
 
-def print_terminal_report(all_stats: List[Dict]):
+def print_terminal_report(all_stats: list[dict]):
     print()
     print("╔══════════════════════════════════════════════════════════════════════════════════╗")
     print("║                       CROSS-JOURNAL EXTRACTION REPORT                          ║")
@@ -174,7 +264,7 @@ def print_terminal_report(all_stats: List[Dict]):
     print()
 
 
-def generate_json_report(all_stats: List[Dict]) -> Dict:
+def generate_json_report(all_stats: list[dict]) -> dict:
     return {
         "report_type": "cross_journal",
         "generated_at": datetime.now().isoformat(),
@@ -191,7 +281,29 @@ def generate_json_report(all_stats: List[Dict]) -> Dict:
     }
 
 
-def run_report(save_json: bool = False, output_dir: Optional[Path] = None) -> Dict:
+def _get_feedback_summary() -> dict | None:
+    try:
+        from pipeline.training import ModelTrainer
+
+        trainer = ModelTrainer()
+        stats = trainer.get_feedback_stats()
+        if not stats:
+            return None
+        total = sum(s["total"] for s in stats.values())
+        return {"total": total, "journals": stats}
+    except (ImportError, OSError):
+        return None
+
+
+def _print_feedback_summary(feedback: dict):
+    print(f"  Feedback: {feedback['total']} outcomes recorded")
+    for journal, s in sorted(feedback["journals"].items()):
+        decisions = ", ".join(f"{k}: {v}" for k, v in s["decisions"].items())
+        print(f"    {journal.upper()}: {s['total']} — {decisions}")
+    print()
+
+
+def run_report(save_json: bool = False, output_dir: Optional[Path] = None) -> dict:
     all_stats = []
     for journal in JOURNALS:
         data = load_journal_data(journal)
@@ -221,7 +333,13 @@ def run_report(save_json: bool = False, output_dir: Optional[Path] = None) -> Di
 
     print_terminal_report(all_stats)
 
+    feedback = _get_feedback_summary()
+    if feedback:
+        _print_feedback_summary(feedback)
+
     report = generate_json_report(all_stats)
+    if feedback:
+        report["feedback"] = feedback
 
     if save_json:
         out_dir = output_dir or OUTPUTS_DIR
@@ -232,6 +350,46 @@ def run_report(save_json: bool = False, output_dir: Optional[Path] = None) -> Di
         print(f"  💾 JSON report saved: {out_file}")
 
     return report
+
+
+def _normalize_name(s: str) -> str:
+    return unicodedata.normalize("NFKD", s).encode("ascii", "ignore").decode().lower().strip()
+
+
+def find_author_across_journals(author_name, exclude_journal=None, exclude_manuscript_id=None):
+    target = _normalize_name(author_name)
+    if not target:
+        return []
+
+    results = []
+    for journal in JOURNALS:
+        if exclude_journal and journal.lower() == exclude_journal.lower():
+            continue
+        data = load_journal_data(journal)
+        if not data:
+            continue
+        for ms in data.get("manuscripts", []):
+            ms_id = ms.get("manuscript_id", "")
+            if exclude_manuscript_id and ms_id == exclude_manuscript_id:
+                continue
+            authors = ms.get("authors", [])
+            matched = False
+            for author in authors:
+                name = author.get("name") or author.get("display_name") or ""
+                if _normalize_name(name) == target:
+                    matched = True
+                    break
+            if matched:
+                results.append(
+                    {
+                        "journal": journal.upper(),
+                        "manuscript_id": ms_id,
+                        "title": ms.get("title", ""),
+                        "status": ms.get("status", ""),
+                        "submission_date": ms.get("submission_date"),
+                    }
+                )
+    return results
 
 
 if __name__ == "__main__":

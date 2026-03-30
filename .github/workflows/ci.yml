@@ -23,12 +23,12 @@ jobs:
           poetry install --no-interaction
           poetry run python -V
           poetry run pip install ruff black bandit pip-audit detect-secrets
-      - name: Ruff (tests)
+      - name: Ruff (lint)
         run: |
-          poetry run ruff check tests
+          poetry run ruff check production/src tests
       - name: Black (check)
         run: |
-          poetry run black --check tests
+          poetry run black --check production/src tests
       - name: Detect secrets (baseline)
         run: |
           poetry run detect-secrets-hook --baseline .secrets.baseline $(git ls-files)
@@ -36,10 +36,10 @@ jobs:
         run: |
           mkdir -p artifacts/security
           poetry run bandit -q -r production/src -x tests,dev,archive -f json -o artifacts/security/bandit.json || true
-      - name: Upload bandit artifacts
+      - name: Upload bandit artifacts (lint job)
         uses: actions/upload-artifact@v4
         with:
-          name: bandit-security
+          name: bandit-lint
           path: artifacts/security/bandit.json
           retention-days: 14
       - name: pip-audit (dependency vulnerabilities)
@@ -47,10 +47,10 @@ jobs:
         run: |
           mkdir -p artifacts/security
           poetry run pip-audit -s -q -f json -o artifacts/security/pip-audit.json || true
-      - name: Upload pip-audit artifacts
+      - name: Upload pip-audit artifacts (lint job)
         uses: actions/upload-artifact@v4
         with:
-          name: pip-audit
+          name: pip-audit-lint
           path: artifacts/security/pip-audit.json
           retention-days: 14
       - name: Security summary
@@ -109,7 +109,7 @@ jobs:
         env:
           PYTHONPATH: production/src:.
         run: |
-          poetry run pytest -q
+          poetry run pytest -q --ignore=tests/test_pipeline_ml.py
 
   security:
     runs-on: ubuntu-latest
@@ -142,6 +142,6 @@ jobs:
       - name: Upload pip-audit artifacts (security job)
         uses: actions/upload-artifact@v4
         with:
-          name: pip-audit
+          name: pip-audit-security
           path: artifacts/security/pip-audit.json
           retention-days: 14

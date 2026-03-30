@@ -9,15 +9,31 @@
 
 ## Project Overview
 
-Dylan Possamai's manuscript extraction system for 8 academic journals.
-- **Purpose**: Extract referee reports, manuscripts, and metadata
-- **Architecture**: Selenium WebDriver + Gmail API
-- **Status**: 8 extractors working (MF, MOR, FS, JOTA, MAFE, SICON, SIFIN, NACO)
+Dylan Possamai's end-to-end editorial management system for 8 academic journals.
+- **Purpose**: Extract referee reports, manuscripts, and metadata; detect state changes; recommend referees; generate AE decision reports
+- **Architecture**: Extraction (Selenium + Gmail API) → Event System (state detection) → ML Pipeline (referee recommendation) → Dashboard (Flask + HTML)
+- **Status**: 8 extractors working, event-driven pipeline operational, dashboard with referee intelligence
+
+### System Architecture
+
+```
+Extractors (8 journals)
+    ↓ JSON outputs
+State Store (SQLite) → Event Dispatcher
+    ↓ typed events (NEW_MANUSCRIPT, ALL_REPORTS_IN, STATUS_CHANGED)
+Event Processor
+    ├── NEW_MANUSCRIPT → Referee Pipeline (desk rejection + candidate search)
+    └── ALL_REPORTS_IN → AE Report Generator (Claude API / clipboard)
+    ↓
+Dashboard Server (Flask :8421) ← API endpoints
+    ↓
+Dashboard HTML (referee intelligence, action items, inline AE reports)
+```
 
 ### Project Structure
 ```
 editorial_scripts/
-├── production/src/extractors/     # ALL WORKING CODE HERE
+├── production/src/extractors/     # 8 journal extractors
 │   ├── mf_extractor.py           # MF - ScholarOne (ComprehensiveMFExtractor)
 │   ├── mor_extractor.py          # MOR - ScholarOne (MORExtractor)
 │   ├── fs_extractor.py           # FS - Gmail API (ComprehensiveFSExtractor)
@@ -26,42 +42,272 @@ editorial_scripts/
 │   ├── sicon_extractor.py        # SICON - SIAM (SICONExtractor)
 │   ├── sifin_extractor.py        # SIFIN - SIAM (SIFINExtractor)
 │   ├── naco_extractor.py         # NACO - EditFlow/MSP (NACOExtractor)
-│   └── generate_fs_timeline_report.py  # FS utility
-├── production/src/core/           # Shared utilities
+│   └── generate_fs_timeline_report.py
+├── production/src/core/           # Shared utilities & event system
 │   ├── scholarone_base.py        # ScholarOne base class (MF, MOR)
 │   ├── em_base.py                # Editorial Manager base class (JOTA, MAFE)
 │   ├── siam_base.py              # SIAM base class (SICON, SIFIN)
+│   ├── event_dispatcher.py       # State change detection → typed events
+│   ├── event_processor.py        # Event handler (AE reports, pipeline trigger)
+│   ├── state_store.py            # SQLite manuscript state tracking
 │   ├── cache_manager.py          # SQLite persistent cache
 │   ├── cache_integration.py      # CachedExtractorMixin
+│   ├── academic_apis.py          # AcademicProfileEnricher (S2, OpenAlex)
+│   ├── web_enrichment.py         # ORCID + CrossRef + S2 + OpenAlex enrichment
+│   ├── orcid_lookup.py           # ORCID API client with SQLite cache
+│   ├── output_schema.py          # Canonical output schema normalization
 │   ├── gmail_search.py           # Gmail timeline integration
-│   └── gmail_verification.py     # 2FA code fetching
-├── production/src/pipeline/       # Referee recommendation pipeline
-│   ├── referee_pipeline.py       # Orchestrator
-│   ├── desk_rejection.py         # Desk-rejection heuristics + optional LLM
-│   ├── referee_finder.py         # Candidate sourcing (OpenAlex, S2, historical)
-│   └── conflict_checker.py       # Conflict detection
-├── production/outputs/            # Extraction JSON results
-│   ├── mf/                       # MF outputs
-│   ├── mor/                      # MOR outputs
-│   ├── jota/                     # JOTA outputs
-│   ├── mafe/                     # MAFE outputs
-│   ├── sicon/                    # SICON outputs
-│   ├── sifin/                    # SIFIN outputs
-│   └── naco/                     # NACO outputs
-├── production/downloads/          # Downloaded documents
-│   ├── mf/                       # MF documents
-│   ├── mor/                      # MOR documents
-│   ├── jota/                     # JOTA documents
-│   └── mafe/                     # MAFE documents
+│   ├── gmail_verification.py     # 2FA code fetching
+│   └── scholarone_utils.py       # with_retry decorator, exponential backoff
+├── production/src/pipeline/       # ML pipeline & referee recommendation
+│   ├── __init__.py               # Constants: JOURNALS, OUTPUTS_DIR, MODELS_DIR, H_INDEX_CAP
+│   ├── referee_pipeline.py       # 5-step orchestrator
+│   ├── desk_rejection.py         # Heuristic + model + optional LLM assessment
+│   ├── referee_finder.py         # Candidate sourcing (OpenAlex, S2, historical, FAISS)
+│   ├── conflict_checker.py       # Institution, coauthorship, opposed, editor conflicts
+│   ├── embeddings.py             # SPECTER2 / MiniLM / TF-IDF embeddings + FAISS
+│   ├── training.py               # ModelTrainer: trains all 3 ML models
+│   ├── report_quality.py         # 6-dimension report quality scoring
+│   ├── ae_report.py              # AE recommendation report generator
+│   ├── ae_prompt_template.py     # Claude/ChatGPT prompt builder for AE reports
+│   ├── referee_db.py             # SQLite referee performance DB with learning
+│   ├── referee_db_backfill.py    # Populate referee DB from extraction history
+│   └── models/                   # Trained ML model artifacts
+│       ├── expertise_index.py    # FAISS semantic referee search
+│       ├── response_predictor.py # P(accept) and P(complete) prediction
+│       └── outcome_predictor.py  # P(manuscript_accepted) prediction
+├── production/src/reporting/      # Action items & cross-journal reports
+│   ├── action_items.py           # Priority-based editorial action computation
+│   └── cross_journal_report.py   # Cross-journal statistics aggregation
+├── production/outputs/            # All output data
+│   ├── {journal}/                # Extraction JSONs per journal (8 dirs)
+│   ├── {journal}/ae_reports/     # Generated AE recommendation reports
+│   ├── {journal}/recommendations/ # Referee recommendation reports
+│   └── dashboard.html            # Generated dashboard
+├── production/events/             # Event queue (JSONL)
+│   ├── pending.jsonl             # Unprocessed events
+│   └── processed.jsonl           # Processed event history
+├── production/models/             # ML model artifacts + referee DB
+│   ├── referee_profiles.db       # SQLite referee performance database
+│   ├── referee_index.faiss       # FAISS expertise index
+│   ├── referee_metadata.json     # Expertise index metadata
+│   ├── response_predictor.joblib # Trained response predictor
+│   ├── outcome_predictor.joblib  # Trained outcome predictor
+│   ├── training_metadata.json    # Model training metadata
+│   └── feedback/                 # Editorial decision feedback (JSONL)
+├── production/downloads/          # Downloaded manuscript documents
 ├── production/cache/              # SQLite cache databases
+├── scripts/                       # Operational scripts
+│   ├── dashboard_server.py       # Flask API server (port 8421)
+│   ├── generate_dashboard.py     # Static HTML dashboard generator
+│   ├── send_digest.py            # Weekly editorial digest email
+│   ├── weekly_run.sh             # Cron-triggered weekly extraction
+│   ├── setup_gmail_oauth.py      # Gmail OAuth token refresh
+│   └── admin/                    # LaunchAgent configs for auto-start
 ├── config/                        # Gmail OAuth tokens, journal configs
-├── archive/                       # Legacy code + skeleton extractors
-├── dev/                           # Development/testing sandbox
-├── docs/                          # Documentation
-├── tests/                         # Test suite
-├── run_extractors.py              # Orchestrator for all extractors
-└── run_pipeline.py                # Referee recommendation CLI
+├── tests/                         # 625 tests (pytest)
+├── run_extractors.py              # Extraction orchestrator
+└── run_pipeline.py                # Pipeline + AE report CLI
 ```
+
+---
+
+## Event-Driven Pipeline
+
+### Architecture
+
+After each extraction, the system detects state changes and emits typed events:
+
+1. **State Store** (`production/src/core/state_store.py`): SQLite DB at `production/cache/manuscript_state.db` tracks manuscript hashes
+2. **Event Dispatcher** (`production/src/core/event_dispatcher.py`): Compares new extraction to stored state, emits events to `production/events/pending.jsonl`
+3. **Event Processor** (`production/src/core/event_processor.py`): Reads pending events and dispatches actions
+
+### Event Types
+
+| Event | Trigger | Action |
+|-------|---------|--------|
+| `NEW_MANUSCRIPT` | First time a manuscript ID appears | Auto-run referee pipeline (desk rejection + candidate search) |
+| `ALL_REPORTS_IN` | All assigned referees submitted reports | Auto-generate AE recommendation report |
+| `STATUS_CHANGED` | New reports, acceptances, declines, or status change | Notification |
+
+### How State Detection Works
+
+1. Each manuscript is hashed: `SHA256(JSON(status + referees[name, status, dates, recommendation]))`
+2. Hash stored in SQLite (`production/cache/manuscript_state.db`) keyed by `(journal, manuscript_id)`
+3. On extraction, new hash compared to stored → if different, classify the change type
+4. NEW_MANUSCRIPT: no prior entry exists
+5. ALL_REPORTS_IN: all active (non-declined) referees have `returned` date or `report_submitted` status
+6. STATUS_CHANGED: hash differs but doesn't match ALL_REPORTS_IN criteria
+
+### Auto-Actions on Events
+
+- **NEW_MANUSCRIPT** → `RefereePipeline.run_single(journal, ms_id)` — runs desk rejection assessment + referee candidate search. Output saved to `production/outputs/{journal}/recommendations/`
+- **ALL_REPORTS_IN** → `ae_report.generate(journal, ms_id)` — assembles referee reports, calls Claude API (or copies prompt to clipboard). Output saved to `production/outputs/{journal}/ae_reports/`
+- **STATUS_CHANGED** → macOS notification only (no auto-action)
+
+### Quick Commands
+```bash
+# Events are auto-dispatched by run_extractors.py after extraction
+# Manual processing:
+PYTHONPATH=production/src python3 -c "from core.event_processor import process_all; process_all()"
+```
+
+---
+
+## ML Pipeline & Referee Recommendation
+
+### 5-Step Pipeline (`production/src/pipeline/referee_pipeline.py`)
+
+For each manuscript awaiting referee assignment:
+1. **Report Quality** → 6-dimension scoring (thoroughness, specificity, constructiveness, engagement, consistency, timeliness)
+2. **Desk Rejection** → Heuristic signals + optional outcome predictor + optional LLM (Claude Sonnet)
+3. **Referee Search** → FAISS expertise index + OpenAlex + Semantic Scholar + historical cross-journal + author-suggested
+4. **Conflict Check** → Institution match, coauthorship, opposed list, editor overlap
+5. **Ranking** → Weighted relevance score + track record bonuses:
+   - `0.30 * topic_similarity` (FAISS cosine distance to manuscript abstract)
+   - `0.25 * publication_similarity` (overlap in research keywords/topics)
+   - `0.15 * seniority_score` (h-index normalized, capped at H_INDEX_CAP=50)
+   - `0.15 * source_trust` (historical > OpenAlex > Semantic Scholar > author-suggested)
+   - `0.15 * recency_score` (recent publications weighted higher)
+   - Track record bonuses: journal-specific acceptance rate (+0.05), top-quartile quality (+0.03), trending quality (+0.02)
+   - Penalties: overdue rate >0.5 (-0.05), chronic decliner (-0.10)
+
+### 3 ML Models
+
+| Model | File | Purpose | Features |
+|-------|------|---------|----------|
+| **Expertise Index** | `models/expertise_index.py` | FAISS semantic search over referee profiles | SPECTER2 embeddings of referee publications + topics |
+| **Response Predictor** | `models/response_predictor.py` | P(accept) and P(complete\|accepted) | h-index, acceptance rate, past reviews, journal match, expertise similarity, turnaround, load, institution distance |
+| **Outcome Predictor** | `models/outcome_predictor.py` | P(manuscript accepted) | Scope similarity, abstract length, keywords, author h-index, freemail, keyword overlap, article type |
+
+### Embeddings (`production/src/pipeline/embeddings.py`)
+- Primary: `allenai/specter2_base` (768-dim scientific embeddings)
+- Fallback: `all-MiniLM-L6-v2` (384-dim)
+- Fallback-fallback: TF-IDF (768-dim sklearn)
+
+### Referee Performance DB (`production/src/pipeline/referee_db.py`)
+
+SQLite database tracking referee behavior across all journals:
+
+**Tables:**
+- `referee_profiles`: Aggregated stats (acceptance rate, avg review days, quality, overdue rate, percentiles, trends)
+- `referee_assignments`: Per-assignment tracking (dates, response, quality score, was_overdue)
+- `referee_journal_stats`: Per-journal breakdown of referee performance
+
+**Learning Features:**
+- `overdue_count` / `overdue_rate`: tracks chronic lateness
+- `quality_trend` / `response_trend`: last 5 values for detecting improvement/decline
+- `percentile_response` / `percentile_quality` / `percentile_speed`: global ranking vs all referees
+- `referee_journal_stats`: per-journal breakdown (a referee may accept for SICON but decline for MF)
+- Feedback loop: `record_feedback(name, journal, ms_id, was_used, score)` tracks whether recommendations were followed
+
+**Key Methods:** `get_track_record()`, `get_journal_stats()`, `search_referees()`, `get_overdue_repeat_offenders()`, `compute_percentiles()`, `get_quality_trend()`, `get_referee_assignments()`, `record_feedback()`
+
+### AE Report Generation (`production/src/pipeline/ae_report.py`)
+
+Assembles referee reports + manuscript data, generates AE recommendation via:
+- **Claude API**: Direct API call (requires `ANTHROPIC_API_KEY`)
+- **Clipboard**: Copies prompt for manual paste into ChatGPT Pro
+
+Output: JSON + Markdown in `production/outputs/{journal}/ae_reports/`
+
+### Quick Commands
+```bash
+# Run referee pipeline
+python3 run_pipeline.py -j sicon --pending
+python3 run_pipeline.py -j sicon -m M178221 --llm
+
+# Train ML models
+python3 run_pipeline.py --train
+python3 run_pipeline.py --rebuild-index
+
+# AE reports
+python3 run_pipeline.py --ae-report -j sicon -m M178221
+python3 run_pipeline.py --ae-auto
+python3 run_pipeline.py --ae-list
+
+# Feedback loop
+python3 run_pipeline.py --record-outcome -j sicon -m M178221 --decision accept
+python3 run_pipeline.py --feedback-stats
+
+# Backfill referee DB
+PYTHONPATH=production/src python3 production/src/pipeline/referee_db_backfill.py
+```
+
+---
+
+## Dashboard
+
+### Server (`scripts/dashboard_server.py`)
+```bash
+python3 scripts/dashboard_server.py          # Start on port 8421
+python3 scripts/dashboard_server.py --port 9000
+```
+
+### API Endpoints
+
+| Endpoint | Method | Purpose |
+|----------|--------|---------|
+| `/` | GET | Serve dashboard HTML |
+| `/api/ae-report` | POST | Generate AE report `{journal, manuscript_id}` |
+| `/api/ae-reports/<j>/<ms>` | GET | Retrieve saved AE report |
+| `/api/ae-list` | GET | List manuscripts needing AE reports |
+| `/api/refresh-dashboard` | POST | Regenerate dashboard HTML |
+| `/api/run-extraction` | POST | Trigger extractor `{journal}` |
+| `/api/referee/<name>` | GET | Referee profile + recent assignments |
+| `/api/referee/search?q=` | GET | Search referees by name/email/institution |
+| `/api/referee/<name>/assignments` | GET | Assignment history |
+| `/api/referee/<name>/journal-stats` | GET | Per-journal stats |
+| `/api/referee/top` | GET | Top performers |
+| `/api/referee/decliners` | GET | Chronic decliners (>70% decline rate) |
+| `/api/referee/overdue` | GET | Repeat overdue offenders |
+| `/api/pipeline/run` | POST | Trigger referee pipeline `{journal, manuscript_id}` |
+| `/api/pipeline/recommendations/<j>/<ms>` | GET | Get recommendation |
+| `/api/manuscripts/search?q=` | GET | Search manuscripts by ID/title/author |
+| `/api/ae-report/paste` | POST | Paste ChatGPT response into saved AE report |
+| `/api/feedback` | POST | Record referee recommendation feedback `{referee_name, journal, manuscript_id, was_used}` |
+| `/api/model-health` | GET | Model training metadata + calibration stats |
+| `/api/health` | GET | Server health check |
+| `/api/events` | GET | List pending events |
+
+### API Request/Response Examples
+
+```bash
+# Generate AE report
+curl -X POST localhost:8421/api/ae-report -H 'Content-Type: application/json' \
+  -d '{"journal":"sicon","manuscript_id":"M181987"}'
+# → {"recommendation":"Minor Revision","confidence":0.85,"summary":"...","revision_points":[...]}
+
+# Search referees
+curl 'localhost:8421/api/referee/search?q=smith'
+# → [{"referee_key":"smith_john","display_name":"John Smith","institution":"MIT",...}]
+
+# Trigger pipeline
+curl -X POST localhost:8421/api/pipeline/run -H 'Content-Type: application/json' \
+  -d '{"journal":"sicon","manuscript_id":"M186000"}'
+# → {"status":"started","journal":"sicon","manuscript_id":"M186000"}
+
+# Search manuscripts
+curl 'localhost:8421/api/manuscripts/search?q=stochastic'
+# → [{"journal":"SICON","manuscript_id":"M181987","title":"...","status":"Under Review"}]
+```
+
+All error responses: `{"error": "message"}` with appropriate HTTP status code (400/404/500).
+
+### Dashboard Features (`scripts/generate_dashboard.py`)
+- Alert bar (critical/high priority action items)
+- Action items with priority + journal filters
+- Manuscript search across all journals
+- Active manuscripts with expandable referee details
+- Clickable referee names → track record overlay card
+- Per-manuscript desk rejection + recommended referees display
+- Inline AE report panel (recommendation badge, confidence, revision points, consensus)
+- "Find Referees" and "Generate AE Report" buttons
+- Referee Intelligence section (top performers, chronic decliners, overdue offenders)
+- Pipeline Recommendations display
+- Journal Overview with freshness indicators
+- Model Health (collapsed)
+- Dark mode support
 
 ---
 
@@ -71,116 +317,56 @@ editorial_scripts/
 
 | Platform | Journals | Base Class | WebDriver | Auth Method |
 |----------|----------|------------|-----------|-------------|
-| **ScholarOne** | MF, MOR | `ScholarOneBaseExtractor` | `webdriver-manager` | Email/password + Gmail 2FA |
+| **ScholarOne** | MF, MOR | `ScholarOneBaseExtractor` | `undetected_chromedriver` | Email/password + Gmail 2FA |
 | **Editorial Manager** | JOTA, MAFE | `EMExtractor` | `undetected_chromedriver` | Username/password, role switch |
 | **SIAM** | SICON, SIFIN | `SIAMExtractor` | `undetected_chromedriver` | ORCID OAuth, Cloudflare challenge |
 | **EditFlow (MSP)** | NACO | standalone | `webdriver-manager` | Username/password (NOT email) |
 | **Gmail API** | FS | standalone | None (API only) | OAuth 2.0 token |
 
-### Per-Extractor Details
+### CRITICAL: Cloudflare Bot Protection (ScholarOne + SIAM)
 
-| Detail | MF | MOR | FS | JOTA | MAFE | SICON | SIFIN | NACO |
-|--------|----|----|-----|------|------|-------|-------|------|
-| **Login URL** | mc.manuscriptcentral.com/mafi | mc.manuscriptcentral.com/mathor | N/A (API) | editorialmanager.com/jota | editorialmanager.com/mafe | sicon.siam.org | sifin.siam.org | ef.msp.org/login.php |
-| **Cred env vars** | `MF_EMAIL` `MF_PASSWORD` | `MOR_EMAIL` `MOR_PASSWORD` | OAuth token | `JOTA_USERNAME` `JOTA_PASSWORD` | `MAFE_USERNAME` `MAFE_PASSWORD` | `SICON_EMAIL` `SICON_PASSWORD` | `SIFIN_EMAIL` `SIFIN_PASSWORD` | `NACO_USERNAME` `NACO_PASSWORD` |
-| **2FA** | Gmail code | Gmail code | N/A | None | None | ORCID SSO | ORCID SSO | None |
-| **Cloudflare** | No | No | No | No | No | **Yes (180s)** | **Yes (180s)** | No |
-| **Downloads** | Yes | Yes | No | Yes | Yes | Yes | Yes | No |
-| **Headless default** | Yes | Yes | N/A | Yes | Yes | Yes | Yes | Yes (always) |
+All four extractors (MF, MOR, SICON, SIFIN) run in **off-screen headful mode** with AppleScript window minimization.
 
-### CRITICAL: Running SIAM Extractors (SICON, SIFIN)
-
-SIAM sites use Cloudflare bot detection. These extractors **MUST** run in headful mode:
+**Chrome 146+ compatibility**: `--no-sandbox` and `plugins.always_open_pdf_externally` crash headful UC. Both removed. Window positioned at (-2000,0) via startup arg.
 
 ```bash
+# ScholarOne (always headful)
+PYTHONUNBUFFERED=1 python3 production/src/extractors/mf_extractor.py
+PYTHONUNBUFFERED=1 python3 production/src/extractors/mor_extractor.py
+
+# SIAM (must set headful)
 EXTRACTOR_HEADLESS=false PYTHONUNBUFFERED=1 python3 production/src/extractors/sicon_extractor.py
 EXTRACTOR_HEADLESS=false PYTHONUNBUFFERED=1 python3 production/src/extractors/sifin_extractor.py
 ```
 
-**What happens in headful mode:**
-1. Browser window opens off-screen at position (-2000, 0) — invisible to you
-2. Cloudflare challenge resolves automatically (up to 180s)
-3. Window auto-minimizes after dashboard loads
-4. You are NOT disturbed — do NOT kill the window
-
-**What goes wrong in headless mode:** Cloudflare blocks headless Chrome. The extractor hangs for 180s then times out.
-
 ### CRITICAL: NACO Uses Username, NOT Email
-
-NACO (EditFlow/MSP) authenticates with a **username**, not an email address:
 - Env vars: `NACO_USERNAME`, `NACO_PASSWORD`
-- Login field: `id="login"` (username field, not email)
 
 ### CRITICAL: MOR Uses EMAIL, NOT USERNAME
-
-MOR env vars are `MOR_EMAIL` and `MOR_PASSWORD` (not `MOR_USERNAME`).
+- Env vars: `MOR_EMAIL`, `MOR_PASSWORD`
 
 ---
 
 ## Environment Variables
 
-### EXTRACTOR_HEADLESS
-
-Controls browser visibility. Read by all Selenium-based extractors.
-
+### Credential Env Vars
 ```bash
-EXTRACTOR_HEADLESS=true   # Default. Headless (invisible) browser.
-EXTRACTOR_HEADLESS=false  # Headful. Required for SICON/SIFIN (Cloudflare).
+MF_EMAIL, MF_PASSWORD                    # ScholarOne
+MOR_EMAIL, MOR_PASSWORD                  # ScholarOne
+JOTA_USERNAME, JOTA_PASSWORD             # Editorial Manager
+MAFE_USERNAME, MAFE_PASSWORD             # Editorial Manager
+SICON_EMAIL, SICON_PASSWORD              # SIAM (ORCID)
+SIFIN_EMAIL, SIFIN_PASSWORD              # SIAM (ORCID)
+NACO_USERNAME, NACO_PASSWORD             # EditFlow (username, NOT email)
+ANTHROPIC_API_KEY                        # For Claude API AE reports (optional)
+# Gmail: OAuth token at config/gmail_token.json
 ```
 
-**Which extractors need headful mode:**
-- **SICON, SIFIN**: MUST be headful (`EXTRACTOR_HEADLESS=false`) — Cloudflare blocks headless
-- **All others**: Can run headless (default)
-- **FS**: No browser at all (Gmail API)
-- **NACO**: Always headless (env var not checked)
-
-### PYTHONUNBUFFERED
-
-Always set when running extractors to see real-time output:
+### Runtime Env Vars
 ```bash
-PYTHONUNBUFFERED=1 python3 extractor.py
-```
-
-### Credential Env Vars (Complete List)
-
-```bash
-# ScholarOne
-MF_EMAIL, MF_PASSWORD
-MOR_EMAIL, MOR_PASSWORD
-
-# Editorial Manager (tries USERNAME first, then EMAIL)
-JOTA_USERNAME, JOTA_PASSWORD    # or JOTA_EMAIL
-MAFE_USERNAME, MAFE_PASSWORD    # or MAFE_EMAIL
-
-# SIAM (ORCID credentials)
-SICON_EMAIL, SICON_PASSWORD
-SIFIN_EMAIL, SIFIN_PASSWORD
-
-# EditFlow
-NACO_USERNAME, NACO_PASSWORD    # USERNAME, not EMAIL
-
-# Gmail API
-# No env vars — uses OAuth token at config/gmail_token.json
-```
-
----
-
-## Credentials & Authentication
-
-### NEVER ASK FOR CREDENTIALS - They're Already Stored!
-
-**Storage Locations:**
-1. **macOS Keychain** (primary, encrypted)
-   - Service names: `editorial-scripts-{journal}`
-   - Persistent forever, survives reboots
-
-2. **Shell Environment**
-   - Auto-loads via: `~/.zshrc` -> `~/.editorial_scripts/load_all_credentials.sh`
-
-**Verification:**
-```bash
-python3 verify_all_credentials.py
-source ~/.editorial_scripts/load_all_credentials.sh
+EXTRACTOR_HEADLESS=false  # Required for SICON/SIFIN (Cloudflare)
+PYTHONUNBUFFERED=1        # Always set for real-time output
+PYTHONPATH=production/src # Required for standalone script execution
 ```
 
 ---
@@ -188,202 +374,93 @@ source ~/.editorial_scripts/load_all_credentials.sh
 ## Quick Commands
 
 ```bash
-# Verify credentials
+# Extractors
+python3 run_extractors.py --status
+python3 run_extractors.py --journal mf
+python3 run_extractors.py --all
+
+# Pipeline
+python3 run_pipeline.py -j sicon --pending
+python3 run_pipeline.py --ae-auto
+python3 run_pipeline.py --train
+
+# Dashboard
+python3 scripts/dashboard_server.py
+PYTHONPATH=production/src python3 scripts/generate_dashboard.py
+
+# Referee DB
+PYTHONPATH=production/src python3 production/src/pipeline/referee_db_backfill.py
+
+# Tests
+python3 -m pytest tests/ -q
+
+# Credentials
 python3 verify_all_credentials.py
-
-# Run production extractors (from project root)
-cd production/src/extractors
-
-# ScholarOne (headless OK)
-PYTHONUNBUFFERED=1 python3 mf_extractor.py
-PYTHONUNBUFFERED=1 python3 mor_extractor.py
-
-# Gmail API (no browser)
-PYTHONUNBUFFERED=1 python3 fs_extractor.py
-
-# Editorial Manager (headless OK)
-PYTHONUNBUFFERED=1 python3 jota_extractor.py
-PYTHONUNBUFFERED=1 python3 mafe_extractor.py
-
-# SIAM (MUST be headful)
-EXTRACTOR_HEADLESS=false PYTHONUNBUFFERED=1 python3 sicon_extractor.py
-EXTRACTOR_HEADLESS=false PYTHONUNBUFFERED=1 python3 sifin_extractor.py
-
-# EditFlow (always headless)
-PYTHONUNBUFFERED=1 python3 naco_extractor.py
-
-# Orchestrator
-python3 run_extractors.py --status      # Show all extractor status
-python3 run_extractors.py --journal mf  # Run specific extractor
-python3 run_extractors.py --all         # Run all working extractors
-
-# Referee recommendation pipeline
-python3 run_pipeline.py --journal sicon --pending
-python3 run_pipeline.py --journal sicon --manuscript M183494
-python3 run_pipeline.py --journal sicon --manuscript M183494 --llm
-
-# Development testing (isolated)
-cd dev/mf
-python3 run_mf_dev.py  # All outputs in dev/mf/
 ```
-
----
-
-## Browser & Driver Setup
-
-### WebDriver Types
-
-| Driver | Used By | Manager | Binary Location |
-|--------|---------|---------|-----------------|
-| `webdriver-manager` | MF, MOR, NACO | Auto-downloads matching ChromeDriver | `~/.wdm/drivers/chromedriver/` |
-| `undetected_chromedriver` | JOTA, MAFE, SICON, SIFIN | Patches ChromeDriver to evade detection | `~/Library/Application Support/undetected_chromedriver/` |
-
-### Bot Detection Evasion
-
-**ScholarOne + NACO** (webdriver-manager):
-- CDP webdriver spoofing (`navigator.webdriver = undefined`)
-- `--disable-blink-features=AutomationControlled`
-- `excludeSwitches=["enable-automation"]`, `useAutomationExtension=False`
-- Custom user-agent string
-
-**EM + SIAM** (undetected_chromedriver):
-- Built-in evasion (patched ChromeDriver binary)
-- Auto Chrome version detection via subprocess
-- No explicit user-agent override needed
-
-### Window Behavior (Headful Mode)
-
-When `EXTRACTOR_HEADLESS=false`:
-- **EM (JOTA, MAFE)**: Window opens at (-2000, 0) off-screen, sized 1400x900
-- **SIAM (SICON, SIFIN)**: Window opens at (-2000, 0) off-screen, sized 1200x800, auto-minimizes after dashboard load
-- **ScholarOne (MF, MOR)**: Not designed for headful — use headless
 
 ---
 
 ## Troubleshooting
 
 ### ChromeDriver Quarantine (macOS)
-
-**Symptom**: Chrome crashes immediately — "no such window: target window already closed"
-
-**Cause**: After `kill -9 chromedriver`, macOS quarantine attributes corrupt the binary.
-
-**Fix for undetected_chromedriver (JOTA, MAFE, SICON, SIFIN):**
+After `kill -9 chromedriver`, binary gets quarantined. Fix:
 ```bash
-xattr -c ~/Library/Application\ Support/undetected_chromedriver/undetected_chromedriver
+rm -f ~/Library/Application\ Support/undetected_chromedriver/undetected_chromedriver
+# UC re-downloads on next run
 ```
 
-**Fix for webdriver-manager (MF, MOR, NACO):**
-```bash
-rm -rf ~/.wdm/drivers/chromedriver/
-# webdriver-manager re-downloads on next run
-```
+### Chrome 146+ Headful Crash
+`--no-sandbox` and `plugins.always_open_pdf_externally` cause instant `NoSuchWindowException` in headful mode. Both already removed from all base classes.
 
-### Cloudflare Timeout (SICON, SIFIN)
-
-**Symptom**: "Cloudflare challenge..." prints every 15s for 180s, then times out.
-
-**Cause**: Running in headless mode. Cloudflare blocks headless Chrome.
-
-**Fix**:
-```bash
-EXTRACTOR_HEADLESS=false PYTHONUNBUFFERED=1 python3 sicon_extractor.py
-```
-
-### Gmail OAuth Token Expired
-
-**Symptom**: FS extractor fails; MF/MOR 2FA code fetch fails; Gmail audit trail unavailable.
-
-**Fix**:
-```bash
-python3 scripts/setup_gmail_oauth.py
-```
-Token saved to `config/gmail_token.json`. Has limited lifetime (weeks/months).
-
-### Session Death / Connection Drops
-
-All Selenium extractors detect session death via keyword matching:
-`"connection refused"`, `"invalid session"`, `"no such window"`, `"chrome not reachable"`, `"target window already closed"`
-
-Recovery is automatic: cleanup → sleep → new driver → re-login.
+### undetected_chromedriver Binary Contention
+Cannot run two UC-based extractors simultaneously. Run sequentially.
 
 ### NEVER Kill Google Chrome
-
 ```bash
-pkill -9 chromedriver          # OK — kills chromedriver processes only
+pkill -9 chromedriver          # OK
 # pkill "Google Chrome"        # NEVER — kills Dylan's personal browser
 ```
 
-### undetected_chromedriver Binary Contention
-
-Running two extractors that use `undetected_chromedriver` simultaneously causes binary contention. Run EM/SIAM extractors sequentially.
-
-### EM Split Tables (JOTA, MAFE)
-
-Editorial Manager "Final Disposition" uses Knockout.js with split fixed/nonfixed tables. Fixed rows (`fr0`) have action links, nonfixed rows (`nfr0`) have data. Must pair by `data-rowindex`. Must use `lxml` HTML parser — `html.parser` nests unclosed `<td>` tags incorrectly.
-
-### Python Output Not Appearing
-
-Always run with `PYTHONUNBUFFERED=1` to disable output buffering:
+### Gmail OAuth Token Expired
 ```bash
-PYTHONUNBUFFERED=1 python3 extractor.py
+python3 scripts/setup_gmail_oauth.py
 ```
-
----
-
-## Development Rules
-
-### ALWAYS USE dev/ FOR TESTING
-```bash
-cd dev/mf
-python3 run_mf_dev.py  # All outputs contained in dev/mf/
-```
-
-**NEVER CREATE:**
-- Test files in project root
-- Debug files outside dev/
-- Temporary scripts outside dev/
-
----
-
-## Key Features
-
-- **3-Pass Extraction** (MF): Forward -> Backward -> Forward
-- **6-Pass Extraction** (MOR): Referees, authors, metadata, docs, history, audit
-- **5-Phase Extraction** (JOTA, MAFE): Details, enrichment, reports, documents, Gmail
-- **Web Enrichment**: ORCID API + CrossRef API + OpenAlex + Semantic Scholar
-- **Gmail Integration**: 2FA codes + FS email extraction + audit trail cross-checking
-- **Session Recovery**: Automatic re-login on connection drops
-- **Document Downloads**: Manuscript PDFs, cover letters, original files, author responses (with redirect detection)
-- **SQLite Caching**: Persistent referee/manuscript cache across runs
-- **Auto ChromeDriver**: webdriver-manager / undetected_chromedriver handles version matching
-- **Structured Output**: JSON with metadata wrapper in `production/outputs/{journal}/`
-- **Referee Pipeline**: Desk-rejection assessment + candidate sourcing + conflict checking
 
 ---
 
 ## Common Bug Patterns
 
-- `self.self.` double references and `self.safe_array_access(tr, 1)` injected into XPath strings — always grep when reviewing code
-- `set -eo pipefail` in shell scripts kills on `grep` returning no matches — append `|| true`
-- Python 3.12+ stricter scope: local `import re` inside a function shadows global `re` → `UnboundLocalError`
-- ScholarOne iframe context: `driver.back()` resets to `default_content`, losing iframe context. MOR fix: re-open category from AE center
-- FS cache save can hang (`threading.Lock` or large `json.dumps`). JSON file saved FIRST, cache secondary with 30s timeout
-- `threading.Lock()` is NOT reentrant — use `threading.RLock()` for methods that call each other
-- Never mutate timeline events with datetime objects — use a local dict keyed by index. `json.dumps` needs `default=str`
-- Pre-commit hooks: security scan targets `production/src`, uses `bandit -ll` and `pip-audit`. MD5 for cache keys needs `usedforsecurity=False`
+- `self.self.` double references and `self.safe_array_access(tr, 1)` in XPath — always grep
+- `set -eo pipefail` kills on `grep` no match — append `|| true`
+- Python 3.12+ local `import re` shadows global `re` → `UnboundLocalError`
+- ScholarOne iframe: `driver.back()` resets to `default_content`
+- `threading.Lock()` is NOT reentrant — use `threading.RLock()`
+- Never mutate timeline events with datetime objects — `json.dumps` needs `default=str`
+- Pre-commit: `bandit -ll`, `pip-audit`, MD5 needs `usedforsecurity=False`
 - Black reformats on commit — always re-stage after failed commit
+- EM split tables: pair `fr0`/`nfr0` by `data-rowindex`, use `lxml` parser
+
+---
+
+## Testing
+
+625 tests across 13 test modules:
+```bash
+python3 -m pytest tests/ -q                    # All tests
+python3 -m pytest tests/test_referee_db.py -v  # Specific module
+```
 
 ---
 
 ## AI Assistant Notes
 
-- **User prefers**: Action over analysis, concise responses
+- **User prefers**: Action over analysis, concise responses, dashboard over CLI
 - **Code style**: No comments unless requested
-- **Testing**: Always use `dev/` directory
+- **Testing**: Always use `dev/` directory for experiments
 - **Production**: Handle with care - it works!
 - **Process kills**: ONLY kill `chromedriver`, NEVER kill `Google Chrome`
+- **Python**: Use `/Library/Frameworks/Python.framework/Versions/3.12/bin/python3.12` (system python3 is 3.9)
 
 ---
 
-**Last Updated**: 2026-02-23
+**Last Updated**: 2026-03-30

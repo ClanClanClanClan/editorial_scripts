@@ -7,53 +7,50 @@ Shared base class for ScholarOne (Manuscript Central) extractors.
 MF and MOR both inherit from this class and override only journal-specific logic.
 """
 
+import atexit
 import os
+import re
+import subprocess
 import sys
 import time
-import json
-import re
-import requests
-import random
-import atexit
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
-from datetime import datetime, timedelta, timezone
-from functools import wraps
-from typing import Dict, List, Optional, Any, Tuple, Callable
-from urllib.parse import quote_plus
+from typing import Any, Optional
 
+import requests
+import undetected_chromedriver as uc
 from core.web_enrichment import enrich_people_from_web
-
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import (
     TimeoutException,
-    NoSuchElementException,
     WebDriverException,
-    StaleElementReferenceException,
 )
-
-try:
-    from bs4 import BeautifulSoup
-except ImportError:
-    os.system("pip install beautifulsoup4")
-    from bs4 import BeautifulSoup
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
 
 sys.path.append(str(Path(__file__).parent.parent))
 from core.cache_integration import CachedExtractorMixin
 from core.scholarone_utils import (
-    with_retry,
-    safe_click as _safe_click,
-    safe_get_text as _safe_get_text,
-    safe_array_access as _safe_array_access,
-    safe_int as _safe_int,
-    smart_wait as _smart_wait,
-    parse_date,
-    parse_ev_date,
     capture_page as _capture_page_fn,
+)
+from core.scholarone_utils import (
+    parse_ev_date,
+    with_retry,
+)
+from core.scholarone_utils import (
+    safe_array_access as _safe_array_access,
+)
+from core.scholarone_utils import (
+    safe_click as _safe_click,
+)
+from core.scholarone_utils import (
+    safe_get_text as _safe_get_text,
+)
+from core.scholarone_utils import (
+    safe_int as _safe_int,
+)
+from core.scholarone_utils import (
+    smart_wait as _smart_wait,
 )
 
 try:
@@ -68,7 +65,7 @@ try:
 except ImportError:
     GMAIL_SEARCH_AVAILABLE = False
 
-from core.gmail_verification_wrapper import fetch_latest_verification_code
+from core.gmail_verification import fetch_latest_verification_code
 
 
 class ScholarOneBaseExtractor(CachedExtractorMixin):
@@ -120,23 +117,22 @@ class ScholarOneBaseExtractor(CachedExtractorMixin):
     # Setup
     # ------------------------------------------------------------------
 
-    def setup_chrome_options(self):
-        self.chrome_options = Options()
-        self.chrome_options.add_argument("--disable-blink-features=AutomationControlled")
-        self.chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
-        self.chrome_options.add_experimental_option("useAutomationExtension", False)
-        self.chrome_options.add_argument("--no-sandbox")
-        self.chrome_options.add_argument("--disable-dev-shm-usage")
-
-        if self.headless:
-            self.chrome_options.add_argument("--headless=new")
-            self.chrome_options.add_argument("--disable-gpu")
-            self.chrome_options.add_argument(
-                "--user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
-                "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
+    def _detect_chrome_version(self):
+        try:
+            result = subprocess.run(
+                ["/Applications/Google Chrome.app/Contents/MacOS/Google Chrome", "--version"],
+                capture_output=True,
+                text=True,
             )
+            return int(result.stdout.strip().split()[-1].split(".")[0])
+        except Exception:
+            return None
 
+    def setup_chrome_options(self):
+        self.chrome_options = uc.ChromeOptions()
+        self.chrome_options.add_argument("--disable-dev-shm-usage")
         self.chrome_options.add_argument("--window-size=800,600")
+        self.chrome_options.add_argument("--window-position=-2000,0")
 
         download_dir = str(
             Path(__file__).parent.parent.parent / "downloads" / self.JOURNAL_CODE.lower()
@@ -146,7 +142,6 @@ class ScholarOneBaseExtractor(CachedExtractorMixin):
             "download.prompt_for_download": False,
             "download.directory_upgrade": True,
             "safebrowsing.enabled": True,
-            "plugins.always_open_pdf_externally": True,
         }
         self.chrome_options.add_experimental_option("prefs", prefs)
 
@@ -162,21 +157,55 @@ class ScholarOneBaseExtractor(CachedExtractorMixin):
             directory.mkdir(parents=True, exist_ok=True)
 
     def setup_driver(self):
-        try:
-            from webdriver_manager.chrome import ChromeDriverManager
-
-            self.service = Service(ChromeDriverManager().install())
-        except ImportError:
-            self.service = Service()
-        self.driver = webdriver.Chrome(service=self.service, options=self.chrome_options)
-        self.driver.execute_cdp_cmd(
-            "Page.addScriptToEvaluateOnNewDocument",
-            {"source": "Object.defineProperty(navigator, 'webdriver', {get: () => undefined})"},
+        chrome_version = self._detect_chrome_version()
+        self.driver = uc.Chrome(
+            options=self.chrome_options,
+            headless=False,
+            version_main=chrome_version,
         )
-        self.driver.set_page_load_timeout(45)
+        try:
+            self.driver.set_window_position(-2000, 0)
+            self.driver.set_window_size(800, 600)
+        except Exception:
+            pass
+        self._minimize_chrome()
+        self.driver.set_page_load_timeout(120)
         self.driver.implicitly_wait(10)
         self.wait = WebDriverWait(self.driver, 20)
         self.original_window = self.driver.current_window_handle
+        print(f"\U0001f5a5\ufe0f  Browser configured for {self.JOURNAL_CODE}")
+
+    @staticmethod
+    def _minimize_chrome():
+        try:
+            import subprocess
+
+            subprocess.Popen(
+                [
+                    "osascript",
+                    "-e",
+                    'tell application "System Events" to set visible of process "Google Chrome" to false',
+                ],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+            )
+        except Exception:
+            pass
+
+    def _wait_for_cloudflare(self, timeout=180):
+        for i in range(timeout):
+            try:
+                title = self.driver.title.lower()
+            except Exception:
+                time.sleep(1)
+                continue
+            if "just a moment" in title or title in ("404 not found", ""):
+                if i % 15 == 0:
+                    print(f"   \u23f3 Cloudflare challenge... ({i}s)")
+                time.sleep(1)
+                continue
+            return True
+        return False
 
     # ------------------------------------------------------------------
     # Utility wrappers (delegate to module-level utils)
@@ -298,7 +327,7 @@ class ScholarOneBaseExtractor(CachedExtractorMixin):
             print(f"🔐 Logging in to {self.JOURNAL_CODE}...")
 
             self.driver.get(self.LOGIN_URL)
-            self.smart_wait(5)
+            self._wait_for_cloudflare(180)
 
             try:
                 reject_btn = self.wait.until(
@@ -349,7 +378,7 @@ class ScholarOneBaseExtractor(CachedExtractorMixin):
                         return False
 
                 if code:
-                    print(f"   ✅ Entering 2FA code...")
+                    print("   ✅ Entering 2FA code...")
                     token_field.clear()
                     token_field.send_keys(code)
                     verify_btn = self.driver.find_element(By.ID, "VERIFY_BTN")
@@ -478,7 +507,7 @@ class ScholarOneBaseExtractor(CachedExtractorMixin):
             )
 
             if not result:
-                print(f"            ❌ No fetch result")
+                print("            ❌ No fetch result")
                 return None
 
             if result.get("error"):
@@ -507,9 +536,9 @@ class ScholarOneBaseExtractor(CachedExtractorMixin):
                     if not redirect_url.startswith("http"):
                         base = url.rsplit("/", 1)[0]
                         redirect_url = base + "/" + redirect_url
-                    print(f"            🔄 Found redirect to download URL")
+                    print("            🔄 Found redirect to download URL")
                     return self._download_file_from_url(redirect_url, manuscript_id, doc_type)
-                print(f"            ⚠️ Got HTML page instead of file")
+                print("            ⚠️ Got HTML page instead of file")
                 return None
 
             with open(file_path, "wb") as f:
@@ -580,7 +609,7 @@ class ScholarOneBaseExtractor(CachedExtractorMixin):
             print(f"         📥 Downloading {doc_type}...")
             popup = self._open_popup_and_switch(link_element, wait_for_content=True)
             if not popup:
-                print(f"            ❌ No popup window opened")
+                print("            ❌ No popup window opened")
                 return None
             file_url = self.driver.current_url
             if not file_url or file_url == "about:blank":
@@ -718,7 +747,7 @@ class ScholarOneBaseExtractor(CachedExtractorMixin):
             import base64 as _b64_fallback
 
             try:
-                print(f"            🔄 Trying CDP Page.printToPDF fallback...")
+                print("            🔄 Trying CDP Page.printToPDF fallback...")
                 pdf_data = self.driver.execute_cdp_cmd("Page.printToPDF", {})
                 if pdf_data and pdf_data.get("data"):
                     data = _b64_fallback.b64decode(pdf_data["data"])
@@ -736,7 +765,7 @@ class ScholarOneBaseExtractor(CachedExtractorMixin):
             except Exception:
                 pass
 
-            print(f"            ❌ Could not extract file from popup")
+            print("            ❌ Could not extract file from popup")
             self._close_popup_safely(original_window)
             return None
         except Exception as e:
@@ -757,7 +786,7 @@ class ScholarOneBaseExtractor(CachedExtractorMixin):
             print(f"         📥 Downloading {doc_type}...")
             popup = self._open_popup_and_switch(link_element)
             if not popup:
-                print(f"            ❌ No popup window opened")
+                print("            ❌ No popup window opened")
                 return None
 
             try:
@@ -898,7 +927,7 @@ class ScholarOneBaseExtractor(CachedExtractorMixin):
                 pass
             return ""
 
-    def extract_recommended_opposed(self) -> Dict[str, list]:
+    def extract_recommended_opposed(self) -> dict[str, list]:
         result = {
             "recommended_referees": [],
             "opposed_referees": [],
@@ -1031,8 +1060,8 @@ class ScholarOneBaseExtractor(CachedExtractorMixin):
     # ------------------------------------------------------------------
 
     def extract_referee_report_from_popup(
-        self, referee: Dict, manuscript_id: str = ""
-    ) -> Optional[Dict]:
+        self, referee: dict, manuscript_id: str = ""
+    ) -> Optional[dict]:
         report_url = referee.get("report_url", "")
         if not report_url:
             return None
@@ -1265,7 +1294,7 @@ class ScholarOneBaseExtractor(CachedExtractorMixin):
     # Version history & milestones (NEAR-IDENTICAL — MOR superset)
     # ------------------------------------------------------------------
 
-    def extract_peer_review_milestones(self) -> Dict[str, Any]:
+    def extract_peer_review_milestones(self) -> dict[str, Any]:
         milestones = {}
         try:
             try:
@@ -1335,7 +1364,7 @@ class ScholarOneBaseExtractor(CachedExtractorMixin):
         label = label.replace(" ", "_")
         return label
 
-    def extract_version_history(self, manuscript_id: str) -> List[Dict]:
+    def extract_version_history(self, manuscript_id: str) -> list[dict]:
         version_history = []
         try:
             try:
@@ -1531,9 +1560,9 @@ class ScholarOneBaseExtractor(CachedExtractorMixin):
     # AE Recommendation (IDENTICAL)
     # ------------------------------------------------------------------
 
-    def extract_ae_recommendation_data(self, manuscript_data: Dict):
+    def extract_ae_recommendation_data(self, manuscript_data: dict):
         try:
-            print(f"      🎯 Extracting AE recommendation data...")
+            print("      🎯 Extracting AE recommendation data...")
             ae_data = {
                 "recommendation_available": True,
                 "referee_summary": [],
@@ -1571,7 +1600,7 @@ class ScholarOneBaseExtractor(CachedExtractorMixin):
                     continue
 
             if not tab_found:
-                print(f"         ⚠️ No recommendation tab found, extracting from current page")
+                print("         ⚠️ No recommendation tab found, extracting from current page")
 
             ms_id = manuscript_data.get("id", "") or manuscript_data.get("manuscript_id", "")
             self._capture_page("ae_recommendation", ms_id)
@@ -1658,7 +1687,7 @@ class ScholarOneBaseExtractor(CachedExtractorMixin):
             if rec_form.get("selected_value"):
                 print(f"         📋 Current recommendation: {rec_form['selected_value']}")
             print(f"         📊 Referee summary rows: {len(ae_data['referee_summary'])}")
-            print(f"         ✅ AE recommendation data extracted")
+            print("         ✅ AE recommendation data extracted")
 
         except Exception as e:
             print(f"         ❌ Error extracting AE recommendation data: {str(e)[:100]}")
@@ -1671,7 +1700,7 @@ class ScholarOneBaseExtractor(CachedExtractorMixin):
     # Enrichment (IDENTICAL / NEAR-IDENTICAL)
     # ------------------------------------------------------------------
 
-    def _enrich_people_from_web(self, manuscript_data: Dict):
+    def _enrich_people_from_web(self, manuscript_data: dict):
         enrich_people_from_web(
             manuscript_data,
             get_cached_web_profile=self.get_cached_web_profile,
@@ -1679,7 +1708,7 @@ class ScholarOneBaseExtractor(CachedExtractorMixin):
             platform_label="scholarone_metadata",
         )
 
-    def _enrich_audit_trail_with_gmail(self, manuscript_data: Dict, manuscript_id: str):
+    def _enrich_audit_trail_with_gmail(self, manuscript_data: dict, manuscript_id: str):
         if not GMAIL_SEARCH_AVAILABLE:
             return
 
@@ -1699,7 +1728,7 @@ class ScholarOneBaseExtractor(CachedExtractorMixin):
         try:
             gmail = GmailSearchManager()
             if not gmail.initialize():
-                print(f"      ⚠️ Gmail service not available")
+                print("      ⚠️ Gmail service not available")
                 return
 
             sub_date_str = manuscript_data.get("metadata", {}).get("submission_date", "")
@@ -1724,7 +1753,7 @@ class ScholarOneBaseExtractor(CachedExtractorMixin):
             )
 
             if not external_emails:
-                print(f"      📧 No external Gmail communications found")
+                print("      📧 No external Gmail communications found")
                 return
 
             merged = gmail.merge_with_audit_trail(
@@ -1742,7 +1771,7 @@ class ScholarOneBaseExtractor(CachedExtractorMixin):
         except Exception as e:
             print(f"      ⚠️ Gmail search error: {str(e)[:60]}")
 
-    def _enrich_revision_referee_data(self, manuscript_data: Dict):
+    def _enrich_revision_referee_data(self, manuscript_data: dict):
         audit = manuscript_data.get("audit_trail", manuscript_data.get("_r0_audit_trail", []))
         if not isinstance(audit, list):
             audit = []
@@ -1884,12 +1913,6 @@ class ScholarOneBaseExtractor(CachedExtractorMixin):
 
             found_country = None
 
-            search_queries = [
-                f'"{institution_name}" university country location',
-                f'"{institution_name}" located in which country',
-                f'"{institution_name}" institution address country',
-            ]
-
             direct_countries = {
                 "ETH Zurich": "Switzerland",
                 "ETH": "Switzerland",
@@ -1972,7 +1995,7 @@ class ScholarOneBaseExtractor(CachedExtractorMixin):
     # Analytics (NEAR-IDENTICAL — parameterized for both MF and MOR)
     # ------------------------------------------------------------------
 
-    def _compute_final_outcome(self, manuscript_data: Dict):
+    def _compute_final_outcome(self, manuscript_data: dict):
         status = manuscript_data.get("metadata", {}).get("status", "")
         if not status:
             status = manuscript_data.get("status_details", {}).get("status", "")
@@ -2050,18 +2073,18 @@ class ScholarOneBaseExtractor(CachedExtractorMixin):
                     if "GMT" in ds or "EDT" in ds:
                         clean_date = ds.replace(" GMT", "").replace(" EDT", "")
                         parsed_date = datetime.strptime(clean_date, "%d-%b-%Y %I:%M %p").replace(
-                            tzinfo=timezone.utc
+                            tzinfo=UTC
                         )
                     else:
                         try:
                             parsed_date = datetime.fromisoformat(ds.replace("Z", "+00:00"))
                             if parsed_date.tzinfo is None:
-                                parsed_date = parsed_date.replace(tzinfo=timezone.utc)
+                                parsed_date = parsed_date.replace(tzinfo=UTC)
                         except (ValueError, TypeError):
                             for fmt in ("%d-%b-%Y", "%Y-%m-%d", "%d-%b-%Y %H:%M"):
                                 try:
                                     parsed_date = datetime.strptime(ds.strip(), fmt).replace(
-                                        tzinfo=timezone.utc
+                                        tzinfo=UTC
                                     )
                                     break
                                 except ValueError:
@@ -2196,7 +2219,7 @@ class ScholarOneBaseExtractor(CachedExtractorMixin):
         ]
         if invitation_events and response_events:
             response_times = []
-            for inv_idx, inv in invitation_events:
+            for inv_idx, _inv in invitation_events:
                 inv_date = parsed_dates.get(inv_idx)
                 if inv_date:
                     later_responses = [
@@ -2230,7 +2253,7 @@ class ScholarOneBaseExtractor(CachedExtractorMixin):
         if reminder_events:
             effective_reminders = 0
             total_reminders = len(reminder_events)
-            for rem_idx, reminder in reminder_events:
+            for rem_idx, _reminder in reminder_events:
                 reminder_date = parsed_dates.get(rem_idx)
                 if reminder_date:
                     cutoff_date = reminder_date + timedelta(days=7)
@@ -2261,9 +2284,9 @@ class ScholarOneBaseExtractor(CachedExtractorMixin):
             analytics["reminder_effectiveness"] = {
                 "total_reminders": total_reminders,
                 "effective_reminders": effective_reminders,
-                "effectiveness_rate": effective_reminders / total_reminders
-                if total_reminders > 0
-                else 0,
+                "effectiveness_rate": (
+                    effective_reminders / total_reminders if total_reminders > 0 else 0
+                ),
             }
 
         print(
@@ -2271,7 +2294,7 @@ class ScholarOneBaseExtractor(CachedExtractorMixin):
         )
         return analytics
 
-    def _compute_referee_statistics(self, manuscript_data: Dict):
+    def _compute_referee_statistics(self, manuscript_data: dict):
         referees = manuscript_data.get("referees", [])
         audit = manuscript_data.get(
             "audit_trail", manuscript_data.get("communication_timeline", [])
@@ -2437,5 +2460,5 @@ class ScholarOneBaseExtractor(CachedExtractorMixin):
     # Abstract methods (subclasses must implement)
     # ------------------------------------------------------------------
 
-    def run(self) -> List[Dict]:
+    def run(self) -> list[dict]:
         raise NotImplementedError("Subclasses must implement run()")

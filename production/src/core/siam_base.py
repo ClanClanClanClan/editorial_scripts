@@ -1,30 +1,25 @@
 import atexit
 import base64
-import glob
+import json
 import os
 import random
 import re
 import sys
 import time
-import json
-from datetime import datetime, timedelta, timezone
-from functools import wraps
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional
+from typing import Optional
 
-import requests
 import undetected_chromedriver as uc
 from bs4 import BeautifulSoup
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support.ui import WebDriverWait
 from selenium.common.exceptions import (
     NoAlertPresentException,
     NoSuchElementException,
-    StaleElementReferenceException,
     TimeoutException,
-    WebDriverException,
 )
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from core.cache_integration import CachedExtractorMixin
@@ -38,42 +33,7 @@ except ImportError:
     GMAIL_SEARCH_AVAILABLE = False
 
 
-def with_retry(max_attempts: int = 3, delay: float = 1.0, backoff: float = 2.0):
-    def decorator(func: Callable) -> Callable:
-        @wraps(func)
-        def wrapper(*args, **kwargs):
-            last_exception = None
-            for attempt in range(max_attempts):
-                try:
-                    return func(*args, **kwargs)
-                except (
-                    TimeoutException,
-                    NoSuchElementException,
-                    WebDriverException,
-                    StaleElementReferenceException,
-                ) as e:
-                    last_exception = e
-                    if attempt < max_attempts - 1:
-                        wait_time = delay * (backoff**attempt)
-                        print(
-                            f"   \u26a0\ufe0f {func.__name__} attempt {attempt + 1} failed: {str(e)[:50]}"
-                        )
-                        print(f"      Retrying in {wait_time:.1f} seconds...")
-                        time.sleep(wait_time)
-                    else:
-                        print(f"   \u274c {func.__name__} failed after {max_attempts} attempts")
-                except Exception as e:
-                    print(
-                        f"   \u274c {func.__name__} failed with unrecoverable error: {str(e)[:100]}"
-                    )
-                    raise
-            if last_exception:
-                raise last_exception
-            return None
-
-        return wrapper
-
-    return decorator
+from core.scholarone_utils import with_retry
 
 
 class SIAMExtractor(CachedExtractorMixin):
@@ -106,9 +66,9 @@ class SIAMExtractor(CachedExtractorMixin):
 
     def setup_chrome_options(self):
         self.chrome_options = uc.ChromeOptions()
-        self.chrome_options.add_argument("--no-sandbox")
         self.chrome_options.add_argument("--disable-dev-shm-usage")
         self.chrome_options.add_argument("--window-size=1200,800")
+        self.chrome_options.add_argument("--window-position=-2000,0")
 
     def setup_directories(self):
         self.base_dir = Path(__file__).parent.parent.parent
@@ -147,6 +107,20 @@ class SIAMExtractor(CachedExtractorMixin):
             try:
                 self.driver.set_window_position(-2000, 0)
                 self.driver.set_window_size(1200, 800)
+            except Exception:
+                pass
+            try:
+                import subprocess
+
+                subprocess.Popen(
+                    [
+                        "osascript",
+                        "-e",
+                        'tell application "System Events" to set visible of process "Google Chrome" to false',
+                    ],
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                )
             except Exception:
                 pass
         self.driver.set_page_load_timeout(120)
@@ -272,7 +246,7 @@ class SIAMExtractor(CachedExtractorMixin):
         self._dismiss_cookie_overlay()
 
         orcid_url = self._build_orcid_url()
-        print(f"\u2705 Navigating directly to ORCID login...")
+        print("\u2705 Navigating directly to ORCID login...")
         self.driver.get(orcid_url)
         self.smart_wait(3)
 
@@ -286,7 +260,7 @@ class SIAMExtractor(CachedExtractorMixin):
             self._save_debug_html("02_unexpected")
             return False
 
-        print(f"\u2705 On ORCID login page")
+        print("\u2705 On ORCID login page")
         self._save_debug_html("02_orcid_login")
 
         try:
@@ -313,18 +287,18 @@ class SIAMExtractor(CachedExtractorMixin):
             print("\u2705 Submitted ORCID credentials")
 
         except TimeoutException:
-            print(f"\u274c ORCID login form not found")
+            print("\u274c ORCID login form not found")
             self._save_debug_html("03_orcid_form_missing")
             return False
 
-        for i in range(30):
+        for _i in range(30):
             time.sleep(1)
             try:
                 url = self.driver.current_url
             except Exception:
                 continue
             if url.startswith(("https://" + base_domain, "http://" + base_domain)):
-                print(f"\u2705 ORCID login successful")
+                print("\u2705 ORCID login successful")
                 self._save_debug_html("04_post_redirect")
                 return self._ensure_dashboard_loaded()
 
@@ -338,14 +312,14 @@ class SIAMExtractor(CachedExtractorMixin):
         except (TimeoutException, NoSuchElementException):
             pass
 
-        for i in range(30):
+        for _i in range(30):
             time.sleep(1)
             try:
                 url = self.driver.current_url
             except Exception:
                 continue
             if url.startswith(("https://" + base_domain, "http://" + base_domain)):
-                print(f"\u2705 ORCID login successful")
+                print("\u2705 ORCID login successful")
                 return self._ensure_dashboard_loaded()
 
         print(f"\u274c Still on: {self.driver.current_url}")
@@ -380,7 +354,7 @@ class SIAMExtractor(CachedExtractorMixin):
                     f"   Dashboard check: title='{title}', logged_in={logged_in}, has_dashboard={has_dashboard}"
                 )
                 if logged_in and (has_dashboard or has_ae):
-                    print(f"   \u2705 Dashboard loaded")
+                    print("   \u2705 Dashboard loaded")
                     self._save_debug_html("dashboard")
                     try:
                         self.driver.minimize_window()
@@ -388,14 +362,14 @@ class SIAMExtractor(CachedExtractorMixin):
                         pass
                     return True
                 if logged_in and not has_dashboard:
-                    print(f"   \u26a0\ufe0f  Logged in but not on dashboard")
+                    print("   \u26a0\ufe0f  Logged in but not on dashboard")
             except Exception:
                 pass
             if attempt < 2:
                 print(f"   \u26a0\ufe0f  Dashboard not loaded (attempt {attempt+1}), reloading...")
                 self.driver.get(self.MAIN_URL)
                 self.smart_wait(5)
-        print(f"\u274c Dashboard failed to load after 3 attempts")
+        print("\u274c Dashboard failed to load after 3 attempts")
         return False
 
     @with_retry(max_attempts=2, delay=2.0)
@@ -439,7 +413,7 @@ class SIAMExtractor(CachedExtractorMixin):
         )
         return True
 
-    def _find_ae_section_links(self) -> List:
+    def _find_ae_section_links(self) -> list:
         try:
             ae_links = self.driver.execute_script(
                 """
@@ -485,7 +459,7 @@ class SIAMExtractor(CachedExtractorMixin):
             pass
         return set()
 
-    def discover_categories(self) -> List[Dict[str, str]]:
+    def discover_categories(self) -> list[dict[str, str]]:
         print("\U0001f50d Discovering manuscript categories...")
         categories = []
         seen_hrefs = set()
@@ -582,7 +556,7 @@ class SIAMExtractor(CachedExtractorMixin):
         return categories
 
     @with_retry(max_attempts=2, delay=3.0)
-    def collect_manuscript_ids(self, category: Dict) -> List[Dict[str, str]]:
+    def collect_manuscript_ids(self, category: dict) -> list[dict[str, str]]:
         cat_name = category["name"]
         print(f"\n\U0001f4c2 Processing category: {cat_name}")
 
@@ -652,14 +626,14 @@ class SIAMExtractor(CachedExtractorMixin):
         return manuscripts
 
     @with_retry(max_attempts=2, delay=3.0)
-    def extract_manuscript_detail(self, ms_info: Dict) -> Optional[Dict]:
+    def extract_manuscript_detail(self, ms_info: dict) -> Optional[dict]:
         ms_id = ms_info["manuscript_id"]
         self._current_manuscript_id = ms_id
         print(f"\n   \U0001f4c4 Extracting: {ms_id}")
 
         href = ms_info.get("href", "")
         if not href:
-            print(f"      \u274c No URL for manuscript")
+            print("      \u274c No URL for manuscript")
             return None
 
         try:
@@ -757,7 +731,7 @@ class SIAMExtractor(CachedExtractorMixin):
 
         return manuscript
 
-    def _extract_metadata(self, manuscript: Dict, page_text: str, soup: BeautifulSoup):
+    def _extract_metadata(self, manuscript: dict, page_text: str, soup: BeautifulSoup):
         metadata = {}
         field_map = {}
 
@@ -817,7 +791,7 @@ class SIAMExtractor(CachedExtractorMixin):
 
         manuscript["metadata"] = metadata
 
-    def _extract_referees(self, manuscript: Dict, page_text: str, soup: BeautifulSoup):
+    def _extract_referees(self, manuscript: dict, page_text: str, soup: BeautifulSoup):
         referees = []
         seen_names = set()
 
@@ -945,7 +919,7 @@ class SIAMExtractor(CachedExtractorMixin):
                 }
                 referees.append(ref)
 
-    def _extract_referees_from_tables(self, referees: List, seen_names: set, soup: BeautifulSoup):
+    def _extract_referees_from_tables(self, referees: list, seen_names: set, soup: BeautifulSoup):
         for heading in soup.find_all(["h2", "h3", "h4", "strong", "b"]):
             heading_text = heading.get_text(strip=True).lower()
             if "referee" not in heading_text and "reviewer" not in heading_text:
@@ -981,7 +955,7 @@ class SIAMExtractor(CachedExtractorMixin):
                 }
                 referees.append(ref)
 
-    def _extract_referee_contact(self, ref: Dict, soup: BeautifulSoup):
+    def _extract_referee_contact(self, ref: dict, soup: BeautifulSoup):
         name = ref.get("name", "")
         if not name:
             return
@@ -1029,7 +1003,7 @@ class SIAMExtractor(CachedExtractorMixin):
         except Exception:
             pass
 
-    def _extract_referee_contact_via_click(self, ref: Dict):
+    def _extract_referee_contact_via_click(self, ref: dict):
         name = ref.get("name", "")
         if not name or ref.get("email"):
             return
@@ -1123,7 +1097,7 @@ class SIAMExtractor(CachedExtractorMixin):
             except Exception:
                 pass
 
-    def _extract_author_contact_via_biblio(self, author: Dict):
+    def _extract_author_contact_via_biblio(self, author: dict):
         biblio_url = author.get("biblio_url", "")
         if not biblio_url:
             return
@@ -1249,7 +1223,7 @@ class SIAMExtractor(CachedExtractorMixin):
             except Exception:
                 pass
 
-    def _extract_suggested_reviewers(self, manuscript: Dict, soup: BeautifulSoup):
+    def _extract_suggested_reviewers(self, manuscript: dict, soup: BeautifulSoup):
         referee_recommendations = {
             "recommended_referees": [],
             "opposed_referees": [],
@@ -1320,7 +1294,7 @@ class SIAMExtractor(CachedExtractorMixin):
             if rec_count or opp_count:
                 print(f"         📋 Suggested: {rec_count} recommended, {opp_count} opposed")
 
-    def _extract_version_history(self, manuscript: Dict, soup: BeautifulSoup):
+    def _extract_version_history(self, manuscript: dict, soup: BeautifulSoup):
         version_history = []
         for row in soup.find_all("tr"):
             th = row.find("th")
@@ -1348,7 +1322,7 @@ class SIAMExtractor(CachedExtractorMixin):
         if version_history:
             manuscript["version_history"] = version_history
 
-    def _compute_referee_statistics(self, manuscript: Dict):
+    def _compute_referee_statistics(self, manuscript: dict):
         audit = manuscript.get("audit_trail", [])
 
         def _parse_date(s):
@@ -1436,7 +1410,7 @@ class SIAMExtractor(CachedExtractorMixin):
             if stats:
                 ref["statistics"] = stats
 
-    def _compute_status_details(self, manuscript: Dict):
+    def _compute_status_details(self, manuscript: dict):
         referees = manuscript.get("referees", [])
         if not referees:
             return
@@ -1479,7 +1453,7 @@ class SIAMExtractor(CachedExtractorMixin):
             return base + relative_url
         return base + "/" + relative_url
 
-    def _extract_decision_letter(self, manuscript: Dict, soup: BeautifulSoup):
+    def _extract_decision_letter(self, manuscript: dict, soup: BeautifulSoup):
         try:
             decision_url = None
             for a in soup.find_all("a", href=True):
@@ -1522,7 +1496,7 @@ class SIAMExtractor(CachedExtractorMixin):
             except Exception:
                 pass
 
-    def _extract_author_response(self, manuscript: Dict, soup: BeautifulSoup):
+    def _extract_author_response(self, manuscript: dict, soup: BeautifulSoup):
         try:
             response_url = None
             for a in soup.find_all("a", href=True):
@@ -1565,7 +1539,7 @@ class SIAMExtractor(CachedExtractorMixin):
             except Exception:
                 pass
 
-    def _extract_referee_reports(self, manuscript: Dict, soup: BeautifulSoup):
+    def _extract_referee_reports(self, manuscript: dict, soup: BeautifulSoup):
         try:
             reviews_url = None
             for a in soup.find_all("a", href=True):
@@ -1705,7 +1679,7 @@ class SIAMExtractor(CachedExtractorMixin):
                 pass
 
     def _scrape_status_details_page(
-        self, manuscript: Dict, soup: BeautifulSoup
+        self, manuscript: dict, soup: BeautifulSoup
     ) -> Optional[BeautifulSoup]:
         try:
             href = None
@@ -1738,7 +1712,7 @@ class SIAMExtractor(CachedExtractorMixin):
             return None
 
     def _scrape_email_log_page(
-        self, manuscript: Dict, soup: BeautifulSoup
+        self, manuscript: dict, soup: BeautifulSoup
     ) -> Optional[BeautifulSoup]:
         try:
             href = None
@@ -1772,7 +1746,7 @@ class SIAMExtractor(CachedExtractorMixin):
 
     def _build_audit_trail(
         self,
-        manuscript: Dict,
+        manuscript: dict,
         status_soup: Optional[BeautifulSoup] = None,
         email_soup: Optional[BeautifulSoup] = None,
     ):
@@ -1787,14 +1761,14 @@ class SIAMExtractor(CachedExtractorMixin):
             etype: str = "status_change",
             from_email: str = "",
             to_email: str = "",
-        ) -> Optional[Dict]:
+        ) -> Optional[dict]:
             if not date_str:
                 return None
             date_part = date_str.split()[0].split("T")[0]
             dt = None
             for fmt in ("%Y-%m-%d", "%d-%b-%Y", "%d-%B-%Y", "%m/%d/%Y"):
                 try:
-                    dt = datetime.strptime(date_part, fmt).replace(tzinfo=timezone.utc)
+                    dt = datetime.strptime(date_part, fmt).replace(tzinfo=UTC)
                     break
                 except Exception:
                     continue
@@ -1933,7 +1907,7 @@ class SIAMExtractor(CachedExtractorMixin):
             print(f"         📋 Audit trail: {len(unique_events)} platform events synthesized")
 
     def _parse_status_details_into_trail(
-        self, events: List, status_soup: BeautifulSoup, ms_id: str
+        self, events: list, status_soup: BeautifulSoup, ms_id: str
     ):
         STAGE_TYPE_MAP = {
             "preliminary manuscript data submitted": "manuscript_submission",
@@ -1980,7 +1954,7 @@ class SIAMExtractor(CachedExtractorMixin):
                 dt = None
                 for fmt in ("%Y-%m-%d", "%d-%b-%Y", "%m/%d/%Y"):
                     try:
-                        dt = datetime.strptime(date_part, fmt).replace(tzinfo=timezone.utc)
+                        dt = datetime.strptime(date_part, fmt).replace(tzinfo=UTC)
                         break
                     except Exception:
                         continue
@@ -2036,7 +2010,7 @@ class SIAMExtractor(CachedExtractorMixin):
             return "general_followup"
         return "platform_email"
 
-    def _parse_email_log_into_trail(self, events: List, email_soup: BeautifulSoup, ms_id: str):
+    def _parse_email_log_into_trail(self, events: list, email_soup: BeautifulSoup, ms_id: str):
         try:
             table = email_soup.find("table", class_="view_email_table")
             if not table:
@@ -2063,7 +2037,7 @@ class SIAMExtractor(CachedExtractorMixin):
                 dt = None
                 for fmt in ("%Y-%m-%d  %H:%M", "%Y-%m-%d %H:%M"):
                     try:
-                        dt = datetime.strptime(date_str.strip(), fmt).replace(tzinfo=timezone.utc)
+                        dt = datetime.strptime(date_str.strip(), fmt).replace(tzinfo=UTC)
                         break
                     except Exception:
                         continue
@@ -2071,7 +2045,7 @@ class SIAMExtractor(CachedExtractorMixin):
                     date_part = date_str.split()[0]
                     for fmt in ("%Y-%m-%d", "%d-%b-%Y", "%m/%d/%Y"):
                         try:
-                            dt = datetime.strptime(date_part, fmt).replace(tzinfo=timezone.utc)
+                            dt = datetime.strptime(date_part, fmt).replace(tzinfo=UTC)
                             break
                         except Exception:
                             continue
@@ -2103,10 +2077,13 @@ class SIAMExtractor(CachedExtractorMixin):
         except Exception as e:
             print(f"         ⚠️ Email log parse error: {str(e)[:60]}")
 
-    def _backfill_referee_dates_from_trail(self, manuscript: Dict):
+    def _backfill_referee_dates_from_trail(self, manuscript: dict):
         referees = manuscript.get("referees", [])
         audit = manuscript.get("audit_trail", [])
-        if not referees or not audit:
+        if not referees:
+            return
+        if not audit:
+            self._normalize_referee_dates(referees)
             return
 
         invitation_events = sorted(
@@ -2179,15 +2156,58 @@ class SIAMExtractor(CachedExtractorMixin):
                 best_ref["acceptance_date"] = acc_date
                 used_acceptances.add(best_ref.get("name", ""))
 
-        backfilled = sum(
+        for acc_ev in acceptance_events:
+            acc_date = acc_ev.get("date", "")
+            triggered_by = (acc_ev.get("from") or "").strip().lower()
+            if not acc_date or not triggered_by:
+                continue
+            for ref in referees:
+                if ref.get("acceptance_date"):
+                    continue
+                if ref.get("name", "").lower() in declined_names:
+                    continue
+                ref_name = ref.get("name", "").strip().lower()
+                ref_email = ref.get("email", "").strip().lower()
+                if not ref_name:
+                    continue
+                if (ref_email and ref_email == triggered_by) or ref_name == triggered_by:
+                    ref["acceptance_date"] = acc_date
+                    break
+                ref_parts = ref_name.split()
+                trig_parts = triggered_by.split()
+                if ref_parts and trig_parts:
+                    ref_surname = ref_parts[-1]
+                    trig_surname = trig_parts[-1]
+                    if (len(ref_surname) > 2 and ref_surname in triggered_by) or (
+                        len(trig_surname) > 2 and trig_surname in ref_name
+                    ):
+                        ref["acceptance_date"] = acc_date
+                        break
+
+        self._normalize_referee_dates(referees)
+
+        backfilled_contact = sum(
             1 for r in referees if r.get("contact_date") and r.get("section") == "active"
         )
-        if backfilled:
+        backfilled_accept = sum(1 for r in referees if r.get("acceptance_date"))
+        if backfilled_contact or backfilled_accept:
             print(
-                f"         📅 Backfilled dates: {backfilled} active referees got contact_date from email log"
+                f"         📅 Backfilled dates: {backfilled_contact} contact, {backfilled_accept} acceptance"
             )
 
-    def _populate_editors(self, manuscript: Dict):
+    def _normalize_referee_dates(self, referees: list):
+        for ref in referees:
+            dates = ref.setdefault("dates", {})
+            if not dates.get("invited") and ref.get("contact_date"):
+                dates["invited"] = ref["contact_date"]
+            if not dates.get("agreed") and ref.get("acceptance_date"):
+                dates["agreed"] = ref["acceptance_date"]
+            if not dates.get("due") and ref.get("due_date"):
+                dates["due"] = ref["due_date"]
+            if not dates.get("returned") and ref.get("received_date"):
+                dates["returned"] = ref["received_date"]
+
+    def _populate_editors(self, manuscript: dict):
         metadata = manuscript.get("metadata", {})
         editors = []
         generic_names = {"assigned", "n/a", "none", "tbd", "pending", ""}
@@ -2201,7 +2221,7 @@ class SIAMExtractor(CachedExtractorMixin):
                 editors.append({"name": name, "role": "corresponding_editor"})
         manuscript["editors"] = editors
 
-    def _compute_peer_review_milestones(self, manuscript: Dict):
+    def _compute_peer_review_milestones(self, manuscript: dict):
         milestones = {}
         metadata = manuscript.get("metadata", {})
         referees = manuscript.get("referees", [])
@@ -2306,7 +2326,7 @@ class SIAMExtractor(CachedExtractorMixin):
 
         manuscript["peer_review_milestones"] = milestones
 
-    def extract_timeline_analytics(self, manuscript: Dict) -> Dict:
+    def extract_timeline_analytics(self, manuscript: dict) -> dict:
         timeline = manuscript.get("communication_timeline") or manuscript.get("audit_trail", [])
         if not timeline:
             return {}
@@ -2330,12 +2350,12 @@ class SIAMExtractor(CachedExtractorMixin):
                     if "GMT" in str(date_str):
                         clean_date = str(date_str).replace(" GMT", "").replace(" EDT", "")
                         parsed_date = datetime.strptime(clean_date, "%d-%b-%Y %I:%M %p").replace(
-                            tzinfo=timezone.utc
+                            tzinfo=UTC
                         )
                     else:
                         parsed_date = datetime.fromisoformat(str(date_str).replace("Z", "+00:00"))
                         if parsed_date.tzinfo is None:
-                            parsed_date = parsed_date.replace(tzinfo=timezone.utc)
+                            parsed_date = parsed_date.replace(tzinfo=UTC)
                     event_dates.append(parsed_date)
                     parsed_dates[idx] = parsed_date
                 except Exception:
@@ -2453,7 +2473,7 @@ class SIAMExtractor(CachedExtractorMixin):
         ]
         if invitation_events and response_events:
             response_times = []
-            for inv_idx, inv in invitation_events:
+            for inv_idx, _inv in invitation_events:
                 inv_date = parsed_dates.get(inv_idx)
                 if inv_date:
                     later_responses = [
@@ -2487,7 +2507,7 @@ class SIAMExtractor(CachedExtractorMixin):
         if reminder_events:
             effective_reminders = 0
             total_reminders = len(reminder_events)
-            for rem_idx, reminder in reminder_events:
+            for rem_idx, _reminder in reminder_events:
                 reminder_date = parsed_dates.get(rem_idx)
                 if reminder_date:
                     cutoff_date = reminder_date + timedelta(days=7)
@@ -2519,7 +2539,7 @@ class SIAMExtractor(CachedExtractorMixin):
         )
         return analytics
 
-    def _extract_authors_from_page(self, manuscript: Dict, page_text: str, soup: BeautifulSoup):
+    def _extract_authors_from_page(self, manuscript: dict, page_text: str, soup: BeautifulSoup):
         authors = []
         author_labels = {
             "corresponding author",
@@ -2592,7 +2612,7 @@ class SIAMExtractor(CachedExtractorMixin):
 
         manuscript["authors"] = authors
 
-    def _extract_documents(self, manuscript: Dict, soup: BeautifulSoup):
+    def _extract_documents(self, manuscript: dict, soup: BeautifulSoup):
         ms_id = manuscript["manuscript_id"]
         documents = {"files": []}
         seen_urls = set()
@@ -2824,7 +2844,7 @@ class SIAMExtractor(CachedExtractorMixin):
                 pass
             self.driver = None
 
-    def _enrich_people_from_web(self, manuscript_data: Dict):
+    def _enrich_people_from_web(self, manuscript_data: dict):
         enrich_people_from_web(
             manuscript_data,
             get_cached_web_profile=self.get_cached_web_profile,
@@ -2832,7 +2852,7 @@ class SIAMExtractor(CachedExtractorMixin):
             platform_label="siam_metadata",
         )
 
-    def _enrich_audit_trail_with_gmail(self, manuscript_data: Dict, manuscript_id: str):
+    def _enrich_audit_trail_with_gmail(self, manuscript_data: dict, manuscript_id: str):
         if not GMAIL_SEARCH_AVAILABLE:
             return
 
@@ -2849,7 +2869,7 @@ class SIAMExtractor(CachedExtractorMixin):
         try:
             gmail = GmailSearchManager()
             if not gmail.initialize():
-                print(f"      \u26a0\ufe0f Gmail service not available")
+                print("      \u26a0\ufe0f Gmail service not available")
                 return
 
             sub_date_str = manuscript_data.get("metadata", {}).get("submission_date", "")
@@ -2872,7 +2892,7 @@ class SIAMExtractor(CachedExtractorMixin):
             )
 
             if not external_emails:
-                print(f"      \U0001f4e7 No external Gmail communications found")
+                print("      \U0001f4e7 No external Gmail communications found")
                 return
 
             audit_trail = manuscript_data.get("audit_trail", [])
@@ -2897,7 +2917,7 @@ class SIAMExtractor(CachedExtractorMixin):
         except Exception as e:
             print(f"      \u26a0\ufe0f Gmail search error: {str(e)[:60]}")
 
-    def _backfill_author_emails_from_timeline(self, manuscript_data: Dict, timeline: List[Dict]):
+    def _backfill_author_emails_from_timeline(self, manuscript_data: dict, timeline: list[dict]):
         authors = manuscript_data.get("authors", [])
         authors_without_email = [a for a in authors if not a.get("email") and a.get("name")]
         if not authors_without_email:
@@ -2941,7 +2961,7 @@ class SIAMExtractor(CachedExtractorMixin):
         if backfilled:
             print(f"      📧 Backfilled {backfilled} author email(s) from Gmail timeline")
 
-    def generate_summary(self, manuscripts: List[Dict]) -> Dict:
+    def generate_summary(self, manuscripts: list[dict]) -> dict:
         total_referees = sum(len(m.get("referees", [])) for m in manuscripts)
         total_authors = sum(len(m.get("authors", [])) for m in manuscripts)
         total_docs = sum(len(m.get("documents", {}).get("files", [])) for m in manuscripts)
@@ -2967,7 +2987,7 @@ class SIAMExtractor(CachedExtractorMixin):
             "enrichment_coverage": (f"{enriched_count}/{total_people}" if total_people else "0/0"),
         }
 
-    def save_results(self, manuscripts: List[Dict]):
+    def save_results(self, manuscripts: list[dict]):
         if not manuscripts:
             print("\u26a0\ufe0f No manuscripts to save")
             return
@@ -2994,11 +3014,11 @@ class SIAMExtractor(CachedExtractorMixin):
             json.dump(results, f, indent=2, ensure_ascii=False, default=str)
 
         print(f"\n\U0001f4be Results saved: {output_file}")
-        print(f"\U0001f4ca Summary:")
+        print("\U0001f4ca Summary:")
         for k, v in summary.items():
             print(f"   {k}: {v}")
 
-    def run(self) -> List[Dict]:
+    def run(self) -> list[dict]:
         print(f"\U0001f680 {self.JOURNAL_CODE} EXTRACTION \u2014 SIAM PLATFORM")
         print("=" * 60)
 

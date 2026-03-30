@@ -16,14 +16,13 @@ project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
 try:
-    from google.auth.transport.requests import Request
-    from google.oauth2.credentials import Credentials
-    from google_auth_oauthlib.flow import InstalledAppFlow
+    from google.auth.transport.requests import Request  # noqa: F401
+    from google.oauth2.credentials import Credentials  # noqa: F401
+    from google_auth_oauthlib.flow import InstalledAppFlow  # noqa: F401
 except ImportError:
     print("❌ Missing Google libraries. Installing...")
     os.system("pip install google-auth-oauthlib google-auth-httplib2 google-api-python-client")
     from google.auth.transport.requests import Request
-    from google.oauth2.credentials import Credentials
     from google_auth_oauthlib.flow import InstalledAppFlow
 
 # Gmail API scopes
@@ -43,13 +42,13 @@ def check_credentials_file():
     """Check if credentials file exists."""
     if not CREDENTIALS_FILE.exists():
         print(f"❌ Credentials file not found: {CREDENTIALS_FILE}")
-        print(f"\n📝 To create credentials:")
-        print(f"   1. Go to https://console.cloud.google.com/")
-        print(f"   2. Create/select a project")
-        print(f"   3. Enable Gmail API")
-        print(f"   4. Create OAuth 2.0 credentials (Desktop app)")
+        print("\n📝 To create credentials:")
+        print("   1. Go to https://console.cloud.google.com/")
+        print("   2. Create/select a project")
+        print("   3. Enable Gmail API")
+        print("   4. Create OAuth 2.0 credentials (Desktop app)")
         print(f"   5. Download JSON and save as: {CREDENTIALS_FILE}")
-        print(f"\n   See docs/GMAIL_OAUTH_SETUP.md for detailed instructions")
+        print("\n   See docs/GMAIL_OAUTH_SETUP.md for detailed instructions")
         return False
 
     print(f"✅ Found credentials file: {CREDENTIALS_FILE}")
@@ -79,10 +78,10 @@ def run_oauth_flow():
                 creds = None
 
         if not creds:
-            print(f"\n🔐 Starting OAuth authorization flow...")
-            print(f"   Your browser will open for authorization")
-            print(f"   Select your ETH email account")
-            print(f"   Grant Gmail read/send permissions")
+            print("\n🔐 Starting OAuth authorization flow...")
+            print("   Your browser will open for authorization")
+            print("   Select your ETH email account")
+            print("   Grant Gmail read/send permissions")
 
             flow = InstalledAppFlow.from_client_secrets_file(str(CREDENTIALS_FILE), SCOPES)
 
@@ -90,7 +89,7 @@ def run_oauth_flow():
             print("✅ Authorization successful!")
 
         # Save credentials
-        print(f"\n💾 Saving credentials...")
+        print("\n💾 Saving credentials...")
 
         # Save as JSON (for compatibility)
         with open(TOKEN_FILE, "w") as token:
@@ -110,7 +109,7 @@ def run_oauth_flow():
 
 def test_gmail_connection(creds):
     """Test Gmail API connection."""
-    print(f"\n🧪 Testing Gmail API connection...")
+    print("\n🧪 Testing Gmail API connection...")
 
     try:
         from googleapiclient.discovery import build
@@ -121,7 +120,7 @@ def test_gmail_connection(creds):
         profile = service.users().getProfile(userId="me").execute()
         email = profile.get("emailAddress")
 
-        print(f"✅ Successfully connected to Gmail")
+        print("✅ Successfully connected to Gmail")
         print(f"   Email: {email}")
         print(f"   Total messages: {profile.get('messagesTotal', 'Unknown')}")
 
@@ -146,33 +145,33 @@ def test_gmail_connection(creds):
 def print_summary():
     """Print setup summary and next steps."""
     print(f"\n{'='*80}")
-    print(f"📋 GMAIL OAUTH SETUP SUMMARY")
+    print("📋 GMAIL OAUTH SETUP SUMMARY")
     print(f"{'='*80}")
 
-    print(f"\n✅ Setup Complete!")
-    print(f"\n📁 Files created:")
+    print("\n✅ Setup Complete!")
+    print("\n📁 Files created:")
     print(f"   • {TOKEN_FILE}")
     print(f"   • {TOKEN_PICKLE}")
 
-    print(f"\n🎯 You can now:")
-    print(f"   1. Use FS extractor (Gmail-based)")
-    print(f"   2. Automatic 2FA code retrieval for MF/MOR")
+    print("\n🎯 You can now:")
+    print("   1. Use FS extractor (Gmail-based)")
+    print("   2. Automatic 2FA code retrieval for MF/MOR")
 
-    print(f"\n🧪 Test FS extractor:")
-    print(f'   python3 -c "')
-    print(f"   import asyncio")
-    print(f"   from src.ecc.adapters.journals.fs import FSAdapter")
-    print(f"   ")
-    print(f"   async def test():")
-    print(f"       async with FSAdapter() as adapter:")
-    print(f"           manuscripts = await adapter.fetch_all_manuscripts()")
-    print(f"           print(f'Found {{len(manuscripts)}} manuscripts')")
-    print(f"   ")
-    print(f"   asyncio.run(test())")
-    print(f'   "')
+    print("\n🧪 Test FS extractor:")
+    print('   python3 -c "')
+    print("   import asyncio")
+    print("   from src.ecc.adapters.journals.fs import FSAdapter")
+    print("   ")
+    print("   async def test():")
+    print("       async with FSAdapter() as adapter:")
+    print("           manuscripts = await adapter.fetch_all_manuscripts()")
+    print("           print(f'Found {len(manuscripts)} manuscripts')")
+    print("   ")
+    print("   asyncio.run(test())")
+    print('   "')
 
-    print(f"\n💡 Token will auto-refresh when expired")
-    print(f"   No need to re-run this script unless you change credentials")
+    print("\n💡 Token will auto-refresh when expired")
+    print("   No need to re-run this script unless you change credentials")
 
     print(f"\n{'='*80}")
 
@@ -180,7 +179,7 @@ def print_summary():
 def main():
     """Main entry point."""
     print(f"{'='*80}")
-    print(f"🔐 GMAIL OAUTH SETUP FOR EDITORIAL COMMAND CENTER")
+    print("🔐 GMAIL OAUTH SETUP FOR EDITORIAL COMMAND CENTER")
     print(f"{'='*80}\n")
 
     # Ensure config directory exists
@@ -199,13 +198,13 @@ def main():
 
     # Test connection
     if not test_gmail_connection(creds):
-        print(f"\n⚠️  Token created but connection test failed")
-        print(f"   Token files may still work for extraction")
+        print("\n⚠️  Token created but connection test failed")
+        print("   Token files may still work for extraction")
 
     # Print summary
     print_summary()
 
-    print(f"\n✨ Gmail OAuth setup complete!")
+    print("\n✨ Gmail OAuth setup complete!")
 
 
 if __name__ == "__main__":

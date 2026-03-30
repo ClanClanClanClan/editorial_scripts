@@ -51,6 +51,13 @@ artifacts/
 production/outputs/
 production/cache/
 
+# Event queue (runtime data, not source code)
+production/events/*.jsonl
+
+# Trained ML model artifacts (binary, regenerated via --train)
+/production/models/
+/models/
+
 # Debug artifacts and HTML captures
 debug_*.html
 *debug*.html

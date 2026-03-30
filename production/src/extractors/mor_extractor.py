@@ -1,23 +1,21 @@
 #!/usr/bin/env python3
-import os
-import sys
-import time
 import json
 import re
-import traceback
-from pathlib import Path
+import sys
+import time
 from datetime import datetime
-from typing import Dict, List, Optional, Any, Tuple
+from pathlib import Path
+from typing import Any, Optional
 
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
+from bs4 import BeautifulSoup
 from selenium.common.exceptions import (
-    TimeoutException,
     NoSuchElementException,
     StaleElementReferenceException,
+    TimeoutException,
 )
-from bs4 import BeautifulSoup
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
 
 sys.path.append(str(Path(__file__).parent.parent))
 from core.scholarone_base import ScholarOneBaseExtractor
@@ -29,7 +27,7 @@ except ImportError:
     ORCIDLookup = None
 
 try:
-    from core.gmail_search import GmailSearchManager
+    from core.gmail_search import GmailSearchManager  # noqa: F401
 
     GMAIL_SEARCH_AVAILABLE = True
 except ImportError:
@@ -116,7 +114,7 @@ class MORExtractor(ScholarOneBaseExtractor):
 
         return ""
 
-    def extract_referee_emails_from_table(self, referees: List[Dict]) -> None:
+    def extract_referee_emails_from_table(self, referees: list[dict]) -> None:
         """Extract referee emails from page HTML (popups crash ChromeDriver)"""
         print("      📧 Searching for referee emails in page HTML...")
 
@@ -247,7 +245,7 @@ class MORExtractor(ScholarOneBaseExtractor):
                                             f"            ✅ {referee['name']}: {rec_email} (from Author Recommended)"
                                         )
                                         break
-            except Exception as e:
+            except Exception:
                 pass
 
             # Strategy 3: Look for emails in mailto: links
@@ -270,7 +268,7 @@ class MORExtractor(ScholarOneBaseExtractor):
         except Exception as e:
             print(f"         ❌ Error extracting emails: {str(e)[:80]}")
 
-    def _extract_email_from_row(self, row, referee: Dict) -> None:
+    def _extract_email_from_row(self, row, referee: dict) -> None:
         """Extract email from a single referee row"""
         try:
             popup_links = row.find_elements(
@@ -302,7 +300,7 @@ class MORExtractor(ScholarOneBaseExtractor):
         except Exception:
             pass
 
-    def download_all_documents(self, manuscript_id: str) -> Dict[str, str]:
+    def download_all_documents(self, manuscript_id: str) -> dict[str, str]:
         documents = {}
         print("      📁 Downloading documents...")
         self._capture_page("document_section", manuscript_id)
@@ -324,7 +322,7 @@ class MORExtractor(ScholarOneBaseExtractor):
                             full_url = relative_url
                         else:
                             full_url = base_url + "/" + relative_url
-                        print(f"         📥 Downloading manuscript_pdf...")
+                        print("         📥 Downloading manuscript_pdf...")
                         print(f"            🔗 Direct URL: {full_url[:100]}...")
                         pdf_path = self._download_file_from_url(
                             full_url, manuscript_id, "manuscript_pdf"
@@ -396,7 +394,7 @@ class MORExtractor(ScholarOneBaseExtractor):
                             if relative_url.startswith("http")
                             else base_url + "/" + relative_url
                         )
-                        print(f"         📥 Downloading html_proof...")
+                        print("         📥 Downloading html_proof...")
                         print(f"            🔗 Direct URL: {full_url[:100]}...")
                         html_path = self._download_file_from_url(
                             full_url, manuscript_id, "html_proof"
@@ -421,7 +419,7 @@ class MORExtractor(ScholarOneBaseExtractor):
 
         return documents
 
-    def extract_enhanced_status_details(self) -> Dict[str, Any]:
+    def extract_enhanced_status_details(self) -> dict[str, Any]:
         """Extract detailed status information (MF-style)"""
         status_details = {}
 
@@ -476,7 +474,7 @@ class MORExtractor(ScholarOneBaseExtractor):
         return status_details
 
     @with_retry(max_attempts=2)
-    def parse_audit_event(self, date: str, time_str: str, event: str) -> Dict:
+    def parse_audit_event(self, date: str, time_str: str, event: str) -> dict:
         parsed = {
             "date": date,
             "raw_event": event,
@@ -581,7 +579,7 @@ class MORExtractor(ScholarOneBaseExtractor):
 
         return parsed
 
-    def extract_complete_audit_trail(self) -> List[Dict]:
+    def extract_complete_audit_trail(self) -> list[dict]:
         """Extract complete audit trail with robust pagination"""
         print("      📜 Extracting complete audit trail...")
 
@@ -618,7 +616,7 @@ class MORExtractor(ScholarOneBaseExtractor):
 
             while page_num <= max_pages and consecutive_empty < 3:
                 if not self.is_session_alive():
-                    print(f"         ❌ Session died during audit trail extraction")
+                    print("         ❌ Session died during audit trail extraction")
                     break
 
                 # Parse current page
@@ -695,7 +693,7 @@ class MORExtractor(ScholarOneBaseExtractor):
                     ("//a[@title='Next page' or @aria-label='Next page']", "Aria next"),
                 ]
 
-                for xpath, desc in pagination_strategies:
+                for xpath, _desc in pagination_strategies:
                     try:
                         next_elem = self.driver.find_element(By.XPATH, xpath)
                         if next_elem.is_enabled() and next_elem.is_displayed():
@@ -736,7 +734,7 @@ class MORExtractor(ScholarOneBaseExtractor):
 
         return all_events
 
-    def enrich_institution(self, institution: str) -> Tuple[str, str]:
+    def enrich_institution(self, institution: str) -> tuple[str, str]:
         """Get country and email domain from institution with enhanced mapping"""
         if not institution:
             return "", ""
@@ -805,7 +803,7 @@ class MORExtractor(ScholarOneBaseExtractor):
 
         return "", ""
 
-    def extract_editors(self) -> List[Dict]:
+    def extract_editors(self) -> list[dict]:
         """Extract editor information from structured label rows."""
         editors = []
         seen = set()
@@ -873,7 +871,7 @@ class MORExtractor(ScholarOneBaseExtractor):
         return editors
 
     @with_retry(max_attempts=2)
-    def extract_manuscript_comprehensive(self, manuscript_id: str) -> Dict[str, Any]:
+    def extract_manuscript_comprehensive(self, manuscript_id: str) -> dict[str, Any]:
         extraction_start = time.time()
         max_extraction_time = 1800
         self._current_manuscript_id = manuscript_id
@@ -889,7 +887,6 @@ class MORExtractor(ScholarOneBaseExtractor):
         #     if cached_data:
         #         print("   ✅ Using cached data")
         #         return cached_data
-        cache_key = f"manuscript_{manuscript_id}"  # Keep cache_key for later use
 
         try:
             header_spans = self.driver.find_elements(
@@ -927,7 +924,7 @@ class MORExtractor(ScholarOneBaseExtractor):
 
         # PASS 1: REFEREES WITH ENHANCED EXTRACTION
         if time.time() - extraction_start > max_extraction_time:
-            print(f"      ⏱️ Extraction timeout, returning partial data")
+            print("      ⏱️ Extraction timeout, returning partial data")
             return manuscript_data
 
         print("\n   🔄 PASS 1: REFEREES WITH ENHANCED EXTRACTION")
@@ -1004,7 +1001,7 @@ class MORExtractor(ScholarOneBaseExtractor):
                     if url_match:
                         review_details_url = url_match.group(1)
                         manuscript_data["_review_details_url"] = review_details_url
-                        print(f"      🔍 Found View Review Details popup")
+                        print("      🔍 Found View Review Details popup")
                         break
             except Exception:
                 pass
@@ -1014,7 +1011,7 @@ class MORExtractor(ScholarOneBaseExtractor):
 
         # PASS 2: MANUSCRIPT INFORMATION
         if time.time() - extraction_start > max_extraction_time:
-            print(f"      ⏱️ Extraction timeout, returning partial data")
+            print("      ⏱️ Extraction timeout, returning partial data")
             return manuscript_data
 
         print("\n   🔄 PASS 2: MANUSCRIPT INFORMATION")
@@ -1061,7 +1058,7 @@ class MORExtractor(ScholarOneBaseExtractor):
 
         # PASS 3: DOCUMENTS
         if time.time() - extraction_start > max_extraction_time:
-            print(f"      ⏱️ Extraction timeout, returning partial data")
+            print("      ⏱️ Extraction timeout, returning partial data")
             return manuscript_data
 
         print("\n   🔄 PASS 3: DOCUMENTS")
@@ -1076,7 +1073,7 @@ class MORExtractor(ScholarOneBaseExtractor):
 
         # PASS 4: VERSION HISTORY + MILESTONES + REVISION INFO
         if time.time() - extraction_start > max_extraction_time:
-            print(f"      ⏱️ Extraction timeout, returning partial data")
+            print("      ⏱️ Extraction timeout, returning partial data")
             return manuscript_data
 
         print("\n   🔄 PASS 4: VERSION HISTORY & MILESTONES")
@@ -1186,7 +1183,7 @@ class MORExtractor(ScholarOneBaseExtractor):
                     rd = self.extract_review_details_from_popup(rd_url)
                     if rd:
                         manuscript_data["review_details"] = rd
-                        print(f"      🔍 Current version review details extracted")
+                        print("      🔍 Current version review details extracted")
 
                 if manuscript_data.get("revision_info", {}).get("previous_versions"):
                     r1_authors = manuscript_data.get("authors", [])
@@ -1213,7 +1210,7 @@ class MORExtractor(ScholarOneBaseExtractor):
 
         # PASS 5: AUDIT TRAIL
         if time.time() - extraction_start > max_extraction_time:
-            print(f"      ⏱️ Extraction timeout, returning partial data")
+            print("      ⏱️ Extraction timeout, returning partial data")
             return manuscript_data
 
         print("\n   🔄 PASS 5: AUDIT TRAIL")
@@ -1226,7 +1223,7 @@ class MORExtractor(ScholarOneBaseExtractor):
 
         # PASS 6: ENHANCED STATUS
         if time.time() - extraction_start > max_extraction_time:
-            print(f"      ⏱️ Extraction timeout, returning partial data")
+            print("      ⏱️ Extraction timeout, returning partial data")
             return manuscript_data
 
         print("\n   🔄 PASS 6: ENHANCED STATUS")
@@ -1363,7 +1360,7 @@ class MORExtractor(ScholarOneBaseExtractor):
 
         return manuscript_data
 
-    def _normalize_output(self, manuscript_data: Dict):
+    def _normalize_output(self, manuscript_data: dict):
         for ref in manuscript_data.get("referees", []):
             ref["dates"] = {
                 "invited": ref.get("invitation_date") or None,
@@ -1519,7 +1516,7 @@ class MORExtractor(ScholarOneBaseExtractor):
                 if fs.get("grant_number") == "":
                     fs["grant_number"] = None
 
-    def extract_referees_enhanced(self) -> List[Dict]:
+    def extract_referees_enhanced(self) -> list[dict]:
         """Enhanced referee extraction with ORDER selects and multiple strategies"""
         referees = []
 
@@ -1607,7 +1604,7 @@ class MORExtractor(ScholarOneBaseExtractor):
 
         return referees
 
-    def _parse_referee_row(self, row) -> Optional[Dict]:
+    def _parse_referee_row(self, row) -> Optional[dict]:
         """Parse a single referee row"""
         try:
             row_text = self.safe_get_text(row)
@@ -1683,15 +1680,19 @@ class MORExtractor(ScholarOneBaseExtractor):
             # Extract status
             status = ""
             status_keywords = [
+                "No Response",
                 "Declined",
+                "Un-invited",
+                "Un-assigned",
+                "Terminated",
                 "Agreed",
-                "Invited",
-                "Pending",
-                "Overdue",
                 "Complete",
                 "Major Revision",
                 "Minor Revision",
                 "In Review",
+                "Overdue",
+                "Invited",
+                "Pending",
             ]
             for keyword in status_keywords:
                 if keyword in row_text:
@@ -1704,24 +1705,41 @@ class MORExtractor(ScholarOneBaseExtractor):
             review_returned_date = ""
             time_in_review = ""
             decision_letter_number = ""
-            date_tds = row.find_elements(By.XPATH, ".//table//tr/td")
-            i = 0
-            while i < len(date_tds) - 1:
-                label = date_tds[i].text.strip().rstrip(":").lower()
-                value = date_tds[i + 1].text.strip()
-                if "invited" in label:
-                    invitation_date = value
-                elif "agreed" in label:
-                    response_date = value
-                elif "due date" in label:
-                    due_date = value
-                elif "review returned" in label:
-                    review_returned_date = value
-                elif "time in review" in label:
-                    time_in_review = value
-                elif "decision letter" in label:
-                    decision_letter_number = value
-                i += 2
+            date_cell = None
+            try:
+                tl_cells = row.find_elements(By.XPATH, ".//td[@class='tablelightcolor']")
+                if len(tl_cells) > 3:
+                    date_cell = tl_cells[3]
+            except Exception:
+                pass
+
+            if not date_cell:
+                for td in row.find_elements(By.XPATH, ".//td"):
+                    td_text = self.safe_get_text(td)
+                    if any(kw in td_text for kw in ["Invited:", "Due Date:", "Agreed:"]):
+                        date_cell = td
+                        break
+
+            if date_cell:
+                date_rows = date_cell.find_elements(By.XPATH, ".//table//tr")
+                for dr in date_rows:
+                    cells = dr.find_elements(By.TAG_NAME, "td")
+                    if len(cells) >= 2:
+                        label = self.safe_get_text(cells[0]).strip().rstrip(":").lower()
+                        value = self.safe_get_text(cells[1]).strip()
+                        if "invited" in label:
+                            invitation_date = value
+                        elif "agreed" in label:
+                            response_date = value
+                        elif "due date" in label:
+                            due_date = value
+                        elif "review returned" in label:
+                            review_returned_date = value
+                        elif "time in review" in label:
+                            time_in_review = value
+                        elif "decision letter" in label:
+                            decision_letter_number = value
+
             if not invitation_date:
                 date_matches = re.findall(r"\d{2}-\w{3}-\d{4}", row_text)
                 if date_matches:
@@ -1847,9 +1865,9 @@ class MORExtractor(ScholarOneBaseExtractor):
                 "decision_letter_number": decision_letter_number,
                 "orcid": orcid_link,
                 "email": email,
-                "email_domain": f"@{email.split('@')[1]}"
-                if "@" in email
-                else (f"@{domain}" if domain else ""),
+                "email_domain": (
+                    f"@{email.split('@')[1]}" if "@" in email else (f"@{domain}" if domain else "")
+                ),
                 "author_recommended": author_recommended,
                 "recommendation": recommendation,
                 "report_url": report_url,
@@ -1885,7 +1903,7 @@ class MORExtractor(ScholarOneBaseExtractor):
             print(f"         ⚠️ Parse error: {str(e)[:60]}")
             return None
 
-    def extract_review_details_from_popup(self, popup_url: str) -> Optional[Dict]:
+    def extract_review_details_from_popup(self, popup_url: str) -> Optional[dict]:
         if not popup_url:
             return None
         try:
@@ -1957,14 +1975,14 @@ class MORExtractor(ScholarOneBaseExtractor):
                 print(f"         📋 Review details extracted: {len(result['raw_text'])} chars")
                 return result
             return None
-        except Exception as e:
+        except Exception:
             try:
                 self.driver.switch_to.window(original_window)
             except Exception:
                 pass
             return None
 
-    def extract_previous_version_data(self, version_info: Dict, current_manuscript_id: str) -> Dict:
+    def extract_previous_version_data(self, version_info: dict, current_manuscript_id: str) -> dict:
         prev_data = {
             "manuscript_id": version_info.get("id", ""),
             "date_submitted": version_info.get("date_submitted", ""),
@@ -2155,7 +2173,7 @@ class MORExtractor(ScholarOneBaseExtractor):
             pass
         return editor_names
 
-    def extract_authors(self) -> List[Dict]:
+    def extract_authors(self) -> list[dict]:
         """Extract author information scoped to Authors & Institutions section."""
         authors_dict = {}
 
@@ -2258,7 +2276,7 @@ class MORExtractor(ScholarOneBaseExtractor):
 
         return authors
 
-    def _parse_author_row(self, row, all_emails: List[str]) -> Optional[Dict]:
+    def _parse_author_row(self, row, all_emails: list[str]) -> Optional[dict]:
         """Parse author row using same pattern as _parse_referee_row"""
         try:
             row_text = self.safe_get_text(row)
@@ -2451,7 +2469,7 @@ class MORExtractor(ScholarOneBaseExtractor):
 
             return author_data
 
-        except Exception as e:
+        except Exception:
             return None
 
     def _extract_label_value(self, label_text: str) -> str:
@@ -2468,7 +2486,7 @@ class MORExtractor(ScholarOneBaseExtractor):
         except Exception:
             return ""
 
-    def extract_metadata(self) -> Dict[str, Any]:
+    def extract_metadata(self) -> dict[str, Any]:
         """Extract comprehensive manuscript metadata"""
         metadata = {}
 
@@ -2619,13 +2637,15 @@ class MORExtractor(ScholarOneBaseExtractor):
 
         return metadata
 
-    def run(self) -> Dict[str, Any]:
+    def run(self) -> dict[str, Any]:
         """Main execution method with comprehensive error handling"""
         print("\n" + "=" * 60)
         print("🚀 MOR PRODUCTION EXTRACTOR - ROBUST MF LEVEL")
         print("=" * 60)
 
         self.setup_driver()
+
+        self._dashboard_manifest = {"scanned": {}, "failed": []}
 
         results = {
             "extraction_timestamp": datetime.now().isoformat(),
@@ -2663,6 +2683,7 @@ class MORExtractor(ScholarOneBaseExtractor):
                             results["errors"].append(
                                 f"Session dead before '{category}', recovery failed"
                             )
+                            self._dashboard_manifest["failed"].append(category)
                             continue
                     manuscripts = self.process_category(category)
                     results["manuscripts"].extend(manuscripts)
@@ -2670,6 +2691,8 @@ class MORExtractor(ScholarOneBaseExtractor):
                     error_msg = f"Error in category '{category}': {str(e)[:100]}"
                     print(f"   ❌ {error_msg}")
                     results["errors"].append(error_msg)
+                    if category not in self._dashboard_manifest["scanned"]:
+                        self._dashboard_manifest["failed"].append(category)
                     err_lower = str(e).lower()
                     session_dead_keywords = [
                         "invalid session id",
@@ -2682,6 +2705,8 @@ class MORExtractor(ScholarOneBaseExtractor):
                         if not self._recover_session():
                             results["errors"].append("Session recovery failed, stopping")
                             break
+
+            results["dashboard_manifest"] = self._dashboard_manifest
 
             # Generate comprehensive summary
             results["summary"] = self.generate_summary(results["manuscripts"])
@@ -2737,7 +2762,7 @@ class MORExtractor(ScholarOneBaseExtractor):
         except TimeoutException:
             return False
 
-    def _collect_manuscript_ids(self) -> List[str]:
+    def _collect_manuscript_ids(self) -> list[str]:
         """Return deduplicated list of MOR manuscript IDs visible on current page.
 
         Uses Take Action check icons as 1:1 anchors per manuscript (proven MF pattern).
@@ -2772,7 +2797,7 @@ class MORExtractor(ScholarOneBaseExtractor):
         print(f"   📋 Found {len(ids)} manuscript IDs via {strategy}: {ids}")
         return ids
 
-    def process_category(self, category: str) -> List[Dict]:
+    def process_category(self, category: str) -> list[dict]:
         """Process all manuscripts in a category."""
         manuscripts = []
 
@@ -2788,6 +2813,7 @@ class MORExtractor(ScholarOneBaseExtractor):
             # Collect unique manuscript IDs up-front
             all_ids = self._collect_manuscript_ids()
             total_manuscripts = len(all_ids)
+            self._dashboard_manifest["scanned"][category] = list(all_ids)
 
             print(f"   📊 Found {total_manuscripts} manuscripts")
 
@@ -2830,7 +2856,7 @@ class MORExtractor(ScholarOneBaseExtractor):
                     # Re-open the category fresh each iteration (after the first)
                     if idx > 0:
                         if not self._open_category(category):
-                            print(f"      ❌ Could not re-open category, stopping")
+                            print("      ❌ Could not re-open category, stopping")
                             break
 
                     # Find the check icon whose innermost row contains this manuscript ID
@@ -2853,8 +2879,8 @@ class MORExtractor(ScholarOneBaseExtractor):
                         print(f"      ⚠️ Row for {manuscript_id} not found, skipping")
                         continue
 
-                    print(f"      ✅ Found row")
-                    print(f"      2️⃣ Clicking manuscript...")
+                    print("      ✅ Found row")
+                    print("      2️⃣ Clicking manuscript...")
 
                     current_url = self.driver.current_url
                     try:
@@ -2865,16 +2891,18 @@ class MORExtractor(ScholarOneBaseExtractor):
 
                     try:
                         WebDriverWait(self.driver, 15).until(lambda d: d.current_url != current_url)
-                        print(f"      ✅ Page loaded")
+                        print("      ✅ Page loaded")
                     except Exception:
-                        print(f"      ⚠️  URL didn't change, continuing anyway")
+                        print("      ⚠️  URL didn't change, continuing anyway")
 
                     self.smart_wait(1)
 
                     # Extract comprehensive data
-                    print(f"      3️⃣ Extracting comprehensive details...")
+                    print("      3️⃣ Extracting comprehensive details...")
                     manuscript_data = self.extract_manuscript_comprehensive(manuscript_id)
                     manuscript_data["category"] = category
+                    if not manuscript_data.get("status"):
+                        manuscript_data["status"] = category
                     manuscript_data["id"] = manuscript_id
 
                     if category == "Awaiting AE Recommendation":
@@ -2924,6 +2952,7 @@ class MORExtractor(ScholarOneBaseExtractor):
 
         except TimeoutException:
             print(f"   ⚠️ Category '{category}' not found or empty")
+            self._dashboard_manifest["scanned"].setdefault(category, [])
         except Exception as e:
             error_str = str(e).lower()
             print(f"   ❌ Category error: {str(e)[:50]}")
@@ -2940,7 +2969,7 @@ class MORExtractor(ScholarOneBaseExtractor):
 
         return manuscripts
 
-    def generate_summary(self, manuscripts: List[Dict]) -> Dict[str, Any]:
+    def generate_summary(self, manuscripts: list[dict]) -> dict[str, Any]:
         """Generate comprehensive extraction summary"""
         summary = {
             "total_manuscripts": len(manuscripts),
@@ -2992,7 +3021,7 @@ class MORExtractor(ScholarOneBaseExtractor):
 
         return summary
 
-    def display_summary(self, results: Dict[str, Any]):
+    def display_summary(self, results: dict[str, Any]):
         """Display comprehensive extraction summary"""
         print("\n" + "=" * 60)
         print("📊 EXTRACTION SUMMARY - MF LEVEL ROBUST")
@@ -3085,6 +3114,5 @@ if __name__ == "__main__":
         "--force-refresh", action="store_true", help="Ignore cache, re-extract everything"
     )
     args = parser.parse_args()
-    main(
-        headless=not args.visible, capture_html=args.capture_html, force_refresh=args.force_refresh
-    )
+    headless = not args.visible
+    main(headless=headless, capture_html=args.capture_html, force_refresh=args.force_refresh)

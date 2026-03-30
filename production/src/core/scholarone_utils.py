@@ -3,19 +3,19 @@
 Shared utilities for ScholarOne extractors (MF, MOR).
 """
 
-import time
 import random
-import re
+import time
+from collections.abc import Callable
 from datetime import datetime
-from pathlib import Path
 from functools import wraps
-from typing import Callable, Optional
+from pathlib import Path
+from typing import Optional
 
 from selenium.common.exceptions import (
-    TimeoutException,
     NoSuchElementException,
-    WebDriverException,
     StaleElementReferenceException,
+    TimeoutException,
+    WebDriverException,
 )
 from selenium.webdriver.common.by import By
 

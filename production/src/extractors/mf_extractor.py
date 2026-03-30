@@ -6,31 +6,31 @@ COMPREHENSIVE MF EXTRACTOR
 Extracts ALL data from ALL categories with proper navigation.
 """
 
+import json
 import os
+import re
 import sys
 import time
-import json
-import re
-import requests
-from urllib.parse import unquote, urlparse
+import traceback
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
-from datetime import datetime, timedelta, timezone
+from typing import Optional
+from urllib.parse import unquote
+
+import requests
+from selenium.common.exceptions import (
+    NoSuchElementException,
+    StaleElementReferenceException,
+    TimeoutException,
+    WebDriverException,
+)
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import (
-    TimeoutException,
-    NoSuchElementException,
-    WebDriverException,
-    StaleElementReferenceException,
-)
-import traceback
-from typing import Optional, Callable, List, Dict, Any
+from selenium.webdriver.support.ui import WebDriverWait
 
 sys.path.append(str(Path(__file__).parent.parent))
 from core.scholarone_base import ScholarOneBaseExtractor
-from core.scholarone_utils import with_retry
 
 try:
     from core.orcid_lookup import ORCIDLookup
@@ -70,6 +70,7 @@ class ComprehensiveMFExtractor(ScholarOneBaseExtractor):
         self.manuscripts = []
         self.processed_manuscript_ids = set()
         self._all_page_emails = set()
+        self._dashboard_manifest = {"scanned": {}, "failed": []}
         self._setup_secure_credentials()
         self.setup_driver()
 
@@ -118,7 +119,7 @@ class ComprehensiveMFExtractor(ScholarOneBaseExtractor):
             # Handle both element objects and URL strings
             if hasattr(popup_url_or_element, "click"):
                 # This is a WebElement - click it directly
-                print(f"         🔧 Clicking element directly...")
+                print("         🔧 Clicking element directly...")
                 popup_url_or_element.click()
             elif isinstance(popup_url_or_element, str):
                 popup_url = popup_url_or_element
@@ -152,7 +153,7 @@ class ComprehensiveMFExtractor(ScholarOneBaseExtractor):
                 popup_window = [w for w in self.driver.window_handles if w != original_window][0]
                 self.driver.switch_to.window(popup_window)
             except TimeoutException:
-                print(f"   ⏱️ Popup window timeout...")
+                print("   ⏱️ Popup window timeout...")
                 return ""
 
             # Wait for content to load - handle framesets differently
@@ -168,7 +169,7 @@ class ComprehensiveMFExtractor(ScholarOneBaseExtractor):
                         EC.presence_of_element_located((By.TAG_NAME, "body"))
                     )
             except TimeoutException:
-                print(f"   ⏱️ Popup content timeout...")
+                print("   ⏱️ Popup content timeout...")
                 # Don't return yet - might be a frameset page
 
             # Extract email with frame-aware strategies for MF framesets
@@ -196,14 +197,14 @@ class ComprehensiveMFExtractor(ScholarOneBaseExtractor):
                 # Check if this is a frameset
                 framesets = self.driver.find_elements(By.TAG_NAME, "frameset")
                 if framesets:
-                    print(f"   🖼️ Detected frameset popup, checking frames...")
+                    print("   🖼️ Detected frameset popup, checking frames...")
 
                     # Get all frames
                     frames = self.driver.find_elements(By.TAG_NAME, "frame")
                     print(f"   📋 Found {len(frames)} frames in popup")
 
                     # Try each frame to find email content
-                    for i, frame in enumerate(frames):
+                    for i, _frame in enumerate(frames):
                         try:
                             self.driver.switch_to.frame(i)
                             print(f"   🔍 Checking frame {i}...")
@@ -376,13 +377,13 @@ class ComprehensiveMFExtractor(ScholarOneBaseExtractor):
                         try:
                             self.driver.switch_to.window(window)
                             self.driver.close()
-                            print(f"   🧹 Closed popup window")
+                            print("   🧹 Closed popup window")
                         except Exception:
                             pass
 
                 # Always return to original window
                 self.driver.switch_to.window(original_window)
-                print(f"   🔙 Returned to main window")
+                print("   🔙 Returned to main window")
 
                 # CRITICAL: Wait for main window to be fully interactive
                 time.sleep(3)  # Give MORE time for browser to settle
@@ -463,7 +464,7 @@ class ComprehensiveMFExtractor(ScholarOneBaseExtractor):
                 r"MAFI\d{4}-\d{3,5}",  # MAFI2024-1234
             ]
 
-            print(f"   🔍 Searching for MAFI manuscript ID patterns...")
+            print("   🔍 Searching for MAFI manuscript ID patterns...")
 
             for pattern in mf_patterns:
                 matches = re.findall(pattern, page_text, re.IGNORECASE)
@@ -555,7 +556,7 @@ class ComprehensiveMFExtractor(ScholarOneBaseExtractor):
     def get_current_editor_names(self):
         """Dynamically extract editor names from current page to avoid hardcoding."""
         try:
-            print(f"      🔍 Dynamically detecting editor names...")
+            print("      🔍 Dynamically detecting editor names...")
 
             # Common patterns to identify editor names on ScholarOne pages
             editor_patterns = [
@@ -588,7 +589,7 @@ class ComprehensiveMFExtractor(ScholarOneBaseExtractor):
 
             # Add common editor surnames as fallback (but dynamic detection first)
             if not detected_editors:
-                print(f"      ⚠️ No editors detected dynamically, using common patterns")
+                print("      ⚠️ No editors detected dynamically, using common patterns")
                 # Only add if we can't detect dynamically
                 fallback_editors = []
             else:
@@ -768,7 +769,7 @@ class ComprehensiveMFExtractor(ScholarOneBaseExtractor):
 
             # If web search didn't work, use enhanced pattern-based fallback
             if not found_institution:
-                print(f"         ⚠️ Web search inconclusive, using pattern-based inference")
+                print("         ⚠️ Web search inconclusive, using pattern-based inference")
 
                 domain_lower = domain.lower()
 
@@ -877,7 +878,7 @@ class ComprehensiveMFExtractor(ScholarOneBaseExtractor):
             if found_institution:
                 print(f"         ✅ Final institution inference: {found_institution}")
             else:
-                print(f"         ❌ Could not infer institution from domain")
+                print("         ❌ Could not infer institution from domain")
 
             return found_institution
 
@@ -888,7 +889,7 @@ class ComprehensiveMFExtractor(ScholarOneBaseExtractor):
     def get_available_manuscript_categories(self):
         """Dynamically detect all available manuscript categories from current page."""
         try:
-            print(f"      🔍 Dynamically detecting manuscript categories...")
+            print("      🔍 Dynamically detecting manuscript categories...")
 
             detected_categories = []
 
@@ -926,7 +927,7 @@ class ComprehensiveMFExtractor(ScholarOneBaseExtractor):
                             if (
                                 len(link_text) > 5
                                 and not link_text.startswith("http")
-                                and not "@" in link_text
+                                and "@" not in link_text
                                 and not link_text.isdigit()
                                 and "manuscript" in link_text.lower()
                                 or "awaiting" in link_text.lower()
@@ -941,7 +942,7 @@ class ComprehensiveMFExtractor(ScholarOneBaseExtractor):
 
             # Fallback: Look for common category keywords in page text
             if not detected_categories:
-                print(f"      ⚠️ No categories detected via links, trying page text patterns...")
+                print("      ⚠️ No categories detected via links, trying page text patterns...")
 
                 page_text = self.driver.find_element(By.TAG_NAME, "body").text
                 fallback_patterns = [
@@ -960,7 +961,7 @@ class ComprehensiveMFExtractor(ScholarOneBaseExtractor):
 
             # Final fallback: Common manuscript states if nothing found
             if not detected_categories:
-                print(f"      ⚠️ No categories detected, using common manuscript states")
+                print("      ⚠️ No categories detected, using common manuscript states")
                 detected_categories = ["Available Manuscripts"]  # Generic fallback
 
             print(f"      📋 Final category list: {detected_categories}")
@@ -979,9 +980,8 @@ class ComprehensiveMFExtractor(ScholarOneBaseExtractor):
             try:
                 print(f"🔐 Login attempt {attempt + 1}/{MAX_LOGIN_ATTEMPTS}...")
 
-                # Navigate to login page
                 self.driver.get("https://mc.manuscriptcentral.com/mafi")
-                time.sleep(5)  # Give more time for initial page load
+                self._wait_for_cloudflare(180)
 
                 # Handle cookie banner
                 try:
@@ -995,7 +995,6 @@ class ComprehensiveMFExtractor(ScholarOneBaseExtractor):
                     # Wait for login form to be present
                     userid_field = self.wait_for_element(By.ID, "USERID", timeout=10)
                     if not userid_field:
-                        # Debug HTML write removed - was polluting working directory
                         raise Exception("Login form not found")
 
                     userid_field = self.driver.find_element(By.ID, "USERID")
@@ -1060,7 +1059,7 @@ class ComprehensiveMFExtractor(ScholarOneBaseExtractor):
                                 time.sleep(5)
 
                             sys.path.insert(0, str(Path(__file__).parent.parent))
-                            from core.gmail_verification_wrapper import (
+                            from core.gmail_verification import (
                                 fetch_latest_verification_code,
                             )
 
@@ -1103,7 +1102,7 @@ class ComprehensiveMFExtractor(ScholarOneBaseExtractor):
                             return False
 
                     if code:
-                        print(f"   🔑 Entering verification code...")
+                        print("   🔑 Entering verification code...")
 
                         # Wait for field to be interactable
                         try:
@@ -1120,7 +1119,7 @@ class ComprehensiveMFExtractor(ScholarOneBaseExtractor):
                                 self.driver.execute_script(
                                     f"document.getElementById('TOKEN_VALUE').value = '{code}';"
                                 )
-                                print(f"   ✅ Used JavaScript to enter code")
+                                print("   ✅ Used JavaScript to enter code")
                             except Exception as js_error:
                                 print(f"   ❌ JavaScript entry also failed: {js_error}")
                                 return False
@@ -1132,7 +1131,7 @@ class ComprehensiveMFExtractor(ScholarOneBaseExtractor):
 
                         # Check if 2FA succeeded
                         try:
-                            still_on_2fa = self.driver.find_element(By.ID, "TOKEN_VALUE")
+                            self.driver.find_element(By.ID, "TOKEN_VALUE")
                             print("   ❌ 2FA failed - still on verification page")
                             if attempt < MAX_LOGIN_ATTEMPTS - 1:
                                 print("   🔄 Retrying login...")
@@ -2572,11 +2571,11 @@ class ComprehensiveMFExtractor(ScholarOneBaseExtractor):
                                                 )
                                         else:
                                             print(
-                                                f"         ⚠️ No EMAIL_TO in URL, clicking popup..."
+                                                "         ⚠️ No EMAIL_TO in URL, clicking popup..."
                                             )
                                             # SKIP POPUP TO PREVENT HANGING
                                             print(
-                                                f"         ⚠️ Skipping popup extraction to prevent hanging"
+                                                "         ⚠️ Skipping popup extraction to prevent hanging"
                                             )
                                             email = (
                                                 ""  # Will get emails from Gmail cross-check later
@@ -2765,7 +2764,7 @@ class ComprehensiveMFExtractor(ScholarOneBaseExtractor):
                                 print(
                                     f"         📍 Affiliation (method 4): {referee['affiliation']}"
                                 )
-                        except Exception as e:
+                        except Exception:
                             pass
 
                     # Strategy 5: Check ALL table cells for affiliation data
@@ -3063,11 +3062,11 @@ class ComprehensiveMFExtractor(ScholarOneBaseExtractor):
                             referee["report_url"] = report_url
                             referee["report"] = {"available": True, "url": report_url}
 
-                            print(f"         📄 Extracting report content from popup...")
+                            print("         📄 Extracting report content from popup...")
                             report_data = self.extract_referee_report_from_popup(referee)
                             if report_data:
                                 referee["report"].update(report_data)
-                                print(f"         ✅ Report content extracted")
+                                print("         ✅ Report content extracted")
                                 if report_data.get("recommendation") and not referee.get(
                                     "recommendation"
                                 ):
@@ -3091,7 +3090,7 @@ class ComprehensiveMFExtractor(ScholarOneBaseExtractor):
                                         pass
                             else:
                                 referee["report"]["extraction_failed"] = True
-                                print(f"         ⚠️ Report popup extraction returned no data")
+                                print("         ⚠️ Report popup extraction returned no data")
                         else:
                             referee["report"] = {"available": False}
                     except Exception as e:
@@ -3270,7 +3269,7 @@ class ComprehensiveMFExtractor(ScholarOneBaseExtractor):
                 return report
             return None
 
-        except Exception as e:
+        except Exception:
             try:
                 self.driver.switch_to.window(self.driver.window_handles[0])
             except Exception:
@@ -3808,7 +3807,7 @@ class ComprehensiveMFExtractor(ScholarOneBaseExtractor):
             manuscript["report_extraction_enabled"] = True
 
             # Count available reports
-            referee_count = len(manuscript.get("referees", []))
+            len(manuscript.get("referees", []))
             reports_with_content = sum(
                 1
                 for r in manuscript.get("referees", [])
@@ -3985,7 +3984,6 @@ class ComprehensiveMFExtractor(ScholarOneBaseExtractor):
 
             if details_link:
                 # Store current window
-                original_window = self.driver.current_window_handle
 
                 # Click the details link
                 details_link.click()
@@ -4389,7 +4387,7 @@ class ComprehensiveMFExtractor(ScholarOneBaseExtractor):
                         and len(link_text) > 3
                         and not link_text.lower().startswith("view")
                         and not link_text.lower().startswith("click")
-                        and not "@" in link_text
+                        and "@" not in link_text
                         and not link_text.isdigit()
                     ):
                         # Additional check: should look like "Last, First" format
@@ -4470,7 +4468,7 @@ class ComprehensiveMFExtractor(ScholarOneBaseExtractor):
                         row_text = author_row.text.strip()
                         if author["name"] not in row_text and raw_name not in row_text:
                             # This might be the wrong row, try parent of parent
-                            print(f"         ⚠️ Row doesn't contain author name, trying parent...")
+                            print("         ⚠️ Row doesn't contain author name, trying parent...")
                             author_row = link.find_element(
                                 By.XPATH, "./ancestor::tr[position()=1 or position()=2]"
                             )
@@ -4482,7 +4480,7 @@ class ComprehensiveMFExtractor(ScholarOneBaseExtractor):
                             or "click on each tab" in row_text.lower()
                         ):
                             print(
-                                f"         ❌ Got page UI text instead of author row, trying alternative..."
+                                "         ❌ Got page UI text instead of author row, trying alternative..."
                             )
                             # Get just the text near the link
                             parent_td = link.find_element(By.XPATH, "./ancestor::td[1]")
@@ -4535,7 +4533,7 @@ class ComprehensiveMFExtractor(ScholarOneBaseExtractor):
                                     print(f"         ⚠️ No @ in URL param: {potential_email}")
                             else:
                                 print(
-                                    f"         ⚠️ No EMAIL_TO in URL, clicking popup to extract..."
+                                    "         ⚠️ No EMAIL_TO in URL, clicking popup to extract..."
                                 )
                                 # CLICK THE POPUP TO EXTRACT EMAIL (like referees)
                                 popup_email = self.get_email_from_popup_safe(link)
@@ -4564,7 +4562,7 @@ class ComprehensiveMFExtractor(ScholarOneBaseExtractor):
                         print(f"         ⚠️ No popup email, using table email: {table_email}")
                         author["email"] = table_email
                     else:
-                        print(f"         ❌ No email found in popup or table")
+                        print("         ❌ No email found in popup or table")
                         author["email"] = ""
 
                     # Extract institution from row - SMART PARSING
@@ -4590,7 +4588,7 @@ class ComprehensiveMFExtractor(ScholarOneBaseExtractor):
                                 continue
 
                             # If we've found the author cell, the next non-empty cell might be institution
-                            if found_author_cell and not "@" in cell_text:
+                            if found_author_cell and "@" not in cell_text:
                                 # Check if it looks like an institution
                                 lines = [
                                     line.strip() for line in cell_text.split("\n") if line.strip()
@@ -4874,7 +4872,7 @@ class ComprehensiveMFExtractor(ScholarOneBaseExtractor):
                             or "corresp" in context
                         ):
                             author["is_corresponding"] = True
-                            print(f"         📝 Corresponding author: Yes")
+                            print("         📝 Corresponding author: Yes")
 
                     # Extract ORCID if present - look specifically near this author
                     author["orcid"] = ""
@@ -5077,7 +5075,7 @@ class ComprehensiveMFExtractor(ScholarOneBaseExtractor):
                                     if city_part:
                                         matched_author["city"] = city_part
                                     for cp in country_parts:
-                                        if len(cp) > 3 and not "@" in cp and not cp[0].isdigit():
+                                        if len(cp) > 3 and "@" not in cp and not cp[0].isdigit():
                                             matched_author["country"] = cp
                                             break
                                 if matched_author.get("email") and "@" in matched_author["email"]:
@@ -5277,7 +5275,7 @@ class ComprehensiveMFExtractor(ScholarOneBaseExtractor):
 
                 if req_pattern in page_text:
                     manuscript["submission_requirements_acknowledged"] = True
-                    print(f"      ✅ Submission Requirements: Acknowledged")
+                    print("      ✅ Submission Requirements: Acknowledged")
                 else:
                     manuscript["submission_requirements_acknowledged"] = False
             except Exception as e:
@@ -5393,7 +5391,7 @@ class ComprehensiveMFExtractor(ScholarOneBaseExtractor):
                         )
                     else:
                         manuscript["is_revision"] = False
-                        print(f"      ✅ Revision Status: Original submission")
+                        print("      ✅ Revision Status: Original submission")
 
             except Exception as e:
                 print(f"      ⚠️ Could not extract files information: {e}")
@@ -5530,7 +5528,7 @@ class ComprehensiveMFExtractor(ScholarOneBaseExtractor):
             if cover_letter_links:
                 download_url = cover_letter_links[0].get_attribute("href")
                 manuscript["cover_letter_url"] = download_url
-                print(f"      ✅ Cover letter URL found")
+                print("      ✅ Cover letter URL found")
 
         except Exception as e:
             print(f"      ❌ Error extracting cover letter: {e}")
@@ -5614,7 +5612,7 @@ class ComprehensiveMFExtractor(ScholarOneBaseExtractor):
                     self.extract_audit_trail_metadata(manuscript)
 
                     # CROSS-CHECK WITH GMAIL for external communications
-                    print(f"   📧 Cross-checking with Gmail for external communications...")
+                    print("   📧 Cross-checking with Gmail for external communications...")
                     print(
                         f"      📊 Pre-enhancement: {len(manuscript.get('communication_timeline', []))} platform events"
                     )
@@ -5655,10 +5653,10 @@ class ComprehensiveMFExtractor(ScholarOneBaseExtractor):
                                 f"   📊 Total timeline: {total_events} events ({platform_events} platform + {external_count} external)"
                             )
                         else:
-                            print(f"   ⚠️ Gmail cross-check completed but timeline not enhanced")
+                            print("   ⚠️ Gmail cross-check completed but timeline not enhanced")
 
                         # ENHANCED: Extract comprehensive timeline analytics
-                        print(f"   📊 Extracting timeline analytics...")
+                        print("   📊 Extracting timeline analytics...")
                         try:
                             timeline_analytics = self.extract_timeline_analytics(manuscript)
                             if timeline_analytics:
@@ -5667,7 +5665,7 @@ class ComprehensiveMFExtractor(ScholarOneBaseExtractor):
                                     f"   ✅ Timeline analytics extracted: {timeline_analytics['total_events']} events analyzed"
                                 )
                             else:
-                                print(f"   ⚠️ No timeline analytics extracted")
+                                print("   ⚠️ No timeline analytics extracted")
                         except Exception as analytics_error:
                             print(f"   ⚠️ Timeline analytics error (continuing): {analytics_error}")
 
@@ -5754,7 +5752,7 @@ class ComprehensiveMFExtractor(ScholarOneBaseExtractor):
         """Get total number of audit events from pagination info."""
 
         try:
-            print(f"      🔍 Looking for pagination info...")
+            print("      🔍 Looking for pagination info...")
 
             # Method 1: Look for pagination info like "of 32" or "of 45" with various selectors
             pagination_selectors = [
@@ -5791,7 +5789,7 @@ class ComprehensiveMFExtractor(ScholarOneBaseExtractor):
                     continue
 
             # Method 2: Count select options
-            print(f"      🔍 Checking select dropdown options...")
+            print("      🔍 Checking select dropdown options...")
             select_selectors = [
                 "//select[@name='page_select']//option",
                 "//select[contains(@name, 'page')]//option",
@@ -5822,7 +5820,7 @@ class ComprehensiveMFExtractor(ScholarOneBaseExtractor):
                     continue
 
             # Method 3: Count actual table rows if pagination fails
-            print(f"      🔍 Counting visible table rows as fallback...")
+            print("      🔍 Counting visible table rows as fallback...")
             try:
                 rows = self.driver.find_elements(By.XPATH, "//table//tr[td]")
                 visible_count = len(rows)
@@ -5837,7 +5835,7 @@ class ComprehensiveMFExtractor(ScholarOneBaseExtractor):
             except Exception:
                 pass
 
-            print(f"      ⚠️ Could not determine total events, using default")
+            print("      ⚠️ Could not determine total events, using default")
             return 20  # Increased default from 10
 
         except Exception as e:
@@ -5904,7 +5902,7 @@ class ComprehensiveMFExtractor(ScholarOneBaseExtractor):
 
             print(f"         Found {len(all_event_rows)} total event rows on this page")
 
-            for i, row in enumerate(all_event_rows):
+            for _i, row in enumerate(all_event_rows):
                 try:
                     event = {}
 
@@ -6042,7 +6040,7 @@ class ComprehensiveMFExtractor(ScholarOneBaseExtractor):
                                 event["datetime"] = parsed_datetime
                                 # Also add date field for compatibility
                                 event["date"] = parsed_datetime
-                            except Exception as e:
+                            except Exception:
                                 # Fallback: try to parse as date only
                                 try:
                                     date_parts = event["timestamp_gmt"].split()
@@ -6276,7 +6274,7 @@ class ComprehensiveMFExtractor(ScholarOneBaseExtractor):
                                 ]
                             else:
                                 # Single keyword - make sure it's not just a label
-                                if not text.lower() in ["keywords", "keywords:", "key words"]:
+                                if text.lower() not in ["keywords", "keywords:", "key words"]:
                                     keywords = [text]
                                 else:
                                     keywords = []
@@ -6601,7 +6599,7 @@ class ComprehensiveMFExtractor(ScholarOneBaseExtractor):
                 print(f"      📥 PDF URL from popup: {pdf_url[:100]}...")
                 return self._download_file_from_url_enhanced(pdf_url, manuscript_id, "manuscript")
 
-            print(f"      ❌ No popup window for PDF")
+            print("      ❌ No popup window for PDF")
 
         except Exception as e:
             print(f"      ❌ Error downloading PDF: {e}")
@@ -6626,7 +6624,7 @@ class ComprehensiveMFExtractor(ScholarOneBaseExtractor):
             # Store current state
             original_window = self.driver.current_window_handle
 
-            print(f"      🔗 Opening cover letter popup...")
+            print("      🔗 Opening cover letter popup...")
             self.driver.execute_script("arguments[0].click();", cover_link)
             time.sleep(3)
 
@@ -6643,7 +6641,7 @@ class ComprehensiveMFExtractor(ScholarOneBaseExtractor):
                 if not popup_window:
                     return None
 
-                print(f"      📄 In cover letter popup")
+                print("      📄 In cover letter popup")
                 time.sleep(2)
 
                 # Handle frames if present
@@ -6741,12 +6739,12 @@ class ComprehensiveMFExtractor(ScholarOneBaseExtractor):
 
                         if file_downloaded:
                             break
-                    except Exception as e:
+                    except Exception:
                         continue
 
                 # If no file found, extract text content as fallback
                 if not file_downloaded:
-                    print(f"      ⚠️ No downloadable files found, extracting text content...")
+                    print("      ⚠️ No downloadable files found, extracting text content...")
 
                     # Get the meaningful text content (skip navigation/metadata)
                     try:
@@ -6771,7 +6769,7 @@ class ComprehensiveMFExtractor(ScholarOneBaseExtractor):
                         # If we only got metadata/navigation, extract actual content
                         if len(content_text) < 100 or "Files attached:" in content_text:
                             print(
-                                f"      ⚠️ Content appears to be metadata page, looking for actual cover letter text..."
+                                "      ⚠️ Content appears to be metadata page, looking for actual cover letter text..."
                             )
 
                             # Look for paragraphs with substantial content
@@ -6792,7 +6790,7 @@ class ComprehensiveMFExtractor(ScholarOneBaseExtractor):
                                 f"      ✅ Saved text content: {txt_path.name} ({len(content_text)} chars)"
                             )
                         else:
-                            print(f"      ❌ No meaningful content found")
+                            print("      ❌ No meaningful content found")
 
                     except Exception as e:
                         print(f"      ❌ Text extraction failed: {e}")
@@ -6809,7 +6807,7 @@ class ComprehensiveMFExtractor(ScholarOneBaseExtractor):
 
                 return file_path
             else:
-                print(f"      ❌ No popup window opened")
+                print("      ❌ No popup window opened")
                 return None
 
         except Exception as e:
@@ -6932,6 +6930,7 @@ class ComprehensiveMFExtractor(ScholarOneBaseExtractor):
 
         if not take_action_links:
             print("   📭 No manuscripts in this category")
+            self._dashboard_manifest["scanned"].setdefault(category_name, [])
             return
 
         actual_count = len(take_action_links)
@@ -6952,6 +6951,8 @@ class ComprehensiveMFExtractor(ScholarOneBaseExtractor):
                         print(f"      📄 Found manuscript in table: {manuscript_id}")
             except Exception:
                 continue
+
+        self._dashboard_manifest["scanned"][category_name] = list(manuscript_ids_in_category)
 
         # Store manuscript IDs in category for 3-pass processing
         category["manuscript_ids"] = manuscript_ids_in_category
@@ -7067,15 +7068,15 @@ class ComprehensiveMFExtractor(ScholarOneBaseExtractor):
                 }
 
                 # Extract basic info from main page (title, status, dates)
-                print(f"   📋 Extracting basic manuscript info...")
+                print("   📋 Extracting basic manuscript info...")
                 self.extract_basic_manuscript_info(manuscript)
 
                 # Extract referees and documents (Pass 1 data)
-                print(f"   👥 Extracting referees...")
+                print("   👥 Extracting referees...")
                 self.extract_referees_comprehensive(manuscript)
                 self.extract_referee_emails_from_source(manuscript.get("referees", []))
 
-                print(f"   📁 Extracting documents...")
+                print("   📁 Extracting documents...")
                 self.extract_document_links(manuscript)
 
                 if category["name"] == "Awaiting AE Recommendation":
@@ -7193,7 +7194,7 @@ class ComprehensiveMFExtractor(ScholarOneBaseExtractor):
                 if i > 0:
                     success = self.navigate_previous_document()
                     if not success:
-                        print(f"   ⚠️ Could not navigate to previous manuscript")
+                        print("   ⚠️ Could not navigate to previous manuscript")
 
             except Exception as e:
                 print(f"   ❌ Error in Pass 2 for manuscript {i+1}: {e}")
@@ -7232,12 +7233,12 @@ class ComprehensiveMFExtractor(ScholarOneBaseExtractor):
                 if i < manuscript_count - 1:
                     success = self.navigate_next_document()
                     if not success:
-                        print(f"   ⚠️ Could not navigate to next manuscript")
+                        print("   ⚠️ Could not navigate to next manuscript")
 
             except Exception as e:
                 print(f"   ❌ Error in Pass 3 for manuscript {i+1}: {e}")
 
-        print(f"\n🎉 3-PASS EXTRACTION COMPLETE")
+        print("\n🎉 3-PASS EXTRACTION COMPLETE")
         print(f"   Processed {len([m for m in manuscript_ids if m])} manuscripts")
         print("=" * 60)
 
@@ -7251,7 +7252,7 @@ class ComprehensiveMFExtractor(ScholarOneBaseExtractor):
                 if unmatched:
                     self._match_referee_emails_from_pool(unmatched, manuscript.get("id", ""))
 
-        print(f"\n📊 POST-PROCESSING: Revision cross-referencing, statistics & ORCID")
+        print("\n📊 POST-PROCESSING: Revision cross-referencing, statistics & ORCID")
         for manuscript in self.manuscripts:
             try:
                 if manuscript.get("is_revision") and manuscript.get("audit_trail"):
@@ -7273,7 +7274,7 @@ class ComprehensiveMFExtractor(ScholarOneBaseExtractor):
                 except Exception as e:
                     print(f"   ⚠️ ORCID enrichment error: {str(e)[:80]}")
             else:
-                print(f"   ℹ️  ORCIDLookup not available, skipping enrichment")
+                print("   ℹ️  ORCIDLookup not available, skipping enrichment")
 
     def _enrich_revision_referee_data(self, manuscript):
         audit = manuscript.get("audit_trail", [])
@@ -7454,7 +7455,7 @@ class ComprehensiveMFExtractor(ScholarOneBaseExtractor):
         ScholarOne shows a 'Make a Recommendation' tab with decision dropdown, comment fields,
         and a summary of all referee scores/recommendations."""
         try:
-            print(f"   🎯 Extracting AE recommendation data...")
+            print("   🎯 Extracting AE recommendation data...")
             ae_data = {
                 "recommendation_available": True,
                 "referee_summary": [],
@@ -7492,7 +7493,7 @@ class ComprehensiveMFExtractor(ScholarOneBaseExtractor):
                     continue
 
             if not tab_found:
-                print(f"      ⚠️ No recommendation tab found, extracting from current page")
+                print("      ⚠️ No recommendation tab found, extracting from current page")
 
             self._capture_page("ae_recommendation", manuscript.get("id", ""))
 
@@ -7578,7 +7579,7 @@ class ComprehensiveMFExtractor(ScholarOneBaseExtractor):
             if rec_form.get("selected_value"):
                 print(f"      📋 Current recommendation: {rec_form['selected_value']}")
             print(f"      📊 Referee summary rows: {len(ae_data['referee_summary'])}")
-            print(f"      ✅ AE recommendation data extracted")
+            print("      ✅ AE recommendation data extracted")
 
         except Exception as e:
             print(f"      ❌ Error extracting AE recommendation data: {str(e)[:100]}")
@@ -7651,7 +7652,7 @@ class ComprehensiveMFExtractor(ScholarOneBaseExtractor):
 
         editors = manuscript.get("editors", {})
         if isinstance(editors, dict):
-            for role, editor in editors.items():
+            for _role, editor in editors.items():
                 if isinstance(editor, dict):
                     for field in ["email", "institution"]:
                         if editor.get(field) == "":
@@ -7709,12 +7710,12 @@ class ComprehensiveMFExtractor(ScholarOneBaseExtractor):
                 next_btn = self.driver.find_element(By.XPATH, selector)
                 next_btn.click()
                 time.sleep(5)
-                print(f"   ➡️ Navigated to next document")
+                print("   ➡️ Navigated to next document")
                 return True
             except Exception:
                 continue
 
-        print(f"   ❌ Could not find Next Document button")
+        print("   ❌ Could not find Next Document button")
         return False
 
     def navigate_previous_document(self):
@@ -7732,12 +7733,12 @@ class ComprehensiveMFExtractor(ScholarOneBaseExtractor):
                 prev_btn = self.driver.find_element(By.XPATH, selector)
                 prev_btn.click()
                 time.sleep(5)
-                print(f"   ⬅️ Navigated to previous document")
+                print("   ⬅️ Navigated to previous document")
                 return True
             except Exception:
                 continue
 
-        print(f"   ❌ Could not find Previous Document button")
+        print("   ❌ Could not find Previous Document button")
         return False
 
     def enrich_referee_profiles(self, manuscript):
@@ -7821,7 +7822,7 @@ class ComprehensiveMFExtractor(ScholarOneBaseExtractor):
 
         if wait_count >= max_wait:
             print(f"   ❌ Login failed - still on login page after {max_wait} seconds")
-            print(f"   📧 Please check Gmail for verification code or ensure 2FA is working")
+            print("   📧 Please check Gmail for verification code or ensure 2FA is working")
             return
 
         print(f"   ✅ Successfully logged in: {self.driver.current_url}")
@@ -7992,14 +7993,20 @@ class ComprehensiveMFExtractor(ScholarOneBaseExtractor):
             return
 
         for category in categories:
+            cat_name = (
+                category.get("name", str(category)) if isinstance(category, dict) else str(category)
+            )
             try:
                 if self._is_session_dead():
                     if not self._recover_session():
-                        print(f"   ❌ Session dead before '{category}', recovery failed")
+                        print(f"   ❌ Session dead before '{cat_name}', recovery failed")
+                        self._dashboard_manifest["failed"].append(cat_name)
                         continue
                 self.process_category(category)
             except Exception as e:
                 print(f"   ❌ Error in category: {str(e)[:100]}")
+                if cat_name not in self._dashboard_manifest["scanned"]:
+                    self._dashboard_manifest["failed"].append(cat_name)
                 err_lower = str(e).lower()
                 if any(kw in err_lower for kw in self.SESSION_DEAD_KEYWORDS):
                     if not self._recover_session():
@@ -8037,7 +8044,7 @@ class ComprehensiveMFExtractor(ScholarOneBaseExtractor):
     def save_results(self):
         """Save comprehensive results and show precise summary."""
         # DEBUG: Check self.manuscripts for corruption
-        print(f"\n🐛 DEBUG: Checking manuscripts list before saving...")
+        print("\n🐛 DEBUG: Checking manuscripts list before saving...")
         print(f"   Total objects in self.manuscripts: {len(self.manuscripts)}")
 
         valid_manuscripts = []
@@ -8061,7 +8068,7 @@ class ComprehensiveMFExtractor(ScholarOneBaseExtractor):
         )
 
         if invalid_objects:
-            print(f"   🔧 FIXING: Using only valid manuscripts for output")
+            print("   🔧 FIXING: Using only valid manuscripts for output")
             self.manuscripts = valid_manuscripts
 
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -8091,6 +8098,7 @@ class ComprehensiveMFExtractor(ScholarOneBaseExtractor):
                 },
             },
             "errors": [],
+            "dashboard_manifest": self._dashboard_manifest,
         }
 
         from core.output_schema import normalize_wrapper
@@ -8118,7 +8126,7 @@ class ComprehensiveMFExtractor(ScholarOneBaseExtractor):
                 enhanced_manuscripts += 1
 
         if total_communications > 0:
-            print(f"\n📬 COMMUNICATION TIMELINE SUMMARY:")
+            print("\n📬 COMMUNICATION TIMELINE SUMMARY:")
             print(f"   Total communications tracked: {total_communications}")
             print(f"   🏢 Platform events: {total_communications - external_communications}")
             print(f"   📧 External emails (Gmail): {external_communications}")
@@ -8168,19 +8176,19 @@ class ComprehensiveMFExtractor(ScholarOneBaseExtractor):
 
             # Documents
             docs = ms.get("documents", {})
-            print(f"   📁 Documents:")
+            print("   📁 Documents:")
             if isinstance(docs, dict) and docs.get("pdf"):
                 path = docs.get("pdf_path", "Unknown path")
                 size = docs.get("pdf_size", "Unknown size")
                 print(f"      ✅ PDF: {path} ({size})")
             else:
-                print(f"      ❌ No PDF")
+                print("      ❌ No PDF")
 
             if isinstance(docs, dict) and docs.get("cover_letter"):
                 path = docs.get("cover_letter_path", "Unknown path")
                 print(f"      📝 Cover Letter: {path}")
             else:
-                print(f"      ❌ No Cover Letter")
+                print("      ❌ No Cover Letter")
 
             # Additional metadata fields (new - matching MOR coverage)
             funding = ms.get("funding_information", "")
@@ -8199,7 +8207,7 @@ class ComprehensiveMFExtractor(ScholarOneBaseExtractor):
             rec_refs = recommendations.get("recommended_referees", [])
             opp_refs = recommendations.get("opposed_referees", [])
             if rec_refs or opp_refs:
-                print(f"   👥 Author Referee Recommendations:")
+                print("   👥 Author Referee Recommendations:")
                 if rec_refs:
                     print(
                         f"      ✅ Recommended ({len(rec_refs)}): {', '.join([r.get('name', 'N/A') for r in rec_refs[:3]])}"
@@ -8209,7 +8217,7 @@ class ComprehensiveMFExtractor(ScholarOneBaseExtractor):
                         f"      🚫 Opposed ({len(opp_refs)}): {', '.join([r.get('name', 'N/A') for r in opp_refs[:3]])}"
                     )
 
-        print(f"\n📂 FILE SYSTEM VERIFICATION:")
+        print("\n📂 FILE SYSTEM VERIFICATION:")
         pdf_files = list(self.download_dir.glob("*_manuscript.*"))
         cover_files = list(self.download_dir.glob("*_cover_letter.*"))
         all_files = [f for f in self.download_dir.iterdir() if f.is_file() and f.name != ".gitkeep"]
@@ -8241,17 +8249,17 @@ class ComprehensiveMFExtractor(ScholarOneBaseExtractor):
             total_platform_events += len([e for e in timeline if not e.get("external", False)])
             total_external_emails += len([e for e in timeline if e.get("external", False)])
 
-        print(f"\n📈 FINAL COUNTS:")
+        print("\n📈 FINAL COUNTS:")
         print(f"   📄 Manuscripts Processed: {len(self.manuscripts)}")
         print(f"   🔍 Total Referees: {total_referees}")
         print(f"   📁 PDF Downloads: {total_pdfs}")
         print(f"   📝 Cover Letters: {total_covers}")
-        print(f"   📅 Communication Events:")
+        print("   📅 Communication Events:")
         print(f"      🏢 Platform Events: {total_platform_events}")
         print(f"      📧 External Emails: {total_external_emails}")
         print(f"      📊 Total Communications: {total_communications}")
 
-        print(f"\n✅ EXTRACTION SUMMARY:")
+        print("\n✅ EXTRACTION SUMMARY:")
         print(f"   📄 Manuscripts: {len(self.manuscripts)}")
         print(f"   🔍 Referees: {total_referees}")
         print(f"   📁 PDFs Downloaded: {total_pdfs}")
@@ -8260,11 +8268,11 @@ class ComprehensiveMFExtractor(ScholarOneBaseExtractor):
 
         n_ms = len(self.manuscripts)
         if n_ms > 0 and total_pdfs >= n_ms and total_referees > 0:
-            print(f"   🎉 SUCCESS - All manuscripts extracted with documents")
+            print("   🎉 SUCCESS - All manuscripts extracted with documents")
         elif n_ms > 0:
-            print(f"   ⚠️ PARTIAL - Some documents may be missing")
+            print("   ⚠️ PARTIAL - Some documents may be missing")
         else:
-            print(f"   ❌ FAILED - No manuscripts extracted")
+            print("   ❌ FAILED - No manuscripts extracted")
 
         print("=" * 80)
 
@@ -8306,7 +8314,7 @@ class ComprehensiveMFExtractor(ScholarOneBaseExtractor):
             )
 
             if not result:
-                print(f"            ❌ No fetch result")
+                print("            ❌ No fetch result")
                 return None
 
             if result.get("error"):
@@ -8335,11 +8343,11 @@ class ComprehensiveMFExtractor(ScholarOneBaseExtractor):
                     if not redirect_url.startswith("http"):
                         base = url.rsplit("/", 1)[0]
                         redirect_url = base + "/" + redirect_url
-                    print(f"            🔄 Found redirect to download URL")
+                    print("            🔄 Found redirect to download URL")
                     return self._download_file_from_url_enhanced(
                         redirect_url, manuscript_id, doc_type
                     )
-                print(f"            ⚠️ Got HTML page instead of file")
+                print("            ⚠️ Got HTML page instead of file")
                 return None
 
             with open(file_path, "wb") as f:
@@ -8352,7 +8360,7 @@ class ComprehensiveMFExtractor(ScholarOneBaseExtractor):
             print(f"            ❌ Download error: {str(e)[:60]}")
             return None
 
-    def _enrich_audit_trail_with_gmail(self, manuscript_data: Dict, manuscript_id: str):
+    def _enrich_audit_trail_with_gmail(self, manuscript_data: dict, manuscript_id: str):
         if not GMAIL_SEARCH_AVAILABLE:
             return
 
@@ -8372,7 +8380,7 @@ class ComprehensiveMFExtractor(ScholarOneBaseExtractor):
         try:
             gmail = GmailSearchManager()
             if not gmail.initialize():
-                print(f"      ⚠️ Gmail service not available")
+                print("      ⚠️ Gmail service not available")
                 return
 
             sub_date_str = manuscript_data.get("metadata", {}).get("submission_date", "")
@@ -8397,7 +8405,7 @@ class ComprehensiveMFExtractor(ScholarOneBaseExtractor):
             )
 
             if not external_emails:
-                print(f"      📧 No external Gmail communications found")
+                print("      📧 No external Gmail communications found")
                 return
 
             merged = gmail.merge_with_audit_trail(
@@ -8430,7 +8438,7 @@ class ComprehensiveMFExtractor(ScholarOneBaseExtractor):
         if hasattr(self, "extraction_errors"):
             total_errors = sum(self.extraction_errors.values())
             if total_errors > 0:
-                print(f"\n⚠️ EXTRACTION ERROR SUMMARY:")
+                print("\n⚠️ EXTRACTION ERROR SUMMARY:")
                 for error_type, count in self.extraction_errors.items():
                     if count > 0:
                         print(f"   {error_type}: {count}")
@@ -8468,7 +8476,7 @@ class ComprehensiveMFExtractor(ScholarOneBaseExtractor):
 
                         def make_aware(dt):
                             if dt.tzinfo is None:
-                                return dt.replace(tzinfo=timezone.utc)
+                                return dt.replace(tzinfo=UTC)
                             return dt
 
                         if event.get("datetime"):
@@ -8489,12 +8497,12 @@ class ComprehensiveMFExtractor(ScholarOneBaseExtractor):
                             try:
                                 clean_date = event["timestamp_gmt"].replace(" GMT", "")
                                 return datetime.strptime(clean_date, "%d-%b-%Y %I:%M %p").replace(
-                                    tzinfo=timezone.utc
+                                    tzinfo=UTC
                                 )
                             except Exception:
                                 pass
 
-                        return datetime(1970, 1, 1, tzinfo=timezone.utc)
+                        return datetime(1970, 1, 1, tzinfo=UTC)
 
                     sorted_timeline = sorted(timeline, key=get_sort_key, reverse=True)
 
@@ -8623,7 +8631,7 @@ class ComprehensiveMFExtractor(ScholarOneBaseExtractor):
                 wait_time += 1
 
             if len(all_windows) <= 1:
-                print(f"           ⚠️ No popup window opened for report extraction")
+                print("           ⚠️ No popup window opened for report extraction")
                 return None
 
             popup_window = [w for w in all_windows if w != current_window][-1]
@@ -8793,7 +8801,7 @@ class ComprehensiveMFExtractor(ScholarOneBaseExtractor):
                         pass
 
                 # Success summary
-                print(f"           ✅ MF Report extraction complete:")
+                print("           ✅ MF Report extraction complete:")
                 print(
                     f"              - Recommendation: {report_data['recommendation'] or 'Not found'}"
                 )
@@ -8972,7 +8980,7 @@ class ComprehensiveMFExtractor(ScholarOneBaseExtractor):
         print(f"         📚 MathSciNet search for: {name}")
 
         # TODO: Implement real MathSciNet API integration
-        print(f"         ⚠️ MathSciNet search not implemented - would need real API access")
+        print("         ⚠️ MathSciNet search not implemented - would need real API access")
         return None
         mathscinet_db = {
             "Aleš Černý": {
@@ -9363,7 +9371,7 @@ class ComprehensiveMFExtractor(ScholarOneBaseExtractor):
                     return self.download_referee_report_pdf(
                         redirect_url, referee_name, manuscript_id
                     )
-                print(f"         ⚠️ Got HTML instead of PDF")
+                print("         ⚠️ Got HTML instead of PDF")
                 return None
 
             with open(pdf_path, "wb") as f:
@@ -9395,7 +9403,7 @@ class ComprehensiveMFExtractor(ScholarOneBaseExtractor):
             print(f"         📄 Original submission manuscript: {manuscript_id}")
             return False, 0
 
-    def extract_version_history_from_dom(self, manuscript) -> List[Dict]:
+    def extract_version_history_from_dom(self, manuscript) -> list[dict]:
         version_history = []
         try:
             brn_div = self.driver.find_elements(
@@ -9482,7 +9490,7 @@ class ComprehensiveMFExtractor(ScholarOneBaseExtractor):
             print(f"         ❌ Error extracting version history: {str(e)[:50]}")
         return version_history
 
-    def extract_previous_version_data(self, version_info: Dict, current_manuscript_id: str) -> Dict:
+    def extract_previous_version_data(self, version_info: dict, current_manuscript_id: str) -> dict:
         prev_data = {
             "manuscript_id": version_info.get("manuscript_id", ""),
             "date_submitted": version_info.get("date_submitted", ""),
@@ -9894,7 +9902,7 @@ class ComprehensiveMFExtractor(ScholarOneBaseExtractor):
                         print(f"         📄 Extracted {len(text)} characters from PDF")
                         return text
             except ImportError:
-                print(f"         ⚠️ PyPDF2 not available")
+                print("         ⚠️ PyPDF2 not available")
             except Exception as e:
                 print(f"         ⚠️ PyPDF2 extraction failed: {e}")
 
@@ -9910,7 +9918,7 @@ class ComprehensiveMFExtractor(ScholarOneBaseExtractor):
                         print(f"         📄 Extracted {len(text)} characters from PDF (pdfplumber)")
                         return text
             except ImportError:
-                print(f"         ⚠️ pdfplumber not available")
+                print("         ⚠️ pdfplumber not available")
             except Exception as e:
                 print(f"         ⚠️ pdfplumber extraction failed: {e}")
 
@@ -9975,7 +9983,7 @@ class ComprehensiveMFExtractor(ScholarOneBaseExtractor):
 
                     referees.append(referee)
 
-                except Exception as e:
+                except Exception:
                     continue
 
         except Exception as e:
@@ -10034,6 +10042,7 @@ if __name__ == "__main__":
         "--force-refresh", action="store_true", help="Ignore cache, re-extract everything"
     )
     args = parser.parse_args()
-    extractor = ComprehensiveMFExtractor(headless=not args.visible, capture_html=args.capture_html)
+    headless = not args.visible
+    extractor = ComprehensiveMFExtractor(headless=headless, capture_html=args.capture_html)
     extractor.force_refresh = args.force_refresh
     extractor.run()

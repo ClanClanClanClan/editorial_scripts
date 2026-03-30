@@ -3,7 +3,8 @@
 
 import os
 import re
-from typing import Dict, List, Optional
+
+from pipeline import FREEMAIL_DOMAINS
 
 JOURNAL_SCOPE_KEYWORDS = {
     "SICON": [
@@ -11,6 +12,7 @@ JOURNAL_SCOPE_KEYWORDS = {
         "stochastic control",
         "differential games",
         "mean-field",
+        "mean field",
         "backward SDE",
         "BSDE",
         "Hamilton-Jacobi",
@@ -28,6 +30,9 @@ JOURNAL_SCOPE_KEYWORDS = {
         "Riccati",
         "robust control",
         "filtering",
+        "optimization",
+        "equilibrium",
+        "utility",
     ],
     "SIFIN": [
         "financial mathematics",
@@ -76,7 +81,16 @@ JOURNAL_SCOPE_KEYWORDS = {
         "interest rate",
         "stochastic control",
         "mean-field game",
+        "mean field",
         "equilibrium",
+        "BSDE",
+        "backward SDE",
+        "utility",
+        "optimal",
+        "trading",
+        "contract",
+        "principal agent",
+        "moral hazard",
     ],
     "FS": [
         "stochastic analysis",
@@ -90,6 +104,19 @@ JOURNAL_SCOPE_KEYWORDS = {
         "free boundary",
         "risk",
         "insurance",
+        "hedging",
+        "portfolio",
+        "pricing",
+        "volatility",
+        "market",
+        "trading",
+        "mean field",
+        "equilibrium",
+        "BSDE",
+        "utility",
+        "optimization",
+        "dividend",
+        "control",
     ],
     "JOTA": [
         "optimization",
@@ -132,23 +159,6 @@ JOURNAL_SCOPE_KEYWORDS = {
         "feedback",
         "stabilization",
     ],
-}
-
-FREEMAIL_DOMAINS = {
-    "gmail.com",
-    "yahoo.com",
-    "hotmail.com",
-    "outlook.com",
-    "aol.com",
-    "mail.com",
-    "protonmail.com",
-    "icloud.com",
-    "live.com",
-    "msn.com",
-    "ymail.com",
-    "qq.com",
-    "163.com",
-    "126.com",
 }
 
 JOURNAL_SCOPES_LLM = {
@@ -198,22 +208,46 @@ JOURNAL_SCOPES_LLM = {
 def assess_desk_rejection(
     manuscript: dict,
     journal_code: str,
-    all_journals_data: Optional[Dict[str, dict]] = None,
+    all_journals_data: dict[str, dict] | None = None,
     use_llm: bool = False,
+    outcome_predictor=None,
+    report_quality: dict = None,
 ) -> dict:
     signals = _heuristic_signals(manuscript, journal_code, all_journals_data)
 
     high_signals = [s for s in signals if s["severity"] == "high"]
     should_reject = len(high_signals) > 0
-    confidence = min(0.9, 0.3 * len(high_signals) + 0.1 * len(signals))
     if not signals:
-        confidence = 0.05
-
-    summary = _build_summary(signals, should_reject)
+        confidence = 0.85
+    elif should_reject:
+        confidence = min(0.9, 0.3 * len(high_signals) + 0.1 * len(signals))
+    else:
+        confidence = max(0.3, 0.8 - 0.1 * len(signals))
     method = "heuristic"
 
+    if outcome_predictor is not None:
+        try:
+            p_accept = outcome_predictor.predict(manuscript, journal_code)
+            model_severity = "high" if p_accept < 0.2 else ("medium" if p_accept < 0.4 else "low")
+            signals.append(
+                {
+                    "signal_name": "model_prediction",
+                    "severity": model_severity,
+                    "description": f"Trained model: P(accept)={p_accept:.2f}",
+                    "confidence": 0.7,
+                }
+            )
+            high_signals = [s for s in signals if s["severity"] == "high"]
+            should_reject = len(high_signals) > 0
+            confidence = round(1.0 - p_accept, 2) if should_reject else round(p_accept, 2)
+            method = "heuristic+model"
+        except (AttributeError, TypeError, ValueError, RuntimeError):
+            pass
+
+    summary = _build_summary(signals, should_reject)
+
     if use_llm:
-        llm_result = _llm_assessment(manuscript, journal_code, signals)
+        llm_result = _llm_assessment(manuscript, journal_code, signals, report_quality)
         if llm_result:
             method = "heuristic+llm"
             if llm_result.get("should_desk_reject") is not None:
@@ -241,7 +275,7 @@ def assess_desk_rejection(
 def _heuristic_signals(
     manuscript: dict,
     journal_code: str,
-    all_journals_data: Optional[Dict[str, dict]],
+    all_journals_data: dict[str, dict] | None,
 ) -> list:
     signals = []
 
@@ -268,35 +302,95 @@ def _heuristic_signals(
         )
 
     scope_kws = JOURNAL_SCOPE_KEYWORDS.get(journal_code.upper(), [])
-    if scope_kws and (keywords or abstract):
-        ms_text = " ".join(keywords).lower() + " " + abstract.lower()
-        ms_text += " " + (manuscript.get("title") or "").lower()
-        matches = sum(1 for kw in scope_kws if kw.lower() in ms_text)
-        overlap = matches / len(scope_kws) if scope_kws else 0
-        if overlap < 0.05 and abstract:
+    jaccard = None
+    if scope_kws and keywords:
+        ms_words = set()
+        for kw in keywords:
+            ms_words.update(kw.lower().split())
+        scope_words = set()
+        for kw in scope_kws:
+            scope_words.update(kw.lower().split())
+        intersection = ms_words & scope_words
+        union = ms_words | scope_words
+        jaccard = len(intersection) / len(union) if union else 0.0
+
+    scope_sim = None
+    scope_desc = JOURNAL_SCOPES_LLM.get(journal_code.upper(), "")
+    if scope_desc and abstract:
+        try:
+            from pipeline.embeddings import get_engine
+
+            engine = get_engine()
+            scope_sim = engine.similarity(abstract[:2000], scope_desc)
+        except (ImportError, AttributeError, RuntimeError, ValueError):
+            pass
+
+    if jaccard is not None and jaccard < 0.1 and abstract:
+        if jaccard == 0.0:
             signals.append(
                 {
                     "signal_name": "scope_mismatch",
                     "severity": "high",
-                    "description": f"Only {matches}/{len(scope_kws)} scope keywords found in title+abstract+keywords",
-                    "confidence": 0.6,
+                    "description": "Zero keyword-scope vocabulary overlap (Jaccard=0.00)",
+                    "confidence": 0.7,
                 }
             )
-        elif overlap >= 0.1:
+        elif scope_sim is not None and scope_sim < 0.2:
             signals.append(
                 {
-                    "signal_name": "scope_match",
+                    "signal_name": "scope_mismatch",
+                    "severity": "high",
+                    "description": (
+                        f"Both keyword Jaccard ({jaccard:.2f}) and semantic similarity "
+                        f"({scope_sim:.2f}) indicate out-of-scope"
+                    ),
+                    "confidence": 0.7,
+                }
+            )
+        else:
+            signals.append(
+                {
+                    "signal_name": "scope_mismatch",
+                    "severity": "medium",
+                    "description": f"Low keyword-scope Jaccard similarity={jaccard:.2f} (threshold 0.1)",
+                    "confidence": 0.4,
+                }
+            )
+    elif jaccard is not None and jaccard >= 0.15:
+        signals.append(
+            {
+                "signal_name": "scope_match",
+                "severity": "low",
+                "description": f"Good keyword-scope overlap (Jaccard={jaccard:.2f})",
+                "confidence": 0.8,
+            }
+        )
+
+    if scope_sim is not None:
+        if scope_sim >= 0.5:
+            signals.append(
+                {
+                    "signal_name": "scope_embedding_match",
                     "severity": "low",
-                    "description": f"{matches}/{len(scope_kws)} scope keywords match",
+                    "description": f"Strong semantic scope match ({scope_sim:.2f})",
                     "confidence": 0.8,
+                }
+            )
+        elif scope_sim < 0.2 and (jaccard is None or jaccard >= 0.1):
+            signals.append(
+                {
+                    "signal_name": "scope_embedding_mismatch",
+                    "severity": "medium",
+                    "description": f"Semantic scope similarity low ({scope_sim:.2f})",
+                    "confidence": 0.5,
                 }
             )
 
     authors = manuscript.get("authors", [])
     if authors:
         has_profile = any(
-            a.get("web_profile", {}).get("h_index")
-            or a.get("web_profile", {}).get("citation_count")
+            (a.get("web_profile") or {}).get("h_index")
+            or (a.get("web_profile") or {}).get("citation_count")
             for a in authors
         )
         if not has_profile:
@@ -313,7 +407,7 @@ def _heuristic_signals(
         for a in authors:
             if (
                 a.get("is_corresponding")
-                or a.get("platform_specific", {}).get("role") == "corresponding"
+                or (a.get("platform_specific") or {}).get("role") == "corresponding"
             ):
                 corresponding = a
                 break
@@ -377,7 +471,8 @@ def _llm_assessment(
     manuscript: dict,
     journal_code: str,
     heuristic_signals: list,
-) -> Optional[dict]:
+    report_quality: dict = None,
+) -> dict | None:
     api_key = os.environ.get("ANTHROPIC_API_KEY")
     if not api_key:
         return None
@@ -394,9 +489,9 @@ def _llm_assessment(
 
     authors_summary = []
     for a in manuscript.get("authors", [])[:5]:
-        wp = a.get("web_profile", {})
+        wp = a.get("web_profile") or {}
         h = wp.get("h_index") or "unknown"
-        topics = wp.get("research_topics", [])[:5]
+        topics = (wp.get("research_topics") or [])[:5]
         authors_summary.append(
             f"- {a.get('name', '?')} ({a.get('institution', '?')}): "
             f"h-index={h}, topics={topics}"
@@ -405,6 +500,26 @@ def _llm_assessment(
     signals_text = "\n".join(
         f"- [{s['severity']}] {s['signal_name']}: {s['description']}" for s in heuristic_signals
     )
+
+    rq_text = ""
+    if report_quality and report_quality.get("n_reports", 0) > 0:
+        rq_lines = [
+            f"\n\nExisting referee reports ({report_quality['n_reports']} total, "
+            f"overall quality={report_quality.get('overall_quality', 'N/A')}):"
+        ]
+        for rpt in report_quality.get("reports", []):
+            rq_lines.append(
+                f"  - {rpt.get('reviewer', '?')}: rec={rpt.get('recommendation', '?')}, "
+                f"words={rpt.get('word_count', 0)}, thoroughness={rpt.get('thoroughness_score', 'N/A')}, "
+                f"timeliness={rpt.get('timeliness_score', 'N/A')}"
+            )
+        if report_quality.get("consensus"):
+            cons = report_quality["consensus"]
+            rq_lines.append(
+                f"  Consensus: agreement={cons.get('recommendation_agreement', 'N/A')}, "
+                f"sentiment={cons.get('sentiment_agreement', 'N/A')}"
+            )
+        rq_text = "\n".join(rq_lines)
 
     prompt = f"""You are an associate editor for {journal_code.upper()}.
 
@@ -420,7 +535,7 @@ Authors:
 {chr(10).join(authors_summary) if authors_summary else '(no author data)'}
 
 Heuristic signals:
-{signals_text if signals_text else '(none)'}
+{signals_text if signals_text else '(none)'}{rq_text}
 
 Respond in JSON format:
 {{"should_desk_reject": true/false, "confidence": 0.0-1.0, "reasoning": "brief explanation", "summary": "one sentence recommendation"}}

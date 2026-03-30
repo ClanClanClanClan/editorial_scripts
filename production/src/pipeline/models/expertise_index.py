@@ -1,0 +1,149 @@
+import json
+from pathlib import Path
+
+from pipeline import MODELS_DIR, OUTPUTS_DIR, _load_json
+
+
+class ExpertiseIndex:
+    def __init__(self):
+        self.referees = []
+        self.index = None
+
+    def build(self, journals: list = None):
+        from pipeline.embeddings import get_engine
+
+        engine = get_engine()
+        self.referees = []
+        texts = []
+
+        if journals is None:
+            journals = [d.name for d in OUTPUTS_DIR.iterdir() if d.is_dir()]
+
+        for journal in journals:
+            journal_dir = OUTPUTS_DIR / journal
+            if not journal_dir.exists():
+                continue
+            for json_path in sorted(journal_dir.glob("*_extraction_*.json")):
+                data = _load_json(json_path)
+                for ms in data.get("manuscripts", []):
+                    ms_keywords = ms.get("keywords", []) or []
+                    ms_title = ms.get("title", "")
+                    for ref in ms.get("referees", []):
+                        profile = _build_referee_profile(ref, ms_keywords, ms_title, journal)
+                        if profile["text"].strip():
+                            self.referees.append(profile)
+                            texts.append(profile["text"])
+
+        if not texts:
+            return 0
+
+        self.referees = _deduplicate(self.referees)
+        texts = [r["text"] for r in self.referees]
+        self.index = engine.build_index(texts)
+        return len(self.referees)
+
+    def search(self, manuscript: dict, k: int = 30):
+        if self.index is None or not self.referees:
+            return []
+
+        from pipeline.embeddings import get_engine
+
+        engine = get_engine()
+        query = _manuscript_text(manuscript)
+        results = engine.search_index(query, self.index, k=k)
+
+        candidates = []
+        for idx, score in results:
+            if 0 <= idx < len(self.referees):
+                ref = dict(self.referees[idx])
+                ref["semantic_similarity"] = score
+                candidates.append(ref)
+        return candidates
+
+    def save(self, path: Path = None):
+        if path is None:
+            path = MODELS_DIR
+        path.mkdir(parents=True, exist_ok=True)
+
+        from pipeline.embeddings import get_engine
+
+        engine = get_engine()
+        if self.index is not None:
+            engine.save_index(self.index, path / "referee_index.faiss")
+        with open(path / "referee_metadata.json", "w") as f:
+            json.dump(self.referees, f, default=str)
+
+    def load(self, path: Path = None):
+        if path is None:
+            path = MODELS_DIR
+
+        from pipeline.embeddings import get_engine
+
+        engine = get_engine()
+        index_path = path / "referee_index.faiss"
+        meta_path = path / "referee_metadata.json"
+
+        if index_path.exists() and meta_path.exists():
+            self.index = engine.load_index(index_path)
+            with open(meta_path) as f:
+                self.referees = json.load(f)
+            return True
+        return False
+
+
+def _build_referee_profile(ref: dict, ms_keywords: list, ms_title: str, journal: str) -> dict:
+    wp = ref.get("web_profile") or {}
+    topics = wp.get("research_topics", []) or []
+    top_papers = []
+    for src in ["semantic_scholar", "openalex"]:
+        src_data = wp.get(src) or {}
+        for p in src_data.get("top_papers", []) or []:
+            top_papers.append(p.get("title", ""))
+
+    text_parts = topics + top_papers[:5] + ms_keywords
+    text = " ".join(str(t) for t in text_parts if t)
+
+    return {
+        "name": ref.get("name", ""),
+        "email": ref.get("email", ""),
+        "institution": ref.get("institution", ""),
+        "h_index": wp.get("h_index") or (wp.get("semantic_scholar") or {}).get("h_index", 0) or 0,
+        "journal": journal,
+        "topics": topics,
+        "text": text,
+    }
+
+
+def _manuscript_text(ms: dict) -> str:
+    parts = [ms.get("title", ""), ms.get("abstract", "")]
+    kw = ms.get("keywords", []) or []
+    parts.extend(kw)
+    return " ".join(str(p) for p in parts if p)
+
+
+def _deduplicate(referees: list) -> list:
+    from pipeline import normalize_name
+
+    by_name: dict[str, dict] = {}
+    for ref in referees:
+        name_key = normalize_name(ref.get("name", ""))
+        if not name_key:
+            continue
+        if name_key in by_name:
+            existing = by_name[name_key]
+            if ref.get("h_index", 0) > existing.get("h_index", 0):
+                existing["h_index"] = ref["h_index"]
+            if ref.get("email") and not existing.get("email"):
+                existing["email"] = ref["email"]
+            if ref.get("institution") and not existing.get("institution"):
+                existing["institution"] = ref["institution"]
+            extra = ref.get("text", "")
+            if extra:
+                existing["text"] = existing.get("text", "") + " " + extra
+            existing.setdefault("topics", [])
+            for t in ref.get("topics", []):
+                if t not in existing["topics"]:
+                    existing["topics"].append(t)
+        else:
+            by_name[name_key] = dict(ref)
+    return list(by_name.values())

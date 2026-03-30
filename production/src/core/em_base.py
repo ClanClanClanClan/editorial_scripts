@@ -6,25 +6,20 @@ import random
 import re
 import sys
 import time
-from datetime import datetime, timedelta, timezone
-from functools import wraps
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional
+from typing import Optional
 
-import requests
 import undetected_chromedriver as uc
 from bs4 import BeautifulSoup
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support.ui import WebDriverWait
 from selenium.common.exceptions import (
     NoAlertPresentException,
     NoSuchElementException,
     NoSuchFrameException,
-    StaleElementReferenceException,
-    TimeoutException,
     WebDriverException,
 )
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from core.cache_integration import CachedExtractorMixin
@@ -38,38 +33,7 @@ except ImportError:
     GMAIL_SEARCH_AVAILABLE = False
 
 
-def with_retry(max_attempts: int = 3, delay: float = 1.0, backoff: float = 2.0):
-    def decorator(func: Callable) -> Callable:
-        @wraps(func)
-        def wrapper(*args, **kwargs):
-            last_exception = None
-            for attempt in range(max_attempts):
-                try:
-                    return func(*args, **kwargs)
-                except (
-                    TimeoutException,
-                    NoSuchElementException,
-                    WebDriverException,
-                    StaleElementReferenceException,
-                ) as e:
-                    last_exception = e
-                    if attempt < max_attempts - 1:
-                        wait_time = delay * (backoff**attempt)
-                        print(f"   ⚠️ {func.__name__} attempt {attempt + 1} failed: {str(e)[:50]}")
-                        print(f"      Retrying in {wait_time:.1f} seconds...")
-                        time.sleep(wait_time)
-                    else:
-                        print(f"   ❌ {func.__name__} failed after {max_attempts} attempts")
-                except Exception as e:
-                    print(f"   ❌ {func.__name__} failed with unrecoverable error: {str(e)[:100]}")
-                    raise
-            if last_exception:
-                raise last_exception
-            return None
-
-        return wrapper
-
-    return decorator
+from core.scholarone_utils import with_retry
 
 
 class EMExtractor(CachedExtractorMixin):
@@ -105,7 +69,6 @@ class EMExtractor(CachedExtractorMixin):
 
     def setup_chrome_options(self):
         self.chrome_options = uc.ChromeOptions()
-        self.chrome_options.add_argument("--no-sandbox")
         self.chrome_options.add_argument("--disable-dev-shm-usage")
         self.chrome_options.add_argument("--disable-popup-blocking")
         self.chrome_options.add_argument("--window-size=1400,900")
@@ -413,7 +376,7 @@ class EMExtractor(CachedExtractorMixin):
 
         return self._ensure_dashboard_loaded()
 
-    def discover_categories(self) -> List[Dict[str, str]]:
+    def discover_categories(self) -> list[dict[str, str]]:
         print("📂 Discovering manuscript categories...")
         categories = []
 
@@ -474,7 +437,7 @@ class EMExtractor(CachedExtractorMixin):
 
         return categories
 
-    def collect_manuscript_ids(self, category: Dict) -> List[Dict[str, str]]:
+    def collect_manuscript_ids(self, category: dict) -> list[dict[str, str]]:
         name = category["name"]
         nvgurl = category["nvgurl"]
         print(f"   📄 Collecting manuscripts from: {name}")
@@ -634,7 +597,7 @@ class EMExtractor(CachedExtractorMixin):
         self.switch_to_default()
         return manuscripts[: self.MAX_MANUSCRIPTS]
 
-    def _extract_action_links(self, ms_info: Dict, action_row) -> None:
+    def _extract_action_links(self, ms_info: dict, action_row) -> None:
         for cell in action_row.find_all("td"):
             cell_html = str(cell)
             has_links = any(
@@ -696,7 +659,7 @@ class EMExtractor(CachedExtractorMixin):
     # ── Manuscript detail extraction ──────────────────────────
 
     @with_retry(max_attempts=2, delay=3.0)
-    def extract_manuscript_detail(self, ms_info: Dict) -> Optional[Dict]:
+    def extract_manuscript_detail(self, ms_info: dict) -> Optional[dict]:
         ms_id = ms_info["manuscript_id"]
         self._current_manuscript_id = ms_id
         print(f"\n   📄 Extracting: {ms_id}")
@@ -755,7 +718,7 @@ class EMExtractor(CachedExtractorMixin):
 
         return manuscript
 
-    def _populate_from_row_data(self, manuscript: Dict, ms_info: Dict):
+    def _populate_from_row_data(self, manuscript: dict, ms_info: dict):
         metadata = manuscript["metadata"]
 
         metadata["manuscript_number"] = ms_info.get("manuscript_id", "")
@@ -793,7 +756,7 @@ class EMExtractor(CachedExtractorMixin):
         manuscript["abstract"] = ""
         manuscript["keywords"] = []
 
-    def _extract_referees_from_summary_page(self, manuscript: Dict, ms_info: Dict):
+    def _extract_referees_from_summary_page(self, manuscript: dict, ms_info: dict):
         reviewer_url = ms_info.get("reviewer_summary_url", "")
         if not reviewer_url:
             return
@@ -809,7 +772,7 @@ class EMExtractor(CachedExtractorMixin):
             self.smart_wait(5)
 
             if not self.switch_to_content_frame():
-                print(f"      ⚠️ Could not switch to content frame for reviewer summary")
+                print("      ⚠️ Could not switch to content frame for reviewer summary")
                 self.switch_to_default()
                 return
 
@@ -832,7 +795,7 @@ class EMExtractor(CachedExtractorMixin):
             print(f"      ⚠️ Reviewer summary page error: {str(e)[:80]}")
             self.switch_to_default()
 
-    def _parse_invited_reviewers_table(self, manuscript: Dict, table):
+    def _parse_invited_reviewers_table(self, manuscript: dict, table):
         referees = manuscript["referees"]
         rows = table.find_all("tr")
 
@@ -896,7 +859,7 @@ class EMExtractor(CachedExtractorMixin):
 
             referees.append(referee)
 
-    def _extract_referees_from_tables(self, manuscript: Dict, soup: BeautifulSoup):
+    def _extract_referees_from_tables(self, manuscript: dict, soup: BeautifulSoup):
         referees = manuscript["referees"]
 
         tables = soup.find_all("table")
@@ -1005,7 +968,7 @@ class EMExtractor(CachedExtractorMixin):
                 }
                 referees.append(referee)
 
-    def _extract_metadata(self, manuscript: Dict, page_text: str, soup: BeautifulSoup):
+    def _extract_metadata(self, manuscript: dict, page_text: str, soup: BeautifulSoup):
         metadata = manuscript["metadata"]
 
         for label in ["Manuscript Number", "Manuscript No", "Article ID"]:
@@ -1076,7 +1039,7 @@ class EMExtractor(CachedExtractorMixin):
         manuscript["abstract"] = metadata.get("abstract", "")
         manuscript["keywords"] = metadata.get("keywords", [])
 
-    def _extract_authors(self, manuscript: Dict, page_text: str, soup: BeautifulSoup):
+    def _extract_authors(self, manuscript: dict, page_text: str, soup: BeautifulSoup):
         authors = manuscript["authors"]
 
         for label in ["Author", "Author(s)", "Corresponding Author"]:
@@ -1110,7 +1073,7 @@ class EMExtractor(CachedExtractorMixin):
                                     if line not in [au.get("name") for au in authors]:
                                         authors.append({"name": line, "role": "author"})
 
-    def _extract_referees(self, manuscript: Dict, page_text: str, soup: BeautifulSoup):
+    def _extract_referees(self, manuscript: dict, page_text: str, soup: BeautifulSoup):
         referees = manuscript["referees"]
 
         reviewer_sections = soup.find_all(string=re.compile(r"Reviewer|Referee", re.I))
@@ -1200,7 +1163,7 @@ class EMExtractor(CachedExtractorMixin):
                 except Exception:
                     continue
 
-    def _extract_documents(self, manuscript: Dict, soup: BeautifulSoup):
+    def _extract_documents(self, manuscript: dict, soup: BeautifulSoup):
         files = manuscript["documents"]["files"]
 
         for a in soup.find_all("a", href=True):
@@ -1376,7 +1339,7 @@ class EMExtractor(CachedExtractorMixin):
 
         return None
 
-    def _extract_documents_from_inventory(self, manuscript: Dict, ms_info: Dict):
+    def _extract_documents_from_inventory(self, manuscript: dict, ms_info: dict):
         js_href = ms_info.get("file_inventory_js")
         if not js_href:
             return
@@ -1475,7 +1438,7 @@ class EMExtractor(CachedExtractorMixin):
         except Exception as e:
             print(f"      ⚠️ File inventory extraction failed: {str(e)[:80]}")
 
-    def _extract_reviewer_attachments(self, manuscript: Dict, ms_info: Dict):
+    def _extract_reviewer_attachments(self, manuscript: dict, ms_info: dict):
         referees = manuscript.get("referees", [])
         if not referees:
             return
@@ -1527,7 +1490,7 @@ class EMExtractor(CachedExtractorMixin):
         if download_count:
             print(f"      📎 Downloaded {download_count} reviewer attachments")
 
-    def _build_audit_trail(self, manuscript: Dict):
+    def _build_audit_trail(self, manuscript: dict):
         audit_trail = manuscript["audit_trail"]
 
         try:
@@ -1660,7 +1623,7 @@ class EMExtractor(CachedExtractorMixin):
         except Exception:
             pass
 
-    def _extract_referees_from_reviews_page(self, manuscript: Dict, ms_info: Dict):
+    def _extract_referees_from_reviews_page(self, manuscript: dict, ms_info: dict):
         ms_id = ms_info["manuscript_id"]
         soup = self._exec_em_js_and_capture(
             ms_info.get("reviews_js", ""),
@@ -1737,7 +1700,7 @@ class EMExtractor(CachedExtractorMixin):
 
         print(f"      📝 Reviews page: found {len(referees)} referees")
 
-    def _extract_details_from_popup(self, manuscript: Dict, ms_info: Dict):
+    def _extract_details_from_popup(self, manuscript: dict, ms_info: dict):
         ms_id = ms_info["manuscript_id"]
         soup = self._exec_em_js_and_capture(
             ms_info.get("details_js", ""),
@@ -1854,7 +1817,7 @@ class EMExtractor(CachedExtractorMixin):
         )
 
     def _parse_authors_from_details(
-        self, manuscript: Dict, label_map: Dict, corr_email: str, ms_info: Dict
+        self, manuscript: dict, label_map: dict, corr_email: str, ms_info: dict
     ):
         corr_td = label_map.get("Corresponding Author")
         all_td = label_map.get("All Authors")
@@ -1926,7 +1889,7 @@ class EMExtractor(CachedExtractorMixin):
                             existing["role"] = "corresponding_author"
                         break
 
-    def _parse_author_td(self, td, ms_info: Dict) -> list:
+    def _parse_author_td(self, td, ms_info: dict) -> list:
         authors = []
         current = {}
 
@@ -2003,7 +1966,7 @@ class EMExtractor(CachedExtractorMixin):
         return authors
 
     def _parse_people_section(
-        self, manuscript: Dict, section_tds: list, section_type: str, ms_info: Dict
+        self, manuscript: dict, section_tds: list, section_type: str, ms_info: dict
     ):
         people = []
         for td in section_tds:
@@ -2122,7 +2085,7 @@ class EMExtractor(CachedExtractorMixin):
                                     ref[key] = person[key]
                             break
 
-    def _extract_audit_trail_from_history(self, manuscript: Dict, ms_info: Dict):
+    def _extract_audit_trail_from_history(self, manuscript: dict, ms_info: dict):
         ms_id = ms_info["manuscript_id"]
         soup = self._exec_em_js_and_capture(
             ms_info.get("history_js", ""),
@@ -2197,7 +2160,7 @@ class EMExtractor(CachedExtractorMixin):
 
         print(f"      📜 History: {len(audit_trail)} events")
 
-    def _extract_referee_reports(self, manuscript: Dict, ms_info: Dict):
+    def _extract_referee_reports(self, manuscript: dict, ms_info: dict):
         review_links = ms_info.get("review_detail_links", [])
         if not review_links:
             return
@@ -2349,9 +2312,9 @@ class EMExtractor(CachedExtractorMixin):
                                     attachment_urls.append(
                                         {
                                             "url": dl_link.get("href", ""),
-                                            "description": att_texts[1]
-                                            if len(att_texts) > 1
-                                            else "",
+                                            "description": (
+                                                att_texts[1] if len(att_texts) > 1 else ""
+                                            ),
                                             "filename": att_texts[2] if len(att_texts) > 2 else "",
                                         }
                                     )
@@ -2385,7 +2348,7 @@ class EMExtractor(CachedExtractorMixin):
         if report_count:
             print(f"      📝 Extracted {report_count} referee reports")
 
-    def _extract_referee_contacts(self, manuscript: Dict, ms_info: Dict):
+    def _extract_referee_contacts(self, manuscript: dict, ms_info: dict):
         referees = manuscript.get("referees", [])
         if not referees:
             return
@@ -2497,7 +2460,7 @@ class EMExtractor(CachedExtractorMixin):
         if enriched:
             print(f"      📧 Enriched {enriched}/{len(referees)} referee contacts")
 
-    def _backfill_referee_dates_from_audit_trail(self, manuscript: Dict):
+    def _backfill_referee_dates_from_audit_trail(self, manuscript: dict):
         referees = manuscript.get("referees", [])
         if not referees:
             return
@@ -2528,7 +2491,7 @@ class EMExtractor(CachedExtractorMixin):
 
                 actor = event.get("actor", "").lower()
                 performed_by = event.get("performed_by", "").lower()
-                action = event.get("action", "").lower()
+                event.get("action", "").lower()
 
                 match = False
                 if surname and len(surname) > 2:
@@ -2542,7 +2505,7 @@ class EMExtractor(CachedExtractorMixin):
 
     # ── Analytics (platform-agnostic, from siam_base.py) ──────
 
-    def _compute_referee_statistics(self, manuscript: Dict):
+    def _compute_referee_statistics(self, manuscript: dict):
         audit = manuscript.get("audit_trail", [])
 
         def _parse_date(s):
@@ -2648,7 +2611,7 @@ class EMExtractor(CachedExtractorMixin):
             if stats:
                 ref["statistics"] = stats
 
-    def _compute_peer_review_milestones(self, manuscript: Dict):
+    def _compute_peer_review_milestones(self, manuscript: dict):
         milestones = {}
         metadata = manuscript.get("metadata", {})
         referees = manuscript.get("referees", [])
@@ -2736,7 +2699,7 @@ class EMExtractor(CachedExtractorMixin):
 
         manuscript["peer_review_milestones"] = milestones
 
-    def extract_timeline_analytics(self, manuscript: Dict) -> Dict:
+    def extract_timeline_analytics(self, manuscript: dict) -> dict:
         timeline = manuscript.get("communication_timeline") or manuscript.get("audit_trail", [])
         if not timeline:
             return {}
@@ -2762,13 +2725,13 @@ class EMExtractor(CachedExtractorMixin):
                     if "GMT" in ds or "EDT" in ds:
                         clean = ds.replace(" GMT", "").replace(" EDT", "")
                         parsed_date = datetime.strptime(clean, "%d-%b-%Y %I:%M %p").replace(
-                            tzinfo=timezone.utc
+                            tzinfo=UTC
                         )
                     else:
                         try:
                             parsed_date = datetime.fromisoformat(ds.replace("Z", "+00:00"))
                             if parsed_date.tzinfo is None:
-                                parsed_date = parsed_date.replace(tzinfo=timezone.utc)
+                                parsed_date = parsed_date.replace(tzinfo=UTC)
                         except (ValueError, TypeError):
                             for fmt in (
                                 "%d-%b-%Y",
@@ -2778,7 +2741,7 @@ class EMExtractor(CachedExtractorMixin):
                             ):
                                 try:
                                     parsed_date = datetime.strptime(ds.strip(), fmt).replace(
-                                        tzinfo=timezone.utc
+                                        tzinfo=UTC
                                     )
                                     break
                                 except ValueError:
@@ -2903,7 +2866,7 @@ class EMExtractor(CachedExtractorMixin):
         ]
         if invitation_events and response_events:
             response_times = []
-            for inv_idx, inv in invitation_events:
+            for inv_idx, _inv in invitation_events:
                 inv_date = parsed_dates.get(inv_idx)
                 if inv_date:
                     later_responses = [
@@ -2933,7 +2896,7 @@ class EMExtractor(CachedExtractorMixin):
         if reminder_events:
             effective_reminders = 0
             total_reminders = len(reminder_events)
-            for rem_idx, reminder in reminder_events:
+            for rem_idx, _reminder in reminder_events:
                 reminder_date = parsed_dates.get(rem_idx)
                 if reminder_date:
                     cutoff_date = reminder_date + timedelta(days=7)
@@ -2967,7 +2930,7 @@ class EMExtractor(CachedExtractorMixin):
 
     # ── Enrichment (delegated to shared web_enrichment module) ─────
 
-    def _enrich_people_from_web(self, manuscript_data: Dict):
+    def _enrich_people_from_web(self, manuscript_data: dict):
         enrich_people_from_web(
             manuscript_data,
             get_cached_web_profile=self.get_cached_web_profile,
@@ -2975,7 +2938,7 @@ class EMExtractor(CachedExtractorMixin):
             platform_label="em_metadata",
         )
 
-    def _enrich_audit_trail_with_gmail(self, manuscript_data: Dict, manuscript_id: str):
+    def _enrich_audit_trail_with_gmail(self, manuscript_data: dict, manuscript_id: str):
         if not GMAIL_SEARCH_AVAILABLE:
             return
 
@@ -2992,7 +2955,7 @@ class EMExtractor(CachedExtractorMixin):
         try:
             gmail = GmailSearchManager()
             if not gmail.initialize():
-                print(f"      ⚠️ Gmail service not available")
+                print("      ⚠️ Gmail service not available")
                 return
 
             sub_date_str = manuscript_data.get("metadata", {}).get("submission_date", "")
@@ -3015,7 +2978,7 @@ class EMExtractor(CachedExtractorMixin):
             )
 
             if not external_emails:
-                print(f"      📧 No external Gmail communications found")
+                print("      📧 No external Gmail communications found")
                 return
 
             audit_trail = manuscript_data.get("audit_trail", [])
@@ -3038,7 +3001,7 @@ class EMExtractor(CachedExtractorMixin):
         except Exception as e:
             print(f"      ⚠️ Gmail search error: {str(e)[:60]}")
 
-    def _backfill_author_emails_from_timeline(self, manuscript_data: Dict, timeline: List[Dict]):
+    def _backfill_author_emails_from_timeline(self, manuscript_data: dict, timeline: list[dict]):
         authors = manuscript_data.get("authors", [])
         authors_without_email = [a for a in authors if not a.get("email") and a.get("name")]
         if not authors_without_email:
@@ -3084,7 +3047,7 @@ class EMExtractor(CachedExtractorMixin):
 
     # ── Output ────────────────────────────────────────────────
 
-    def generate_summary(self, manuscripts: List[Dict]) -> Dict:
+    def generate_summary(self, manuscripts: list[dict]) -> dict:
         total_referees = sum(len(m.get("referees", [])) for m in manuscripts)
         total_authors = sum(len(m.get("authors", [])) for m in manuscripts)
         total_docs = sum(len(m.get("documents", {}).get("files", [])) for m in manuscripts)
@@ -3110,7 +3073,7 @@ class EMExtractor(CachedExtractorMixin):
             "enrichment_coverage": (f"{enriched_count}/{total_people}" if total_people else "0/0"),
         }
 
-    def save_results(self, manuscripts: List[Dict]):
+    def save_results(self, manuscripts: list[dict]):
         if not manuscripts:
             print("⚠️ No manuscripts to save")
             return
@@ -3138,7 +3101,7 @@ class EMExtractor(CachedExtractorMixin):
             json.dump(results, f, indent=2, ensure_ascii=False, default=str)
 
         print(f"\n💾 Results saved: {output_file}")
-        print(f"📊 Summary:")
+        print("📊 Summary:")
         for k, v in summary.items():
             print(f"   {k}: {v}")
 
@@ -3207,7 +3170,7 @@ class EMExtractor(CachedExtractorMixin):
 
     # ── Main entry point ──────────────────────────────────────
 
-    def run(self) -> List[Dict]:
+    def run(self) -> list[dict]:
         print(f"🚀 {self.JOURNAL_CODE} EXTRACTION — EDITORIAL MANAGER")
         print("=" * 60)
 

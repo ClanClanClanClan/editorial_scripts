@@ -376,3 +376,9 @@ class AcademicProfileEnricher:
                     return True
 
         return False
+
+    def name_match(self, api_name, target_name):
+        return self._name_match(api_name, target_name)
+
+    def institution_match(self, known, api_inst):
+        return self._institution_match(known, api_inst)

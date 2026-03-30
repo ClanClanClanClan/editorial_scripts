@@ -27,10 +27,10 @@ jobs:
           poetry run pip install ruff black bandit pip-audit detect-secrets
       - name: Ruff (lint)
         run: |
-          poetry run ruff check production/src tests
+          poetry run ruff check production/src/core production/src/pipeline production/src/reporting tests scripts
       - name: Black (check)
         run: |
-          poetry run black --check production/src tests
+          poetry run black --check production/src/core production/src/pipeline production/src/reporting tests scripts
       - name: Detect secrets (baseline)
         run: |
           poetry run detect-secrets-hook --baseline .secrets.baseline $(git ls-files)

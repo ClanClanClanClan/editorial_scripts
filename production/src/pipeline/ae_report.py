@@ -272,13 +272,16 @@ def _generate_clipboard(system_prompt: str, user_prompt: str, assembled: dict) -
         print(f"\n📄 Prompt saved to {prompt_path}")
         print("   Copy contents and paste into ChatGPT Pro.")
 
-    return {
-        "manuscript_id": assembled["manuscript_id"],
-        "journal": assembled["journal"],
-        "provider": "clipboard",
+    partial = {
+        "recommendation": "",
+        "confidence": 0.0,
+        "summary": "Prompt copied to clipboard — paste into ChatGPT Pro and save response.",
+        "report": "",
+        "revision_points": [],
         "status": "awaiting_paste",
         "prompt_length": len(full_prompt),
     }
+    return _save_report(assembled, partial, provider="clipboard")
 
 
 def _save_report(assembled: dict, llm_result: dict, provider: str) -> dict:

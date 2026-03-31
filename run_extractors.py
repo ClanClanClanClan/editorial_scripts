@@ -298,10 +298,21 @@ class ExtractorOrchestrator:
         self.logger.info(f"Running all working extractors: {working_extractors}")
 
         headful_journals = {"sicon", "sifin", "mf", "mor"}
+        uc_binary = (
+            Path.home()
+            / "Library"
+            / "Application Support"
+            / "undetected_chromedriver"
+            / "undetected_chromedriver"
+        )
         results = {}
         for journal_id in working_extractors:
             print(f"\n🚀 STARTING {journal_id.upper()} EXTRACTION")
             print("-" * 50)
+
+            if journal_id in headful_journals and uc_binary.exists():
+                uc_binary.unlink()
+                print("   (cleaned quarantined chromedriver)")
 
             journal_headless = False if journal_id in headful_journals else headless
             result = self.run_extractor(journal_id, headless=journal_headless)

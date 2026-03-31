@@ -228,7 +228,7 @@ class ExtractorOrchestrator:
             self.logger.info(f"Running {journal_id.upper()} extraction...")
             start_time = datetime.now()
 
-            if journal_id in ("sicon", "sifin", "jota", "mafe", "naco"):
+            if hasattr(extractor, "run"):
                 result = extractor.run()
             else:
                 result = extractor.extract_all()

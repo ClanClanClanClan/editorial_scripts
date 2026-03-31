@@ -42,10 +42,14 @@ def serve_dashboard():
 
 @app.route("/api/ae-report", methods=["POST"])
 def generate_ae_report():
+    import os
+
     data = request.get_json() or {}
     journal = data.get("journal", "").lower()
     manuscript_id = data.get("manuscript_id", "")
-    provider = data.get("provider", "claude")
+    provider = data.get("provider")
+    if not provider:
+        provider = "claude" if os.environ.get("ANTHROPIC_API_KEY") else "prompt"
 
     if not journal or not manuscript_id:
         return jsonify({"error": "journal and manuscript_id required"}), 400

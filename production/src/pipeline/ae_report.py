@@ -202,14 +202,33 @@ def generate(
         journal_code=journal,
     )
 
+    if provider == "prompt":
+        partial = {
+            "recommendation": "",
+            "confidence": 0.0,
+            "summary": "",
+            "report": "",
+            "revision_points": [],
+            "status": "awaiting_paste",
+            "prompt": f"SYSTEM:\n{system_prompt}\n\n---\n\nUSER:\n{user_prompt}",
+        }
+        return _save_report(assembled, partial, provider="prompt")
     if provider == "clipboard":
         return _generate_clipboard(system_prompt, user_prompt, assembled)
-    else:
-        result = _generate_claude(system_prompt, user_prompt, assembled)
-        if result is None:
-            print("Claude API failed — falling back to clipboard mode")
-            return _generate_clipboard(system_prompt, user_prompt, assembled)
-        return result
+    result = _generate_claude(system_prompt, user_prompt, assembled)
+    if result is None:
+        print("Claude API failed — returning prompt for manual paste")
+        partial = {
+            "recommendation": "",
+            "confidence": 0.0,
+            "summary": "",
+            "report": "",
+            "revision_points": [],
+            "status": "awaiting_paste",
+            "prompt": f"SYSTEM:\n{system_prompt}\n\n---\n\nUSER:\n{user_prompt}",
+        }
+        return _save_report(assembled, partial, provider="prompt")
+    return result
 
 
 def _generate_claude(system_prompt: str, user_prompt: str, assembled: dict) -> dict | None:
@@ -310,6 +329,10 @@ def _save_report(assembled: dict, llm_result: dict, provider: str) -> dict:
         ],
         "report_quality": assembled["report_quality"],
     }
+    if llm_result.get("prompt"):
+        report["prompt"] = llm_result["prompt"]
+    if llm_result.get("status"):
+        report["status"] = llm_result["status"]
 
     json_path = out_dir / f"ae_{ms_id}_{timestamp}.json"
     with open(json_path, "w") as f:

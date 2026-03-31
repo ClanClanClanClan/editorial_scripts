@@ -58,7 +58,9 @@ class TestAEReport:
         )
         assert resp.status_code == 200
         assert resp.get_json()["recommendation"] == "accept"
-        mock_gen.assert_called_once_with("sicon", "M123", provider="claude")
+        call_args = mock_gen.call_args
+        assert call_args[0] == ("sicon", "M123")
+        assert call_args[1]["provider"] in ("claude", "prompt")
 
     @patch("pipeline.ae_report.generate", return_value=None)
     def test_generation_failure_returns_500(self, mock_gen, client):

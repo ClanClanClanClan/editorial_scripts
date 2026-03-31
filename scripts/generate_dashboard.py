@@ -707,11 +707,57 @@ function _showAEPanel(d) {
     html += '</div>';
     document.body.insertAdjacentHTML('beforeend', html);
 }
+function _showAEPastePanel(d, j, m) {
+    _closeOverlays();
+    var html = '<div class="ae-overlay" onclick="_closeOverlays()"></div>';
+    html += '<div class="ae-panel" style="max-width:800px">';
+    html += '<button class="ae-close" onclick="_closeOverlays()">&times;</button>';
+    html += '<h3>AE Report: ' + _escHtml(d.manuscript_id || m) + '</h3>';
+    if (d.referee_recommendations && d.referee_recommendations.length) {
+        html += '<h5 style="font-size:0.75rem;color:var(--text2);margin:4px 0">REFEREE CONSENSUS</h5>';
+        d.referee_recommendations.forEach(function(r) {
+            html += '<div style="font-size:0.78rem">' + _escHtml(r.name) + ': <b>' + _escHtml(r.recommendation) + '</b></div>';
+        });
+    }
+    html += '<div style="margin-top:12px">';
+    html += '<p style="font-size:0.78rem;color:var(--text2)"><b>Step 1:</b> Copy the prompt below and paste into ChatGPT Pro</p>';
+    html += '<textarea id="ae-prompt-text" style="width:100%;height:120px;font-size:0.72rem;border:1px solid var(--border);border-radius:4px;padding:6px;font-family:monospace" readonly>' + _escHtml(d.prompt || '') + '</textarea>';
+    html += '<button class="btn-ae" style="margin-top:4px" onclick="document.getElementById(\'ae-prompt-text\').select();document.execCommand(\'copy\');this.textContent=\'Copied!\'">Copy Prompt</button>';
+    html += '</div>';
+    html += '<div style="margin-top:12px">';
+    html += '<p style="font-size:0.78rem;color:var(--text2)"><b>Step 2:</b> Paste the ChatGPT response below and click Save</p>';
+    html += '<textarea id="ae-response-text" style="width:100%;height:150px;font-size:0.78rem;border:1px solid var(--border);border-radius:4px;padding:6px" placeholder="Paste ChatGPT response here..."></textarea>';
+    html += '<button class="btn-ae" style="margin-top:4px" onclick="_saveAEResponse(\'' + _escHtml(j) + '\',\'' + _escHtml(m) + '\')">Save Response</button>';
+    html += ' <span id="ae-save-status" style="font-size:0.78rem"></span>';
+    html += '</div>';
+    html += '</div>';
+    document.body.insertAdjacentHTML('beforeend', html);
+}
+function _saveAEResponse(j, m) {
+    var responseText = document.getElementById('ae-response-text').value;
+    if (!responseText.trim()) { alert('Paste the response first'); return; }
+    var status = document.getElementById('ae-save-status');
+    status.textContent = 'Saving...';
+    fetch(API + '/ae-report/paste', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({journal: j, manuscript_id: m, response: responseText})
+    }).then(function(r) { return r.json(); })
+    .then(function(d) {
+        if (d.recommendation) {
+            status.textContent = 'Saved: ' + d.recommendation;
+            status.style.color = '#22c55e';
+            setTimeout(function() { _closeOverlays(); _showAEPanel(d); }, 1000);
+        } else {
+            status.textContent = 'Saved (paste a structured response for better results)';
+        }
+    }).catch(function() { status.textContent = 'Error saving'; status.style.color = '#ef4444'; });
+}
 function _closeOverlays() {
     document.querySelectorAll('.ae-overlay,.ae-panel,.ref-card-overlay,.ref-card').forEach(function(e) { e.remove(); });
 }
 function generateAE(j, m) {
-    var btn = event.target;
+    var btn = (event && event.target) || this;
     btn.textContent = 'Generating...';
     btn.disabled = true;
     fetch(API + '/ae-report', {
@@ -720,12 +766,14 @@ function generateAE(j, m) {
         body: JSON.stringify({journal: j, manuscript_id: m})
     }).then(function(r) { return r.json(); })
     .then(function(d) {
-        if (d.recommendation) {
+        if (d.recommendation && d.status !== 'awaiting_paste') {
             btn.textContent = d.recommendation;
             btn.classList.add('btn-done');
             _showAEPanel(d);
-        } else if (d.status === 'awaiting_paste') {
-            btn.textContent = 'Copied!';
+        } else if (d.status === 'awaiting_paste' || d.prompt) {
+            btn.textContent = 'Paste Response';
+            btn.classList.add('btn-view');
+            _showAEPastePanel(d, j, m);
         } else {
             btn.textContent = 'Error';
         }
@@ -739,7 +787,11 @@ function viewAE(j, m) {
     .then(function(r) { return r.json(); })
     .then(function(d) {
         if (d.error) return;
-        _showAEPanel(d);
+        if (d.status === 'awaiting_paste' || (!d.recommendation && d.prompt)) {
+            _showAEPastePanel(d, j, m);
+        } else {
+            _showAEPanel(d);
+        }
     }).catch(function() {});
 }
 function showRefereeCard(name) {

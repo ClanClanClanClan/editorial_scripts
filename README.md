@@ -15,7 +15,7 @@ End-to-end editorial management system for 8 academic journals. Extracts referee
 | SIAM J. Financial Mathematics | SIFIN | SIAM | `SIFINExtractor` | **WORKING** |
 | Numerical Algorithms & Computation | NACO | EditFlow/MSP | `NACOExtractor` | **WORKING** |
 
-512 tests passing. Python 3.12 required.
+703 tests passing. Python 3.12 required.
 
 ## Quick Start
 

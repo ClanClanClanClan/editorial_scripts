@@ -105,7 +105,7 @@ editorial_scripts/
 │   ├── setup_gmail_oauth.py      # Gmail OAuth token refresh
 │   └── admin/                    # LaunchAgent configs for auto-start
 ├── config/                        # Gmail OAuth tokens, journal configs
-├── tests/                         # 512 tests (pytest)
+├── tests/                         # 703 tests (pytest)
 ├── run_extractors.py              # Extraction orchestrator
 └── run_pipeline.py                # Pipeline + AE report CLI
 ```
@@ -440,7 +440,7 @@ python3 scripts/setup_gmail_oauth.py
 
 ## Testing
 
-512 tests across 13 test modules:
+703 tests across 13 test modules:
 ```bash
 python3 -m pytest tests/ -q                    # All tests
 python3 -m pytest tests/test_referee_db.py -v  # Specific module

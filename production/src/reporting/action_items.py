@@ -1,9 +1,11 @@
 """Compute actionable editorial items from extraction data."""
 
 import datetime
+import json
 import re
 from dataclasses import asdict, dataclass, field
 from email.utils import parsedate_to_datetime
+from pathlib import Path
 
 from reporting.cross_journal_report import (
     INACTIVE_REFEREE_STATUSES,
@@ -105,6 +107,7 @@ class RefereeAction:
     due_date: str | None = None
     reminders_sent: int = 0
     message: str = ""
+    is_revision: bool = False
 
 
 @dataclass
@@ -427,10 +430,26 @@ def harmonize_status(raw_status: str) -> str:
 
 
 def _has_ae_report(journal: str, manuscript_id: str) -> bool:
-    from pathlib import Path
-
     ae_dir = Path(__file__).resolve().parents[2] / "outputs" / journal / "ae_reports"
     return any(ae_dir.glob(f"ae_{manuscript_id}_*.json"))
+
+
+def _load_desk_rejection(journal: str, ms_id: str) -> dict | None:
+    rec_dir = Path(__file__).resolve().parents[2] / "outputs" / journal / "recommendations"
+    if not rec_dir.exists():
+        return None
+    files = sorted(rec_dir.glob(f"rec_{ms_id}_*.json"), reverse=True)
+    if not files:
+        return None
+    try:
+        with open(files[0]) as f:
+            data = json.load(f)
+        dr = data.get("desk_rejection")
+        if dr and dr.get("recommend_desk_reject"):
+            return dr
+    except (json.JSONDecodeError, OSError):
+        pass
+    return None
 
 
 def _is_terminal(ms: dict) -> bool:
@@ -462,6 +481,11 @@ def compute_action_items(journals: list[str] | None = None) -> list[RefereeActio
             ms_id = ms.get("manuscript_id", "?")
             ms_title = ms.get("title", "")
             ms_status = _get_manuscript_status(ms)
+            is_revision = (
+                "revision" in ms_status.lower()
+                or "r1" in ms_status.lower()
+                or "r2" in ms_status.lower()
+            )
             referees = _dedup_referees(ms.get("referees", []))
 
             active_refs = []
@@ -511,12 +535,16 @@ def compute_action_items(journals: list[str] | None = None) -> list[RefereeActio
                                 due_date=due.isoformat(),
                                 reminders_sent=reminders,
                                 message=f"{ref_name} is {abs(days_left)} days overdue ({reminders} reminders sent)",
+                                is_revision=is_revision,
                             )
                         )
                     elif days_left <= 14:
+                        pri = "medium"
+                        if is_revision and days_left <= 7:
+                            pri = "high"
                         items.append(
                             RefereeAction(
-                                priority="medium",
+                                priority=pri,
                                 action_type="due_soon",
                                 journal=journal.upper(),
                                 manuscript_id=ms_id,
@@ -528,6 +556,7 @@ def compute_action_items(journals: list[str] | None = None) -> list[RefereeActio
                                 due_date=due.isoformat(),
                                 reminders_sent=reminders,
                                 message=f"{ref_name}'s report due in {days_left} days",
+                                is_revision=is_revision,
                             )
                         )
 
@@ -550,6 +579,7 @@ def compute_action_items(journals: list[str] | None = None) -> list[RefereeActio
                                     days_overdue=wait_days,
                                     reminders_sent=reminders,
                                     message=f"{ref_name} hasn't responded in {wait_days} days",
+                                    is_revision=is_revision,
                                 )
                             )
 
@@ -571,6 +601,7 @@ def compute_action_items(journals: list[str] | None = None) -> list[RefereeActio
                         manuscript_title=ms_title,
                         status=ms_status,
                         message=msg,
+                        is_revision=is_revision,
                     )
                 )
 
@@ -592,6 +623,7 @@ def compute_action_items(journals: list[str] | None = None) -> list[RefereeActio
                             manuscript_title=ms_title,
                             status=ms_status,
                             message="Needs referee assignment",
+                            is_revision=is_revision,
                         )
                     )
 
@@ -610,6 +642,24 @@ def compute_action_items(journals: list[str] | None = None) -> list[RefereeActio
                         manuscript_title=ms_title,
                         status=ms_status,
                         message=msg,
+                        is_revision=is_revision,
+                    )
+                )
+
+            desk_reject = _load_desk_rejection(journal, ms_id)
+            if desk_reject:
+                reasons = desk_reject.get("reasons", [])
+                reason_str = "; ".join(reasons[:3]) if reasons else "Model recommends desk reject"
+                items.append(
+                    RefereeAction(
+                        priority="high",
+                        action_type="desk_reject_review",
+                        journal=journal.upper(),
+                        manuscript_id=ms_id,
+                        manuscript_title=ms_title,
+                        status=ms_status,
+                        message=f"Desk rejection recommended: {reason_str}",
+                        is_revision=is_revision,
                     )
                 )
 

@@ -1,5 +1,6 @@
 """Event dispatcher — detects state changes after extraction and emits events."""
 
+import fcntl
 import json
 from datetime import datetime
 from pathlib import Path
@@ -13,11 +14,17 @@ PROCESSED_FILE = EVENTS_DIR / "processed.jsonl"
 
 def _append_event(event: dict, path: Path = PENDING_FILE):
     path.parent.mkdir(parents=True, exist_ok=True)
-    with open(path, "a") as f:
-        f.write(json.dumps(event, default=str) + "\n")
+    lock_path = path.with_suffix(".lock")
+    with open(lock_path, "a+") as lock_f:
+        fcntl.flock(lock_f, fcntl.LOCK_EX)
+        try:
+            with open(path, "a") as f:
+                f.write(json.dumps(event, default=str) + "\n")
+        finally:
+            fcntl.flock(lock_f, fcntl.LOCK_UN)
 
 
-def process_extraction(data: dict, journal: str) -> list[dict]:
+def process_extraction(data: dict, journal: str, source_file: str | None = None) -> list[dict]:
     store = StateStore()
     events = []
 
@@ -30,6 +37,8 @@ def process_extraction(data: dict, journal: str) -> list[dict]:
         if event:
             event["timestamp"] = datetime.now().isoformat()
             event["extraction_ts"] = data.get("extraction_timestamp", "")
+            if source_file:
+                event["source_file"] = source_file
             events.append(event)
             _append_event(event)
 
@@ -79,15 +88,24 @@ def mark_processed(events: list[dict]):
         _append_event(event, PROCESSED_FILE)
 
     if PENDING_FILE.exists():
-        remaining = get_pending_events()
-        processed_ids = {
-            (e.get("manuscript_id"), e.get("journal"), e.get("timestamp")) for e in events
-        }
-        kept = [
-            e
-            for e in remaining
-            if (e.get("manuscript_id"), e.get("journal"), e.get("timestamp")) not in processed_ids
-        ]
-        PENDING_FILE.write_text(
-            "\n".join(json.dumps(e, default=str) for e in kept) + "\n" if kept else ""
-        )
+        lock_path = PENDING_FILE.with_suffix(".lock")
+        with open(lock_path, "a+") as lock_f:
+            fcntl.flock(lock_f, fcntl.LOCK_EX)
+            try:
+                remaining = get_pending_events()
+                processed_ids = {
+                    (e.get("manuscript_id"), e.get("journal"), e.get("timestamp")) for e in events
+                }
+                kept = [
+                    e
+                    for e in remaining
+                    if (e.get("manuscript_id"), e.get("journal"), e.get("timestamp"))
+                    not in processed_ids
+                ]
+                tmp = PENDING_FILE.with_suffix(".tmp")
+                tmp.write_text(
+                    "\n".join(json.dumps(e, default=str) for e in kept) + "\n" if kept else ""
+                )
+                tmp.rename(PENDING_FILE)
+            finally:
+                fcntl.flock(lock_f, fcntl.LOCK_UN)

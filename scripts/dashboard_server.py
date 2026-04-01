@@ -10,6 +10,7 @@ Usage:
 """
 
 import json
+import re as _re
 import subprocess
 import sys
 import threading
@@ -22,14 +23,16 @@ sys.path.insert(0, str(PROJECT_DIR / "production" / "src"))
 
 DASHBOARD_PATH = PROJECT_DIR / "production" / "outputs" / "dashboard.html"
 
+_SAFE_ID = _re.compile(r"^[\w\-.]+$")
+VALID_JOURNALS = {"mf", "mor", "fs", "jota", "mafe", "sicon", "sifin", "naco"}
+
 app = Flask(__name__)
 
 
-def _validate_params(journal: str = "", manuscript_id: str = "") -> bool:
-    if journal and not journal.replace("_", "").isalnum():
-        return False
-    if manuscript_id and not manuscript_id.replace("-", "").replace("_", "").isalnum():
-        return False
+def _validate_params(**kwargs):
+    for _name, val in kwargs.items():
+        if val and not _SAFE_ID.match(val):
+            return False
     return True
 
 
@@ -62,8 +65,57 @@ def generate_ae_report():
     return jsonify({"error": "Generation failed"}), 500
 
 
+@app.route("/api/ae-report/paste", methods=["POST"])
+def paste_ae_report():
+    data = request.get_json() or {}
+    journal = data.get("journal", "").lower()
+    manuscript_id = data.get("manuscript_id", "")
+    response_text = data.get("response", "")
+    if not journal or not manuscript_id or not response_text:
+        return jsonify({"error": "journal, manuscript_id, and response required"}), 400
+    if not _validate_params(journal=journal, manuscript_id=manuscript_id):
+        return jsonify({"error": "Invalid parameters"}), 400
+
+    parsed = None
+    try:
+        parsed = json.loads(response_text)
+    except json.JSONDecodeError:
+        json_match = _re.search(r"\{[\s\S]*\}", response_text)
+        if json_match:
+            try:
+                parsed = json.loads(json_match.group())
+            except json.JSONDecodeError:
+                pass
+    if not parsed:
+        return jsonify({"error": "Could not parse JSON from response"}), 400
+
+    ae_dir = PROJECT_DIR / "production" / "outputs" / journal / "ae_reports"
+    ae_dir.mkdir(parents=True, exist_ok=True)
+
+    existing_files = sorted(ae_dir.glob(f"ae_{manuscript_id}_*.json"), reverse=True)
+    if existing_files:
+        try:
+            with open(existing_files[0]) as f:
+                existing = json.load(f)
+            existing.update(parsed)
+            parsed = existing
+        except (json.JSONDecodeError, OSError):
+            pass
+
+    import datetime
+
+    ts = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+    out_path = ae_dir / f"ae_{manuscript_id}_{ts}.json"
+    with open(out_path, "w") as f:
+        json.dump(parsed, f, indent=2, default=str)
+
+    return jsonify({"status": "ok", "path": str(out_path), "report": parsed})
+
+
 @app.route("/api/ae-reports/<journal>/<manuscript_id>")
 def get_ae_report(journal, manuscript_id):
+    if not _validate_params(journal=journal, manuscript_id=manuscript_id):
+        return jsonify({"error": "Invalid parameters"}), 400
     ae_dir = PROJECT_DIR / "production" / "outputs" / journal.lower() / "ae_reports"
     files = sorted(ae_dir.glob(f"ae_{manuscript_id}_*.json"), reverse=True)
     if not files:
@@ -123,6 +175,41 @@ def run_extraction():
     return jsonify({"status": "started", "journal": journal})
 
 
+@app.route("/api/referee/search")
+def search_referees():
+    from pipeline.referee_db import RefereeDB
+
+    q = request.args.get("q", "")
+    if not q or len(q) < 2:
+        return jsonify({"error": "query too short"}), 400
+    db = RefereeDB()
+    return jsonify(db.search_referees(q))
+
+
+@app.route("/api/referee/top")
+def get_top_referees():
+    from pipeline.referee_db import RefereeDB
+
+    db = RefereeDB()
+    return jsonify(db.get_top_referees(min_invitations=2, limit=20))
+
+
+@app.route("/api/referee/decliners")
+def get_chronic_decliners():
+    from pipeline.referee_db import RefereeDB
+
+    db = RefereeDB()
+    return jsonify(db.get_chronic_decliners(min_invitations=2))
+
+
+@app.route("/api/referee/overdue")
+def get_overdue_offenders():
+    from pipeline.referee_db import RefereeDB
+
+    db = RefereeDB()
+    return jsonify(db.get_overdue_repeat_offenders(min_overdue=2))
+
+
 @app.route("/api/referee/<name>")
 def get_referee_profile(name):
     from pipeline.referee_db import RefereeDB
@@ -133,17 +220,6 @@ def get_referee_profile(name):
         profile["assignments"] = db.get_referee_assignments(name, limit=10)
         return jsonify(profile)
     return jsonify({"error": "Referee not found"}), 404
-
-
-@app.route("/api/referee/search")
-def search_referees():
-    from pipeline.referee_db import RefereeDB
-
-    q = request.args.get("q", "")
-    if not q or len(q) < 2:
-        return jsonify({"error": "query too short"}), 400
-    db = RefereeDB()
-    return jsonify(db.search_referees(q))
 
 
 @app.route("/api/referee/<name>/assignments")
@@ -173,28 +249,18 @@ def get_referee_journal_stats(name):
     return jsonify([dict(r) for r in rows])
 
 
-@app.route("/api/referee/top")
-def get_top_referees():
+@app.route("/api/referee/<name>/note", methods=["GET", "POST"])
+def referee_note(name):
     from pipeline.referee_db import RefereeDB
 
     db = RefereeDB()
-    return jsonify(db.get_top_referees(min_invitations=2, limit=20))
-
-
-@app.route("/api/referee/decliners")
-def get_chronic_decliners():
-    from pipeline.referee_db import RefereeDB
-
-    db = RefereeDB()
-    return jsonify(db.get_chronic_decliners(min_invitations=2))
-
-
-@app.route("/api/referee/overdue")
-def get_overdue_offenders():
-    from pipeline.referee_db import RefereeDB
-
-    db = RefereeDB()
-    return jsonify(db.get_overdue_repeat_offenders(min_overdue=2))
+    if request.method == "POST":
+        data = request.get_json() or {}
+        note = data.get("note", "")
+        db.set_referee_note(name, note)
+        return jsonify({"status": "ok"})
+    note = db.get_referee_note(name)
+    return jsonify({"note": note or ""})
 
 
 @app.route("/api/pipeline/run", methods=["POST"])
@@ -221,6 +287,8 @@ def run_pipeline():
 
 @app.route("/api/pipeline/recommendations/<journal>/<manuscript_id>")
 def get_pipeline_recommendation(journal, manuscript_id):
+    if not _validate_params(journal=journal, manuscript_id=manuscript_id):
+        return jsonify({"error": "Invalid parameters"}), 400
     rec_dir = PROJECT_DIR / "production" / "outputs" / journal.lower() / "recommendations"
     files = sorted(rec_dir.glob(f"rec_{manuscript_id}_*.json"), reverse=True)
     if not files:
@@ -351,20 +419,6 @@ def send_reminders():
     return jsonify({"status": "ok", "reminders_sent": sent, "reminders_failed": failed})
 
 
-@app.route("/api/referee/<name>/note", methods=["GET", "POST"])
-def referee_note(name):
-    from pipeline.referee_db import RefereeDB
-
-    db = RefereeDB()
-    if request.method == "POST":
-        data = request.get_json() or {}
-        note = data.get("note", "")
-        db.set_referee_note(name, note)
-        return jsonify({"status": "ok"})
-    note = db.get_referee_note(name)
-    return jsonify({"note": note or ""})
-
-
 @app.route("/api/annual-report", methods=["POST"])
 def annual_report():
     data = request.get_json() or {}
@@ -410,6 +464,65 @@ def get_similarity(journal, manuscript_id):
         return jsonify(results)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/feedback", methods=["POST"])
+def record_feedback():
+    data = request.get_json() or {}
+    referee_name = data.get("referee_name", "")
+    journal = data.get("journal", "").lower()
+    manuscript_id = data.get("manuscript_id", "")
+    was_used = data.get("was_used", False)
+    quality_score = data.get("quality_score")
+    if not referee_name or not journal or not manuscript_id:
+        return jsonify({"error": "referee_name, journal, and manuscript_id required"}), 400
+    try:
+        if quality_score is not None:
+            quality_score = float(quality_score)
+    except (ValueError, TypeError):
+        return jsonify({"error": "quality_score must be a number"}), 400
+    try:
+        from pipeline.referee_db import RefereeDB
+
+        db = RefereeDB()
+        db.record_feedback(referee_name, journal, manuscript_id, was_used, quality_score)
+        return jsonify({"status": "ok"})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/model-health")
+def model_health():
+    models_dir = PROJECT_DIR / "production" / "models"
+    health = {}
+    for name in ("response_predictor.joblib", "outcome_predictor.joblib"):
+        p = models_dir / name
+        health[name] = {
+            "exists": p.exists(),
+            "size_bytes": p.stat().st_size if p.exists() else 0,
+            "modified": p.stat().st_mtime if p.exists() else None,
+        }
+    faiss_path = models_dir / "referee_index.faiss"
+    health["referee_index.faiss"] = {
+        "exists": faiss_path.exists(),
+        "size_bytes": faiss_path.stat().st_size if faiss_path.exists() else 0,
+        "modified": faiss_path.stat().st_mtime if faiss_path.exists() else None,
+    }
+    meta_path = models_dir / "training_metadata.json"
+    if meta_path.exists():
+        try:
+            with open(meta_path) as f:
+                health["training_metadata"] = json.load(f)
+        except (json.JSONDecodeError, OSError):
+            health["training_metadata"] = None
+    else:
+        health["training_metadata"] = None
+    return jsonify(health)
+
+
+@app.route("/api/health")
+def health():
+    return jsonify({"status": "ok"})
 
 
 def main():

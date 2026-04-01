@@ -18,8 +18,70 @@ def _notify(title: str, message: str):
             check=False,
             timeout=5,
         )
-    except Exception:
-        pass
+    except Exception as e:
+        print(f"  ⚠️ Notification failed: {e}")
+
+
+def _record_outcomes(events: list[dict]):
+    try:
+        from pipeline.referee_db import RefereeDB
+        from reporting.cross_journal_report import load_journal_data
+
+        relevant = [e for e in events if e.get("type") in ("STATUS_CHANGED", "ALL_REPORTS_IN")]
+        if not relevant:
+            return
+
+        db = RefereeDB()
+        journals_loaded = {}
+
+        for event in relevant:
+            journal = event.get("journal", "")
+            ms_id = event.get("manuscript_id", "")
+            if not journal or not ms_id:
+                continue
+
+            if journal not in journals_loaded:
+                journals_loaded[journal] = load_journal_data(journal)
+
+            data = journals_loaded[journal]
+            if not data:
+                continue
+
+            for ms in data.get("manuscripts", []):
+                if ms.get("manuscript_id") != ms_id:
+                    continue
+                for ref in ms.get("referees", []):
+                    name = ref.get("name", "")
+                    if not name:
+                        continue
+                    status = (ref.get("status") or "").lower()
+                    dates = ref.get("dates") or {}
+                    returned_date = dates.get("returned")
+
+                    if "decline" in status or "terminated" in status:
+                        response = "declined"
+                    elif returned_date or status in (
+                        "report submitted",
+                        "review complete",
+                        "completed",
+                    ):
+                        response = "accepted"
+                    else:
+                        continue
+
+                    try:
+                        db._update_assignment_outcome(name, journal, ms_id, response, returned_date)
+                    except Exception:
+                        pass
+                break
+
+        try:
+            db.resolve_predictions()
+        except Exception:
+            pass
+
+    except Exception as e:
+        print(f"  ⚠️ Outcome recording failed (non-critical): {e}")
 
 
 def process_all(provider: str = "claude") -> list[dict]:
@@ -38,11 +100,12 @@ def process_all(provider: str = "claude") -> list[dict]:
         event_type = event.get("type", "")
         journal = event.get("journal", "")
         ms_id = event.get("manuscript_id", "")
+        source_file = event.get("source_file")
 
         if event_type == "ALL_REPORTS_IN":
             ae_candidates.append((journal, ms_id))
         elif event_type == "NEW_MANUSCRIPT":
-            new_manuscripts.append((journal, ms_id))
+            new_manuscripts.append((journal, ms_id, source_file))
 
         processed.append(event)
 
@@ -72,17 +135,20 @@ def process_all(provider: str = "claude") -> list[dict]:
 
     if new_manuscripts:
         print(f"\n📝 {len(new_manuscripts)} new manuscript(s) detected:")
-        for journal, ms_id in new_manuscripts:
+        for journal, ms_id, _sf in new_manuscripts:
             print(f"   {journal.upper()}/{ms_id}")
 
         try:
             from pipeline.referee_pipeline import RefereePipeline
 
             pipeline = RefereePipeline(use_llm=False)
-            for journal, ms_id in new_manuscripts:
+            for journal, ms_id, source_file in new_manuscripts:
                 print(f"\n🔍 Running referee pipeline for {journal.upper()}/{ms_id}...")
                 try:
-                    pipeline.run_single(journal, ms_id)
+                    kwargs = {}
+                    if source_file:
+                        kwargs["extraction_path"] = source_file
+                    pipeline.run_single(journal, ms_id, **kwargs)
                     try:
                         from pipeline.manuscript_similarity import (
                             find_similar_manuscripts,
@@ -108,7 +174,7 @@ def process_all(provider: str = "claude") -> list[dict]:
         except ImportError:
             print("   (referee pipeline not available — skipping auto-pipeline)")
 
-        for journal, ms_id in new_manuscripts:
+        for journal, ms_id, _sf in new_manuscripts:
             try:
                 from core.email_notifications import send_event_notification
 
@@ -128,6 +194,7 @@ def process_all(provider: str = "claude") -> list[dict]:
         )
 
     mark_processed(processed)
+    _record_outcomes(processed)
     print(f"\n✅ Processed {len(processed)} event(s)")
     return processed
 

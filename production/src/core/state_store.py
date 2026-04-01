@@ -46,14 +46,30 @@ class StateStore:
             "referees": [],
         }
         for ref in manuscript.get("referees", []):
+            rec = ref.get("recommendation", "")
+            if rec and rec.lower() in (
+                "unknown",
+                "n/a",
+                "",
+                "pending",
+                "in progress",
+                "none",
+                "awaiting",
+            ):
+                rec = ""
             key_data["referees"].append(
                 {
                     "name": ref.get("name", ""),
                     "status": ref.get("status", ""),
-                    "recommendation": ref.get("recommendation", ""),
+                    "recommendation": rec,
                     "review_received": (ref.get("status_details") or {}).get(
                         "review_received", False
                     ),
+                    "review_complete": (ref.get("status_details") or {}).get(
+                        "review_complete", False
+                    ),
+                    "has_report_text": bool((ref.get("report") or {}).get("comments_to_author")),
+                    "returned": bool((ref.get("dates") or {}).get("returned")),
                 }
             )
         raw = json.dumps(key_data, sort_keys=True, default=str)
@@ -94,7 +110,19 @@ class StateStore:
                 or sd.get("review_received")
                 or sd.get("review_complete")
                 or bool(report.get("comments_to_author"))
-                or (rec and rec.lower() not in ("unknown", "n/a", ""))
+                or (
+                    rec
+                    and rec.lower()
+                    not in (
+                        "unknown",
+                        "n/a",
+                        "",
+                        "pending",
+                        "in progress",
+                        "none",
+                        "awaiting",
+                    )
+                )
             )
             is_declined = "decline" in status or "terminated" in status
 

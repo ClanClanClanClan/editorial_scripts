@@ -101,7 +101,7 @@ def find_referees(
         c["topic_overlap"] = _compute_topic_overlap(c, keywords)
 
     candidates.sort(key=lambda x: -x["relevance_score"])
-    return candidates[: max_candidates * 2], api_calls
+    return candidates[:max_candidates], api_calls
 
 
 def _dedup_keys(c: dict) -> list[str]:
@@ -399,6 +399,7 @@ def _compute_relevance(
                 candidate, manuscript, journal_code or ""
             )
             score += 0.05 * p_accept
+            candidate["_predicted_p_accept"] = p_accept
         except (ValueError, RuntimeError) as e:
             print(f"   Warning: response prediction failed: {e}")
 

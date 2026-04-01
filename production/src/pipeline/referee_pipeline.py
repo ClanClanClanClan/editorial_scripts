@@ -303,6 +303,20 @@ class RefereePipeline:
             print("   [3/5] Skipping referee search (desk rejection recommended)")
             print("   [4/5] Skipping conflict check")
 
+        try:
+            from pipeline.referee_db import RefereeDB
+
+            db = RefereeDB()
+            ms_id = manuscript.get("manuscript_id", "unknown")
+            for c in candidates:
+                if c.get("is_conflicted"):
+                    continue
+                p_accept = c.get("_predicted_p_accept")
+                if p_accept is not None:
+                    db.store_prediction(c["name"], journal_code, ms_id, p_accept)
+        except Exception:
+            pass
+
         print("   [5/5] Building report...")
         report = self._build_report(manuscript, journal_code, desk, candidates, rq, api_calls)
         self._save_report(report, journal_code)
@@ -438,7 +452,15 @@ class RefereePipeline:
 
 def _sanitize_candidates(candidates: list) -> list:
     clean = []
-    skip_keys = {"web_profile", "_hist_journal", "_hist_ms", "_hist_overlap"}
+    skip_keys = {
+        "web_profile",
+        "_hist_journal",
+        "_hist_ms",
+        "_hist_overlap",
+        "_predicted_p_accept",
+        "_referee_stats",
+        "_cooling_off_days",
+    }
     for c in candidates:
         out = {k: v for k, v in c.items() if k not in skip_keys}
         clean.append(out)

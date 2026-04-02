@@ -4,7 +4,7 @@ import json
 import sys
 from pathlib import Path
 
-from pipeline import JOURNALS, OUTPUTS_DIR
+from pipeline import JOURNALS, OUTPUTS_DIR, normalize_name
 from pipeline.referee_db import RefereeDB
 from pipeline.report_quality import assess_report_quality
 
@@ -61,10 +61,27 @@ def backfill(incremental: bool = False):
 
                 for ref in ms.get("referees", []):
                     name = ref.get("name", "")
-                    if not name:
+                    if not name or len(name) < 4 or " " not in name.strip():
+                        continue
+                    name_lower = name.lower()
+                    if any(
+                        g in name_lower
+                        for g in (
+                            "preferences",
+                            "close",
+                            "register",
+                            "summary",
+                            "decline reasons",
+                            "select new",
+                            "display",
+                            "notes ",
+                            "invited reviewer",
+                            "edit ",
+                        )
+                    ):
                         continue
 
-                    dedup_key = (name.lower(), journal, ms_id)
+                    dedup_key = (normalize_name(name), journal, ms_id)
                     if dedup_key in seen:
                         continue
                     seen.add(dedup_key)

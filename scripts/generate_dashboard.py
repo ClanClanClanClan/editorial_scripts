@@ -795,16 +795,21 @@ function _showAEPastePanel(d, j, m) {
     html += '<div style="margin-top:12px">';
     html += '<p style="font-size:0.78rem;color:var(--text2)"><b>Step 1:</b> Copy the prompt below and paste into ChatGPT Pro</p>';
     html += '<textarea id="ae-prompt-text" style="width:100%;height:120px;font-size:0.72rem;border:1px solid var(--border);border-radius:4px;padding:6px;font-family:monospace" readonly>' + _escHtml(d.prompt || '') + '</textarea>';
-    html += '<button class="btn-ae" style="margin-top:4px" onclick="document.getElementById(\'ae-prompt-text\').select();document.execCommand(\'copy\');this.textContent=\'Copied!\'">Copy Prompt</button>';
+    html += '<button class="btn-ae" style="margin-top:4px" onclick="copyAEPrompt()">Copy Prompt</button>';
     html += '</div>';
     html += '<div style="margin-top:12px">';
     html += '<p style="font-size:0.78rem;color:var(--text2)"><b>Step 2:</b> Paste the ChatGPT response below and click Save</p>';
     html += '<textarea id="ae-response-text" style="width:100%;height:150px;font-size:0.78rem;border:1px solid var(--border);border-radius:4px;padding:6px" placeholder="Paste ChatGPT response here..."></textarea>';
-    html += '<button class="btn-ae" style="margin-top:4px" onclick="_saveAEResponse(\'' + _escHtml(j) + '\',\'' + _escHtml(m) + '\')">Save Response</button>';
+    html += '<button class="btn-ae" style="margin-top:4px" id="ae-save-btn" data-journal="' + _escHtml(j) + '" data-ms="' + _escHtml(m) + '" onclick="_saveAEResponse(this.dataset.journal,this.dataset.ms)">Save Response</button>';
     html += ' <span id="ae-save-status" style="font-size:0.78rem"></span>';
     html += '</div>';
     html += '</div>';
     document.body.insertAdjacentHTML('beforeend', html);
+}
+function copyAEPrompt() {
+    var t = document.getElementById('ae-prompt-text');
+    if (t) { t.select(); document.execCommand('copy'); }
+    var btn = event && event.target; if (btn) btn.textContent = 'Copied!';
 }
 function _saveAEResponse(j, m) {
     var responseText = document.getElementById('ae-response-text').value;
@@ -905,7 +910,8 @@ function showRefereeCard(name) {
         html += '<div style="margin-top:8px"><b>Notes:</b><br>';
         var noteId = 'ref-note-' + name.replace(/[^a-zA-Z0-9]/g, '_');
         html += '<textarea id="' + noteId + '" style="width:100%;height:60px;font-size:0.78rem;border:1px solid var(--border);border-radius:4px;padding:4px">' + _escHtml(d.notes || '') + '</textarea>';
-        html += '<button class="btn-ae" style="margin-top:4px" onclick="saveRefereeNote(\'' + _escHtml(name).replace(/'/g, "\\\\'") + '\')">Save Note</button></div>';
+        var safeName = name.replace(/[^a-zA-Z0-9 .,_-]/g, '');
+        html += '<button class="btn-ae" style="margin-top:4px" onclick="saveRefereeNote(this.dataset.name)" data-name="' + _escHtml(safeName) + '">Save Note</button></div>';
         html += '</div>';
         document.body.insertAdjacentHTML('beforeend', html);
     }).catch(function() {});

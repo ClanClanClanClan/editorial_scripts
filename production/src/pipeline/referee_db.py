@@ -134,10 +134,14 @@ class RefereeDB:
         due = dates.get("due")
         response_date = dates.get("response_date") or agreed
         status_lower = (status or "").lower()
+        rec_lower = (recommendation or "").lower()
+        has_recommendation = rec_lower and rec_lower not in ("unknown", "n/a", "none", "")
         if "decline" in status_lower or "terminated" in status_lower:
             response = "declined"
         elif (
             agreed
+            or returned
+            or has_recommendation
             or "agreed" in status_lower
             or "awaiting report" in status_lower
             or "report submitted" in status_lower

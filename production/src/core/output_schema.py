@@ -254,6 +254,9 @@ def _normalize_referee(ref: dict, platform: str) -> None:
     for canon_key, source_fields in mapping.items():
         for source_field in source_fields:
             val = _resolve_nested_field(ref, source_field)
+            if not val:
+                ps = ref.get("platform_specific") or {}
+                val = ps.get(source_field)
             if val:
                 canonical_dates[canon_key] = normalize_date(str(val))
                 break

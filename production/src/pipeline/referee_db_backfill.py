@@ -14,10 +14,19 @@ def _effective_dates(ref: dict) -> dict:
     ps = ref.get("platform_specific") or {}
     sd = ref.get("status_details") or {}
     return {
-        "invited": dates.get("invited") or ps.get("invited_date") or sd.get("invited_date"),
-        "agreed": dates.get("agreed") or ps.get("agreed_date") or sd.get("agreed_date"),
+        "invited": dates.get("invited")
+        or ps.get("contact_date")
+        or ps.get("invited_date")
+        or sd.get("invited_date"),
+        "agreed": dates.get("agreed")
+        or ps.get("acceptance_date")
+        or ps.get("agreed_date")
+        or sd.get("agreed_date"),
         "due": dates.get("due") or ps.get("due_date") or sd.get("due_date"),
-        "returned": dates.get("returned") or ps.get("returned_date") or sd.get("returned_date"),
+        "returned": dates.get("returned")
+        or ps.get("received_date")
+        or ps.get("returned_date")
+        or sd.get("returned_date"),
         "response_date": dates.get("responded") or dates.get("agreed") or dates.get("declined"),
     }
 
@@ -32,12 +41,12 @@ def backfill(incremental: bool = False):
         if not journal_dir.exists():
             continue
 
-        files = sorted(journal_dir.glob(f"{journal}_extraction_*.json"))
+        files = sorted(journal_dir.glob(f"{journal}_extraction_*.json"), reverse=True)
         if not files:
             continue
 
         if incremental:
-            files = files[-1:]
+            files = files[:1]
 
         seen = set()
         for filepath in files:

@@ -905,23 +905,9 @@ class EMExtractor(CachedExtractorMixin):
 
                 if not name and cell_texts:
                     for ct in cell_texts:
-                        if ct and len(ct) > 2 and not re.match(r"^\d", ct) and "@" not in ct:
-                            if not any(
-                                kw in ct.lower()
-                                for kw in [
-                                    "agree",
-                                    "complet",
-                                    "declin",
-                                    "pending",
-                                    "invited",
-                                    "overdue",
-                                    "review",
-                                    "status",
-                                    "date",
-                                ]
-                            ):
-                                name = ct
-                                break
+                        if self._is_valid_referee_name(ct) and "@" not in ct:
+                            name = ct
+                            break
 
                 if not name:
                     continue
@@ -1073,6 +1059,36 @@ class EMExtractor(CachedExtractorMixin):
                                     if line not in [au.get("name") for au in authors]:
                                         authors.append({"name": line, "role": "author"})
 
+    @staticmethod
+    def _is_valid_referee_name(name: str) -> bool:
+        if not name or len(name) < 4 or " " not in name.strip():
+            return False
+        if name[0].isdigit() or "(" in name or ")" in name:
+            return False
+        garbage_keywords = (
+            "preference",
+            "close",
+            "register",
+            "select",
+            "summary",
+            "decline",
+            "display",
+            "notes ",
+            "invited",
+            "status",
+            "complete",
+            "edit ",
+            "view ",
+            "reviewer",
+            "submit",
+            "assign",
+            "flag",
+            "terminate",
+            "remind",
+        )
+        lower = name.lower()
+        return not any(kw in lower for kw in garbage_keywords)
+
     def _extract_referees(self, manuscript: dict, page_text: str, soup: BeautifulSoup):
         referees = manuscript["referees"]
 
@@ -1152,6 +1168,8 @@ class EMExtractor(CachedExtractorMixin):
                         text = self.safe_get_text(el)
                         if text and len(text) > 3:
                             name = text.split("\n")[0].strip()
+                            if not self._is_valid_referee_name(name):
+                                continue
                             if name and name not in [r.get("name") for r in referees]:
                                 referees.append(
                                     {

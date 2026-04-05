@@ -361,6 +361,9 @@ def find_author_across_journals(author_name, exclude_journal=None, exclude_manus
     if not target:
         return []
 
+    target_parts = target.split()
+    is_single_word = len(target_parts) == 1
+
     results = []
     for journal in JOURNALS:
         if exclude_journal and journal.lower() == exclude_journal.lower():
@@ -376,8 +379,12 @@ def find_author_across_journals(author_name, exclude_journal=None, exclude_manus
             matched = False
             for author in authors:
                 name = author.get("name") or author.get("display_name") or ""
-                if _normalize_name(name) == target:
-                    matched = True
+                normalized = _normalize_name(name)
+                if is_single_word:
+                    matched = target_parts[0] in normalized.split()
+                else:
+                    matched = normalized == target
+                if matched:
                     break
             if matched:
                 results.append(

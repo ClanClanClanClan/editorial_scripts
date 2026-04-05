@@ -486,9 +486,9 @@ class TestPredictionCalibration:
 
 class TestUpdateAssignmentOutcome:
     def test_updates_response(self, populated_db):
-        from pipeline import normalize_name
+        from pipeline import normalize_name_orderless
 
-        key = normalize_name("Alice Smith")
+        key = normalize_name_orderless("Alice Smith")
         populated_db._update_assignment_outcome(key, "sicon", "M100", "accepted", "2025-02-20")
         assignments = populated_db.get_referee_assignments("Alice Smith")
         m100 = [a for a in assignments if a["manuscript_id"] == "M100"][0]

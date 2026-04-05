@@ -167,7 +167,7 @@ def _extract_author_names(entry):
 
 
 def get_cited_author_candidates(pdf_path, exclude_names=None, session=None):
-    from pipeline import normalize_name
+    from pipeline import normalize_name_orderless as normalize_name
 
     refs = extract_references(pdf_path)
     if not refs:

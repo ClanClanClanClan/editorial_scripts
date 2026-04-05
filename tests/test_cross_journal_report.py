@@ -436,3 +436,50 @@ class TestFindAuthorAcrossJournals:
         }
         results = find_author_across_journals("muller, hans")
         assert len(results) >= 1
+
+    @patch("reporting.cross_journal_report.load_journal_data")
+    def test_surname_only_search(self, mock_load):
+        mock_load.return_value = {
+            "manuscripts": [
+                {
+                    "manuscript_id": "M1",
+                    "title": "T",
+                    "status": "OK",
+                    "authors": [{"name": "Alice Wonderland"}],
+                }
+            ]
+        }
+        results = find_author_across_journals("Wonderland")
+        assert len(results) >= 1
+
+    @patch("reporting.cross_journal_report.load_journal_data")
+    def test_surname_only_no_partial_word_match(self, mock_load):
+        mock_load.return_value = {
+            "manuscripts": [
+                {
+                    "manuscript_id": "M1",
+                    "title": "T",
+                    "status": "OK",
+                    "authors": [{"name": "Alice Wonderland"}],
+                }
+            ]
+        }
+        results = find_author_across_journals("Wonder")
+        assert len(results) == 0
+
+    @patch("reporting.cross_journal_report.load_journal_data")
+    def test_full_name_requires_exact_match(self, mock_load):
+        mock_load.return_value = {
+            "manuscripts": [
+                {
+                    "manuscript_id": "M1",
+                    "title": "T",
+                    "status": "OK",
+                    "authors": [{"name": "Alice Smith"}],
+                }
+            ]
+        }
+        results = find_author_across_journals("Alice Smith")
+        assert len(results) >= 1
+        results2 = find_author_across_journals("Alice Jones")
+        assert len(results2) == 0

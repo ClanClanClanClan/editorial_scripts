@@ -2,6 +2,7 @@
 
 import fcntl
 import json
+import sys
 from datetime import datetime
 from pathlib import Path
 
@@ -78,6 +79,10 @@ def get_pending_events() -> list[dict]:
             try:
                 events.append(json.loads(line))
             except json.JSONDecodeError:
+                print(
+                    f"  ⚠️ Skipping corrupt event line: {line[:100]}",
+                    file=sys.stderr,
+                )
                 continue
     return events
 
@@ -92,7 +97,13 @@ def mark_processed(events: list[dict]):
         with open(lock_path, "a+") as lock_f:
             fcntl.flock(lock_f, fcntl.LOCK_EX)
             try:
-                remaining = get_pending_events()
+                remaining = []
+                for line in PENDING_FILE.read_text().strip().split("\n"):
+                    if line.strip():
+                        try:
+                            remaining.append(json.loads(line))
+                        except json.JSONDecodeError:
+                            continue
                 processed_ids = {
                     (e.get("manuscript_id"), e.get("journal"), e.get("timestamp")) for e in events
                 }

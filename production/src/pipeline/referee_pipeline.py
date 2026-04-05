@@ -14,7 +14,8 @@ from core.academic_apis import AcademicProfileEnricher
 from core.file_utils import load_latest_extraction as load_journal_data
 from core.output_schema import JOURNAL_NAME_MAP, PLATFORM_MAP
 
-from pipeline import JOURNALS, OUTPUTS_DIR, normalize_name
+from pipeline import JOURNALS, OUTPUTS_DIR
+from pipeline import normalize_name_orderless as normalize_name
 from pipeline.conflict_checker import check_conflicts
 from pipeline.desk_rejection import assess_desk_rejection
 from pipeline.referee_finder import find_referees

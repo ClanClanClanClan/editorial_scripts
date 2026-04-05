@@ -24,6 +24,7 @@ sys.path.insert(0, str(PROJECT_DIR / "production" / "src"))
 DASHBOARD_PATH = PROJECT_DIR / "production" / "outputs" / "dashboard.html"
 
 _SAFE_ID = _re.compile(r"^[\w\-.]+$")
+_SAFE_NAME = _re.compile(r"^[\w\s,.\-']+$")
 VALID_JOURNALS = {"mf", "mor", "fs", "jota", "mafe", "sicon", "sifin", "naco"}
 
 app = Flask(__name__)
@@ -31,7 +32,10 @@ app = Flask(__name__)
 
 def _validate_params(**kwargs):
     for _name, val in kwargs.items():
-        if val and not _SAFE_ID.match(val):
+        if not val:
+            continue
+        pattern = _SAFE_NAME if _name == "name" else _SAFE_ID
+        if not pattern.match(val):
             return False
     return True
 
@@ -56,6 +60,8 @@ def generate_ae_report():
 
     if not journal or not manuscript_id:
         return jsonify({"error": "journal and manuscript_id required"}), 400
+    if not _validate_params(journal=journal, manuscript_id=manuscript_id):
+        return jsonify({"error": "Invalid parameters"}), 400
 
     from pipeline.ae_report import generate
 
@@ -155,6 +161,8 @@ def run_extraction():
     journal = data.get("journal", "").lower()
     if not journal:
         return jsonify({"error": "journal required"}), 400
+    if not _validate_params(journal=journal):
+        return jsonify({"error": "Invalid journal parameter"}), 400
 
     def _run():
         env_vars = {
@@ -168,6 +176,7 @@ def run_extraction():
             [sys.executable, "run_extractors.py", "--journal", journal],
             cwd=str(PROJECT_DIR),
             env=env,
+            timeout=600,
         )
 
     thread = threading.Thread(target=_run, daemon=True)
@@ -177,90 +186,126 @@ def run_extraction():
 
 @app.route("/api/referee/search")
 def search_referees():
-    from pipeline.referee_db import RefereeDB
-
     q = request.args.get("q", "")
     if not q or len(q) < 2:
         return jsonify({"error": "query too short"}), 400
-    db = RefereeDB()
-    return jsonify(db.search_referees(q))
+    try:
+        from pipeline.referee_db import RefereeDB
+
+        db = RefereeDB()
+        return jsonify(db.search_referees(q))
+    except Exception as e:
+        return jsonify({"error": f"Database error: {e}"}), 500
 
 
 @app.route("/api/referee/top")
 def get_top_referees():
-    from pipeline.referee_db import RefereeDB
+    try:
+        from pipeline.referee_db import RefereeDB
 
-    db = RefereeDB()
-    return jsonify(db.get_top_referees(min_invitations=2, limit=20))
+        db = RefereeDB()
+        return jsonify(db.get_top_referees(min_invitations=2, limit=20))
+    except Exception as e:
+        return jsonify({"error": f"Database error: {e}"}), 500
 
 
 @app.route("/api/referee/decliners")
 def get_chronic_decliners():
-    from pipeline.referee_db import RefereeDB
+    try:
+        from pipeline.referee_db import RefereeDB
 
-    db = RefereeDB()
-    return jsonify(db.get_chronic_decliners(min_invitations=2))
+        db = RefereeDB()
+        return jsonify(db.get_chronic_decliners(min_invitations=2))
+    except Exception as e:
+        return jsonify({"error": f"Database error: {e}"}), 500
 
 
 @app.route("/api/referee/overdue")
 def get_overdue_offenders():
-    from pipeline.referee_db import RefereeDB
+    try:
+        from pipeline.referee_db import RefereeDB
 
-    db = RefereeDB()
-    return jsonify(db.get_overdue_repeat_offenders(min_overdue=2))
+        db = RefereeDB()
+        return jsonify(db.get_overdue_repeat_offenders(min_overdue=2))
+    except Exception as e:
+        return jsonify({"error": f"Database error: {e}"}), 500
 
 
 @app.route("/api/referee/<name>")
 def get_referee_profile(name):
-    from pipeline.referee_db import RefereeDB
+    if not _validate_params(name=name):
+        return jsonify({"error": "Invalid name parameter"}), 400
+    try:
+        from pipeline.referee_db import RefereeDB
 
-    db = RefereeDB()
-    profile = db.get_profile(name)
-    if profile:
-        profile["assignments"] = db.get_referee_assignments(name, limit=10)
-        return jsonify(profile)
-    return jsonify({"error": "Referee not found"}), 404
+        db = RefereeDB()
+        profile = db.get_profile(name)
+        if profile:
+            profile["assignments"] = db.get_referee_assignments(name, limit=10)
+            return jsonify(profile)
+        return jsonify({"error": "Referee not found"}), 404
+    except Exception as e:
+        return jsonify({"error": f"Database error: {e}"}), 500
 
 
 @app.route("/api/referee/<name>/assignments")
 def get_referee_assignments(name):
-    from pipeline.referee_db import RefereeDB
+    if not _validate_params(name=name):
+        return jsonify({"error": "Invalid name parameter"}), 400
+    try:
+        from pipeline.referee_db import RefereeDB
 
-    db = RefereeDB()
-    return jsonify(db.get_referee_assignments(name))
+        db = RefereeDB()
+        return jsonify(db.get_referee_assignments(name))
+    except Exception as e:
+        return jsonify({"error": f"Database error: {e}"}), 500
 
 
 @app.route("/api/referee/<name>/journal-stats")
 def get_referee_journal_stats(name):
-    from pipeline.referee_db import RefereeDB
+    if not _validate_params(name=name):
+        return jsonify({"error": "Invalid name parameter"}), 400
+    try:
+        from pipeline.referee_db import RefereeDB
 
-    journal = request.args.get("journal")
-    db = RefereeDB()
-    if journal:
-        stats = db.get_journal_stats(name, journal)
-        return jsonify(stats or {})
-    with db._lock:
-        conn = db._conn()
-        rows = conn.execute(
-            "SELECT * FROM referee_journal_stats WHERE referee_key=?",
-            (name.lower().replace(",", "").replace(".", "").replace(" ", ""),),
-        ).fetchall()
-        conn.close()
-    return jsonify([dict(r) for r in rows])
+        journal = request.args.get("journal")
+        if journal and not _validate_params(journal=journal):
+            return jsonify({"error": "Invalid journal parameter"}), 400
+        db = RefereeDB()
+        if journal:
+            stats = db.get_journal_stats(name, journal)
+            return jsonify(stats or {})
+        from pipeline import normalize_name_orderless
+
+        key = normalize_name_orderless(name)
+        with db._lock:
+            with db._connection() as conn:
+                rows = conn.execute(
+                    "SELECT * FROM referee_journal_stats WHERE referee_key=?",
+                    (key,),
+                ).fetchall()
+        return jsonify([dict(r) for r in rows])
+    except Exception as e:
+        return jsonify({"error": f"Database error: {e}"}), 500
 
 
 @app.route("/api/referee/<name>/note", methods=["GET", "POST"])
 def referee_note(name):
-    from pipeline.referee_db import RefereeDB
+    if not _validate_params(name=name):
+        return jsonify({"error": "Invalid name parameter"}), 400
+    try:
+        from pipeline.referee_db import RefereeDB
 
-    db = RefereeDB()
-    if request.method == "POST":
-        data = request.get_json() or {}
-        note = data.get("note", "")
-        db.set_referee_note(name, note)
-        return jsonify({"status": "ok"})
-    note = db.get_referee_note(name)
-    return jsonify({"note": note or ""})
+        db = RefereeDB()
+        if request.method == "POST":
+            data = request.get_json() or {}
+            note = data.get("note", "")
+            db.set_referee_note(name, note)
+            return jsonify({"status": "ok"})
+        note = db.get_referee_note(name)
+        return jsonify({"note": note or ""})
+    except Exception as e:
+        return jsonify({"error": f"Database error: {e}"}), 500
 
 
 @app.route("/api/pipeline/run", methods=["POST"])
@@ -270,6 +315,8 @@ def run_pipeline():
     manuscript_id = data.get("manuscript_id", "")
     if not journal or not manuscript_id:
         return jsonify({"error": "journal and manuscript_id required"}), 400
+    if not _validate_params(journal=journal, manuscript_id=manuscript_id):
+        return jsonify({"error": "Invalid parameters"}), 400
 
     def _run():
         try:
@@ -349,6 +396,8 @@ def record_decision():
     notes = data.get("notes", "")
     if not journal or not manuscript_id or not decision:
         return jsonify({"error": "journal, manuscript_id, and decision required"}), 400
+    if not _validate_params(journal=journal, manuscript_id=manuscript_id):
+        return jsonify({"error": "Invalid parameters"}), 400
     valid = {"accept", "minor_revision", "major_revision", "reject", "desk_reject"}
     if decision.lower() not in valid:
         return jsonify({"error": f"Invalid decision. Must be one of: {valid}"}), 400

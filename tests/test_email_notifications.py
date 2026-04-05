@@ -10,6 +10,7 @@ from core.email_notifications import (
     format_event_email,
     send_event_notification,
     send_notification,
+    verify_send_scope,
 )
 
 
@@ -66,3 +67,50 @@ class TestLoadConfig:
         assert config == EVENT_EMAIL_DEFAULTS
         assert config["ALL_REPORTS_IN"] is True
         assert config["STATUS_CHANGED"] is False
+
+
+class TestVerifySendScope:
+    @patch("core.email_notifications._get_gmail_service", return_value=None)
+    def test_no_service(self, mock_svc):
+        result = verify_send_scope()
+        assert result["ok"] is False
+        assert "unavailable" in result["error"]
+
+    @patch("core.email_notifications._get_gmail_service")
+    def test_read_fails(self, mock_svc):
+        mock_service = MagicMock()
+        mock_service.users.return_value.messages.return_value.list.return_value.execute.side_effect = Exception(
+            "read error"
+        )
+        mock_svc.return_value = mock_service
+        result = verify_send_scope()
+        assert result["ok"] is False
+        assert "read failed" in result["error"]
+
+    @patch("core.email_notifications._get_gmail_service")
+    def test_send_scope_missing(self, mock_svc):
+        mock_service = MagicMock()
+        mock_service.users.return_value.messages.return_value.list.return_value.execute.return_value = (
+            {}
+        )
+        mock_service.users.return_value.drafts.return_value.create.return_value.execute.side_effect = Exception(
+            "403 insufficient permissions"
+        )
+        mock_svc.return_value = mock_service
+        result = verify_send_scope()
+        assert result["ok"] is False
+        assert "gmail.send" in result["error"]
+
+    @patch("core.email_notifications._get_gmail_service")
+    def test_success(self, mock_svc):
+        mock_service = MagicMock()
+        mock_service.users.return_value.messages.return_value.list.return_value.execute.return_value = (
+            {}
+        )
+        mock_service.users.return_value.drafts.return_value.create.return_value.execute.return_value = {
+            "id": "draft1"
+        }
+        mock_svc.return_value = mock_service
+        result = verify_send_scope()
+        assert result["ok"] is True
+        assert "gmail.send" in result["scopes"]

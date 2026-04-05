@@ -40,3 +40,12 @@ def _load_json(path: Path) -> dict:
 
 def normalize_name(s: str) -> str:
     return unicodedata.normalize("NFKD", s).encode("ascii", "ignore").decode().lower().strip()
+
+
+def normalize_name_orderless(s: str) -> str:
+    import re
+
+    base = normalize_name(s)
+    base = re.sub(r"[,;.]+", " ", base)
+    parts = sorted(base.split())
+    return " ".join(parts)

@@ -157,6 +157,32 @@ def format_event_email(event):
     return subject, body
 
 
+def verify_send_scope():
+    service = _get_gmail_service()
+    if service is None:
+        return {"ok": False, "error": "Gmail service unavailable (missing libraries or token)"}
+    try:
+        service.users().messages().list(userId="me", maxResults=1).execute()
+    except Exception as e:
+        return {"ok": False, "error": f"Gmail read failed: {e}"}
+    try:
+        draft = MIMEText("Send scope verification (not actually sent)", "plain")
+        draft["to"] = SENDER
+        draft["from"] = SENDER
+        draft["subject"] = "scope-check"
+        raw = base64.urlsafe_b64encode(draft.as_bytes()).decode()
+        service.users().drafts().create(userId="me", body={"message": {"raw": raw}}).execute()
+        return {"ok": True, "scopes": ["gmail.readonly", "gmail.send"]}
+    except Exception as e:
+        err = str(e)
+        if "insufficient" in err.lower() or "403" in err:
+            return {
+                "ok": False,
+                "error": "gmail.send scope not granted. Re-run: rm config/gmail_token.json && python3 scripts/setup_gmail_oauth.py",
+            }
+        return {"ok": False, "error": f"Draft creation failed: {e}"}
+
+
 def send_event_notification(event):
     config = _load_config()
     event_type = event.get("type", "")

@@ -8,7 +8,8 @@ import time
 import requests
 from core.academic_apis import AcademicProfileEnricher
 
-from pipeline import H_INDEX_CAP, JOURNALS, OUTPUTS_DIR, normalize_name
+from pipeline import H_INDEX_CAP, JOURNALS, OUTPUTS_DIR
+from pipeline import normalize_name_orderless as normalize_name
 
 
 def find_referees(

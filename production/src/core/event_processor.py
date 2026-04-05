@@ -24,6 +24,7 @@ def _notify(title: str, message: str):
 
 def _record_outcomes(events: list[dict]):
     try:
+        from pipeline import normalize_name_orderless
         from pipeline.referee_db import RefereeDB
         from reporting.cross_journal_report import load_journal_data
 
@@ -70,15 +71,16 @@ def _record_outcomes(events: list[dict]):
                         continue
 
                     try:
-                        db._update_assignment_outcome(name, journal, ms_id, response, returned_date)
-                    except Exception:
-                        pass
+                        key = normalize_name_orderless(name)
+                        db._update_assignment_outcome(key, journal, ms_id, response, returned_date)
+                    except Exception as e:
+                        print(f"  ⚠️ Outcome update failed for {name}: {e}", file=sys.stderr)
                 break
 
         try:
             db.resolve_predictions()
-        except Exception:
-            pass
+        except Exception as e:
+            print(f"  ⚠️ Prediction resolution failed: {e}", file=sys.stderr)
 
     except Exception as e:
         print(f"  ⚠️ Outcome recording failed (non-critical): {e}")
@@ -130,8 +132,8 @@ def process_all(provider: str = "claude") -> list[dict]:
                             "manuscript_id": ms_id,
                         }
                     )
-                except Exception:
-                    pass
+                except Exception as e:
+                    print(f"  ⚠️ Email notification failed: {e}", file=sys.stderr)
 
     if new_manuscripts:
         print(f"\n📝 {len(new_manuscripts)} new manuscript(s) detected:")
@@ -167,8 +169,8 @@ def process_all(provider: str = "claude") -> list[dict]:
                                     if similar:
                                         print(f"   Similar manuscripts: {len(similar)} found")
                                     break
-                    except Exception:
-                        pass
+                    except Exception as e:
+                        print(f"  ⚠️ Similarity check failed: {e}", file=sys.stderr)
                 except Exception as e:
                     print(f"   Pipeline error for {journal.upper()}/{ms_id}: {e}")
         except ImportError:
@@ -185,8 +187,8 @@ def process_all(provider: str = "claude") -> list[dict]:
                         "manuscript_id": ms_id,
                     }
                 )
-            except Exception:
-                pass
+            except Exception as e:
+                print(f"  ⚠️ Email notification failed: {e}", file=sys.stderr)
 
         _notify(
             "New Manuscripts",

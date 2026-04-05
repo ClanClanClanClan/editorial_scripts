@@ -7,7 +7,8 @@ from contextlib import contextmanager
 from datetime import datetime
 from pathlib import Path
 
-from pipeline import MODELS_DIR, normalize_name
+from pipeline import MODELS_DIR
+from pipeline import normalize_name_orderless as normalize_name
 
 DB_PATH = MODELS_DIR / "referee_profiles.db"
 
@@ -445,8 +446,8 @@ class RefereeDB:
         with self._lock:
             with self._connection() as conn:
                 rows = conn.execute(
-                    "SELECT * FROM referee_profiles WHERE LOWER(display_name) LIKE ? OR LOWER(email) LIKE ? OR LOWER(institution) LIKE ? OR LOWER(COALESCE(notes, '')) LIKE ? ORDER BY total_invitations DESC LIMIT ?",
-                    (q, q, q, q, limit),
+                    "SELECT * FROM referee_profiles WHERE referee_key LIKE ? OR LOWER(display_name) LIKE ? OR LOWER(email) LIKE ? OR LOWER(institution) LIKE ? OR LOWER(COALESCE(notes, '')) LIKE ? ORDER BY total_invitations DESC LIMIT ?",
+                    (q, q, q, q, q, limit),
                 ).fetchall()
                 return [self._deserialize_profile(r) for r in rows]
 

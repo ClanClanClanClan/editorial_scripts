@@ -122,7 +122,7 @@ def _manuscript_text(ms: dict) -> str:
 
 
 def _deduplicate(referees: list) -> list:
-    from pipeline import normalize_name
+    from pipeline import normalize_name_orderless as normalize_name
 
     by_name: dict[str, dict] = {}
     for ref in referees:

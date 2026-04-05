@@ -4,7 +4,7 @@ import json
 import sys
 from pathlib import Path
 
-from pipeline import JOURNALS, OUTPUTS_DIR, normalize_name
+from pipeline import JOURNALS, OUTPUTS_DIR, normalize_name_orderless
 from pipeline.referee_db import RefereeDB
 from pipeline.report_quality import assess_report_quality
 
@@ -90,7 +90,7 @@ def backfill(incremental: bool = False):
                     ):
                         continue
 
-                    dedup_key = (normalize_name(name), journal, ms_id)
+                    dedup_key = (normalize_name_orderless(name), journal, ms_id)
                     if dedup_key in seen:
                         continue
                     seen.add(dedup_key)

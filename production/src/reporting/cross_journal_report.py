@@ -8,7 +8,7 @@ from typing import Optional
 
 OUTPUTS_DIR = Path(__file__).parent.parent.parent / "outputs"
 
-JOURNALS = ["mf", "mor", "fs", "jota", "mafe", "sicon", "sifin", "naco"]
+JOURNALS = ["mf", "mor", "fs", "jota", "mafe", "sicon", "sifin", "naco", "mf_wiley"]
 
 JOURNAL_NAMES = {
     "mf": "Mathematical Finance",
@@ -19,6 +19,7 @@ JOURNAL_NAMES = {
     "sicon": "SICON",
     "sifin": "SIFIN",
     "naco": "NACO",
+    "mf_wiley": "MF (Wiley)",
 }
 
 PLATFORMS = {
@@ -30,6 +31,7 @@ PLATFORMS = {
     "sicon": "SIAM",
     "sifin": "SIAM",
     "naco": "EditFlow",
+    "mf_wiley": "Wiley",
 }
 
 

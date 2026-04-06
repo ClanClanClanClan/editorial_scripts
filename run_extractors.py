@@ -115,6 +115,14 @@ class ExtractorOrchestrator:
                 "status": "WORKING",
                 "url": "Email-based workflow",
             },
+            "mf_wiley": {
+                "name": "Mathematical Finance (Wiley)",
+                "module": "mf_wiley_extractor",
+                "class": "MFWileyExtractor",
+                "platform": "Wiley ScienceConnect",
+                "status": "WORKING",
+                "url": "https://review.wiley.com",
+            },
         }
 
         self.logger.info(f"Orchestrator initialized with output directory: {self.output_dir}")
@@ -297,7 +305,7 @@ class ExtractorOrchestrator:
 
         self.logger.info(f"Running all working extractors: {working_extractors}")
 
-        headful_journals = {"sicon", "sifin", "mf", "mor"}
+        headful_journals = {"sicon", "sifin", "mf", "mor", "mf_wiley"}
         uc_binary = (
             Path.home()
             / "Library"

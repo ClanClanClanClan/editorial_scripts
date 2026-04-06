@@ -8,7 +8,7 @@ PRODUCTION_DIR = Path(__file__).resolve().parents[2]
 OUTPUTS_DIR = PRODUCTION_DIR / "outputs"
 MODELS_DIR = PRODUCTION_DIR / "models"
 
-JOURNALS = ["mf", "mor", "fs", "jota", "mafe", "sicon", "sifin", "naco"]
+JOURNALS = ["mf", "mor", "fs", "jota", "mafe", "sicon", "sifin", "naco", "mf_wiley"]
 
 H_INDEX_CAP = 40
 

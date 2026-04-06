@@ -21,6 +21,7 @@ PLATFORM_MAP = {
     "SICON": "SIAM",
     "SIFIN": "SIAM",
     "NACO": "EditFlow (MSP)",
+    "MF_WILEY": "Wiley ScienceConnect",
 }
 
 JOURNAL_NAME_MAP = {
@@ -32,6 +33,7 @@ JOURNAL_NAME_MAP = {
     "SICON": "SIAM Journal on Control and Optimization",
     "SIFIN": "SIAM Journal on Financial Mathematics",
     "NACO": "Numerical Algebra, Control and Optimization",
+    "MF_WILEY": "Mathematical Finance",
 }
 
 DATE_FORMATS = [
@@ -75,6 +77,12 @@ REFEREE_DATE_MAPPINGS = {
         "agreed": [],
         "due": [],
         "returned": [],
+    },
+    "Wiley ScienceConnect": {
+        "invited": ["invited_date", "dates.invited"],
+        "agreed": ["accepted_date", "dates.agreed"],
+        "due": ["due_date", "dates.due"],
+        "returned": ["submitted_date", "dates.returned"],
     },
 }
 

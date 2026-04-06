@@ -39,7 +39,7 @@ class WileyBaseExtractor(CachedExtractorMixin):
     JOURNAL_NAME = ""
     LOGIN_URL = "https://wiley.scienceconnect.io/login"
     DASHBOARD_URL = "https://review.wiley.com"
-    CLOUDFLARE_WAIT = 180
+    CLOUDFLARE_WAIT = 300
     MANUSCRIPT_PATTERN = r"\d{7}"
     COOKIE_FILE = "wiley_cookies.json"
 
@@ -53,9 +53,15 @@ class WileyBaseExtractor(CachedExtractorMixin):
         self.original_window = None
         self.manuscripts_data = []
 
-        self.email = os.environ.get(f"{self.JOURNAL_CODE}_EMAIL") or os.environ.get("MF_EMAIL")
-        self.password = os.environ.get(f"{self.JOURNAL_CODE}_PASSWORD") or os.environ.get(
-            "MF_PASSWORD"
+        self.email = (
+            os.environ.get(f"{self.JOURNAL_CODE}_EMAIL")
+            or os.environ.get("SICON_EMAIL")
+            or os.environ.get("MF_EMAIL")
+        )
+        self.password = (
+            os.environ.get(f"{self.JOURNAL_CODE}_PASSWORD")
+            or os.environ.get("SICON_PASSWORD")
+            or os.environ.get("MF_PASSWORD")
         )
 
         atexit.register(self.cleanup_driver)
@@ -64,7 +70,6 @@ class WileyBaseExtractor(CachedExtractorMixin):
         self.chrome_options = uc.ChromeOptions()
         self.chrome_options.add_argument("--disable-dev-shm-usage")
         self.chrome_options.add_argument("--window-size=1200,800")
-        self.chrome_options.add_argument("--window-position=-2000,0")
 
     def setup_directories(self):
         self.base_dir = Path(__file__).parent.parent.parent
@@ -120,10 +125,20 @@ class WileyBaseExtractor(CachedExtractorMixin):
                 )
             except Exception:
                 pass
-        self.driver.set_page_load_timeout(120)
-        self.driver.implicitly_wait(10)
-        self.wait = WebDriverWait(self.driver, 30)
-        self.original_window = self.driver.current_window_handle
+        time.sleep(5)
+        for attempt in range(3):
+            try:
+                self.driver.set_page_load_timeout(120)
+                self.driver.implicitly_wait(10)
+                self.wait = WebDriverWait(self.driver, 30)
+                self.original_window = self.driver.current_window_handle
+                break
+            except Exception:
+                if attempt < 2:
+                    print(f"   \u26a0\ufe0f Browser init attempt {attempt + 1} failed, retrying...")
+                    time.sleep(5)
+                else:
+                    raise
         print(f"\U0001f5a5\ufe0f  Browser configured for {self.JOURNAL_CODE}")
 
     def cleanup_driver(self):
@@ -136,6 +151,7 @@ class WileyBaseExtractor(CachedExtractorMixin):
 
     def _wait_for_cloudflare(self, timeout=None):
         timeout = timeout or self.CLOUDFLARE_WAIT
+        prompted = False
         for i in range(timeout):
             try:
                 title = self.driver.title.lower()
@@ -143,13 +159,40 @@ class WileyBaseExtractor(CachedExtractorMixin):
                 time.sleep(1)
                 continue
             if "just a moment" in title or "un instant" in title or title == "":
-                if i % 15 == 0 and i > 0:
+                if i == 20 and not prompted:
+                    self._prompt_cloudflare_click()
+                    prompted = True
+                if i % 30 == 0 and i > 0:
                     print(f"   \u23f3 Cloudflare challenge... ({i}s)")
                 time.sleep(1)
                 continue
             return True
         print(f"   \u26a0\ufe0f Cloudflare timeout after {timeout}s")
         return False
+
+    def _prompt_cloudflare_click(self):
+        import subprocess
+
+        try:
+            self.driver.set_window_position(200, 100)
+            self.driver.set_window_size(800, 600)
+        except Exception:
+            pass
+        try:
+            subprocess.run(
+                [
+                    "osascript",
+                    "-e",
+                    'display notification "Click the Cloudflare checkbox in the Chrome window" '
+                    'with title "Wiley Extractor" sound name "Glass"',
+                ],
+                check=False,
+                timeout=5,
+            )
+        except Exception:
+            pass
+        print("   \U0001f446 Please click the Cloudflare 'Verify you are human' checkbox")
+        print("      (browser window brought to foreground)")
 
     def _save_cookies(self):
         cookie_path = self.cache_dir_path / self.COOKIE_FILE
@@ -208,6 +251,40 @@ class WileyBaseExtractor(CachedExtractorMixin):
                 return True
             except Exception:
                 return False
+
+    def _dismiss_cookie_banners(self):
+        try:
+            self.driver.execute_script(
+                """
+                // OneTrust (ORCID uses this)
+                var ot = document.getElementById('onetrust-accept-btn-handler');
+                if (ot) { ot.click(); return; }
+                // Generic cookie-policy overlays
+                var overlay = document.getElementById('cookie-policy-layer-bg');
+                if (overlay) overlay.remove();
+                var layer = document.getElementById('cookie-policy-layer');
+                if (layer) layer.remove();
+                // Reject all / accept all buttons
+                var btns = document.querySelectorAll(
+                    'button[id*="accept"], button[id*="reject"], button[class*="cookie"], ' +
+                    'button[class*="consent"], a[id*="cookie"], .cc-dismiss'
+                );
+                for (var i = 0; i < btns.length; i++) {
+                    var t = btns[i].textContent.toLowerCase();
+                    if (t.indexOf('reject') >= 0 || t.indexOf('decline') >= 0 || t.indexOf('deny') >= 0) {
+                        btns[i].click(); return;
+                    }
+                }
+                for (var i = 0; i < btns.length; i++) {
+                    var t = btns[i].textContent.toLowerCase();
+                    if (t.indexOf('accept') >= 0 || t.indexOf('agree') >= 0 || t.indexOf('ok') >= 0) {
+                        btns[i].click(); return;
+                    }
+                }
+            """
+            )
+        except Exception:
+            pass
 
     def _is_session_dead(self):
         try:
@@ -276,6 +353,7 @@ class WileyBaseExtractor(CachedExtractorMixin):
                 return False
 
         time.sleep(2)
+        self._dismiss_cookie_banners()
         print("   \U0001f4dd Filling ORCID credentials...")
 
         username_field = self._wait_for_element(By.ID, "username-input", timeout=15)
@@ -305,17 +383,50 @@ class WileyBaseExtractor(CachedExtractorMixin):
 
         self._safe_click(signin_btn)
         print("   \U0001f511 ORCID credentials submitted")
-        time.sleep(3)
 
-        authorize_btn = self._wait_for_clickable(By.ID, "authorize", timeout=5)
+        for wait_i in range(60):
+            time.sleep(2)
+            url = self.driver.current_url
+            if "review.wiley.com" in url:
+                print("   \u2705 ORCID redirect to dashboard")
+                return True
+            if "scienceconnect.io" in url and "orcid" not in url:
+                print("   \u2705 ORCID redirect to ScienceConnect")
+                return True
+            if "orcid.org" in url and "/signin" not in url and "/oauth" not in url:
+                break
+            if wait_i == 5:
+                try:
+                    error_el = self.driver.find_element(
+                        By.CSS_SELECTOR, ".alert-error, .orcid-error, #orcid-errors, .mat-error"
+                    )
+                    err_text = error_el.text.strip()
+                    if err_text:
+                        print(f"   \u274c ORCID error: {err_text[:100]}")
+                        return False
+                except NoSuchElementException:
+                    pass
+            if wait_i == 10:
+                print(f"   \u23f3 Waiting for ORCID redirect... (URL: {url[:80]})")
+
+        authorize_btn = self._wait_for_clickable(By.ID, "authorize", timeout=10)
         if authorize_btn:
             self._safe_click(authorize_btn)
             print("   \u2705 Authorization granted")
             time.sleep(3)
 
+        for _ in range(30):
+            time.sleep(2)
+            url = self.driver.current_url
+            if "review.wiley.com" in url:
+                return True
+            if "scienceconnect.io" in url and "orcid" not in url:
+                return True
+
+        print(f"   \u26a0\ufe0f Still on ORCID after submit. URL: {self.driver.current_url}")
         return True
 
-    def _wait_for_dashboard_redirect(self, timeout=60) -> bool:
+    def _wait_for_dashboard_redirect(self, timeout=120) -> bool:
         for _ in range(timeout):
             try:
                 url = self.driver.current_url
@@ -328,9 +439,12 @@ class WileyBaseExtractor(CachedExtractorMixin):
                         return True
                 return False
             if "wiley.scienceconnect.io" in url and "/login" not in url:
+                print("   \U0001f517 Redirected to ScienceConnect, navigating to dashboard...")
                 time.sleep(2)
                 self.driver.get(self.DASHBOARD_URL)
-                return self._wait_for_cloudflare(timeout=60)
+                if self._wait_for_cloudflare(timeout=120):
+                    return self._ensure_dashboard_loaded()
+                return False
             time.sleep(1)
         print(f"   \u274c Dashboard redirect timeout. URL: {self.driver.current_url}")
         return False

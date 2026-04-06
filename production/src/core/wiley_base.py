@@ -96,11 +96,10 @@ class WileyBaseExtractor(CachedExtractorMixin):
         except Exception:
             pass
 
-        uc_binary = Path.home() / "Library/Application Support/undetected_chromedriver"
-        uc_binary = uc_binary / "undetected_chromedriver"
-        if uc_binary.exists():
-            uc_binary.unlink()
-            print("  Cleaned stale UC binary")
+        import subprocess as _sp
+
+        _sp.run(["pkill", "-9", "chromedriver"], capture_output=True)
+        time.sleep(1)
 
         self.driver = uc.Chrome(
             options=self.chrome_options,
@@ -125,20 +124,18 @@ class WileyBaseExtractor(CachedExtractorMixin):
                 )
             except Exception:
                 pass
-        time.sleep(5)
-        for attempt in range(3):
-            try:
-                self.driver.set_page_load_timeout(120)
-                self.driver.implicitly_wait(10)
-                self.wait = WebDriverWait(self.driver, 30)
-                self.original_window = self.driver.current_window_handle
-                break
-            except Exception:
-                if attempt < 2:
-                    print(f"   \u26a0\ufe0f Browser init attempt {attempt + 1} failed, retrying...")
-                    time.sleep(5)
-                else:
-                    raise
+        time.sleep(3)
+        self.driver.set_page_load_timeout(120)
+        self.driver.implicitly_wait(10)
+        self.wait = WebDriverWait(self.driver, 30)
+        try:
+            self.original_window = self.driver.current_window_handle
+        except Exception:
+            print("   \u26a0\ufe0f Initial window closed, creating new tab...")
+            self.driver.execute_cdp_cmd("Target.createTarget", {"url": "about:blank"})
+            time.sleep(2)
+            self.original_window = self.driver.window_handles[0]
+            self.driver.switch_to.window(self.original_window)
         print(f"\U0001f5a5\ufe0f  Browser configured for {self.JOURNAL_CODE}")
 
     def cleanup_driver(self):
@@ -459,13 +456,32 @@ class WileyBaseExtractor(CachedExtractorMixin):
 
     def collect_manuscript_ids(self) -> list[dict]:
         print("\n\U0001f4cb Collecting manuscripts from dashboard...")
+        print(f"   URL: {self.driver.current_url}")
+        print(f"   Title: {self.driver.title}")
 
+        time.sleep(3)
         all_btn = self._wait_for_clickable(
-            By.CSS_SELECTOR, '[data-test-id="bin-radio-all"]', timeout=10
+            By.CSS_SELECTOR, '[data-test-id="bin-radio-all"]', timeout=15
         )
         if all_btn:
             self._safe_click(all_btn)
-            time.sleep(3)
+            print("   Clicked 'All' filter")
+            time.sleep(5)
+        else:
+            print("   \u26a0\ufe0f 'All' radio button not found, trying 'In progress'...")
+            ip_btn = self._wait_for_clickable(
+                By.CSS_SELECTOR, '[data-test-id="bin-radio-inprogress"]', timeout=10
+            )
+            if ip_btn:
+                self._safe_click(ip_btn)
+                time.sleep(5)
+            else:
+                print("   \u26a0\ufe0f No filter buttons found. Checking page state...")
+                try:
+                    body = self.driver.find_element(By.TAG_NAME, "body").text[:500]
+                    print(f"   Body text: {body}")
+                except Exception:
+                    pass
 
         manuscripts = []
         cards = self.driver.find_elements(By.CSS_SELECTOR, '[data-test-id^="manuscript-card"]')

@@ -262,7 +262,7 @@ def _normalize_referee_status(ref: dict, journal: str) -> str:
     if sd.get("declined"):
         return "declined"
 
-    if raw_lower in ("invited", "contacted", "pending"):
+    if raw_lower in ("invited", "contacted", "pending", "not contacted"):
         return "pending"
     if sd.get("no_response"):
         return "declined"

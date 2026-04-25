@@ -132,11 +132,194 @@ CANONICAL_REFEREE_FIELDS = {
     "dates",
     "recommendation",
     "report",
+    "reports",
     "web_profile",
     "statistics",
     "status_details",
     "platform_specific",
 }
+
+CANONICAL_REPORT_FIELDS = {
+    "revision",
+    "recommendation",
+    "recommendation_raw",
+    "manuscript_quality",
+    "scores",
+    "comments_to_author",
+    "confidential_comments",
+    "raw_text",
+    "report_date",
+    "word_count",
+    "available",
+    "extraction_status",
+    "source",
+    "attachments",
+}
+
+# Map raw recommendation strings (from any extractor) → canonical 5-value enum.
+# Lookup is case-insensitive on the lowercased key.
+RECOMMENDATION_CANONICAL_MAP = {
+    # Accept variants
+    "accept": "Accept",
+    "accept as is": "Accept",
+    "accept without revision": "Accept",
+    "publish as is": "Accept",
+    "publish": "Accept",
+    "accept with no changes": "Accept",
+    # Minor revision variants
+    "minor revision": "Minor Revision",
+    "minor revisions": "Minor Revision",
+    "accept with minor revisions": "Minor Revision",
+    "accept after minor revisions": "Minor Revision",
+    "minor changes": "Minor Revision",
+    "minor": "Minor Revision",
+    # Major revision variants
+    "major revision": "Major Revision",
+    "major revisions": "Major Revision",
+    "revise and resubmit": "Major Revision",
+    "resubmit for review": "Major Revision",
+    "accept with major revisions": "Major Revision",
+    "accept after major revisions": "Major Revision",
+    "reject and resubmit": "Major Revision",
+    "major": "Major Revision",
+    # Reject variants
+    "reject": "Reject",
+    "decline": "Reject",
+    "reject - do not encourage resubmission": "Reject",
+    "reject without resubmission": "Reject",
+    "do not publish": "Reject",
+    # Desk reject (treated as Reject for canonical purposes)
+    "desk reject": "Reject",
+    "desk rejection": "Reject",
+}
+
+
+def normalize_recommendation(raw: str) -> str:
+    """Map a raw recommendation string to one of: Accept, Minor Revision, Major Revision, Reject, Unknown."""
+    if not raw or not isinstance(raw, str):
+        return "Unknown"
+    key = raw.strip().lower()
+    if not key:
+        return "Unknown"
+    if key in RECOMMENDATION_CANONICAL_MAP:
+        return RECOMMENDATION_CANONICAL_MAP[key]
+    # Substring fallback (catches "Accept (after minor revisions)" etc.)
+    if "minor" in key and ("revis" in key or "change" in key):
+        return "Minor Revision"
+    if "major" in key and ("revis" in key or "change" in key):
+        return "Major Revision"
+    if "reject" in key or "decline" in key:
+        return "Reject"
+    if "accept" in key or "publish" in key:
+        return "Accept"
+    return "Unknown"
+
+
+def _normalize_report(report: dict, default_revision: int = 0) -> dict:
+    """Coerce a report dict to the canonical schema. Idempotent."""
+    if not isinstance(report, dict):
+        return {}
+
+    out = dict(report)
+
+    # Truncate long string fields
+    for field, max_len in (
+        ("comments_to_author", 20000),
+        ("confidential_comments", 20000),
+        ("raw_text", 20000),
+    ):
+        val = out.get(field, "")
+        if isinstance(val, str) and len(val) > max_len:
+            out[field] = val[:max_len]
+        elif not isinstance(val, str):
+            out[field] = ""
+
+    # Recommendation: store both canonical and raw
+    raw_rec = out.get("recommendation") or out.get("recommendation_raw") or ""
+    if raw_rec:
+        out["recommendation_raw"] = raw_rec
+        canonical = normalize_recommendation(raw_rec)
+        # Only overwrite recommendation if the canonical mapping found something specific
+        if canonical != "Unknown" or not out.get("recommendation"):
+            out["recommendation"] = canonical
+
+    # Defaults for missing fields
+    out.setdefault("revision", default_revision)
+    out.setdefault("manuscript_quality", None)
+    out.setdefault("scores", {})
+    out.setdefault("comments_to_author", "")
+    out.setdefault("confidential_comments", "")
+    out.setdefault("raw_text", "")
+    out.setdefault("report_date", None)
+    out.setdefault("recommendation", "")
+    out.setdefault("attachments", [])
+    out.setdefault("source", "")
+    out.setdefault("extraction_status", "ok")
+
+    # Compute word_count from comments_to_author if missing
+    if "word_count" not in out or not isinstance(out.get("word_count"), int):
+        wc_text = out.get("comments_to_author") or out.get("raw_text") or ""
+        out["word_count"] = len(wc_text.split())
+
+    # Available = there's anything actionable
+    out["available"] = bool(
+        out.get("comments_to_author")
+        or out.get("raw_text")
+        or out.get("scores")
+        or (out.get("recommendation") and out.get("recommendation") != "Unknown")
+        or out.get("attachments")
+    )
+
+    # Strip non-canonical keys into platform_specific to keep schema clean
+    extra = {}
+    for k in list(out.keys()):
+        if k not in CANONICAL_REPORT_FIELDS and k != "platform_specific":
+            extra[k] = out.pop(k)
+    if extra:
+        ps = out.setdefault("platform_specific", {})
+        if isinstance(ps, dict):
+            ps.update(extra)
+
+    return out
+
+
+def _finalize_referee_reports(ref: dict) -> None:
+    """Make referee.reports canonical (list of normalized reports, sorted by revision).
+    Sets referee.report = reports[-1] for backward compatibility."""
+    reports = ref.get("reports")
+    single = ref.get("report")
+
+    # Coerce: if only `report` (singular) exists, wrap in list
+    if isinstance(single, dict) and not isinstance(reports, list):
+        reports = [single]
+    elif not isinstance(reports, list):
+        reports = []
+    elif isinstance(single, dict) and isinstance(reports, list):
+        # Both exist: ensure singular is in the list (avoid duplicates by identity)
+        if single not in reports:
+            # Only append if it adds new info (e.g. has comments not in any reports entry)
+            single_text = (single.get("comments_to_author") or "").strip()
+            existing_texts = {(r.get("comments_to_author") or "").strip() for r in reports}
+            if single_text and single_text not in existing_texts:
+                reports.append(single)
+
+    # Normalize each entry
+    normalized = []
+    for idx, rpt in enumerate(reports):
+        if isinstance(rpt, dict):
+            normalized.append(_normalize_report(rpt, default_revision=idx))
+
+    # Sort by revision ascending; missing revisions kept stable
+    normalized.sort(key=lambda r: (r.get("revision") if r.get("revision") is not None else 0))
+
+    if normalized:
+        ref["reports"] = normalized
+        ref["report"] = normalized[-1]
+    else:
+        # No reports — keep referee.reports as empty list, drop singular
+        ref["reports"] = []
+        ref.pop("report", None)
+
 
 PROMOTED_METADATA_FIELDS = [
     "title",
@@ -285,6 +468,15 @@ def _normalize_referee(ref: dict, platform: str) -> None:
         ref["institution"] = ref["affiliation"]
     if not ref.get("institution") and ref.get("affiliation_full"):
         ref["institution"] = ref["affiliation_full"]
+
+    # Canonicalize report(s): build referee.reports list, mirror latest into referee.report
+    _finalize_referee_reports(ref)
+
+    # If a top-level recommendation is missing but the latest report has one, surface it
+    if not ref.get("recommendation") and isinstance(ref.get("report"), dict):
+        latest_rec = ref["report"].get("recommendation") or ref["report"].get("recommendation_raw")
+        if latest_rec:
+            ref["recommendation"] = latest_rec
 
     _collect_platform_specific(ref, CANONICAL_REFEREE_FIELDS)
 

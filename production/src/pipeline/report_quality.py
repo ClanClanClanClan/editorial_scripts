@@ -54,9 +54,28 @@ def assess_report_quality(manuscript: dict) -> dict:
     reports = []
 
     for ref in referees:
-        ref_reports = ref.get("reports", []) or []
+        # Canonical: referee.reports list. Fall back to singular referee.report.
+        ref_reports = ref.get("reports") or []
+        if not ref_reports and isinstance(ref.get("report"), dict):
+            single = ref["report"]
+            # Skip empty shells like {available: false}
+            if (
+                single.get("comments_to_author")
+                or single.get("raw_text")
+                or single.get("recommendation")
+                or single.get("scores")
+            ):
+                ref_reports = [single]
+
         for report in ref_reports:
-            score = _score_single_report(report, manuscript, ref)
+            # If extraction explicitly failed, fall back to a recommendation-only score
+            # so we don't penalize the referee for our scraping bug.
+            if report.get("extraction_status") == "popup_failed" and not (
+                report.get("comments_to_author") or report.get("raw_text")
+            ):
+                score = _score_from_recommendation_only(ref)
+            else:
+                score = _score_single_report(report, manuscript, ref)
             reports.append(score)
 
         if not ref_reports and ref.get("recommendation"):
@@ -80,7 +99,10 @@ def _score_single_report(report: dict, manuscript: dict, referee: dict) -> dict:
     ).strip()
     recommendation = report.get("recommendation", "") or referee.get("recommendation", "") or ""
 
-    word_count = len(text.split()) if text else 0
+    # Prefer pre-computed word_count from the canonical schema; fall back to live computation.
+    word_count = report.get("word_count")
+    if not isinstance(word_count, int) or word_count == 0:
+        word_count = len(text.split()) if text else 0
 
     thoroughness_score = _thoroughness(text, word_count)
 

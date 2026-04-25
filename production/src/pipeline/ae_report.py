@@ -56,47 +56,94 @@ def _detect_revision_round(manuscript: dict) -> int:
     return 0
 
 
-def _collect_report_text(referee: dict, manuscript: dict, journal: str) -> str:
-    texts = []
+def _text_fingerprint(text: str) -> str:
+    """Stable fingerprint for dedup — collapses whitespace and lowercases."""
+    import hashlib
 
+    if not text:
+        return ""
+    normalized = " ".join(text.lower().split())
+    return hashlib.md5(normalized.encode("utf-8"), usedforsecurity=False).hexdigest()
+
+
+def _collect_report_text(referee: dict, manuscript: dict, journal: str) -> str:
+    texts: list[str] = []
+    seen_fingerprints: set[str] = set()
+
+    def _add(text: str) -> None:
+        if not text or not isinstance(text, str):
+            return
+        text = text.strip()
+        if not text:
+            return
+        fp = _text_fingerprint(text)
+        if fp in seen_fingerprints:
+            return
+        seen_fingerprints.add(fp)
+        texts.append(text)
+
+    # 1. Canonical referee.reports list (latest revision first)
+    ref_reports = referee.get("reports") or []
+    sorted_reports = sorted(
+        ref_reports, key=lambda r: -(r.get("revision") or 0) if isinstance(r, dict) else 0
+    )
+    for rpt in sorted_reports:
+        if not isinstance(rpt, dict):
+            continue
+        # Prefer comments_to_author; fall back to raw_text
+        if rpt.get("comments_to_author"):
+            _add(rpt["comments_to_author"])
+        elif rpt.get("raw_text"):
+            _add(rpt["raw_text"])
+        # Legacy FS schema may attach analysis dict
+        analysis = rpt.get("analysis") or {}
+        if analysis.get("raw_text"):
+            _add(analysis["raw_text"])
+        # Path to attached PDF (legacy FS) or canonical attachments list
+        for path_key in ("path",):
+            p = rpt.get(path_key)
+            if p and os.path.exists(p):
+                _add(_extract_pdf_text(p) or "")
+        for att in rpt.get("attachments") or []:
+            if isinstance(att, dict):
+                local = att.get("local_path") or att.get("path")
+                if local and os.path.exists(local):
+                    _add(_extract_pdf_text(local) or "")
+
+    # 2. Singular referee.report (legacy mirror; should match latest of `reports` already)
     report = referee.get("report") or {}
     if report.get("comments_to_author"):
-        texts.append(report["comments_to_author"])
+        _add(report["comments_to_author"])
+    elif report.get("raw_text"):
+        _add(report["raw_text"])
 
-    for rpt in referee.get("reports", []):
-        analysis = rpt.get("analysis") or {}
-        raw = analysis.get("raw_text", "")
-        if raw:
-            texts.append(raw)
-        elif rpt.get("path") and os.path.exists(rpt["path"]):
-            pdf_text = _extract_pdf_text(rpt["path"])
-            if pdf_text:
-                texts.append(pdf_text)
-
+    # 3. Manuscript-level platform_specific.referee_reports (FS Gmail attachments)
     ps = manuscript.get("platform_specific", {})
     ref_name_lower = referee.get("name", "").lower()
     for rpt in ps.get("referee_reports", []):
-        if (rpt.get("referee") or "").lower() == ref_name_lower:
-            analysis = rpt.get("analysis") or {}
-            raw = analysis.get("raw_text", "")
-            if raw and raw not in texts:
-                texts.append(raw)
-            elif rpt.get("path") and os.path.exists(rpt["path"]):
-                pdf_text = _extract_pdf_text(rpt["path"])
-                if pdf_text and pdf_text not in texts:
-                    texts.append(pdf_text)
+        if (rpt.get("referee") or "").lower() != ref_name_lower:
+            continue
+        analysis = rpt.get("analysis") or {}
+        if analysis.get("raw_text"):
+            _add(analysis["raw_text"])
+        elif rpt.get("path") and os.path.exists(rpt["path"]):
+            _add(_extract_pdf_text(rpt["path"]) or "")
 
+    # 4. Documents list — referee_report-typed PDFs that may not be linked to a referee yet
     docs = ps.get("documents", {}).get("files", [])
     for doc in docs:
         doc_type = doc.get("type", "")
         if doc_type.startswith("referee_report") and doc.get("local_path"):
             if os.path.exists(doc["local_path"]):
-                pdf_text = _extract_pdf_text(doc["local_path"])
-                if pdf_text and pdf_text not in texts:
-                    texts.append(pdf_text)
+                _add(_extract_pdf_text(doc["local_path"]) or "")
 
+    # Final fallback: announce that we have a recommendation but no prose
     if not texts:
-        rec = referee.get("recommendation", "")
+        rec = (
+            referee.get("recommendation")
+            or report.get("recommendation")
+            or (sorted_reports[0].get("recommendation") if sorted_reports else "")
+        )
         if rec:
             texts.append(f"(No report text available. Recommendation: {rec})")
 
@@ -110,9 +157,17 @@ def _is_report_complete(referee: dict, journal: str) -> bool:
     sd = referee.get("status_details", {})
     if sd.get("review_received") or sd.get("review_complete"):
         return True
+    # Canonical reports list (latest entry has prose or recommendation)
+    for rpt in referee.get("reports") or []:
+        if isinstance(rpt, dict) and (
+            rpt.get("comments_to_author") or rpt.get("raw_text") or rpt.get("recommendation")
+        ):
+            return True
+    # Singular legacy report
     report = referee.get("report") or {}
-    if report.get("recommendation") or report.get("comments_to_author"):
+    if report.get("recommendation") or report.get("comments_to_author") or report.get("raw_text"):
         return True
+    # Standalone recommendation + at least one PDF reference
     rec = referee.get("recommendation", "")
     if rec and rec.lower() not in ("unknown", "n/a", ""):
         reports = referee.get("reports", [])

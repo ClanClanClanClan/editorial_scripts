@@ -3,13 +3,17 @@ from core.output_schema import (
     CANONICAL_AUTHOR_FIELDS,
     CANONICAL_MANUSCRIPT_FIELDS,
     CANONICAL_REFEREE_FIELDS,
+    CANONICAL_REPORT_FIELDS,
     _collect_platform_specific,
+    _finalize_referee_reports,
     _normalize_author,
     _normalize_author_corresponding,
     _normalize_referee,
+    _normalize_report,
     _resolve_nested_field,
     normalize_date,
     normalize_keywords,
+    normalize_recommendation,
     normalize_wrapper,
 )
 
@@ -172,3 +176,159 @@ class TestNormalizeWrapper:
         results = {"manuscripts": [{"id": "X-001", "title": "Test"}]}
         normalize_wrapper(results, "MF")
         assert results["manuscripts"][0]["manuscript_id"] == "X-001"
+
+
+class TestNormalizeRecommendation:
+    def test_accept(self):
+        assert normalize_recommendation("Accept") == "Accept"
+        assert normalize_recommendation("publish as is") == "Accept"
+        assert normalize_recommendation("Accept without revision") == "Accept"
+
+    def test_minor_revision(self):
+        assert normalize_recommendation("Minor Revision") == "Minor Revision"
+        assert normalize_recommendation("minor revisions") == "Minor Revision"
+        assert normalize_recommendation("Accept with minor revisions") == "Minor Revision"
+
+    def test_major_revision(self):
+        assert normalize_recommendation("Major Revision") == "Major Revision"
+        assert normalize_recommendation("revise and resubmit") == "Major Revision"
+        assert normalize_recommendation("reject and resubmit") == "Major Revision"
+
+    def test_reject(self):
+        assert normalize_recommendation("Reject") == "Reject"
+        assert normalize_recommendation("decline") == "Reject"
+        assert normalize_recommendation("desk reject") == "Reject"
+
+    def test_unknown(self):
+        assert normalize_recommendation("") == "Unknown"
+        assert normalize_recommendation(None) == "Unknown"
+        assert normalize_recommendation("???") == "Unknown"
+
+    def test_substring_fallback(self):
+        # Free-form variants caught by substring rules
+        assert normalize_recommendation("Accept (after minor revisions)") == "Minor Revision"
+        assert normalize_recommendation("Major revision required") == "Major Revision"
+        assert normalize_recommendation("Reject - not suitable") == "Reject"
+
+
+class TestNormalizeReport:
+    def test_canonical_passthrough(self):
+        rpt = {
+            "revision": 1,
+            "recommendation": "Accept",
+            "comments_to_author": "Good paper.",
+            "scores": {"clarity": "high"},
+        }
+        out = _normalize_report(rpt)
+        assert out["revision"] == 1
+        assert out["recommendation"] == "Accept"
+        assert out["recommendation_raw"] == "Accept"
+        assert out["comments_to_author"] == "Good paper."
+        assert out["available"] is True
+        assert out["word_count"] == 2
+
+    def test_truncates_long_strings(self):
+        rpt = {"comments_to_author": "x" * 30000}
+        out = _normalize_report(rpt)
+        assert len(out["comments_to_author"]) == 20000
+
+    def test_word_count_computed(self):
+        rpt = {"comments_to_author": "one two three four five"}
+        out = _normalize_report(rpt)
+        assert out["word_count"] == 5
+
+    def test_word_count_preserved_if_set(self):
+        rpt = {"comments_to_author": "one two three", "word_count": 999}
+        out = _normalize_report(rpt)
+        assert out["word_count"] == 999
+
+    def test_recommendation_raw_preserved_with_canonical_overlay(self):
+        rpt = {"recommendation": "publish as is"}
+        out = _normalize_report(rpt)
+        assert out["recommendation_raw"] == "publish as is"
+        assert out["recommendation"] == "Accept"
+
+    def test_available_false_for_empty_report(self):
+        out = _normalize_report({})
+        assert out["available"] is False
+        assert out["word_count"] == 0
+
+    def test_extra_fields_moved_to_platform_specific(self):
+        rpt = {"comments_to_author": "Hi", "popup_html_path": "/tmp/x.html"}
+        out = _normalize_report(rpt)
+        assert "popup_html_path" not in out
+        assert out["platform_specific"]["popup_html_path"] == "/tmp/x.html"
+
+    def test_idempotent(self):
+        rpt = {
+            "revision": 0,
+            "recommendation": "Reject",
+            "comments_to_author": "No good.",
+            "scores": {},
+        }
+        first = _normalize_report(rpt)
+        second = _normalize_report(first)
+        assert first == second
+
+
+class TestFinalizeRefereeReports:
+    def test_single_report_wrapped_into_list(self):
+        ref = {"name": "R1", "report": {"comments_to_author": "Looks fine."}}
+        _finalize_referee_reports(ref)
+        assert isinstance(ref["reports"], list)
+        assert len(ref["reports"]) == 1
+        assert ref["report"] is ref["reports"][-1]
+
+    def test_reports_list_normalized_and_sorted(self):
+        ref = {
+            "name": "R1",
+            "reports": [
+                {"revision": 1, "comments_to_author": "R1 comments"},
+                {"revision": 0, "comments_to_author": "R0 comments"},
+            ],
+        }
+        _finalize_referee_reports(ref)
+        # Ascending by revision
+        assert ref["reports"][0]["revision"] == 0
+        assert ref["reports"][1]["revision"] == 1
+        # Singular mirrors the latest (highest revision)
+        assert ref["report"]["comments_to_author"] == "R1 comments"
+
+    def test_empty_referee(self):
+        ref = {"name": "R1"}
+        _finalize_referee_reports(ref)
+        assert ref["reports"] == []
+        assert "report" not in ref
+
+    def test_singular_and_list_coexist(self):
+        ref = {
+            "name": "R1",
+            "report": {"comments_to_author": "Latest comment"},
+            "reports": [{"comments_to_author": "Older comment", "revision": 0}],
+        }
+        _finalize_referee_reports(ref)
+        # Both should be present (since they have different content)
+        texts = [r["comments_to_author"] for r in ref["reports"]]
+        assert "Older comment" in texts
+        assert "Latest comment" in texts
+
+
+class TestNormalizeRefereeIntegration:
+    def test_singular_report_canonicalized(self):
+        ref = {
+            "name": "R1",
+            "report": {"comments_to_author": "Solid contribution.", "recommendation": "Accept"},
+        }
+        _normalize_referee(ref, "SIAM")
+        # Reports list created from singular
+        assert len(ref["reports"]) == 1
+        assert ref["report"]["recommendation"] == "Accept"
+        assert ref["report"]["available"] is True
+
+    def test_top_level_recommendation_surfaced(self):
+        ref = {
+            "name": "R1",
+            "report": {"comments_to_author": "Good.", "recommendation": "Minor Revision"},
+        }
+        _normalize_referee(ref, "SIAM")
+        assert ref["recommendation"] == "Minor Revision"

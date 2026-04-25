@@ -108,6 +108,10 @@ class RefereeAction:
     reminders_sent: int = 0
     message: str = ""
     is_revision: bool = False
+    # journal_group is the canonical group code (e.g. MF for both MF and
+    # MF_WILEY), used by dashboard rollups. Self-mapped for journals that
+    # don't belong to a multi-platform group.
+    journal_group: str = ""
 
 
 @dataclass
@@ -144,6 +148,8 @@ class ManuscriptSummary:
     needs_ae_decision: bool = False
     needs_referee_assignment: bool = False
     referee_details: list = field(default_factory=list)
+    # Canonical group code (MF for both MF and MF_WILEY); used by dashboard rollups
+    journal_group: str = ""
 
 
 def _parse_date(s: str | None) -> datetime.date | None:
@@ -663,6 +669,13 @@ def compute_action_items(journals: list[str] | None = None) -> list[RefereeActio
                     )
                 )
 
+    # Populate journal_group on every item (for dashboard rollups)
+    from core.output_schema import journal_group as _journal_group
+
+    for item in items:
+        if not item.journal_group:
+            item.journal_group = _journal_group(item.journal)
+
     items.sort(
         key=lambda x: (
             PRIORITY_ORDER.get(x.priority, 9),
@@ -776,6 +789,13 @@ def compute_manuscript_summaries(
                     referee_details=ref_details,
                 )
             )
+
+    # Populate journal_group on every summary (for dashboard rollups)
+    from core.output_schema import journal_group as _journal_group
+
+    for s in summaries:
+        if not getattr(s, "journal_group", ""):
+            s.journal_group = _journal_group(s.journal)
 
     summaries.sort(
         key=lambda s: (

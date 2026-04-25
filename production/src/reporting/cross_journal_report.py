@@ -266,12 +266,68 @@ def print_terminal_report(all_stats: list[dict]):
     print()
 
 
+def aggregate_by_group(all_stats: list[dict]) -> list[dict]:
+    """Roll up per-journal stats into journal groups.
+
+    For example: MF (ScholarOne) + MF_WILEY (Wiley) collapse into one
+    "Mathematical Finance" group entry showing combined manuscript/referee
+    counts. Self-mapping journals (SICON, etc.) appear unchanged.
+    """
+    from core.output_schema import journal_group, journal_group_display
+
+    by_group: dict[str, dict] = {}
+    for s in all_stats:
+        if s is None:
+            continue
+        code = s.get("journal", "")
+        group = journal_group(code) or code
+        if group not in by_group:
+            by_group[group] = {
+                "group": group,
+                "group_name": journal_group_display(code) or s.get("journal_name", ""),
+                "platforms": [],
+                "journals_in_group": [],
+                "manuscripts": 0,
+                "referees": 0,
+                "referees_all": 0,
+                "authors": 0,
+                "enriched": 0,
+                "total_people": 0,
+                "extraction_dates": [],
+            }
+        g = by_group[group]
+        g["journals_in_group"].append(code)
+        plat = s.get("platform", "")
+        if plat and plat not in g["platforms"]:
+            g["platforms"].append(plat)
+        g["manuscripts"] += s.get("manuscripts", 0) or 0
+        g["referees"] += s.get("referees", 0) or 0
+        g["referees_all"] += s.get("referees_all", 0) or 0
+        g["authors"] += s.get("authors", 0) or 0
+        g["enriched"] += s.get("enriched", 0) or 0
+        g["total_people"] += s.get("total_people", 0) or 0
+        if s.get("extraction_date"):
+            g["extraction_dates"].append(s["extraction_date"])
+
+    out = []
+    for g in by_group.values():
+        g["enrichment_pct"] = (
+            round(100 * g["enriched"] / g["total_people"], 1) if g["total_people"] > 0 else 0
+        )
+        g["latest_extraction"] = max(g["extraction_dates"]) if g["extraction_dates"] else ""
+        out.append(g)
+    # Stable sort by group code
+    out.sort(key=lambda x: x.get("group", ""))
+    return out
+
+
 def generate_json_report(all_stats: list[dict]) -> dict:
     return {
         "report_type": "cross_journal",
         "generated_at": datetime.now().isoformat(),
         "schema_version": "1.0.0",
         "journals": all_stats,
+        "groups": aggregate_by_group(all_stats),
         "totals": {
             "journals_active": sum(1 for s in all_stats if s and s["manuscripts"] > 0),
             "journals_total": len(all_stats),

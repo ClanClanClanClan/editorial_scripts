@@ -36,6 +36,46 @@ JOURNAL_NAME_MAP = {
     "MF_WILEY": "Mathematical Finance",
 }
 
+# Logical grouping for journals that are the same publication on different
+# platforms. Used by the dashboard, action items, and cross-journal report
+# to render MF (legacy ScholarOne) + MF_WILEY (new Wiley platform) as a
+# single "Mathematical Finance" group while keeping their data separate.
+#
+# Codes are stored in lowercase (matches journal code casing across the
+# codebase). Values are the canonical group code (uppercase).
+JOURNAL_GROUP_MAP = {
+    "mf": "MF",
+    "mf_wiley": "MF",
+}
+
+JOURNAL_GROUP_DISPLAY = {
+    "MF": "Mathematical Finance",
+    "MOR": "Mathematics of Operations Research",
+    "FS": "Finance and Stochastics",
+    "JOTA": "Journal of Optimization Theory and Applications",
+    "MAFE": "Mathematical and Financial Economics",
+    "SICON": "SIAM Journal on Control and Optimization",
+    "SIFIN": "SIAM Journal on Financial Mathematics",
+    "NACO": "Numerical Algebra, Control and Optimization",
+}
+
+
+def journal_group(journal_code: str) -> str:
+    """Return the group code for a journal. Self-maps if no group is defined.
+
+    Lowercased input handled. Output is uppercase.
+    """
+    if not journal_code:
+        return ""
+    return JOURNAL_GROUP_MAP.get(journal_code.lower(), journal_code.upper())
+
+
+def journal_group_display(journal_code: str) -> str:
+    """Return the human-readable display name for the journal's group."""
+    group = journal_group(journal_code)
+    return JOURNAL_GROUP_DISPLAY.get(group, group)
+
+
 DATE_FORMATS = [
     "%d-%b-%Y",
     "%d %b %Y",

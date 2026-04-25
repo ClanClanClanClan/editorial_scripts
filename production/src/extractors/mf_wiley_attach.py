@@ -1069,16 +1069,44 @@ def _backfill_referee_dates(referees: list[dict], audit_trail: list[dict]):
                 ps["invite_source"] = "bulk_invitation"
 
 
+def _run_preflight() -> bool:
+    """Run scripts/check_wiley_prereqs.py and return True iff all checks pass.
+    On failure, prints the same actionable remediation message that the
+    standalone script would emit, then returns False.
+    """
+    project_dir = Path(__file__).parent.parent.parent.parent
+    preflight = project_dir / "scripts" / "check_wiley_prereqs.py"
+    if not preflight.exists():
+        # Pre-flight script is optional; fall through to legacy in-process check
+        return True
+    r = subprocess.run(
+        [sys.executable, str(preflight)],
+        capture_output=True,
+        text=True,
+        timeout=20,
+    )
+    if r.stdout:
+        print(r.stdout, end="" if r.stdout.endswith("\n") else "\n")
+    if r.stderr:
+        print(r.stderr, end="" if r.stderr.endswith("\n") else "\n")
+    return r.returncode == 0
+
+
 def main():
     print("=" * 60)
     print(f"  {JOURNAL_NAME} — Wiley ScienceConnect Attach Extractor")
     print("=" * 60)
 
+    # Pre-flight: tab open, AppleScript JS enabled, logged in
+    if not _run_preflight():
+        print("\nResolve the issues above and re-run.")
+        sys.exit(1)
+
     if not switch_to_wiley_tab():
         print("❌ No review.wiley.com tab open. Please navigate there first.")
         sys.exit(1)
 
-    # Ensure AppleScript JS is on
+    # Ensure AppleScript JS is on (defensive — pre-flight covers this)
     title = js("document.title")
     if not title:
         print("❌ AppleScript JS returned empty. Enable:")

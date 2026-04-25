@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+LaunchAgent for the MF_WILEY attach-mode extractor.
+
+Schedule: Mon / Wed / Fri at 06:00 local time.
+
+Why launchd (not cron): the extractor needs a logged-in Chrome tab with
+AppleScript JS enabled. cron has no GUI session; launchd runs in the
+user's Aqua session and can activate Chrome via osascript.
+
+Install:
+    cp scripts/admin/com.user.mfwiley.plist ~/Library/LaunchAgents/
+    launchctl load ~/Library/LaunchAgents/com.user.mfwiley.plist
+
+Verify:
+    launchctl list | grep mfwiley
+
+Unload:
+    launchctl unload ~/Library/LaunchAgents/com.user.mfwiley.plist
+-->
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.user.mfwiley</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/bash</string>
+        <string>/Users/dylanpossamai/Library/CloudStorage/Dropbox/Work/editorial_scripts/scripts/run_mf_wiley_attached.sh</string>
+        <string>--warm</string>
+        <string>60</string>
+    </array>
+
+    <key>StartCalendarInterval</key>
+    <array>
+        <dict>
+            <key>Weekday</key>
+            <integer>1</integer>
+            <key>Hour</key>
+            <integer>6</integer>
+            <key>Minute</key>
+            <integer>0</integer>
+        </dict>
+        <dict>
+            <key>Weekday</key>
+            <integer>3</integer>
+            <key>Hour</key>
+            <integer>6</integer>
+            <key>Minute</key>
+            <integer>0</integer>
+        </dict>
+        <dict>
+            <key>Weekday</key>
+            <integer>5</integer>
+            <key>Hour</key>
+            <integer>6</integer>
+            <key>Minute</key>
+            <integer>0</integer>
+        </dict>
+    </array>
+
+    <key>RunAtLoad</key>
+    <false/>
+
+    <key>StandardOutPath</key>
+    <string>/Users/dylanpossamai/Library/CloudStorage/Dropbox/Work/editorial_scripts/logs/mf_wiley.log</string>
+
+    <key>StandardErrorPath</key>
+    <string>/Users/dylanpossamai/Library/CloudStorage/Dropbox/Work/editorial_scripts/logs/mf_wiley.err</string>
+
+    <key>WorkingDirectory</key>
+    <string>/Users/dylanpossamai/Library/CloudStorage/Dropbox/Work/editorial_scripts</string>
+
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PATH</key>
+        <string>/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+        <key>PYTHON</key>
+        <string>/Library/Frameworks/Python.framework/Versions/3.12/bin/python3.12</string>
+    </dict>
+</dict>
+</plist>

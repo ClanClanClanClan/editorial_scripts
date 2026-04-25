@@ -367,6 +367,325 @@ class NACOExtractor(CachedExtractorMixin):
             referees.append(referee)
         return referees
 
+    # --- Detail-page extraction (scaffold; refine selectors after first live run) ---
+
+    def _navigate_to_manuscript_detail(self, manuscript_id: str, article_url: str = "") -> bool:
+        """Navigate to the per-manuscript detail page on EditFlow.
+
+        EditFlow URLs follow `article.php?id=<id>`. If a direct URL is supplied,
+        use it; otherwise try to derive from the manuscript ID.
+        """
+        if not getattr(self, "driver", None):
+            return False
+
+        target = article_url
+        if not target:
+            num_match = re.search(r"(\d+)$", manuscript_id or "")
+            if num_match:
+                target = f"https://ef.msp.org/article.php?id={num_match.group(1)}"
+        if not target:
+            return False
+
+        try:
+            self.driver.get(target)
+            time.sleep(2)
+            self._save_debug_html(f"detail_{manuscript_id}")
+            return True
+        except Exception as e:
+            self.logger.warning(f"Failed to navigate to detail page for {manuscript_id}: {e}")
+            return False
+
+    def _extract_referees_from_detail_page(self, soup: BeautifulSoup) -> list[dict[str, Any]]:
+        """Extract referees from the EditFlow per-manuscript detail page.
+
+        TODO(naco): refine selectors after live debug capture. Today we use
+        generic heuristics: any table whose header text mentions "referee" or
+        "reviewer" is treated as the reviewer-status table.
+        """
+        referees: list[dict[str, Any]] = []
+
+        # Find a table whose first row mentions referee/reviewer
+        target_table = None
+        for table in soup.find_all("table"):
+            header_text = table.find(["thead", "tr"])
+            if not header_text:
+                continue
+            label = header_text.get_text(separator=" ", strip=True).lower()
+            if "referee" in label or "reviewer" in label:
+                target_table = table
+                break
+
+        if target_table is None:
+            return referees
+
+        # Parse rows. Heuristic: each row has cells for name, email, status, dates,
+        # and possibly a "View Report" link.
+        for row in target_table.find_all("tr"):
+            cells = row.find_all(["td", "th"])
+            if len(cells) < 2:
+                continue
+            row_text = " ".join(c.get_text(strip=True) for c in cells)
+            emails = re.findall(r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b", row_text)
+            if not emails:
+                continue
+
+            email = emails[0]
+            # Name = first cell text minus the email
+            name = cells[0].get_text(strip=True)
+            name = re.sub(re.escape(email), "", name).strip(" -·,;")
+
+            ref: dict[str, Any] = {
+                "name": name,
+                "email": email,
+                "status": self._parse_naco_status(row_text),
+            }
+
+            # Date matches across the row
+            date_matches = re.findall(
+                r"\d{4}-\d{2}-\d{2}|\d{1,2}/\d{1,2}/\d{4}|\d{1,2}-[A-Za-z]{3}-\d{4}",
+                row_text,
+            )
+            if date_matches:
+                ref["contacted_date"] = date_matches[0]
+                if len(date_matches) > 1:
+                    ref["due_date"] = date_matches[1]
+                if len(date_matches) > 2:
+                    ref["received_date"] = date_matches[-1]
+
+            # Capture report link if present
+            report_link = row.find("a", string=re.compile(r"view\s+report|view\s+review", re.I))
+            if not report_link:
+                for link in row.find_all("a", href=True):
+                    if any(
+                        kw in (link.text or "").lower() for kw in ("report", "review", "comments")
+                    ):
+                        report_link = link
+                        break
+            if report_link:
+                ref["report_url"] = report_link.get("href", "")
+
+            referees.append(ref)
+
+        return referees
+
+    @staticmethod
+    def _parse_naco_status(text: str) -> str:
+        t = text.lower()
+        if any(kw in t for kw in ("submitted", "received", "review complete", "completed")):
+            return "Report Submitted"
+        if any(kw in t for kw in ("accepted", "agreed", "confirmed")):
+            return "Agreed"
+        if any(kw in t for kw in ("declined", "rejected", "refused")):
+            return "Declined"
+        if any(kw in t for kw in ("invited", "contacted", "pending", "awaiting")):
+            return "Invited"
+        return "Unknown"
+
+    def _extract_referee_report_inline(
+        self, soup: BeautifulSoup, referee_email: str
+    ) -> Optional[dict[str, Any]]:
+        """Search the detail page for an inline-rendered review report for the
+        given referee. Returns a canonical report dict or None.
+        """
+        # Heuristic: find a section/header naming the referee, then capture
+        # following text up to the next header.
+        if not referee_email:
+            return None
+
+        anchor = soup.find(
+            string=lambda s: isinstance(s, str) and referee_email.lower() in s.lower()
+        )
+        if not anchor:
+            return None
+
+        # Try the anchor's parent first; if that has no useful content, walk
+        # forward through siblings to find a section/div with the report.
+        node = anchor.find_parent(["section", "div", "fieldset"]) or anchor.parent
+        if not node:
+            return None
+
+        text = node.get_text(separator="\n", strip=True)
+
+        # If we landed on a heading (h1-h6) or a tiny container, scan forward
+        # siblings until we find a section/div with substantial content.
+        if len(text) < 100 or (getattr(node, "name", "") in ("h1", "h2", "h3", "h4", "h5", "h6")):
+            sibling = node.find_next_sibling(["section", "div", "fieldset", "article", "p"])
+            collected = []
+            steps = 0
+            while sibling is not None and steps < 6:
+                steps += 1
+                sib_text = sibling.get_text(separator="\n", strip=True)
+                if sib_text:
+                    collected.append(sib_text)
+                # Stop if we hit another heading
+                if sibling.find(["h1", "h2", "h3", "h4"]):
+                    break
+                sibling = sibling.find_next_sibling(["section", "div", "fieldset", "article", "p"])
+            if collected:
+                text = "\n".join([text] + collected) if text else "\n".join(collected)
+
+        if len(text) < 100:
+            return None
+
+        # Try to detect recommendation
+        rec_match = re.search(r"recommendation\s*[:.]?\s*([A-Z][^\n]{2,80})", text, re.IGNORECASE)
+        cta_match = re.search(
+            r"comments?\s*to\s*(?:the\s*)?authors?\s*[:.]?\s*\n?(.+?)"
+            r"(?=\n(?:confidential|comments?\s*to\s*editor|recommendation|score|attachments)|\Z)",
+            text,
+            re.DOTALL | re.IGNORECASE,
+        )
+
+        rec = rec_match.group(1).strip() if rec_match else ""
+        cta = cta_match.group(1).strip() if cta_match else ""
+        if not (rec or cta):
+            return None
+
+        word_text = cta or text
+        return {
+            "revision": 0,
+            "recommendation": rec,
+            "recommendation_raw": rec,
+            "comments_to_author": cta[:20000],
+            "confidential_comments": "",
+            "raw_text": text[:20000],
+            "scores": {},
+            "report_date": None,
+            "word_count": len(word_text.split()),
+            "attachments": [],
+            "source": "editflow_inline",
+            "extraction_status": "ok" if cta else "shell_only",
+            "available": True,
+        }
+
+    def _extract_referee_report_from_link(self, report_url: str) -> Optional[dict[str, Any]]:
+        """Follow a report URL on EditFlow and parse the resulting page or PDF.
+
+        For a PDF, delegate to fs_extractor's helpers (already imported by the
+        FS extractor). Returns a canonical report dict or None on failure.
+        """
+        if not report_url or not self.driver:
+            return None
+
+        absolute = report_url
+        if absolute.startswith("/"):
+            absolute = "https://ef.msp.org" + absolute
+
+        try:
+            current = self.driver.current_url
+            self.driver.get(absolute)
+            time.sleep(2)
+            page_src = self.driver.page_source
+            soup = BeautifulSoup(page_src, "html.parser")
+            text = soup.get_text(separator="\n", strip=True)
+            self.driver.get(current)  # restore
+        except Exception as e:
+            self.logger.warning(f"Failed to load report URL {absolute}: {e}")
+            return None
+
+        if len(text) < 100:
+            return None
+
+        rec_match = re.search(r"recommendation\s*[:.]?\s*([A-Z][^\n]{2,80})", text, re.IGNORECASE)
+        cta_match = re.search(
+            r"comments?\s*to\s*(?:the\s*)?authors?\s*[:.]?\s*\n?(.+?)"
+            r"(?=\n(?:confidential|comments?\s*to\s*editor|recommendation|score|attachments)|\Z)",
+            text,
+            re.DOTALL | re.IGNORECASE,
+        )
+        cc_match = re.search(
+            r"(?:confidential\s*comments?|comments?\s*to\s*editor)\s*[:.]?\s*\n?(.+?)"
+            r"(?=\n(?:comments?\s*to\s*author|recommendation|score|attachments)|\Z)",
+            text,
+            re.DOTALL | re.IGNORECASE,
+        )
+
+        rec = rec_match.group(1).strip() if rec_match else ""
+        cta = cta_match.group(1).strip() if cta_match else ""
+        cc = cc_match.group(1).strip() if cc_match else ""
+        if not (rec or cta or cc):
+            return None
+
+        word_text = cta or text
+        return {
+            "revision": 0,
+            "recommendation": rec,
+            "recommendation_raw": rec,
+            "comments_to_author": cta[:20000],
+            "confidential_comments": cc[:20000],
+            "raw_text": text[:20000],
+            "scores": {},
+            "report_date": None,
+            "word_count": len(word_text.split()),
+            "attachments": [{"url": absolute, "filename": ""}],
+            "source": "editflow_link",
+            "extraction_status": "ok" if (cta or cc) else "shell_only",
+            "available": True,
+        }
+
+    def _enrich_manuscript_from_detail_page(self, ms: dict) -> None:
+        """For a manuscript already parsed from the AE listing, navigate to the
+        detail page and append referee + report data.
+
+        This is the wire-up for live extraction. Defensive: any failure leaves
+        the manuscript untouched.
+        """
+        ms_id = ms.get("manuscript_id", "")
+        if not ms_id:
+            return
+
+        if not self._navigate_to_manuscript_detail(ms_id):
+            return
+
+        try:
+            soup = BeautifulSoup(self.driver.page_source, "html.parser")
+        except Exception:
+            return
+
+        detail_referees = self._extract_referees_from_detail_page(soup)
+        if not detail_referees:
+            return
+
+        # Merge: existing referees (from AE listing) by email, add new ones.
+        existing_by_email = {
+            (r.get("email") or "").lower(): r for r in ms.get("referees", []) or []
+        }
+        for new_ref in detail_referees:
+            email = (new_ref.get("email") or "").lower()
+            if email and email in existing_by_email:
+                # Merge — overwrite empty fields only
+                target = existing_by_email[email]
+                for k, v in new_ref.items():
+                    if v and not target.get(k):
+                        target[k] = v
+            else:
+                ms.setdefault("referees", []).append(new_ref)
+                existing_by_email[email] = new_ref
+
+        # Try to extract reports for each referee
+        for ref in ms.get("referees", []):
+            email = (ref.get("email") or "").lower()
+            if not email:
+                continue
+            report = None
+            # 1. Inline (preferred)
+            try:
+                report = self._extract_referee_report_inline(soup, email)
+            except Exception as e:
+                self.logger.debug(f"Inline report extraction failed for {email}: {e}")
+            # 2. From report link
+            if not report and ref.get("report_url"):
+                try:
+                    report = self._extract_referee_report_from_link(ref["report_url"])
+                except Exception as e:
+                    self.logger.debug(f"Linked report extraction failed for {email}: {e}")
+            if report:
+                ref.setdefault("reports", []).append(report)
+                if not ref.get("report"):
+                    ref["report"] = dict(report)
+                if report.get("recommendation") and not ref.get("recommendation"):
+                    ref["recommendation"] = report["recommendation"]
+
     # --- Session Recovery ---
 
     def _is_session_dead(self) -> bool:
@@ -828,6 +1147,14 @@ class NACOExtractor(CachedExtractorMixin):
             for idx, ms in enumerate(self.manuscripts):
                 ms_id = ms.get("manuscript_id", "")
                 print(f"\n   [{idx + 1}/{len(self.manuscripts)}] {ms_id}")
+
+                # Detail-page enrichment: pulls referees + reports from the
+                # per-manuscript article page (scaffolding; refines after first
+                # live capture). Defensive — never raises.
+                try:
+                    self._enrich_manuscript_from_detail_page(ms)
+                except Exception as e:
+                    print(f"      ⚠️ Detail-page enrichment error: {str(e)[:60]}")
 
                 try:
                     self._enrich_people_from_web(ms)

@@ -3063,10 +3063,18 @@ class ComprehensiveMFExtractor(ScholarOneBaseExtractor):
                             referee["report"] = {"available": True, "url": report_url}
 
                             print("         📄 Extracting report content from popup...")
-                            report_data = self.extract_referee_report_from_popup(referee)
+                            ms_id = manuscript.get("manuscript_id", "")
+                            report_data = self.extract_referee_report_from_popup(
+                                referee, manuscript_id=ms_id
+                            )
                             if report_data:
                                 referee["report"].update(report_data)
-                                print("         ✅ Report content extracted")
+                                # Also append to canonical reports list
+                                referee.setdefault("reports", []).append(dict(report_data))
+                                print(
+                                    f"         ✅ Report extracted: status="
+                                    f"{report_data.get('extraction_status')}"
+                                )
                                 if report_data.get("recommendation") and not referee.get(
                                     "recommendation"
                                 ):
@@ -3090,6 +3098,7 @@ class ComprehensiveMFExtractor(ScholarOneBaseExtractor):
                                         pass
                             else:
                                 referee["report"]["extraction_failed"] = True
+                                referee["report"]["extraction_status"] = "popup_failed"
                                 print("         ⚠️ Report popup extraction returned no data")
                         else:
                             referee["report"] = {"available": False}
@@ -3164,117 +3173,9 @@ class ComprehensiveMFExtractor(ScholarOneBaseExtractor):
             manuscript["referees"] = []
             traceback.print_exc()
 
-    def extract_referee_report_from_popup(self, referee):
-        report_url = referee.get("report_url", "")
-        if not report_url:
-            return None
-        try:
-            original_window = self.driver.current_window_handle
-            all_before = set(self.driver.window_handles)
-
-            self.driver.execute_script(
-                f"window.open('{report_url}', 'report_popup', 'width=700,height=600');"
-            )
-            time.sleep(3)
-
-            all_after = set(self.driver.window_handles)
-            new_windows = all_after - all_before
-            if not new_windows:
-                return None
-
-            popup = new_windows.pop()
-            self.driver.switch_to.window(popup)
-            time.sleep(2)
-
-            report = {
-                "recommendation": referee.get("recommendation", ""),
-                "scores": {},
-                "comments_to_author": "",
-                "confidential_comments": "",
-                "raw_text": "",
-            }
-
-            try:
-                body = self.driver.find_element(By.TAG_NAME, "body")
-                full_text = body.text.strip()
-                report["raw_text"] = full_text
-
-                tables = self.driver.find_elements(By.XPATH, "//table")
-                for table in tables:
-                    rows = table.find_elements(By.XPATH, ".//tr")
-                    for tr in rows:
-                        cells = tr.find_elements(By.XPATH, ".//td")
-                        if len(cells) >= 2:
-                            label = cells[0].text.strip().rstrip(":")
-                            value = cells[-1].text.strip()
-                            if label and value and len(label) < 80:
-                                score_match = re.match(r"(\d+(?:\.\d+)?)\s*(?:/\s*\d+)?$", value)
-                                if score_match:
-                                    report["scores"][label] = value
-                                elif label.lower() in ["recommendation", "overall recommendation"]:
-                                    report["recommendation"] = value
-
-                sections = {
-                    "comments_to_author": [
-                        "Comments to Author",
-                        "Comments to the Author",
-                        "Review Comments",
-                        "Comments for the Author",
-                    ],
-                    "confidential_comments": [
-                        "Confidential Comments to Editor",
-                        "Confidential Comments",
-                        "Comments to the Editor",
-                        "Confidential",
-                    ],
-                }
-                for field, headers in sections.items():
-                    for header in headers:
-                        pattern = re.compile(
-                            rf"{re.escape(header)}[:\s]*\n(.*?)(?=\n(?:Comments|Confidential|Recommendation|$))",
-                            re.DOTALL | re.IGNORECASE,
-                        )
-                        m = pattern.search(full_text)
-                        if m:
-                            report[field] = m.group(1).strip()
-                            break
-
-                if not report["comments_to_author"] and full_text:
-                    lines = full_text.split("\n")
-                    content_lines = []
-                    capture = False
-                    for line in lines:
-                        lower = line.lower().strip()
-                        if any(
-                            h.lower() in lower for h in ["comments to author", "review comments"]
-                        ):
-                            capture = True
-                            continue
-                        if capture:
-                            if any(
-                                h.lower() in lower
-                                for h in ["confidential", "recommendation", "score"]
-                            ):
-                                break
-                            content_lines.append(line)
-                    if content_lines:
-                        report["comments_to_author"] = "\n".join(content_lines).strip()
-            except Exception:
-                pass
-
-            self.driver.close()
-            self.driver.switch_to.window(original_window)
-
-            if report["comments_to_author"] or report["raw_text"]:
-                return report
-            return None
-
-        except Exception:
-            try:
-                self.driver.switch_to.window(self.driver.window_handles[0])
-            except Exception:
-                pass
-            return None
+    # NOTE: extract_referee_report_from_popup() now lives only in scholarone_base.py.
+    # Previously this file had a degraded override (no manuscript_id, no debug capture,
+    # no popup-blocked fallback). The base implementation supersedes it.
 
     def extract_document_links(self, manuscript):
         """Extract document links and download PDF, Abstract, and Cover Letter."""

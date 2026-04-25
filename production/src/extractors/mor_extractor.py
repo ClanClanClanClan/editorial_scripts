@@ -944,6 +944,10 @@ class MORExtractor(ScholarOneBaseExtractor):
                         "//a[contains(@href,'rev_ms_det_pop')] | "
                         "//a[contains(@onclick,'rev_ms_det_pop')]",
                     )
+                    print(
+                        f"      🔍 Recovery: {len(all_review_links)} view_review links on page, "
+                        f"{len(refs_without_url)} referees without URL"
+                    )
                     for rl in all_review_links:
                         try:
                             href = rl.get_attribute("href") or ""
@@ -957,14 +961,65 @@ class MORExtractor(ScholarOneBaseExtractor):
                             already_assigned = any(r.get("report_url") == url for r in referees)
                             if already_assigned:
                                 continue
-                            parent_row = rl.find_element(By.XPATH, "./ancestor::tr[1]")
-                            row_text = self.safe_get_text(parent_row)
-                            for ref in refs_without_url:
-                                ref_name = ref.get("name", "")
-                                if ref_name and ref_name in row_text:
-                                    ref["report_url"] = url
-                                    print(f"      🔍 Fallback: found report URL for {ref_name}")
+
+                            matched = False
+                            # Strategy 1: closest ancestor that holds the name (span/td/tr)
+                            for ancestor_xpath in (
+                                "./ancestor::span[1]",
+                                "./ancestor::td[1]",
+                                "./ancestor::tr[1]",
+                            ):
+                                if matched:
                                     break
+                                try:
+                                    container = rl.find_element(By.XPATH, ancestor_xpath)
+                                    container_text = self.safe_get_text(container)
+                                except Exception:
+                                    continue
+                                for ref in refs_without_url:
+                                    ref_name = ref.get("name", "")
+                                    if not ref_name or ref.get("report_url"):
+                                        continue
+                                    # Match either the full name or just the surname
+                                    surname = (
+                                        ref_name.split(",")[0].strip().split()[0]
+                                        if ref_name
+                                        else ""
+                                    )
+                                    if ref_name in container_text or (
+                                        surname and surname in container_text and len(surname) >= 4
+                                    ):
+                                        ref["report_url"] = url
+                                        print(
+                                            f"      🔍 Recovered URL for {ref_name} ({ancestor_xpath})"
+                                        )
+                                        matched = True
+                                        break
+
+                            # Strategy 2: walk preceding name-link siblings
+                            if not matched:
+                                try:
+                                    prev_name_link = rl.find_element(
+                                        By.XPATH,
+                                        "./preceding::a[contains(@href,'mailpopup') or "
+                                        "contains(@href,'biblio_dump')][1]",
+                                    )
+                                    prev_name = (prev_name_link.text or "").strip()
+                                    for ref in refs_without_url:
+                                        ref_name = ref.get("name", "")
+                                        if ref.get("report_url"):
+                                            continue
+                                        if ref_name and (
+                                            ref_name in prev_name or prev_name in ref_name
+                                        ):
+                                            ref["report_url"] = url
+                                            print(
+                                                f"      🔍 Recovered URL for {ref_name} (preceding name link)"
+                                            )
+                                            matched = True
+                                            break
+                                except Exception:
+                                    pass
                         except Exception:
                             continue
                 except Exception:
@@ -985,6 +1040,8 @@ class MORExtractor(ScholarOneBaseExtractor):
                         )
                         if report:
                             ref["report"] = report
+                            # Append to canonical reports list
+                            ref.setdefault("reports", []).append(dict(report))
                             if report.get("recommendation") and not ref.get("recommendation"):
                                 ref["recommendation"] = report["recommendation"]
                             reports_extracted += 1

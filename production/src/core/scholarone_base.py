@@ -1059,120 +1059,235 @@ class ScholarOneBaseExtractor(CachedExtractorMixin):
     # Report/Letter/Response popup extraction (IDENTICAL)
     # ------------------------------------------------------------------
 
+    @staticmethod
+    def _parse_scholarone_popup_html(html: str, referee: Optional[dict] = None) -> dict:
+        """Pure parser for a ScholarOne referee-report popup page.
+
+        Accepts the raw HTML of the popup body; returns a canonical report dict
+        with: recommendation, recommendation_raw, scores, comments_to_author,
+        confidential_comments, raw_text, available, source, extraction_status.
+
+        Testable without Selenium. Idempotent.
+        """
+        from bs4 import BeautifulSoup
+
+        report: dict = {
+            "recommendation": (referee or {}).get("recommendation", ""),
+            "scores": {},
+            "comments_to_author": "",
+            "confidential_comments": "",
+            "raw_text": "",
+            "source": "scholarone_popup",
+            "extraction_status": "ok",
+        }
+
+        if not html or len(html) < 50:
+            report["extraction_status"] = "popup_failed"
+            report["available"] = False
+            return report
+
+        soup = BeautifulSoup(html, "html.parser")
+        body = soup.find("body") or soup
+        full_text = body.get_text(separator="\n", strip=True)
+        report["raw_text"] = full_text[:20000]
+
+        # Pass 1: walk all tables looking for label/value rows.
+        # ScholarOne forms use a 3-column layout (label, prompt, response) for
+        # questions, and 2-column layout (label, value) for scores.
+        # Rule: cells[-1] is always the response. cells[1..-1] is prompt boilerplate.
+        prompt_indicators = ("click", "select", "choose", "pick one", "please")
+
+        def _looks_like_prompt(text: str) -> bool:
+            """Heuristic: value cell text that's actually a prompt, not an answer."""
+            if not text:
+                return True
+            t = text.lower().strip()
+            if t.endswith(":"):
+                return True
+            if any(ind in t for ind in prompt_indicators):
+                return True
+            return False
+
+        for table in soup.find_all("table"):
+            for tr in table.find_all("tr"):
+                cells = tr.find_all(["td", "th"])
+                if len(cells) < 2:
+                    continue
+
+                label = cells[0].get_text(strip=True).rstrip(":")
+                if not label or len(label) > 120:
+                    continue
+
+                # Always prefer the LAST cell as the response.
+                # If it looks like a prompt (rare), fall through to other candidates.
+                value = cells[-1].get_text(separator="\n", strip=True)
+                if _looks_like_prompt(value) and len(cells) > 2:
+                    # Try second-to-last
+                    alt = cells[-2].get_text(separator="\n", strip=True)
+                    if alt and not _looks_like_prompt(alt):
+                        value = alt
+
+                if not value or value in ("\xa0", "&nbsp;") or _looks_like_prompt(value):
+                    continue
+
+                label_lower = label.lower()
+                score_match = re.match(r"^(\d+(?:\.\d+)?)\s*(?:/\s*\d+)?$", value)
+
+                if score_match:
+                    report["scores"][label] = value
+                elif label_lower in ("recommendation", "overall recommendation"):
+                    report["recommendation"] = value
+                elif "comments to" in label_lower and "author" in label_lower:
+                    if len(value) >= 20:  # avoid prompt/header rows
+                        report["comments_to_author"] = value[:20000]
+                elif "confidential" in label_lower or (
+                    "comments" in label_lower and "editor" in label_lower
+                ):
+                    if len(value) >= 10:
+                        report["confidential_comments"] = value[:20000]
+
+        # Pass 2: regex section extraction over full text (loosened patterns).
+        # Catches free-form forms that don't use proper tables.
+        if not report["comments_to_author"]:
+            cta_re = re.compile(
+                r"comments?\s*to\s*(?:the\s*)?author[s]?\s*(?:\(s\))?\s*[:.\n]+(.+?)"
+                r"(?=\n(?:confidential|comments?\s*to\s*(?:the\s*)?editor|recommendation|"
+                r"overall\s*recommendation|score|rating|reviewer|referee|$))",
+                re.DOTALL | re.IGNORECASE,
+            )
+            m = cta_re.search(full_text)
+            if m:
+                snippet = m.group(1).strip()
+                if len(snippet) >= 20:
+                    report["comments_to_author"] = snippet[:20000]
+
+        if not report["confidential_comments"]:
+            cc_re = re.compile(
+                r"(?:confidential\s*comments?(?:\s*to\s*(?:the\s*)?editor)?|"
+                r"comments?\s*to\s*(?:the\s*)?editor)\s*[:.\n]+(.+?)"
+                r"(?=\n(?:comments?\s*to|recommendation|overall|score|rating|reviewer|referee|$))",
+                re.DOTALL | re.IGNORECASE,
+            )
+            m = cc_re.search(full_text)
+            if m:
+                snippet = m.group(1).strip()
+                if len(snippet) >= 10:
+                    report["confidential_comments"] = snippet[:20000]
+
+        # Pass 3: line-based capture as last-resort fallback
+        if not report["comments_to_author"] and full_text:
+            lines = full_text.split("\n")
+            content_lines = []
+            capture = False
+            cta_markers = ("comments to author", "review comments", "comments for the author")
+            stop_markers = ("confidential", "recommendation", "overall", "score", "rating")
+            for line in lines:
+                lower = line.lower().strip()
+                if any(m in lower for m in cta_markers):
+                    capture = True
+                    continue
+                if capture:
+                    if any(m in lower for m in stop_markers):
+                        break
+                    content_lines.append(line)
+            if content_lines:
+                joined = "\n".join(content_lines).strip()
+                if len(joined) >= 20:
+                    report["comments_to_author"] = joined[:20000]
+
+        # Compute availability
+        report["available"] = bool(
+            report["comments_to_author"]
+            or report["confidential_comments"]
+            or report["scores"]
+            or (report["recommendation"] and report["recommendation"] != "Unknown")
+        )
+        if not report["available"]:
+            report["extraction_status"] = "shell_only"
+
+        return report
+
     def extract_referee_report_from_popup(
         self, referee: dict, manuscript_id: str = ""
     ) -> Optional[dict]:
         report_url = referee.get("report_url", "")
         if not report_url:
             return None
+
+        original_window: Optional[str] = None
+        popup: Optional[str] = None
+        opened_via_tab = False
+
         try:
             original_window = self.driver.current_window_handle
             all_before = set(self.driver.window_handles)
 
-            self.driver.execute_script(
-                f"window.open('{report_url}', 'report_popup', 'width=700,height=600');"
-            )
-            time.sleep(3)
+            # Try popup window first
+            try:
+                self.driver.execute_script(
+                    f"window.open('{report_url}', 'report_popup', 'width=700,height=600');"
+                )
+            except Exception as e:
+                print(f"         ⚠️ window.open failed: {str(e)[:60]}")
 
+            time.sleep(2)
             all_after = set(self.driver.window_handles)
             new_windows = all_after - all_before
-            if not new_windows:
-                return None
 
-            popup = new_windows.pop()
-            self.driver.switch_to.window(popup)
-            time.sleep(2)
+            # Fallback: popup blocked → open as new tab
+            if not new_windows:
+                print("         ⚠️ Popup blocked — opening as new tab")
+                try:
+                    self.driver.switch_to.new_window("tab")
+                    self.driver.get(report_url)
+                    opened_via_tab = True
+                    new_windows = {self.driver.current_window_handle}
+                except Exception as e:
+                    print(f"         ❌ New-tab fallback failed: {str(e)[:60]}")
+                    return None
+
+            popup = new_windows.pop() if not opened_via_tab else self.driver.current_window_handle
+            if not opened_via_tab:
+                self.driver.switch_to.window(popup)
+
+            # Robust readiness wait: poll for readyState=complete + body text > 50 chars
+            ready = False
+            for _ in range(20):  # up to 10s
+                try:
+                    rs = self.driver.execute_script("return document.readyState")
+                    body_len = self.driver.execute_script(
+                        "return (document.body && document.body.innerText) ? "
+                        "document.body.innerText.length : 0"
+                    )
+                    if rs == "complete" and body_len > 50:
+                        ready = True
+                        break
+                except Exception:
+                    pass
+                time.sleep(0.5)
 
             referee_name = referee.get("name", "unknown")
             safe_name = re.sub(r"[^a-zA-Z0-9_]", "_", referee_name.split(",")[0].strip())
 
+            # Always capture debug HTML when manuscript_id provided
             if manuscript_id:
                 self._capture_page(f"referee_report_{safe_name}", manuscript_id, is_popup=True)
 
-            report = {
-                "recommendation": referee.get("recommendation", ""),
-                "scores": {},
-                "comments_to_author": "",
-                "confidential_comments": "",
-                "raw_text": "",
-                "attached_files": [],
-            }
+            html = self.driver.page_source
+            current_url = self.driver.current_url
+            print(f"         🔎 Popup ready={ready} html_len={len(html)} url={current_url[:80]}")
 
-            try:
-                body = self.driver.find_element(By.TAG_NAME, "body")
-                full_text = body.text.strip()
-                report["raw_text"] = full_text
+            # Parse via pure function
+            report = self._parse_scholarone_popup_html(html, referee)
+            report.setdefault("attached_files", [])
 
-                tables = self.driver.find_elements(By.XPATH, "//table")
-                for table in tables:
-                    rows = table.find_elements(By.XPATH, ".//tr")
-                    for tr in rows:
-                        cells = tr.find_elements(By.XPATH, ".//td")
-                        if len(cells) >= 2:
-                            label = cells[0].text.strip().rstrip(":")
-                            value = cells[-1].text.strip()
-                            if label and value and len(label) < 80:
-                                score_match = re.match(r"(\d+(?:\.\d+)?)\s*(?:/\s*\d+)?$", value)
-                                if score_match:
-                                    report["scores"][label] = value
-                                elif label.lower() in ["recommendation", "overall recommendation"]:
-                                    report["recommendation"] = value
-
-                sections = {
-                    "comments_to_author": [
-                        "Comments to Author",
-                        "Comments to the Author",
-                        "Review Comments",
-                        "Comments for the Author",
-                    ],
-                    "confidential_comments": [
-                        "Confidential Comments to Editor",
-                        "Confidential Comments",
-                        "Comments to the Editor",
-                        "Confidential",
-                    ],
-                }
-                for field, headers in sections.items():
-                    for header in headers:
-                        pattern = re.compile(
-                            rf"{re.escape(header)}[:\s]*\n(.*?)(?=\n(?:Comments|Confidential|Recommendation|$))",
-                            re.DOTALL | re.IGNORECASE,
-                        )
-                        m = pattern.search(full_text)
-                        if m:
-                            report[field] = m.group(1).strip()
-                            break
-
-                if not report["comments_to_author"] and full_text:
-                    lines = full_text.split("\n")
-                    content_lines = []
-                    capture = False
-                    for line in lines:
-                        lower = line.lower().strip()
-                        if any(
-                            h.lower() in lower
-                            for h in [
-                                "comments to author",
-                                "review comments",
-                                "comments for the author",
-                            ]
-                        ):
-                            capture = True
-                            continue
-                        if capture:
-                            if any(
-                                h.lower() in lower
-                                for h in ["confidential", "recommendation", "score"]
-                            ):
-                                break
-                            content_lines.append(line)
-                    if content_lines:
-                        report["comments_to_author"] = "\n".join(content_lines).strip()
-
-                if manuscript_id:
+            # Pass 4 (Selenium-only): collect attached PDFs/Word files in popup
+            if manuscript_id:
+                try:
                     file_links = self.driver.find_elements(
                         By.XPATH,
-                        "//a[contains(@href, '.pdf') or contains(@href, '.doc') or contains(@href, 'GetFile') or contains(@href, 'DOWNLOAD')]",
+                        "//a[contains(@href, '.pdf') or contains(@href, '.doc') or "
+                        "contains(@href, 'GetFile') or contains(@href, 'DOWNLOAD')]",
                     )
                     for fl in file_links:
                         href = fl.get_attribute("href") or ""
@@ -1201,34 +1316,49 @@ class ScholarOneBaseExtractor(CachedExtractorMixin):
                         if saved:
                             report["attached_files"].append(saved)
                             print(f"            📎 Saved referee attachment: {Path(saved).name}")
+                except Exception:
+                    pass
 
-                if manuscript_id and report["raw_text"]:
+            # Save raw text dump alongside debug HTML for offline inspection
+            if manuscript_id and report["raw_text"]:
+                try:
                     report_dir = self.download_dir / "referee_reports"
                     report_dir.mkdir(exist_ok=True)
                     txt_path = report_dir / f"{manuscript_id}_report_{safe_name}.txt"
                     txt_path.write_text(report["raw_text"], encoding="utf-8")
                     report["report_text_file"] = str(txt_path)
-
-            except Exception:
-                pass
+                except Exception:
+                    pass
 
             self.driver.close()
             self.driver.switch_to.window(original_window)
 
-            if report["comments_to_author"] or report["raw_text"]:
-                print(
-                    f"         📝 Report extracted: {len(report.get('comments_to_author', ''))} chars"
-                )
-                return report
-            return None
+            cta_len = len(report.get("comments_to_author", ""))
+            print(
+                f"         📝 Report parsed: cta={cta_len} chars, "
+                f"scores={len(report.get('scores', {}))} "
+                f"available={report.get('available')}"
+            )
+            return report
 
         except Exception as e:
             try:
-                self.driver.switch_to.window(original_window)
+                if original_window:
+                    self.driver.switch_to.window(original_window)
             except Exception:
                 pass
-            print(f"         ⚠️ Report extraction error: {str(e)[:50]}")
-            return None
+            print(f"         ⚠️ Report extraction error: {str(e)[:80]}")
+            return {
+                "recommendation": referee.get("recommendation", ""),
+                "scores": {},
+                "comments_to_author": "",
+                "confidential_comments": "",
+                "raw_text": "",
+                "source": "scholarone_popup",
+                "extraction_status": "popup_failed",
+                "available": False,
+                "error": str(e)[:200],
+            }
 
     def extract_decision_letter_from_popup(self, popup_url: str) -> Optional[str]:
         if not popup_url:

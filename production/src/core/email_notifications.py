@@ -90,9 +90,29 @@ def send_notification(subject, body, to_email=None):
         return False
 
 
+def _journal_label(journal_code: str) -> str:
+    """Short subject-line label. Prefers a human-readable name from
+    JOURNAL_NAME_MAP, falling back to the raw code. Strips noisy variants
+    (e.g. MF_WILEY → "Mathematical Finance" but kept compact in subjects).
+    """
+    if not journal_code:
+        return ""
+    code = journal_code.upper()
+    try:
+        from core.output_schema import JOURNAL_NAME_MAP
+
+        full = JOURNAL_NAME_MAP.get(code)
+        if full:
+            return full
+    except Exception:
+        pass
+    return code
+
+
 def format_event_email(event):
     event_type = event.get("type", "UNKNOWN")
-    journal = event.get("journal", "").upper()
+    raw_journal = event.get("journal", "").upper()
+    journal = _journal_label(raw_journal)
     ms_id = event.get("manuscript_id", "")
     timestamp = event.get("timestamp", datetime.now().isoformat())
 

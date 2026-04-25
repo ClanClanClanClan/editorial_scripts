@@ -388,7 +388,7 @@ def main():
     parser.add_argument(
         "--journal",
         "-j",
-        choices=["mf", "mor", "sicon", "sifin", "naco", "jota", "mafe", "fs"],
+        choices=["mf", "mor", "sicon", "sifin", "naco", "jota", "mafe", "fs", "mf_wiley"],
         help="Run specific journal extractor",
     )
     parser.add_argument("--all", action="store_true", help="Run all working extractors")

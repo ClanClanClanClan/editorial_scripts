@@ -37,16 +37,25 @@ class TestFormatEventEmail:
     def test_all_reports_in_subject(self):
         event = {"type": "ALL_REPORTS_IN", "journal": "sicon", "manuscript_id": "M181987"}
         subject, body = format_event_email(event)
-        assert "SICON" in subject
+        # Subject now uses human-readable journal name (or falls back to code)
+        assert "SICON" in subject or "SIAM" in subject
         assert "M181987" in subject
         assert "All reports in" in subject
 
     def test_new_manuscript_subject(self):
         event = {"type": "NEW_MANUSCRIPT", "journal": "mf", "manuscript_id": "MF-2026-001"}
         subject, body = format_event_email(event)
-        assert "MF" in subject
+        # Either the raw code or the resolved "Mathematical Finance" name
+        assert "MF" in subject or "Mathematical Finance" in subject
         assert "New manuscript" in subject
         assert "MF-2026-001" in subject
+
+    def test_mf_wiley_uses_human_name(self):
+        event = {"type": "NEW_MANUSCRIPT", "journal": "mf_wiley", "manuscript_id": "1384665"}
+        subject, _ = format_event_email(event)
+        # MF_WILEY should resolve to "Mathematical Finance", not raw code
+        assert "Mathematical Finance" in subject
+        assert "MF_WILEY" not in subject
 
 
 class TestSendEventNotification:

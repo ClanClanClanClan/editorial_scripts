@@ -159,6 +159,32 @@ JOURNAL_SCOPE_KEYWORDS = {
         "feedback",
         "stabilization",
     ],
+    # MF_WILEY is the same journal as MF on a different platform — keywords mirror MF.
+    "MF_WILEY": [
+        "mathematical finance",
+        "derivative pricing",
+        "stochastic calculus",
+        "risk measure",
+        "portfolio optimization",
+        "market microstructure",
+        "volatility",
+        "option",
+        "hedging",
+        "credit risk",
+        "interest rate",
+        "stochastic control",
+        "mean-field game",
+        "mean field",
+        "equilibrium",
+        "BSDE",
+        "backward SDE",
+        "utility",
+        "optimal",
+        "trading",
+        "contract",
+        "principal agent",
+        "moral hazard",
+    ],
 }
 
 JOURNAL_SCOPES_LLM = {
@@ -201,6 +227,12 @@ JOURNAL_SCOPES_LLM = {
     "NACO": (
         "Numerical Algebra, Control and Optimization publishes research in numerical "
         "algebra, control theory, and optimization, with emphasis on computational methods."
+    ),
+    # MF_WILEY is the same journal as MF on a different platform — scope mirrors MF.
+    "MF_WILEY": (
+        "Mathematical Finance publishes original research in all areas of mathematical "
+        "finance: derivative pricing, risk management, portfolio theory, market "
+        "microstructure, and stochastic analysis applied to finance."
     ),
 }
 

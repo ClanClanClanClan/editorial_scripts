@@ -70,7 +70,10 @@ run_step "Cross-journal report" $PYTHON run_extractors.py --report --json
 # Step 3: Train ML models
 run_step "Train ML models" $PYTHON run_pipeline.py --train
 
-# Step 4: Run referee pipeline for all journals
+# Step 4: Run referee pipeline for all journals.
+# Note: mf_wiley is intentionally excluded — Wiley extraction runs in attach
+# mode (requires a logged-in Chrome tab + manual Cloudflare click), so it can't
+# run from cron/launchd. See scripts/run_mf_wiley_attached.sh for the manual flow.
 PIPELINE_JOURNALS="mf mor sicon sifin jota mafe naco"
 for j in $PIPELINE_JOURNALS; do
     run_step "Pipeline: $j" $PYTHON run_pipeline.py -j "$j" --pending || true

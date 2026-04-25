@@ -25,7 +25,7 @@ DASHBOARD_PATH = PROJECT_DIR / "production" / "outputs" / "dashboard.html"
 
 _SAFE_ID = _re.compile(r"^[\w\-.]+$")
 _SAFE_NAME = _re.compile(r"^[\w\s,.\-']+$")
-VALID_JOURNALS = {"mf", "mor", "fs", "jota", "mafe", "sicon", "sifin", "naco"}
+VALID_JOURNALS = {"mf", "mor", "fs", "jota", "mafe", "sicon", "sifin", "naco", "mf_wiley"}
 
 app = Flask(__name__)
 

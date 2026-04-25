@@ -178,6 +178,60 @@ class TestCrossJournalReportIncludes:
         assert "mf_wiley" in JOURNALS
 
 
+class TestMFWileyPipelineIntegration:
+    """Phase B integration: MF_WILEY must be a first-class citizen everywhere."""
+
+    def test_journal_scope_present(self):
+        from pipeline.desk_rejection import JOURNAL_SCOPES_LLM
+
+        assert "MF_WILEY" in JOURNAL_SCOPES_LLM
+        scope = JOURNAL_SCOPES_LLM["MF_WILEY"]
+        assert "Mathematical Finance" in scope
+        assert len(scope) > 100
+
+    def test_journal_keywords_present(self):
+        from pipeline.desk_rejection import JOURNAL_SCOPE_KEYWORDS
+
+        assert "MF_WILEY" in JOURNAL_SCOPE_KEYWORDS
+        kws = JOURNAL_SCOPE_KEYWORDS["MF_WILEY"]
+        assert isinstance(kws, list)
+        assert "mathematical finance" in [k.lower() for k in kws]
+
+    def test_run_extractors_choices_include_mf_wiley(self):
+        # Read the file and verify the choices line includes mf_wiley
+        from pathlib import Path
+
+        run_path = Path(__file__).parent.parent / "run_extractors.py"
+        content = run_path.read_text()
+        assert "mf_wiley" in content
+        # Specifically in the choices list
+        assert '"mf_wiley"' in content
+
+    def test_dashboard_valid_journals_include_mf_wiley(self):
+        from pathlib import Path
+
+        ds_path = Path(__file__).parent.parent / "scripts" / "dashboard_server.py"
+        content = ds_path.read_text()
+        assert '"mf_wiley"' in content
+
+    def test_ae_prompt_uses_human_journal_name(self):
+        from pipeline.ae_prompt_template import build_prompt
+
+        manuscript = {
+            "manuscript_id": "1384665",
+            "title": "Test paper",
+            "abstract": "Lorem ipsum",
+            "authors": [{"name": "X"}],
+            "keywords": [],
+        }
+        reports = []  # No completed reports yet
+        consensus = {}
+        system_text, _user_text = build_prompt(manuscript, reports, consensus, "MF_WILEY")
+        assert "Mathematical Finance" in system_text
+        # Raw code shouldn't appear in the human-facing system prompt
+        assert "MF_WILEY" not in system_text
+
+
 class TestSubmittedReportPanelHeuristics:
     """Test the heuristic regex parsers used for the (still hypothetical)
     submitted-report panel. These run on plain text, not DOM, so they're

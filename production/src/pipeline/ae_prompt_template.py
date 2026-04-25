@@ -88,8 +88,13 @@ def build_prompt(
     keywords = manuscript.get("keywords", [])
     keywords_str = ", ".join(keywords) if keywords else "(none)"
 
+    # Use human-readable journal name when available (e.g. MF_WILEY -> "Mathematical Finance")
+    from core.output_schema import JOURNAL_NAME_MAP
+
+    journal_name = JOURNAL_NAME_MAP.get(journal_code.upper(), journal_code.upper())
+
     system = SYSTEM_PROMPT.format(
-        journal_name=journal_code.upper(),
+        journal_name=journal_name,
         journal_scope=journal_scope,
     )
     user = USER_PROMPT.format(

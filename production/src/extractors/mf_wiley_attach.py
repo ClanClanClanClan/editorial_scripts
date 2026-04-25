@@ -285,6 +285,103 @@ def extract_editors() -> list[dict]:
     return editors
 
 
+def extract_submitted_report_for_referee(card_index: int, referee_name: str) -> dict | None:
+    """Defensive extraction of a submitted-report panel under a reviewer card.
+
+    No reviewer on the live MF_WILEY platform has submitted a report yet, so
+    this is forward-looking scaffolding. When the first real report arrives,
+    the operator should:
+
+      1. Navigate to the manuscript detail page in Chrome (logged in).
+      2. Inspect the DOM under the reviewer card that has a submitted report.
+      3. Confirm the panel data-test-id (likely "Submitted-reports" at the
+         manuscript level OR per-reviewer "submitted-report-{uuid}").
+      4. Confirm the recommendation lives inside as data-test-id=
+         "reviewer-recommendation" or similar; comments-to-author as a
+         readonly textarea or div under a "Comments to Author:" heading.
+      5. Confirm any attached PDF is downloadable via data-test-id=
+         "report-attachment-link" -> href.
+      6. Update the JS selector pass below to match the discovered structure.
+
+    Until then this function returns None whenever the card does not contain
+    any descendant matching `[data-test-id*="report"]` or
+    `[data-test-id*="Submitted"]` with non-trivial text content.
+
+    Returns: a canonical report dict (per output_schema.CANONICAL_REPORT_FIELDS)
+    when content is found, else None.
+    """
+    raw = js(
+        f"""
+        (function(){{
+            var c = window._revCards[{card_index}];
+            if (!c) return 'NO_CARD';
+            // Search for any report-related panel inside the card
+            var panels = c.querySelectorAll('[data-test-id*="report"], [data-test-id*="Submitted"], [data-test-id*="submitted"]');
+            if (!panels || panels.length === 0) return 'NO_PANEL';
+            var combinedText = '';
+            for (var i = 0; i < panels.length; i++) {{
+                var t = (panels[i].textContent || '').trim();
+                // Skip stub/empty panels (just a button or label)
+                if (t.length < 30) continue;
+                combinedText += t + '\\n';
+            }}
+            if (!combinedText.trim()) return 'NO_TEXT';
+            return combinedText.substring(0, 20000);
+        }})()
+    """
+    )
+    if not raw or raw in ("NO_CARD", "NO_PANEL", "NO_TEXT"):
+        return None
+
+    text = raw.strip()
+    if len(text) < 30:
+        return None
+
+    # Best-effort heuristic parsing — labels match what the operator will
+    # discover in the real DOM. Loose: case-insensitive, multiline.
+    rec_match = re.search(r"recommendation\s*[:.]?\s*([A-Z][^\n]{2,80})", text, re.IGNORECASE)
+    cta_match = re.search(
+        r"comments?\s*to\s*(?:the\s*)?authors?\s*[:.]?\s*\n?(.+?)"
+        r"(?=\n(?:confidential|comments?\s*to\s*editor|recommendation|score|attachments|$))",
+        text,
+        re.DOTALL | re.IGNORECASE,
+    )
+    cc_match = re.search(
+        r"(?:confidential\s*comments?|comments?\s*to\s*editor)\s*[:.]?\s*\n?(.+?)"
+        r"(?=\n(?:comments?\s*to\s*author|recommendation|score|attachments|$))",
+        text,
+        re.DOTALL | re.IGNORECASE,
+    )
+
+    recommendation = (rec_match.group(1).strip() if rec_match else "") or ""
+    cta = (cta_match.group(1).strip() if cta_match else "") or ""
+    cc = (cc_match.group(1).strip() if cc_match else "") or ""
+
+    if not (recommendation or cta or cc):
+        return None
+
+    word_text = cta or text
+    return {
+        "revision": 0,
+        "recommendation": recommendation,
+        "recommendation_raw": recommendation,
+        "comments_to_author": cta[:20000],
+        "confidential_comments": cc[:20000],
+        "raw_text": text[:20000],
+        "scores": {},
+        "report_date": None,
+        "word_count": len(word_text.split()),
+        "attachments": [],
+        "source": "wiley_panel",
+        "extraction_status": "ok" if (cta or cc) else "shell_only",
+        "available": True,
+        "platform_specific": {
+            "referee_name": referee_name,
+            "card_index": card_index,
+        },
+    }
+
+
 def extract_referees() -> list[dict]:
     # Expand all "More Details" — multiple passes because cards start in mixed states
     # and clicking toggles. We want them ALL expanded; the button text changes to
@@ -382,6 +479,20 @@ def extract_referees() -> list[dict]:
             ref["web_profile"] = {
                 "research_topics": [k.strip() for k in kw.split(";") if k.strip()]
             }
+
+        # Defensive: extract submitted-report panel content if any reviewer
+        # has actually submitted (today: none have).
+        try:
+            submitted = extract_submitted_report_for_referee(i, name)
+        except Exception as e:
+            print(f"   ⚠️ Submitted-report extraction failed for {name}: {str(e)[:60]}")
+            submitted = None
+        if submitted:
+            ref.setdefault("reports", []).append(submitted)
+            ref["report"] = dict(submitted)
+            if submitted.get("recommendation") and not ref.get("recommendation"):
+                ref["recommendation"] = submitted["recommendation"]
+
         referees.append(ref)
     return referees
 

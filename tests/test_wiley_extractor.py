@@ -176,3 +176,66 @@ class TestCrossJournalReportIncludes:
         from reporting.cross_journal_report import JOURNALS
 
         assert "mf_wiley" in JOURNALS
+
+
+class TestSubmittedReportPanelHeuristics:
+    """Test the heuristic regex parsers used for the (still hypothetical)
+    submitted-report panel. These run on plain text, not DOM, so they're
+    independent of the Selenium / AppleScript layer.
+    """
+
+    def _parse(self, text):
+        # Mirror the regex set used in both wiley_base._extract_submitted_report_panel
+        # and mf_wiley_attach.extract_submitted_report_for_referee.
+        import re
+
+        rec_match = re.search(r"recommendation\s*[:.]?\s*([A-Z][^\n]{2,80})", text, re.IGNORECASE)
+        cta_match = re.search(
+            r"comments?\s*to\s*(?:the\s*)?authors?\s*[:.]?\s*\n?(.+?)"
+            r"(?=\n(?:confidential|comments?\s*to\s*editor|recommendation|score|attachments|$))",
+            text,
+            re.DOTALL | re.IGNORECASE,
+        )
+        cc_match = re.search(
+            r"(?:confidential\s*comments?|comments?\s*to\s*editor)\s*[:.]?\s*\n?(.+?)"
+            r"(?=\n(?:comments?\s*to\s*author|recommendation|score|attachments|$))",
+            text,
+            re.DOTALL | re.IGNORECASE,
+        )
+        return (
+            (rec_match.group(1).strip() if rec_match else ""),
+            (cta_match.group(1).strip() if cta_match else ""),
+            (cc_match.group(1).strip() if cc_match else ""),
+        )
+
+    def test_full_panel_extracted(self):
+        text = """Recommendation: Minor Revision
+Comments to Author:
+The paper makes a strong contribution. A few minor issues to address.
+Confidential Comments to Editor:
+Borderline; lean accept.
+"""
+        rec, cta, cc = self._parse(text)
+        assert "Minor Revision" in rec
+        assert "strong contribution" in cta
+        assert "Borderline" in cc
+
+    def test_only_recommendation(self):
+        text = "Recommendation: Reject\n"
+        rec, cta, cc = self._parse(text)
+        assert "Reject" in rec
+        assert cta == ""
+        assert cc == ""
+
+    def test_no_match_returns_empty(self):
+        text = "This is some unrelated text."
+        rec, cta, cc = self._parse(text)
+        assert rec == ""
+        assert cta == ""
+        assert cc == ""
+
+    def test_case_insensitive_labels(self):
+        text = "RECOMMENDATION: Accept\nCOMMENTS TO THE AUTHORS:\nLooks good.\n"
+        rec, cta, _ = self._parse(text)
+        assert "Accept" in rec
+        assert "Looks good" in cta

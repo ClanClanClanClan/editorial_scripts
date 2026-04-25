@@ -692,7 +692,103 @@ class WileyBaseExtractor(CachedExtractorMixin):
             topics = [k.strip() for k in kw_text.split(";") if k.strip()]
             ref["web_profile"] = {"research_topics": topics}
 
+        # Defensive: extract submitted-report panel if reviewer has submitted.
+        # No live MF_WILEY reviewer has submitted yet; this is forward-looking.
+        # See discovery checklist in extract_submitted_report_panel docstring.
+        try:
+            submitted = self._extract_submitted_report_panel(card, name)
+        except Exception as e:
+            print(f"   ⚠️ Submitted-report extraction failed for {name}: {str(e)[:60]}")
+            submitted = None
+        if submitted:
+            ref.setdefault("reports", []).append(submitted)
+            ref["report"] = dict(submitted)
+            if submitted.get("recommendation") and not ref.get("recommendation"):
+                ref["recommendation"] = submitted["recommendation"]
+
         return ref
+
+    def _extract_submitted_report_panel(self, card, referee_name: str) -> dict | None:
+        """Defensive extraction of any submitted-report panel under a reviewer card.
+
+        TODO(mf_wiley): when the first real report arrives, inspect the live DOM
+        to determine the exact data-test-id selectors and update this method.
+        Discovery checklist:
+          1. Confirm panel data-test-id (likely "Submitted-reports" at the
+             manuscript level OR per-reviewer "submitted-report-{uuid}").
+          2. Confirm reviewer-recommendation, comments-to-author, confidential-
+             comments live as separate sub-elements with stable selectors.
+          3. Confirm any attached PDF is downloadable via report-attachment-link.
+
+        Today: returns None if no descendant panel matches our heuristic
+        (`[data-test-id*="report"]` or `[data-test-id*="Submitted"]`) or if
+        the matched panel has < 30 chars of text.
+        """
+        try:
+            panels = card.find_elements(
+                By.CSS_SELECTOR,
+                "[data-test-id*='report'], [data-test-id*='Submitted'], "
+                "[data-test-id*='submitted']",
+            )
+        except Exception:
+            return None
+        if not panels:
+            return None
+
+        text_chunks = []
+        for p in panels:
+            try:
+                t = p.text.strip()
+            except Exception:
+                continue
+            if len(t) < 30:
+                continue
+            text_chunks.append(t)
+        if not text_chunks:
+            return None
+
+        full_text = "\n".join(text_chunks)[:20000]
+
+        rec_match = re.search(
+            r"recommendation\s*[:.]?\s*([A-Z][^\n]{2,80})", full_text, re.IGNORECASE
+        )
+        cta_match = re.search(
+            r"comments?\s*to\s*(?:the\s*)?authors?\s*[:.]?\s*\n?(.+?)"
+            r"(?=\n(?:confidential|comments?\s*to\s*editor|recommendation|score|attachments|$))",
+            full_text,
+            re.DOTALL | re.IGNORECASE,
+        )
+        cc_match = re.search(
+            r"(?:confidential\s*comments?|comments?\s*to\s*editor)\s*[:.]?\s*\n?(.+?)"
+            r"(?=\n(?:comments?\s*to\s*author|recommendation|score|attachments|$))",
+            full_text,
+            re.DOTALL | re.IGNORECASE,
+        )
+
+        recommendation = (rec_match.group(1).strip() if rec_match else "") or ""
+        cta = (cta_match.group(1).strip() if cta_match else "") or ""
+        cc = (cc_match.group(1).strip() if cc_match else "") or ""
+
+        if not (recommendation or cta or cc):
+            return None
+
+        word_text = cta or full_text
+        return {
+            "revision": 0,
+            "recommendation": recommendation,
+            "recommendation_raw": recommendation,
+            "comments_to_author": cta[:20000],
+            "confidential_comments": cc[:20000],
+            "raw_text": full_text,
+            "scores": {},
+            "report_date": None,
+            "word_count": len(word_text.split()),
+            "attachments": [],
+            "source": "wiley_panel",
+            "extraction_status": "ok" if (cta or cc) else "shell_only",
+            "available": True,
+            "platform_specific": {"referee_name": referee_name},
+        }
 
     def _extract_referee_dates(self, card) -> dict:
         dates = {}

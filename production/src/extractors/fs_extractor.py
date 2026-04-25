@@ -3178,7 +3178,23 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
                             manuscript_id,
                         )
                         if file_path:
-                            referee_reports.append({"filename": filename, "path": file_path})
+                            # Run full analysis (text, recommendation, scores) so
+                            # downstream tooling can use the report content.
+                            try:
+                                analysis = self.analyze_referee_report(file_path)
+                            except Exception as e:
+                                analysis = {
+                                    "report_path": file_path,
+                                    "text_extracted": False,
+                                    "error": str(e)[:200],
+                                }
+                            referee_reports.append(
+                                {
+                                    "filename": filename,
+                                    "path": file_path,
+                                    "analysis": analysis,
+                                }
+                            )
 
             # Use PDF title/abstract if found
             if pdf_title:
@@ -4299,6 +4315,11 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
             if "attached_files" not in analysis:
                 analysis["attached_files"] = []
 
+        # Link manuscript-level referee_reports into per-referee canonical reports list.
+        # Each manuscript["referee_reports"] entry has {filename, path, date, referee, analysis}.
+        # We attach the full text + recommendation + scores to the matching referee.report dict.
+        self._link_referee_reports_canonical(manuscript)
+
         if not manuscript.get("final_outcome"):
             status = manuscript.get("status", "")
             if "Accepted" in status:
@@ -4309,6 +4330,98 @@ class ComprehensiveFSExtractor(CachedExtractorMixin):
                 manuscript["final_outcome"] = "Revision Requested"
             else:
                 manuscript["final_outcome"] = "Pending"
+
+    def _link_referee_reports_canonical(self, manuscript: dict) -> None:
+        """Attach manuscript['referee_reports'] entries to the matching referee's
+        canonical reports[] list. Each report gets the full PDF text as raw_text,
+        analysis fields surfaced at the top level, and canonical schema annotations.
+        """
+        ms_reports = manuscript.get("referee_reports") or []
+        referees = manuscript.get("referees") or []
+        if not ms_reports or not referees:
+            return
+
+        # Build name index for matching (case-insensitive, parts-set fallback)
+        ref_by_name = {}
+        ref_by_parts = {}
+        for ref in referees:
+            name = (ref.get("name") or "").strip()
+            if not name:
+                continue
+            ref_by_name[name.lower()] = ref
+            ref_by_parts[frozenset(name.lower().split())] = ref
+
+        for rpt_meta in ms_reports:
+            referee_name = (rpt_meta.get("referee") or "").strip()
+            if not referee_name or referee_name == "Unknown":
+                continue
+
+            # Find target referee
+            target = ref_by_name.get(referee_name.lower())
+            if target is None:
+                target = ref_by_parts.get(frozenset(referee_name.lower().split()))
+            if target is None:
+                continue
+
+            analysis = rpt_meta.get("analysis") or {}
+            file_path = rpt_meta.get("path") or ""
+
+            # Read full PDF text once for canonical raw_text
+            full_text = ""
+            try:
+                if file_path and os.path.exists(file_path):
+                    full_text = self.extract_text_from_report_pdf(file_path) or ""
+            except Exception:
+                full_text = ""
+
+            preview = analysis.get("text_preview") or ""
+            comments = preview if preview else full_text[:5000]
+
+            recommendation = analysis.get("recommendation") or ""
+            scores = analysis.get("scores") or {}
+            attachments = []
+            if file_path:
+                attachments.append(
+                    {
+                        "filename": rpt_meta.get("filename") or "",
+                        "url": "",
+                        "local_path": file_path,
+                    }
+                )
+
+            canonical_report = {
+                "revision": 0,
+                "recommendation": recommendation,
+                "recommendation_raw": recommendation,
+                "comments_to_author": comments,
+                "confidential_comments": "",
+                "raw_text": full_text[:20000],
+                "scores": scores,
+                "report_date": rpt_meta.get("date") or None,
+                "word_count": len(comments.split()) if comments else 0,
+                "attachments": attachments,
+                "source": "fs_pdf",
+                "extraction_status": "ok" if (comments or full_text) else "shell_only",
+                "available": bool(comments or full_text or scores or recommendation),
+            }
+
+            # Append to canonical reports list (avoid duplicates by file_path)
+            existing = target.setdefault("reports", [])
+            duplicate = any(
+                isinstance(r, dict)
+                and any(
+                    a.get("local_path") == file_path
+                    for a in (r.get("attachments") or [])
+                    if isinstance(a, dict)
+                )
+                for r in existing
+            )
+            if not duplicate:
+                existing.append(canonical_report)
+
+            # Mirror onto singular report if missing or empty
+            if not target.get("report") or not target["report"].get("comments_to_author"):
+                target["report"] = dict(canonical_report)
 
     def _generate_summary(self):
         manuscripts = self.manuscripts

@@ -9,32 +9,34 @@
 
 ## Project Overview
 
-Dylan Possamai's end-to-end editorial management system for 8 academic journals.
+Dylan Possamai's end-to-end editorial management system for 8 academic journals
+across 9 extraction backends (MF is mid-migration to Wiley — both backends run).
 - **Purpose**: Extract referee reports, manuscripts, and metadata; detect state changes; recommend referees; generate AE decision reports
-- **Architecture**: Extraction (Selenium + Gmail API) → Event System (state detection) → ML Pipeline (referee recommendation) → Dashboard (Flask + HTML)
-- **Status**: 8 extractors working, event-driven pipeline operational, dashboard with referee intelligence
+- **Architecture**: Extraction (Selenium + Gmail API + AppleScript JS attach mode) → Event System (state detection) → ML Pipeline (referee recommendation) → Dashboard (Flask + HTML)
+- **Status**: 9 extractors operational (8 cron-driven + 1 attach-mode for Wiley), event-driven pipeline, dashboard with referee intelligence, canonical referee.reports[] schema across all platforms
 
 ### System Architecture
 
 ```
-Extractors (8 journals)
-    ↓ JSON outputs
+Extractors (9 backends, 8 logical journals)
+    ↓ JSON outputs (canonical schema with referee.reports[])
 State Store (SQLite) → Event Dispatcher
     ↓ typed events (NEW_MANUSCRIPT, ALL_REPORTS_IN, STATUS_CHANGED)
 Event Processor
     ├── NEW_MANUSCRIPT → Referee Pipeline (desk rejection + candidate search)
-    └── ALL_REPORTS_IN → AE Report Generator (Claude API / clipboard)
+    └── ALL_REPORTS_IN → AE Report Generator (Claude API / prompt mode)
     ↓
 Dashboard Server (Flask :8421) ← API endpoints
     ↓
-Dashboard HTML (referee intelligence, action items, inline AE reports)
+Dashboard HTML (referee intelligence, action items, inline AE reports,
+                MF + MF_WILEY soft-merged into one "Mathematical Finance" group)
 ```
 
 ### Project Structure
 ```
 editorial_scripts/
-├── production/src/extractors/     # 8 journal extractors
-│   ├── mf_extractor.py           # MF - ScholarOne (ComprehensiveMFExtractor)
+├── production/src/extractors/     # 9 journal extractor backends
+│   ├── mf_extractor.py           # MF (legacy) - ScholarOne (ComprehensiveMFExtractor)
 │   ├── mor_extractor.py          # MOR - ScholarOne (MORExtractor)
 │   ├── fs_extractor.py           # FS - Gmail API (ComprehensiveFSExtractor)
 │   ├── jota_extractor.py         # JOTA - Editorial Manager (JOTAExtractor)
@@ -42,11 +44,14 @@ editorial_scripts/
 │   ├── sicon_extractor.py        # SICON - SIAM (SICONExtractor)
 │   ├── sifin_extractor.py        # SIFIN - SIAM (SIFINExtractor)
 │   ├── naco_extractor.py         # NACO - EditFlow/MSP (NACOExtractor)
+│   ├── mf_wiley_extractor.py     # MF (Wiley, headful UC; experimental)
+│   ├── mf_wiley_attach.py        # MF (Wiley, attach-mode; primary path)
 │   └── generate_fs_timeline_report.py
 ├── production/src/core/           # Shared utilities & event system
 │   ├── scholarone_base.py        # ScholarOne base class (MF, MOR)
 │   ├── em_base.py                # Editorial Manager base class (JOTA, MAFE)
 │   ├── siam_base.py              # SIAM base class (SICON, SIFIN)
+│   ├── wiley_base.py             # Wiley ScienceConnect base (headful UC)
 │   ├── event_dispatcher.py       # State change detection → typed events
 │   ├── event_processor.py        # Event handler (AE reports, pipeline trigger)
 │   ├── state_store.py            # SQLite manuscript state tracking
@@ -103,12 +108,77 @@ editorial_scripts/
 │   ├── send_digest.py            # Weekly editorial digest email
 │   ├── weekly_run.sh             # Cron-triggered weekly extraction
 │   ├── setup_gmail_oauth.py      # Gmail OAuth token refresh
-│   └── admin/                    # LaunchAgent configs for auto-start
+│   ├── check_wiley_prereqs.py    # MF_WILEY pre-flight checks
+│   ├── run_mf_wiley_attached.sh  # MF_WILEY attach-mode wrapper
+│   └── admin/                    # LaunchAgent configs (com.user.mfwiley.plist, etc.)
 ├── config/                        # Gmail OAuth tokens, journal configs
-├── tests/                         # 703 tests (pytest)
+├── tests/                         # 914 tests (pytest)
 ├── run_extractors.py              # Extraction orchestrator
 └── run_pipeline.py                # Pipeline + AE report CLI
 ```
+
+### Reviewer report content extraction status
+
+After Phase A (canonical `referee.reports[]` schema migration), every
+extractor populates a uniform schema: `recommendation`, `comments_to_author`,
+`raw_text`, `scores`, `word_count`, `available`, `extraction_status`, `source`.
+
+Per-journal status:
+- **SICON / SIFIN** ✅ — SIAM `display_all_reviews` page; raw_text always
+  stored; 3 header regex variants for both tenants.
+- **MAFE** ✅ partial — Editorial Manager popup parser works on ~67% of
+  referees (others had reports submitted as PDF attachments).
+- **MF** ✅ — ScholarOne popup parser refactored into pure
+  `_parse_scholarone_popup_html(html, referee)`. Robust 3-col form parsing
+  (cells[-1] is the answer; prompts skipped). Popup-blocked fallback to
+  `switch_to.new_window("tab")`.
+- **MOR** ✅ — Same parser as MF after the refactor. `_recover_missing_report_urls`
+  walks 3 ancestor scopes + preceding-name-link strategy to find the
+  `view_review.gif` icon link sibling to the name.
+- **JOTA** ✅ — Loosened review-detail link discovery (popupReviewerComments,
+  PopupReviewDetails, ReviewerComments.aspx; href + onclick). Minimal canonical
+  report shell when reviews-page summary captures a recommendation.
+- **FS** ✅ — `analyze_referee_report()` was orphaned; now wired into the
+  per-email manuscript builder. New `_link_referee_reports_canonical()` walks
+  `manuscript['referee_reports']` and populates `referee.reports[]` (matched
+  by name with case-insensitive + parts-set fallback). PDF text becomes
+  `raw_text`; preview becomes `comments_to_author`.
+- **NACO** ✅ scaffold — Greenfield detail-page extractor:
+  `_navigate_to_manuscript_detail`, `_extract_referees_from_detail_page`,
+  `_extract_referee_report_inline`, `_extract_referee_report_from_link`.
+  Uses generic heuristics until first live capture pass refines selectors.
+- **MF_WILEY** ✅ scaffold — `extract_submitted_report_for_referee`
+  (attach mode) and `_extract_submitted_report_panel` (headful UC).
+  Forward-looking; no Wiley reviewer has submitted a report yet.
+
+### MF + MF_WILEY (soft merge)
+
+MF is mid-migration from ScholarOne to Wiley ScienceConnect. Both backends
+run. To present them as a single journal in the dashboard, the system uses
+`output_schema.JOURNAL_GROUP_MAP` (`mf` and `mf_wiley` both map to `MF`).
+Storage stays per backend (separate output dirs, separate event streams);
+only the dashboard view aggregates via `cross_journal_report.aggregate_by_group`
+and `RefereeAction.journal_group`.
+
+### Wiley operational quirks
+
+`MF_WILEY` is **attach-mode-only**: the extractor connects to a logged-in
+Chrome tab via AppleScript JS execution, so it can't run from cron.
+
+Requirements:
+- Chrome must be running with `review.wiley.com` open in a tab.
+- Chrome > View > Developer > Allow JavaScript from Apple Events checked.
+- The tab must show "Dashboard | Wiley" (logged in via ORCID, past Cloudflare).
+
+Pre-flight script `scripts/check_wiley_prereqs.py` verifies all of the above.
+
+The wrapper `scripts/run_mf_wiley_attached.sh` activates Chrome, opens the
+tab if missing, waits a warm-up window, runs pre-flight, then runs the
+extractor. Use `--warm SECONDS` to control the warm-up.
+
+Schedule via launchd: `cp scripts/admin/com.user.mfwiley.plist
+~/Library/LaunchAgents/ && launchctl load ~/Library/LaunchAgents/com.user.mfwiley.plist`
+(template runs Mon/Wed/Fri 06:00).
 
 ---
 
@@ -440,7 +510,7 @@ python3 scripts/setup_gmail_oauth.py
 
 ## Testing
 
-703 tests across 13 test modules:
+914 tests across 20+ test modules:
 ```bash
 python3 -m pytest tests/ -q                    # All tests
 python3 -m pytest tests/test_referee_db.py -v  # Specific module
@@ -459,4 +529,4 @@ python3 -m pytest tests/test_referee_db.py -v  # Specific module
 
 ---
 
-**Last Updated**: 2026-03-25
+**Last Updated**: 2026-04-24

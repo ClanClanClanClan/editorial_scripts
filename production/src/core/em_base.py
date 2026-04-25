@@ -1698,15 +1698,52 @@ class EMExtractor(CachedExtractorMixin):
                 if recommendations:
                     referee["recommendation"] = recommendations[-1]
                     referee["recommendation_history"] = recommendations
+                    # Seed a minimal canonical report shell so downstream tooling
+                    # knows a review exists, even if popup extraction is later blocked.
+                    referee["report"] = {
+                        "recommendation": recommendations[-1],
+                        "recommendation_raw": recommendations[-1],
+                        "comments_to_author": "",
+                        "confidential_comments": "",
+                        "raw_text": "",
+                        "scores": {},
+                        "word_count": 0,
+                        "source": "em_reviews_page_summary",
+                        "extraction_status": "shell_only",
+                        "available": True,
+                    }
 
             referees.append(referee)
             existing_names.add(name.lower())
 
-        review_detail_links = []
-        for link in soup.find_all("a", href=re.compile(r"popupReviewDetails")):
-            review_detail_links.append(link["href"])
+        # Collect review-detail popup hrefs. EM tenants vary in capitalization
+        # (popupReviewDetails / PopupReviewDetails / popupReviewerComments) and
+        # sometimes attach the JS to onclick rather than href.
+        review_detail_pattern = re.compile(
+            r"popupReviewDetails|PopupReviewDetails|popupReviewerComments|"
+            r"popupReviewerComment|ReviewerComments\.aspx",
+            re.IGNORECASE,
+        )
+        review_detail_links: list[str] = []
+        for link in soup.find_all("a"):
+            href = link.get("href", "") or ""
+            onclick = link.get("onclick", "") or ""
+            target = href if review_detail_pattern.search(href) else ""
+            if not target and review_detail_pattern.search(onclick):
+                target = onclick
+            if target and target not in review_detail_links:
+                review_detail_links.append(target)
+
         if review_detail_links:
             ms_info["review_detail_links"] = review_detail_links
+        elif referees:
+            # Diagnostic: we found referees but no review-detail popup hooks.
+            # Likely causes: reviews not yet submitted (status row is invitation-only),
+            # tenant uses a different popup function, or the page is showing a stub.
+            print(
+                f"      ⚠️ Reviews page has {len(referees)} referees but no review-detail "
+                "popup links — reviews may not be submitted yet, or popup function name differs."
+            )
 
         attach_link = soup.find("a", href=re.compile(r"Editor_ViewRevAttach|popupViewRevAttach"))
         if attach_link:
@@ -1716,7 +1753,10 @@ class EMExtractor(CachedExtractorMixin):
             else:
                 ms_info["view_rev_attach_url"] = href
 
-        print(f"      📝 Reviews page: found {len(referees)} referees")
+        print(
+            f"      📝 Reviews page: {len(referees)} referees, "
+            f"{len(review_detail_links)} review-detail link(s)"
+        )
 
     def _extract_details_from_popup(self, manuscript: dict, ms_info: dict):
         ms_id = ms_info["manuscript_id"]
@@ -2339,6 +2379,31 @@ class EMExtractor(CachedExtractorMixin):
                             if attachment_urls:
                                 report["_attachment_urls"] = attachment_urls
 
+                    # Apply canonical schema annotations
+                    report.setdefault("source", "em_popup")
+                    cta = report.get("comments_to_author") or ""
+                    raw = report.get("raw_text") or ""
+                    has_attachments = bool(report.get("_attachment_urls"))
+                    report["available"] = bool(
+                        cta
+                        or raw
+                        or report.get("scores")
+                        or has_attachments
+                        or (
+                            report.get("recommendation")
+                            and report["recommendation"].lower()
+                            not in ("", "unknown", "n/a", "(none)")
+                        )
+                    )
+                    if cta or raw:
+                        report["extraction_status"] = "ok"
+                    elif report.get("recommendation") or has_attachments:
+                        report["extraction_status"] = "shell_only"
+                    else:
+                        report["extraction_status"] = "popup_failed"
+                    word_text = cta or raw
+                    report["word_count"] = len(word_text.split()) if word_text else 0
+
                     reports.append(report)
                     report_count += 1
 
@@ -2360,6 +2425,11 @@ class EMExtractor(CachedExtractorMixin):
                             "confidential_comments",
                             "recommendation",
                             "review_date",
+                            "scores",
+                            "word_count",
+                            "available",
+                            "extraction_status",
+                            "source",
                         )
                     }
 

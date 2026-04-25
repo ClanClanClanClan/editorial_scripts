@@ -1605,7 +1605,7 @@ class SIAMExtractor(CachedExtractorMixin):
                         if not ref:
                             continue
 
-                        report = ref.get("report", {})
+                        report = ref.get("report", {}) or {}
                         if recommendation:
                             report["recommendation"] = recommendation
                             ref["recommendation"] = recommendation
@@ -1620,26 +1620,76 @@ class SIAMExtractor(CachedExtractorMixin):
                         if scores:
                             report["scores"] = scores
 
+                        # Canonical annotations (will be re-applied / extended after
+                        # the comment-table pass below)
+                        report.setdefault("source", "siam_reviews_page")
+                        report.setdefault("revision", manuscript.get("revision_number", 0) or 0)
                         ref["report"] = report
 
-            for p in rev_soup.find_all("p", style=re.compile(r"font-weight:\s*bold")):
-                p_text = p.get_text(strip=True)
-                match = re.match(r"(.+?)'s\s+Comments\s+\(Referee\s+#(\d+)\)\s*-\s*(.+)", p_text)
-                if not match:
-                    continue
-                ref_name = match.group(1)
-                ref_num = match.group(2)
-                report_date = match.group(3).strip()
+            # Comment headers come in several formats across SICON/SIFIN tenants.
+            # Match any of:
+            #   "<Name>'s Comments (Referee #N) - <date>"
+            #   "<Name>'s Comments - <date>"
+            #   "Comments from <Name> (Referee #N)"
+            comment_header_patterns = [
+                re.compile(r"(.+?)'s\s+Comments\s+\(Referee\s+#(\d+)\)\s*-\s*(.+)", re.IGNORECASE),
+                re.compile(r"(.+?)'s\s+Comments\s*-\s*(.+)", re.IGNORECASE),
+                re.compile(
+                    # Greedy on name (no parens or end-dash), optional referee#, optional date.
+                    r"Comments\s+from\s+([^()-]+?)(?:\s*\(Referee\s+#(\d+)\))?(?:\s*-\s*(.+))?$",
+                    re.IGNORECASE,
+                ),
+            ]
 
-                ref = _match_referee(ref_name, f"#{ref_num}")
+            # Find candidate header elements: bold paragraphs OR <h2>/<h3>/<h4> headings
+            header_candidates = list(
+                rev_soup.find_all("p", style=re.compile(r"font-weight:\s*bold"))
+            ) + list(rev_soup.find_all(["h2", "h3", "h4", "b", "strong"]))
+
+            seen_for_referee: set = set()
+            for header in header_candidates:
+                p_text = header.get_text(strip=True)
+                if not p_text or "Comments" not in p_text:
+                    continue
+                ref_name = ""
+                ref_num = ""
+                report_date = ""
+                for pat in comment_header_patterns:
+                    m = pat.match(p_text)
+                    if m:
+                        groups = m.groups()
+                        ref_name = groups[0] if len(groups) > 0 else ""
+                        # Group layout differs between patterns; pluck what's there
+                        if len(groups) == 3:
+                            ref_num = groups[1] or ""
+                            report_date = groups[2] or ""
+                        elif len(groups) == 2:
+                            report_date = groups[1] or ""
+                        break
+                if not ref_name:
+                    continue
+
+                ref = _match_referee(ref_name, f"#{ref_num}" if ref_num else "")
                 if not ref:
                     continue
 
-                report = ref.get("report", {})
-                report["report_date"] = report_date
+                # Avoid double-processing the same referee from multiple header matches
+                key = id(ref)
+                if key in seen_for_referee:
+                    continue
+                seen_for_referee.add(key)
 
-                comment_table = p.find_next("table")
+                report = ref.get("report", {}) or {}
+                if report_date:
+                    report["report_date"] = report_date.strip()
+
+                comment_table = header.find_next("table")
                 if comment_table:
+                    table_text = comment_table.get_text(separator="\n", strip=True)
+                    # Always store raw_text from the comment table — SICON's quality
+                    # scorer reads this when comments_to_author is short.
+                    if table_text and len(table_text) > 50:
+                        report["raw_text"] = table_text[:20000]
                     for row in comment_table.find_all("tr"):
                         th = row.find("th")
                         td = row.find("td")
@@ -1650,11 +1700,40 @@ class SIAMExtractor(CachedExtractorMixin):
                         if not value or value == "\xa0":
                             continue
                         if "remark" in label and "author" in label:
-                            report["comments_to_author"] = value[:10000]
+                            report["comments_to_author"] = value[:20000]
                         elif "confidential" in label or ("message" in label and "editor" in label):
-                            report["confidential_comments"] = value[:10000]
+                            report["confidential_comments"] = value[:20000]
+
+                # Canonical schema annotations
+                report["source"] = "siam_reviews_page"
+                report["extraction_status"] = (
+                    "ok"
+                    if (
+                        report.get("comments_to_author")
+                        or report.get("raw_text")
+                        or report.get("scores")
+                    )
+                    else "shell_only"
+                )
+                report["revision"] = manuscript.get("revision_number", 0) or 0
+                # Pre-compute word_count for downstream scorer
+                wc_text = report.get("comments_to_author") or report.get("raw_text") or ""
+                report["word_count"] = len(wc_text.split()) if wc_text else 0
+                report["available"] = bool(
+                    report.get("comments_to_author")
+                    or report.get("raw_text")
+                    or report.get("scores")
+                    or (
+                        report.get("recommendation")
+                        and report["recommendation"].lower() not in ("", "unknown", "n/a")
+                    )
+                )
 
                 ref["report"] = report
+                # Append to canonical reports list (avoid duplicates by id)
+                ref_reports = ref.setdefault("reports", [])
+                if all(r is not report for r in ref_reports):
+                    ref_reports.append(report)
 
             if not any(r.get("report") for r in referees):
                 full_text = rev_soup.get_text(separator="\n", strip=True)

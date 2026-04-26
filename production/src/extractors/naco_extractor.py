@@ -571,6 +571,56 @@ class NACOExtractor(CachedExtractorMixin):
         if absolute.startswith("/"):
             absolute = "https://ef.msp.org" + absolute
 
+        # If the URL is a direct PDF, download via authenticated session
+        # cookies and extract text via the shared helper.
+        is_pdf = absolute.lower().endswith(".pdf") or "pdf" in absolute.lower()
+        local_pdf = None
+        if is_pdf:
+            try:
+                import requests
+
+                cookies = {c["name"]: c["value"] for c in (self.driver.get_cookies() or [])}
+                r = requests.get(absolute, cookies=cookies, timeout=30)
+                if r.ok and r.headers.get("content-type", "").startswith(
+                    ("application/pdf", "application/octet-stream")
+                ):
+                    download_dir = (
+                        Path(self.config["base_dir"]) / "downloads" / "naco"
+                        if hasattr(self, "config")
+                        else Path("production/downloads/naco")
+                    )
+                    download_dir.mkdir(parents=True, exist_ok=True)
+                    local_pdf = download_dir / Path(absolute).name
+                    local_pdf.write_bytes(r.content)
+            except Exception as e:
+                self.logger.warning(f"Failed to download report PDF {absolute}: {e}")
+
+        if local_pdf and local_pdf.exists() and local_pdf.stat().st_size > 0:
+            try:
+                from core.pdf_utils import extract_pdf_text, populate_report_from_pdf
+
+                text = extract_pdf_text(local_pdf)
+            except Exception:
+                text = ""
+            if text and len(text) > 100:
+                report = {
+                    "revision": 0,
+                    "recommendation": "",
+                    "recommendation_raw": "",
+                    "comments_to_author": "",
+                    "confidential_comments": "",
+                    "raw_text": "",
+                    "scores": {},
+                    "report_date": None,
+                    "word_count": 0,
+                    "attachments": [],
+                    "source": "editflow_link_pdf",
+                    "extraction_status": "ok",
+                    "available": True,
+                }
+                populate_report_from_pdf(report, local_pdf, attachment_url=absolute)
+                return report
+
         try:
             current = self.driver.current_url
             self.driver.get(absolute)

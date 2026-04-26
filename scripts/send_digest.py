@@ -107,9 +107,24 @@ def _build_html_email(stats, training, feedback, rec_count):
     total_refs = sum(s["referees"] for s in stats)
     active = sum(1 for s in stats if s["manuscripts"] > 0)
 
+    # Phase C soft merge: aggregate by journal group (MF + MF_WILEY → "MF")
+    from reporting.cross_journal_report import aggregate_by_group
+
+    groups = aggregate_by_group(stats)
+    # Active count by group: at least one source code in the group has manuscripts
+    active = sum(1 for g in groups if g.get("manuscripts", 0) > 0)
+
     rows = ""
-    for s in stats:
-        age = s.get("age_days")
+    for g in groups:
+        age_str = g.get("latest_extraction") or ""
+        # latest_extraction is an ISO date string; estimate freshness from
+        # max age across sources in the group
+        # We use the most recent extraction's age (already in stats)
+        codes = g.get("journals_in_group", [])
+        ages = [
+            s["age_days"] for s in stats if s["journal"] in codes and s.get("age_days") is not None
+        ]
+        age = min(ages) if ages else None
         if age is None:
             freshness = '<span style="color:#9ca3af">No data</span>'
         elif age <= 7:
@@ -119,19 +134,33 @@ def _build_html_email(stats, training, feedback, rec_count):
         else:
             freshness = f'<span style="color:#ef4444">{age}d ago</span>'
 
+        platforms = " + ".join(g.get("platforms", []))
+        codes_label = "+".join(c.upper() for c in sorted(codes)) if len(codes) > 1 else ""
+        name_html = g.get("group", "")
+        if codes_label:
+            name_html += f" <span style='color:#9ca3af;font-weight:normal;font-size:11px'>[{codes_label}]</span>"
+
         rows += f"""<tr>
-            <td style="padding:8px 12px;border-bottom:1px solid #e5e7eb;font-weight:600">{s['journal']}</td>
-            <td style="padding:8px 12px;border-bottom:1px solid #e5e7eb">{s.get('platform','')}</td>
-            <td style="padding:8px 12px;border-bottom:1px solid #e5e7eb;text-align:center">{s['manuscripts']}</td>
-            <td style="padding:8px 12px;border-bottom:1px solid #e5e7eb;text-align:center">{s['referees']}</td>
-            <td style="padding:8px 12px;border-bottom:1px solid #e5e7eb;text-align:center">{s.get('enrichment_pct',0):.0f}%</td>
+            <td style="padding:8px 12px;border-bottom:1px solid #e5e7eb;font-weight:600">{name_html}</td>
+            <td style="padding:8px 12px;border-bottom:1px solid #e5e7eb">{platforms}</td>
+            <td style="padding:8px 12px;border-bottom:1px solid #e5e7eb;text-align:center">{g['manuscripts']}</td>
+            <td style="padding:8px 12px;border-bottom:1px solid #e5e7eb;text-align:center">{g['referees']}</td>
+            <td style="padding:8px 12px;border-bottom:1px solid #e5e7eb;text-align:center">{g.get('enrichment_pct',0):.0f}%</td>
             <td style="padding:8px 12px;border-bottom:1px solid #e5e7eb;text-align:center">{freshness}</td>
         </tr>"""
 
-    stale = [s for s in stats if s.get("age_days") and s["age_days"] > 7]
+    # Stale-data alert: surface only groups whose freshest source is >7 days old
+    stale_groups = []
+    for g in groups:
+        codes = g.get("journals_in_group", [])
+        ages = [
+            s["age_days"] for s in stats if s["journal"] in codes and s.get("age_days") is not None
+        ]
+        if ages and min(ages) > 7:
+            stale_groups.append(g.get("group", ""))
     alerts_html = ""
-    if stale:
-        names = ", ".join(s["journal"] for s in stale)
+    if stale_groups:
+        names = ", ".join(stale_groups)
         alerts_html = f"""
         <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:12px 16px;margin-bottom:20px;color:#991b1b;font-size:14px">
             Stale data (&gt;7 days): {names}

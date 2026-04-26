@@ -157,23 +157,68 @@ class ScholarOneBaseExtractor(CachedExtractorMixin):
             directory.mkdir(parents=True, exist_ok=True)
 
     def setup_driver(self):
-        chrome_version = self._detect_chrome_version()
-        self.driver = uc.Chrome(
-            options=self.chrome_options,
-            headless=False,
-            version_main=chrome_version,
-        )
-        try:
-            self.driver.set_window_position(-2000, 0)
-            self.driver.set_window_size(800, 600)
-        except Exception:
-            pass
-        self._minimize_chrome()
-        self.driver.set_page_load_timeout(120)
-        self.driver.implicitly_wait(10)
-        self.wait = WebDriverWait(self.driver, 20)
-        self.original_window = self.driver.current_window_handle
-        print(f"\U0001f5a5\ufe0f  Browser configured for {self.JOURNAL_CODE}")
+        # Chrome 147+ occasionally closes the initial window during UC
+        # initialization, raising NoSuchWindowException at our first
+        # `current_window_handle` access. We retry a few times with the
+        # binary refreshed between attempts (UC re-downloads on next
+        # construction).
+        from selenium.common.exceptions import NoSuchWindowException, WebDriverException
+
+        last_err: Optional[Exception] = None
+        for attempt in range(1, 4):
+            try:
+                # UC consumes ChromeOptions on construction — must rebuild
+                # the options object on each retry (otherwise UC raises
+                # "you cannot reuse the ChromeOptions object").
+                self.setup_chrome_options()
+                chrome_version = self._detect_chrome_version()
+                self.driver = uc.Chrome(
+                    options=self.chrome_options,
+                    headless=False,
+                    version_main=chrome_version,
+                )
+                try:
+                    self.driver.set_window_position(-2000, 0)
+                    self.driver.set_window_size(800, 600)
+                except Exception:
+                    pass
+                self._minimize_chrome()
+                self.driver.set_page_load_timeout(120)
+                self.driver.implicitly_wait(10)
+                self.wait = WebDriverWait(self.driver, 20)
+                self.original_window = self.driver.current_window_handle
+                print(f"\U0001f5a5\ufe0f  Browser configured for {self.JOURNAL_CODE}")
+                return
+            except (NoSuchWindowException, WebDriverException) as e:
+                last_err = e
+                print(f"   \u26a0\ufe0f setup_driver attempt {attempt}/3 failed: {str(e)[:120]}")
+                # Tear down the broken driver and refresh the UC binary
+                try:
+                    if self.driver:
+                        self.driver.quit()
+                except Exception:
+                    pass
+                self.driver = None
+                # Force UC to re-download the bundled binary on next call
+                try:
+                    uc_bin = (
+                        Path.home()
+                        / "Library"
+                        / "Application Support"
+                        / "undetected_chromedriver"
+                        / "undetected_chromedriver"
+                    )
+                    if uc_bin.exists():
+                        uc_bin.unlink()
+                except Exception:
+                    pass
+                # Kill any leftover chromedriver processes
+                try:
+                    subprocess.run(["pkill", "-9", "chromedriver"], check=False)
+                except Exception:
+                    pass
+                time.sleep(2 + attempt)
+        raise last_err if last_err else RuntimeError("setup_driver: unknown failure")
 
     @staticmethod
     def _minimize_chrome():
@@ -1316,6 +1361,28 @@ class ScholarOneBaseExtractor(CachedExtractorMixin):
                         if saved:
                             report["attached_files"].append(saved)
                             print(f"            📎 Saved referee attachment: {Path(saved).name}")
+                            # Extract text from the PDF and merge into the
+                            # canonical report dict so reviewers who submit
+                            # via attachment instead of inline form still
+                            # surface in raw_text / comments_to_author.
+                            if saved.lower().endswith(".pdf"):
+                                try:
+                                    from core.pdf_utils import populate_report_from_pdf
+
+                                    populate_report_from_pdf(report, saved, attachment_url=href)
+                                    if report.get("raw_text") and not report.get(
+                                        "comments_to_author"
+                                    ):
+                                        # populate_report_from_pdf already
+                                        # mirrored to comments_to_author when
+                                        # empty, but in case raw_text already
+                                        # had headers, override comments_to_author
+                                        # too:
+                                        report["comments_to_author"] = report["raw_text"]
+                                except Exception as e:
+                                    print(
+                                        f"            ⚠️ Failed to extract text from PDF: {str(e)[:80]}"
+                                    )
                 except Exception:
                     pass
 

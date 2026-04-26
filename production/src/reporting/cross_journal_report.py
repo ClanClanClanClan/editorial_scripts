@@ -263,6 +263,18 @@ def print_terminal_report(all_stats: list[dict]):
     if stale:
         stale_names = ", ".join(s["journal"] for s in stale)
         print(f"  ⚠️  Stale data (>7 days): {stale_names}")
+
+    # Group rollup — show only when at least one group spans >1 journal code
+    groups = aggregate_by_group(all_stats)
+    multi = [g for g in groups if len(g.get("journals_in_group", [])) > 1]
+    if multi:
+        print()
+        print("  Journal groups (soft merge):")
+        for g in multi:
+            codes = "+".join(sorted(g["journals_in_group"]))
+            ms = g["manuscripts"]
+            refs = g["referees"]
+            print(f"    • {g['group_name']}  [{codes}]  {ms} ms · {refs} refs")
     print()
 
 

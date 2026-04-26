@@ -9,12 +9,31 @@ Why launchd (not cron): the extractor needs a logged-in Chrome tab with
 AppleScript JS enabled. cron has no GUI session; launchd runs in the
 user's Aqua session and can activate Chrome via osascript.
 
+Note on missed runs: StartCalendarInterval does NOT make up for runs
+that were missed while the Mac was asleep / shut down. If the laptop
+was off at 06:00 Friday, the next run is Monday 06:00. To fire a
+catch-up immediately on wake, run the wrapper manually.
+
+Hardcoded paths: this plist is checked into the repo as a template
+for the maintainer (dylanpossamai). Other users must:
+
+    1. Replace /Users/dylanpossamai with $HOME in:
+         - ProgramArguments[1]    (path to run_mf_wiley_attached.sh)
+         - StandardOutPath
+         - StandardErrorPath
+         - WorkingDirectory
+    2. Verify EnvironmentVariables.PYTHON points at a Python 3.12
+       interpreter on this machine (`which python3.12`).
+    3. Confirm scripts/run_mf_wiley_attached.sh is executable
+       (`chmod +x`).
+
 Install:
     cp scripts/admin/com.user.mfwiley.plist ~/Library/LaunchAgents/
     launchctl load ~/Library/LaunchAgents/com.user.mfwiley.plist
 
 Verify:
     launchctl list | grep mfwiley
+    tail -f /Users/dylanpossamai/Library/CloudStorage/Dropbox/Work/editorial_scripts/logs/mf_wiley.log
 
 Unload:
     launchctl unload ~/Library/LaunchAgents/com.user.mfwiley.plist

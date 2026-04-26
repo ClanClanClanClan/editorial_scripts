@@ -14,6 +14,10 @@ from reporting.action_items import (  # noqa: E402
     compute_action_items,
     compute_manuscript_summaries,
 )
+from core.output_schema import (  # noqa: E402
+    journal_group,
+    journal_group_display,
+)
 from reporting.cross_journal_report import (  # noqa: E402
     JOURNAL_NAMES,
     JOURNALS,
@@ -238,6 +242,26 @@ def build_dashboard_data():
             manuscripts_by_journal[j] = []
         manuscripts_by_journal[j].append(ms)
 
+    # Group view: { group_code: { "name": ..., "journals": [(code, [ms, ...]), ...] } }
+    # Used for the dashboard's grouped section rendering (Phase C soft merge).
+    manuscripts_by_group: dict[str, dict] = {}
+    for j_code, mss in manuscripts_by_journal.items():
+        g = journal_group(j_code) or j_code.upper()
+        bucket = manuscripts_by_group.setdefault(
+            g,
+            {
+                "group": g,
+                "group_name": journal_group_display(j_code) or JOURNAL_NAMES.get(j_code, g),
+                "journals": [],
+                "total": 0,
+            },
+        )
+        bucket["journals"].append({"code": j_code, "manuscripts": [asdict(m) for m in mss]})
+        bucket["total"] += len(mss)
+    # Stable order: group code asc; within a group, journals by code asc
+    for bucket in manuscripts_by_group.values():
+        bucket["journals"].sort(key=lambda x: x["code"])
+
     rec_summaries = []
     for rec in recommendations:
         candidates = rec.get("referee_candidates", [])[:3]
@@ -293,6 +317,7 @@ def build_dashboard_data():
         "manuscripts_by_journal": {
             k: [asdict(m) for m in v] for k, v in manuscripts_by_journal.items()
         },
+        "manuscripts_by_group": manuscripts_by_group,
         "recommendations": rec_summaries,
         "rec_by_ms": rec_by_ms,
         "referee_intelligence": referee_intelligence,
@@ -570,6 +595,16 @@ tr:last-child td { border-bottom: none; }
     background: var(--accent-bg); padding: 1px 7px; border-radius: 3px;
     margin-left: auto;
 }
+.jsec-codes {
+    font-size: 0.72rem; font-weight: 500; color: var(--text2);
+    margin-left: 4px;
+}
+.src-badge {
+    display: inline-block; font-size: 0.65rem; font-weight: 500;
+    color: var(--text2); background: var(--surface2);
+    padding: 0 5px; border-radius: 3px; margin-left: 4px;
+    border: 1px solid var(--border);
+}
 .jsec-body { display: block; }
 .jsec-body.hidden { display: none; }
 .jsec .table-wrap { border: none; border-radius: 0; }
@@ -719,7 +754,10 @@ function filterActsJournal(j) {
     if (event && event.target) event.target.classList.add('active');
     document.querySelectorAll('.action-item').forEach(function(a) {
         var aj = a.querySelector('.action-journal');
-        a.style.display = (j === 'all' || (aj && aj.textContent.trim() === j)) ? '' : 'none';
+        // Match by group (Phase C soft merge): prefer data-group, fall back
+        // to text content for legacy items without the attribute.
+        var key = aj ? (aj.getAttribute('data-group') || aj.textContent.trim()) : '';
+        a.style.display = (j === 'all' || key === j) ? '' : 'none';
     });
 }
 function searchManuscripts(q) {
@@ -1098,7 +1136,7 @@ def generate_html(data):
                 for it in overdue_items[:5]:
                     h.append(
                         f"<div class='priority-item'>"
-                        f"<span class='action-journal'>{_esc(it['journal'])}</span> "
+                        f"<span class='action-journal' data-group='{_esc(it.get('journal_group') or it['journal'])}'>{_esc(it['journal'])}</span> "
                         f"{_esc(it['manuscript_id'])} — {_esc(it['message'][:60])}</div>"
                     )
                 if len(overdue_items) > 5:
@@ -1123,7 +1161,7 @@ def generate_html(data):
                         btn_html = f" <button class='btn-ae btn-view' style='font-size:0.68rem;padding:1px 6px' onclick=\"viewAE('{_esc(j_lower)}','{ms_esc}')\">View</button>"
                     h.append(
                         f"<div class='priority-item'>"
-                        f"<span class='action-journal'>{_esc(it['journal'])}</span> "
+                        f"<span class='action-journal' data-group='{_esc(it.get('journal_group') or it['journal'])}'>{_esc(it['journal'])}</span> "
                         f"{ms_esc}{btn_html}</div>"
                     )
                 h.append("</div>")
@@ -1140,7 +1178,7 @@ def generate_html(data):
                     h.append(
                         f"<div class='priority-item'>"
                         f"<span class='action-type t-med' style='font-size:0.65rem;padding:1px 4px'>{label}</span> "
-                        f"<span class='action-journal'>{_esc(it['journal'])}</span> "
+                        f"<span class='action-journal' data-group='{_esc(it.get('journal_group') or it['journal'])}'>{_esc(it['journal'])}</span> "
                         f"{_esc(it['manuscript_id'])}</div>"
                     )
                 h.append("</div>")
@@ -1151,7 +1189,7 @@ def generate_html(data):
                 for it in no_response_items[:5]:
                     h.append(
                         f"<div class='priority-item'>"
-                        f"<span class='action-journal'>{_esc(it['journal'])}</span> "
+                        f"<span class='action-journal' data-group='{_esc(it.get('journal_group') or it['journal'])}'>{_esc(it['journal'])}</span> "
                         f"{_esc(it['manuscript_id'])} — {_esc(it['message'][:60])}</div>"
                     )
                 if len(no_response_items) > 5:
@@ -1187,13 +1225,17 @@ def generate_html(data):
                     f"<button class='fbtn fbtn-priority' onclick='filterActs(\"{css}\")'>"
                     f"{lvl.title()} ({counts[lvl]})</button>"
                 )
-        journals_in_items = sorted({it["journal"] for it in items})
-        if len(journals_in_items) > 1:
+        # Filter chips by journal group (Phase C soft merge): MF + MF_WILEY
+        # appear as a single "MF" chip.
+        groups_in_items = sorted({it.get("journal_group") or it["journal"] for it in items})
+        if len(groups_in_items) > 1:
             h.append("<span style='border-left:1px solid var(--border);margin:0 4px'></span>")
-            for j in journals_in_items:
+            for g in groups_in_items:
+                # Count items in this group for the chip label
+                g_count = sum(1 for it in items if (it.get("journal_group") or it["journal"]) == g)
                 h.append(
                     f"<button class='fbtn fbtn-journal' "
-                    f"onclick='filterActsJournal(\"{_esc(j)}\")'>{_esc(j)}</button>"
+                    f"onclick='filterActsJournal(\"{_esc(g)}\")'>{_esc(g)} ({g_count})</button>"
                 )
         h.append("</div>")
 
@@ -1223,7 +1265,10 @@ def generate_html(data):
 
             h.append(f"<div class='action-item p-{p} {p}'>")
             h.append(f"<span class='action-type t-{p}'>{label}</span>")
-            h.append(f"<span class='action-journal'>{_esc(it['journal'])}</span>")
+            h.append(
+                f"<span class='action-journal' data-group='{_esc(it.get('journal_group') or it['journal'])}'>"
+                f"{_esc(it['journal'])}</span>"
+            )
             h.append(f"<span class='action-msid'>{_esc(it['manuscript_id'])}</span>")
             h.append(f"<span class='action-msg'>{_esc(it['message'])}</span>")
             if extra:
@@ -1259,22 +1304,44 @@ def generate_html(data):
         "oninput='searchManuscripts(this.value)'>"
     )
 
+    # Phase C: render by journal group so MF + MF_WILEY collapse into a single
+    # "Mathematical Finance" section. Single-journal groups (SICON, etc.)
+    # behave exactly as before.
+    ms_by_group = data.get("manuscripts_by_group", {})
     ms_by_journal = data.get("manuscripts_by_journal", {})
-    if ms_by_journal:
+    if ms_by_group:
         h.append("<div class='journal-sections'>")
-        for journal_code in sorted(ms_by_journal.keys()):
-            j_manuscripts = ms_by_journal[journal_code]
-            j_name = JOURNAL_NAMES.get(journal_code.lower(), journal_code)
-            j_slug = journal_code.lower().replace(" ", "")
-            tid = f"ms-table-{j_slug}"
+        # Sort groups by code for stable ordering
+        for group_code in sorted(ms_by_group.keys()):
+            bucket = ms_by_group[group_code]
+            group_name = bucket.get("group_name") or group_code
+            # Rename to avoid shadowing the outer `journals` (journal_stats list)
+            group_journals = bucket.get("journals", [])
+            total = bucket.get("total", 0)
+            multi = len(group_journals) > 1
+            # Slug used for collapse + table IDs
+            g_slug = group_code.lower().replace(" ", "_")
+            tid = f"ms-table-{g_slug}"
+
+            # Header label: single-journal groups keep the legacy "<code> — <name>"
+            # form; multi-journal groups show "<group_name> [<codes>]"
+            if multi:
+                codes_str = " + ".join(j["code"].upper() for j in group_journals)
+                hdr_label = (
+                    f"{_esc(group_name)} <span class='jsec-codes'>[{_esc(codes_str)}]</span>"
+                )
+            else:
+                only_code = group_journals[0]["code"]
+                only_name = JOURNAL_NAMES.get(only_code.lower(), only_code)
+                hdr_label = f"{_esc(only_code.upper())} — {_esc(only_name)}"
 
             h.append("<div class='jsec'>")
             h.append(
-                f"<div class='jsec-hdr' id='jh-{j_slug}' onclick=\"toggleJsec('{j_slug}')\">"
-                f"{_esc(journal_code)} — {_esc(j_name)}"
-                f"<span class='jsec-badge'>{len(j_manuscripts)}</span></div>"
+                f"<div class='jsec-hdr' id='jh-{g_slug}' onclick=\"toggleJsec('{g_slug}')\">"
+                f"{hdr_label}"
+                f"<span class='jsec-badge'>{total}</span></div>"
             )
-            h.append(f"<div class='jsec-body' id='jb-{j_slug}'>")
+            h.append(f"<div class='jsec-body' id='jb-{g_slug}'>")
             h.append("<div class='table-wrap'>")
             h.append(f"<table id='{tid}'>")
             h.append("<colgroup>")
@@ -1290,8 +1357,20 @@ def generate_html(data):
                 h.append(f"<th onclick=\"sortTable('{tid}',{i})\">{col}</th>")
             h.append("</tr></thead><tbody>")
 
-            for ms in j_manuscripts:
+            # Flatten manuscripts across all source journal codes in this group;
+            # tag each with its native code so backend buttons keep working.
+            flat_manuscripts: list[tuple[str, dict]] = []
+            for j_entry in group_journals:
+                j_code = j_entry["code"]
+                for m in j_entry["manuscripts"]:
+                    flat_manuscripts.append((j_code, m))
+
+            for journal_code, ms in flat_manuscripts:
                 safe_id = ms["manuscript_id"].replace(".", "_").replace("-", "_")
+                # Per-row source badge only when group spans multiple codes
+                src_badge = (
+                    f" <span class='src-badge'>{_esc(journal_code.upper())}</span>" if multi else ""
+                )
 
                 completed = ms["referees_completed"]
                 agreed = ms["referees_agreed"]
@@ -1334,7 +1413,7 @@ def generate_html(data):
                 )
                 h.append(
                     f"<td class='td-id' data-sort='{_esc(ms['manuscript_id'])}'>"
-                    f"{_esc(ms['manuscript_id'])}</td>"
+                    f"{_esc(ms['manuscript_id'])}{src_badge}</td>"
                 )
                 h.append(
                     f"<td class='td-title' title='{_esc(ms['title'])}'>{_esc(ms['title'])}</td>"
@@ -1495,27 +1574,78 @@ def generate_html(data):
         h.append("<div class='empty'>No active manuscripts</div>")
     h.append("</div>")
 
-    # ── Journal Overview ──────────────────────────────────────────
+    # ── Journal Overview (Phase C: grouped) ───────────────────────
     h.append("<div class='section'>")
     h.append("<div class='section-hdr'>Journal Overview</div>")
     h.append("<div class='journal-grid'>")
+
+    # Aggregate per-journal-code stats into journal groups so MF + MF_WILEY
+    # appear as a single "Mathematical Finance" card with combined counts.
+    overview_groups: dict[str, dict] = {}
     for js in journals:
-        j = js["journal"].upper()
-        j_lower = js["journal"].lower()
-        n_ms = js.get("manuscripts", 0)
-        n_ref = js.get("referees", 0)
-        fc = js.get("freshness_class", "stale")
-        fl = js.get("freshness_label", "No data")
+        code = js["journal"]
+        g = journal_group(code) or code.upper()
+        bucket = overview_groups.setdefault(
+            g,
+            {
+                "group": g,
+                "group_name": journal_group_display(code) or JOURNAL_NAMES.get(code, g),
+                "codes": [],
+                "platforms": [],
+                "manuscripts": 0,
+                "referees": 0,
+                "freshness_class": "stale",
+                "freshness_label": "No data",
+                "_max_age": -1,
+            },
+        )
+        bucket["codes"].append(code)
+        plat = js.get("platform", "")
+        if plat and plat not in bucket["platforms"]:
+            bucket["platforms"].append(plat)
+        bucket["manuscripts"] += js.get("manuscripts", 0) or 0
+        bucket["referees"] += js.get("referees", 0) or 0
+        # Use the freshest member for the freshness badge (lowest age)
+        age = js.get("age_days")
+        if age is not None and (bucket["_max_age"] < 0 or age < bucket["_max_age"]):
+            bucket["_max_age"] = age
+            bucket["freshness_class"] = js.get("freshness_class", "stale")
+            bucket["freshness_label"] = js.get("freshness_label", "No data")
+
+    for g in sorted(overview_groups.keys()):
+        bucket = overview_groups[g]
+        codes = bucket["codes"]
+        multi = len(codes) > 1
+        n_ms = bucket["manuscripts"]
+        n_ref = bucket["referees"]
+        fc = bucket["freshness_class"]
+        fl = bucket["freshness_label"]
+        plat_str = " + ".join(bucket["platforms"]) if bucket["platforms"] else ""
+
+        # Card name: group code; if multi, also show source codes inline
+        if multi:
+            name_html = f"{_esc(g)} <span class='jsec-codes'>[{_esc('+'.join(c.upper() for c in sorted(codes)))}]</span>"
+        else:
+            name_html = _esc(codes[0].upper())
+
         h.append("<div class='jcard'>")
-        h.append(f"<div class='jcard-name'>{_esc(j)}</div>")
-        h.append(f"<div class='jcard-platform'>{_esc(js.get('platform', ''))}</div>")
+        h.append(f"<div class='jcard-name'>{name_html}</div>")
+        h.append(f"<div class='jcard-platform'>{_esc(plat_str)}</div>")
         h.append(f"<div class='jcard-stats'>{n_ms} mss · {n_ref} refs</div>")
-        jp = journal_performance.get(j_lower, {})
-        if jp:
-            completed_reviews = jp.get("completed_reviews", 0)
-            avg_days = jp.get("avg_review_days")
+        # Aggregate journal_performance across all codes in the group
+        completed_reviews = 0
+        avg_days_values = []
+        for code in codes:
+            jp = journal_performance.get(code.lower(), {})
+            if jp:
+                completed_reviews += jp.get("completed_reviews", 0) or 0
+                ad = jp.get("avg_review_days")
+                if ad is not None:
+                    avg_days_values.append(ad)
+        if completed_reviews or avg_days_values:
             h.append(f"<div class='jcard-stats'>{completed_reviews} reviews done")
-            if avg_days is not None:
+            if avg_days_values:
+                avg_days = sum(avg_days_values) / len(avg_days_values)
                 h.append(f" · avg {avg_days:.0f}d")
             h.append("</div>")
         h.append(f"<span class='jcard-fresh {fc}'>{_esc(fl)}</span>")

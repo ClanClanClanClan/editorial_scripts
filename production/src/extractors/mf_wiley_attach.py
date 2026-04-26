@@ -20,6 +20,7 @@ import sys
 import time
 from datetime import datetime
 from pathlib import Path
+from typing import Optional
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from core.output_schema import normalize_wrapper
@@ -319,22 +320,59 @@ def extract_submitted_report_for_referee(card_index: int, referee_name: str) -> 
             var panels = c.querySelectorAll('[data-test-id*="report"], [data-test-id*="Submitted"], [data-test-id*="submitted"]');
             if (!panels || panels.length === 0) return 'NO_PANEL';
             var combinedText = '';
+            var attachments = [];
             for (var i = 0; i < panels.length; i++) {{
                 var t = (panels[i].textContent || '').trim();
+                // Collect any PDF/document links (forward-looking — once a
+                // reviewer submits a report with an attachment, this surfaces
+                // the URL so the operator can fetch + extract text)
+                var links = panels[i].querySelectorAll('a[href]');
+                for (var j = 0; j < links.length; j++) {{
+                    var h = links[j].getAttribute('href') || '';
+                    var ext = h.toLowerCase();
+                    if (ext.indexOf('.pdf') >= 0 || ext.indexOf('.doc') >= 0 ||
+                        h.indexOf('download') >= 0 || h.indexOf('attachment') >= 0 ||
+                        (links[j].getAttribute('data-test-id') || '').indexOf('attachment') >= 0) {{
+                        attachments.push({{
+                            url: h.indexOf('http') === 0 ? h : (location.origin + h),
+                            filename: links[j].textContent.trim().substring(0, 120),
+                            test_id: links[j].getAttribute('data-test-id') || ''
+                        }});
+                    }}
+                }}
                 // Skip stub/empty panels (just a button or label)
                 if (t.length < 30) continue;
                 combinedText += t + '\\n';
             }}
-            if (!combinedText.trim()) return 'NO_TEXT';
-            return combinedText.substring(0, 20000);
+            if (!combinedText.trim() && attachments.length === 0) return 'NO_TEXT';
+            return JSON.stringify({{
+                text: combinedText.substring(0, 20000),
+                attachments: attachments
+            }});
         }})()
     """
     )
     if not raw or raw in ("NO_CARD", "NO_PANEL", "NO_TEXT"):
         return None
 
-    text = raw.strip()
-    if len(text) < 30:
+    # Parse the JSON envelope (text + attachments[])
+    import json as _json
+
+    try:
+        envelope = _json.loads(raw)
+    except Exception:
+        # Backwards-compat: old version returned plain text
+        envelope = {"text": raw, "attachments": []}
+
+    text = (envelope.get("text") or "").strip()
+    attachments_meta = envelope.get("attachments") or []
+
+    # If we got attachment URLs but no inline text, the report content lives
+    # in the PDFs. Try downloading via the user's Chrome session by opening
+    # each attachment URL in a hidden iframe and base64-fetching the bytes.
+    # If the JS fetch fails (cross-origin / auth), record the URL as a TODO
+    # so the operator can manually download and re-run analysis.
+    if not text and not attachments_meta:
         return None
 
     # Best-effort heuristic parsing — labels match what the operator will
@@ -357,29 +395,144 @@ def extract_submitted_report_for_referee(card_index: int, referee_name: str) -> 
     cta = (cta_match.group(1).strip() if cta_match else "") or ""
     cc = (cc_match.group(1).strip() if cc_match else "") or ""
 
-    if not (recommendation or cta or cc):
+    # Even if no inline text, surface the attachment URLs so they aren't lost
+    if not (recommendation or cta or cc) and not attachments_meta:
         return None
 
-    word_text = cta or text
+    # Try downloading any attachment PDFs via Chrome's authenticated fetch
+    # so we can extract their text. We do this by running a JS fetch in
+    # the active Chrome tab (cookies travel automatically) and shuttling
+    # the bytes back base64-encoded. AppleScript JS has a result-size cap,
+    # so we chunk into ~50KB pieces.
+    pdf_text_extras: list[str] = []
+    attachment_records: list[dict] = []
+    for att in attachments_meta:
+        url = att.get("url") or ""
+        if not url:
+            continue
+        record = {
+            "url": url,
+            "filename": att.get("filename") or "",
+            "test_id": att.get("test_id") or "",
+        }
+        if url.lower().endswith(".pdf") or "pdf" in url.lower():
+            try:
+                local_path = _wiley_fetch_pdf_via_chrome(url)
+                if local_path:
+                    from core.pdf_utils import extract_pdf_text
+
+                    pdf_text = extract_pdf_text(local_path)
+                    if pdf_text:
+                        pdf_text_extras.append(pdf_text)
+                    record["local_path"] = str(local_path)
+            except Exception as e:
+                print(f"   ⚠️ Failed to fetch Wiley attachment {url[:80]}: {str(e)[:80]}")
+        attachment_records.append(record)
+
+    # Merge any PDF text into the report fields
+    pdf_combined = "\n".join(pdf_text_extras).strip()
+    if pdf_combined and not cta:
+        cta = pdf_combined[:20000]
+    raw_combined = text or pdf_combined
+    if pdf_combined and pdf_combined not in raw_combined:
+        raw_combined = (raw_combined + "\n" + pdf_combined).strip()
+
+    if not (recommendation or cta or cc or pdf_combined):
+        return None
+
+    word_text = cta or pdf_combined or text
     return {
         "revision": 0,
         "recommendation": recommendation,
         "recommendation_raw": recommendation,
         "comments_to_author": cta[:20000],
         "confidential_comments": cc[:20000],
-        "raw_text": text[:20000],
+        "raw_text": raw_combined[:20000],
         "scores": {},
         "report_date": None,
-        "word_count": len(word_text.split()),
-        "attachments": [],
+        "word_count": len(word_text.split()) if word_text else 0,
+        "attachments": attachment_records,
         "source": "wiley_panel",
-        "extraction_status": "ok" if (cta or cc) else "shell_only",
+        "extraction_status": "ok" if (cta or cc or pdf_combined) else "shell_only",
         "available": True,
         "platform_specific": {
             "referee_name": referee_name,
             "card_index": card_index,
         },
     }
+
+
+def _wiley_fetch_pdf_via_chrome(url: str) -> Optional["Path"]:
+    """Fetch a PDF via the user's logged-in Chrome session using an
+    AppleScript JS fetch + base64 shuttle. Saves to
+    `production/downloads/mf_wiley/` and returns the local path on success.
+
+    AppleScript `execute javascript` has a result-size cap (~1 MB),
+    so we chunk by reading the response into a window-scoped Uint8Array
+    and returning slices in successive calls.
+    """
+    download_dir = (
+        Path(__file__).parent.parent.parent.parent / "production" / "downloads" / "mf_wiley"
+    )
+    download_dir.mkdir(parents=True, exist_ok=True)
+    safe_name = re.sub(r"[^a-zA-Z0-9._-]", "_", url.split("/")[-1] or "report.pdf")
+    if not safe_name.lower().endswith(".pdf"):
+        safe_name += ".pdf"
+    local_path = download_dir / safe_name
+
+    # Step 1: fetch + buffer in window
+    fetch_js = f"""
+    (async function() {{
+        try {{
+            var r = await fetch({json.dumps(url)}, {{credentials: 'include'}});
+            if (!r.ok) return 'HTTP_' + r.status;
+            var buf = new Uint8Array(await r.arrayBuffer());
+            window._wileyAttBuf = buf;
+            return 'OK_' + buf.length;
+        }} catch (e) {{
+            return 'ERR_' + (e && e.message || 'unknown');
+        }}
+    }})()
+    """
+    res = js(fetch_js)
+    if not res or not res.startswith("OK_"):
+        return None
+    try:
+        total = int(res.split("_", 1)[1])
+    except Exception:
+        return None
+
+    # Step 2: pull buffer back in 256KB chunks (base64 ~ 1.33x size)
+    chunk_size = 256 * 1024
+    bytes_out = bytearray()
+    offset = 0
+    while offset < total:
+        end = min(offset + chunk_size, total)
+        chunk_js = f"""
+        (function() {{
+            var buf = window._wileyAttBuf;
+            var slice = buf.subarray({offset}, {end});
+            // Convert to base64
+            var bin = '';
+            for (var i = 0; i < slice.length; i++) bin += String.fromCharCode(slice[i]);
+            return btoa(bin);
+        }})()
+        """
+        b64 = js(chunk_js)
+        if not b64:
+            return None
+        import base64
+
+        bytes_out.extend(base64.b64decode(b64))
+        offset = end
+
+    # Cleanup window-scoped buffer
+    js("delete window._wileyAttBuf;")
+
+    if len(bytes_out) != total:
+        return None
+    local_path.write_bytes(bytes_out)
+    return local_path
 
 
 def extract_referees() -> list[dict]:
@@ -1078,13 +1231,26 @@ def _run_preflight() -> bool:
     preflight = project_dir / "scripts" / "check_wiley_prereqs.py"
     if not preflight.exists():
         # Pre-flight script is optional; fall through to legacy in-process check
+        print(f"⚠️  Pre-flight script not found at {preflight}; skipping checks.")
         return True
-    r = subprocess.run(
-        [sys.executable, str(preflight)],
-        capture_output=True,
-        text=True,
-        timeout=20,
-    )
+    try:
+        r = subprocess.run(
+            [sys.executable, str(preflight)],
+            capture_output=True,
+            text=True,
+            timeout=20,
+        )
+    except subprocess.TimeoutExpired:
+        print(
+            "❌ Pre-flight check timed out after 20s.\n"
+            "   This usually means osascript hung waiting on a Chrome dialog\n"
+            "   (e.g. AppleScript permission prompt). Click any pending\n"
+            "   dialogs in Chrome and re-run."
+        )
+        return False
+    except FileNotFoundError as e:
+        print(f"❌ Pre-flight check could not be launched: {e}")
+        return False
     if r.stdout:
         print(r.stdout, end="" if r.stdout.endswith("\n") else "\n")
     if r.stderr:

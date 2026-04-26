@@ -679,9 +679,15 @@ class EMExtractor(CachedExtractorMixin):
 
         self._populate_from_row_data(manuscript, ms_info)
 
+        # Order matters: summary page first (lists all assigned referees
+        # with status), THEN the reviews page (has the per-review detail
+        # popup links + completed-review HTML). Both must run when both
+        # are present — without the reviews page, review_detail_links
+        # stays empty and `_extract_referee_reports` is skipped, so
+        # completed reviews never produce a canonical `referee.reports[0]`.
         if ms_info.get("reviewer_summary_url"):
             self._extract_referees_from_summary_page(manuscript, ms_info)
-        elif ms_info.get("reviews_js"):
+        if ms_info.get("reviews_js"):
             self._extract_referees_from_reviews_page(manuscript, ms_info)
 
         if ms_info.get("details_js"):
@@ -1499,6 +1505,21 @@ class EMExtractor(CachedExtractorMixin):
                     if downloaded:
                         file_entry["local_path"] = downloaded
                         download_count += 1
+                        # Extract text from PDF/DOC attachments and merge
+                        # into the canonical report dict so reviewers who
+                        # uploaded their report still surface in raw_text /
+                        # comments_to_author.
+                        if downloaded.lower().endswith((".pdf", ".doc", ".docx")):
+                            try:
+                                from core.pdf_utils import populate_report_from_pdf
+
+                                populate_report_from_pdf(
+                                    report, downloaded, attachment_url=full_url
+                                )
+                            except Exception as e:
+                                print(
+                                    f"         ⚠️ Failed to extract text from reviewer attachment: {str(e)[:80]}"
+                                )
 
                     files.append(file_entry)
 

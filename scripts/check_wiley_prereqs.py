@@ -69,21 +69,48 @@ end tell
 
 
 def _js_apple_events_enabled() -> bool:
-    """Try to evaluate a trivial JS expression. If AppleScript JS is disabled,
-    Chrome returns an error message containing 'turned off'."""
+    """Try to evaluate a trivial JS expression against the Wiley tab if one
+    is open, otherwise the front-window active tab. Handles zero-windows
+    Chrome (no front window) and missing-tab cases.
+
+    If AppleScript JS is disabled, Chrome returns an error message
+    containing 'turned off' or 'JavaScript through AppleScript'.
+    """
     script = """
 tell application "Google Chrome"
-    tell active tab of front window
-        return execute javascript "1+1"
-    end tell
+    if (count of windows) is 0 then return "NO_WINDOWS"
+    set targetTab to missing value
+    repeat with w in every window
+        repeat with t in every tab of w
+            if URL of t contains "review.wiley.com" then
+                set targetTab to t
+                exit repeat
+            end if
+        end repeat
+        if targetTab is not missing value then exit repeat
+    end repeat
+    if targetTab is missing value then
+        try
+            set targetTab to active tab of front window
+        on error
+            return "NO_TAB"
+        end try
+    end if
+    try
+        return (execute targetTab javascript "1+1") as text
+    on error errMsg
+        return "ERR:" & errMsg
+    end try
 end tell
 """.strip()
     rc, out, err = _osa(script)
     if rc == 0 and out == "2":
         return True
-    if "turned off" in (out + err).lower() or "applescript" in (out + err).lower():
+    combined = (out + " " + err).lower()
+    if "turned off" in combined or "javascript through applescript" in combined:
         return False
-    # Fallback heuristic: any failure is treated as disabled
+    # Other failures (no windows, no tab, syntax error) — treat as disabled so
+    # the surrounding remediation message points the operator at Chrome
     return False
 
 
@@ -91,14 +118,38 @@ def _classify_title(title: str) -> str:
     t = (title or "").strip().lower()
     if not t:
         return "empty"
-    if "dashboard" in t and "wiley" in t:
-        return "logged_in"
-    if "connexion" in t or "connect" in t:
-        return "logged_out"
-    if "moment" in t or "instant" in t:
+    # Cloudflare challenge — check first because "moment" appears in localized
+    # variants across languages
+    if "moment" in t or "instant" in t or "verifying" in t:
         return "cloudflare"
-    if "manuscript details" in t and "wiley" in t:
+    # Logged-in pages — dashboard, manuscript details, profile, settings, list
+    if "wiley" in t and (
+        "dashboard" in t
+        or "manuscript details" in t
+        or "manuscripts" in t
+        or "profile" in t
+        or "settings" in t
+        or "research exchange" in t
+    ):
         return "logged_in"
+    # Login pages: English ("Connect", "Sign in"), French ("Connexion"),
+    # German ("Anmelden"), Spanish ("Iniciar sesión", "Conectar"), Italian
+    # ("Accedi"), Portuguese ("Entrar")
+    login_markers = (
+        "connexion",
+        "connect",
+        "sign in",
+        "log in",
+        "login",
+        "anmelden",
+        "iniciar sesión",
+        "iniciar sesion",
+        "conectar",
+        "accedi",
+        "entrar",
+    )
+    if any(m in t for m in login_markers):
+        return "logged_out"
     return "unknown"
 
 
@@ -121,6 +172,12 @@ def main():
             "   Open https://review.wiley.com in a Chrome tab and pass the\n"
             "   Cloudflare challenge if prompted."
         )
+        # Skip the JS / title checks — they would target the wrong tab and
+        # produce misleading remediation steps. Operator must open the tab
+        # first; subsequent re-runs will surface JS / login issues.
+        for f in failures:
+            print(f)
+        sys.exit(1)
 
     if not _js_apple_events_enabled():
         failures.append(
@@ -129,7 +186,7 @@ def main():
             "Allow JavaScript from Apple Events, and check the box."
         )
 
-    state = _classify_title(title) if found else "no_tab"
+    state = _classify_title(title)
     if state == "logged_out":
         failures.append(
             "❌ Wiley tab is on the login page.\n"

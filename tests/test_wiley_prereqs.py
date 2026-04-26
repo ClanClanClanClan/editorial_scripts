@@ -27,9 +27,27 @@ class TestClassifyTitle:
         assert preflight._classify_title("Connexion - CONNECT") == "logged_out"
         assert preflight._classify_title("Connect - Sign in") == "logged_out"
 
+    def test_login_page_non_english(self):
+        # German, Spanish, Italian, Portuguese login flows
+        assert preflight._classify_title("Anmelden - Wiley") == "logged_out"
+        assert preflight._classify_title("Iniciar sesión") == "logged_out"
+        assert preflight._classify_title("Conectar - Wiley") == "logged_out"
+        assert preflight._classify_title("Accedi") == "logged_out"
+        assert preflight._classify_title("Entrar") == "logged_out"
+
     def test_cloudflare_challenge(self):
         assert preflight._classify_title("Just a moment...") == "cloudflare"
         assert preflight._classify_title("Un instant...") == "cloudflare"
+        # Cloudflare challenge takes precedence over login-marker words
+        # ("connect" appears nowhere here, but verify the marker order is sane)
+        assert preflight._classify_title("Verifying you are human") == "cloudflare"
+
+    def test_logged_in_extra_pages(self):
+        # Profile, Manuscripts list, Settings — all logged-in states
+        assert preflight._classify_title("Profile | Wiley") == "logged_in"
+        assert preflight._classify_title("Manuscripts | Wiley") == "logged_in"
+        assert preflight._classify_title("Settings | Wiley") == "logged_in"
+        assert preflight._classify_title("Research Exchange Review | Wiley") == "logged_in"
 
     def test_empty_title(self):
         assert preflight._classify_title("") == "empty"

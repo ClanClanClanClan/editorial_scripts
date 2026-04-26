@@ -1735,6 +1735,18 @@ class SIAMExtractor(CachedExtractorMixin):
                 if all(r is not report for r in ref_reports):
                     ref_reports.append(report)
 
+            # ── PDF attachments ─────────────────────────────────────
+            # SIAM reviews can include "Referee #N Review Attachment #M"
+            # links pointing to PDF files when a reviewer uploaded their
+            # report instead of (or in addition to) typing it inline.
+            # Pattern observed in production debug HTML:
+            #   <a href=".../<refnum>_reviewer_attachment_<n>_<id>.pdf"
+            #      target="FILE">Referee #N Review Attachment #M</a>
+            try:
+                self._attach_referee_pdfs(manuscript, rev_soup)
+            except Exception as e:
+                print(f"         ⚠️ Referee PDF attachment scan failed: {str(e)[:80]}")
+
             if not any(r.get("report") for r in referees):
                 full_text = rev_soup.get_text(separator="\n", strip=True)
                 if len(full_text) > 100:
@@ -1756,6 +1768,102 @@ class SIAMExtractor(CachedExtractorMixin):
                 self.smart_wait(2)
             except Exception:
                 pass
+
+    def _attach_referee_pdfs(self, manuscript: dict, rev_soup: BeautifulSoup) -> None:
+        """Scan the SIAM reviews page for referee PDF attachments and
+        merge their text into each matching referee's canonical report.
+
+        SIAM exposes attachments as anchors like:
+            <a href=".../<refnum>_reviewer_attachment_<n>_<id>.pdf"
+               target="FILE">Referee #N Review Attachment #M</a>
+
+        For each attachment we:
+          1. Extract referee number from the link text or URL
+          2. Match to the corresponding referee in `manuscript['referees']`
+          3. Download via `_download_file_from_url`
+          4. Merge PDF text into the referee's canonical report dict via
+             `populate_report_from_pdf`
+        """
+        from core.pdf_utils import populate_report_from_pdf
+
+        referees = manuscript.get("referees", [])
+        if not referees:
+            return
+
+        ms_id = manuscript.get("manuscript_id", "unknown")
+
+        # Find attachment anchors. Be tolerant: match either the URL
+        # pattern or the literal "Review Attachment" / "reviewer_attachment"
+        # in the anchor text/href.
+        link_url_pat = re.compile(r"reviewer_attachment", re.IGNORECASE)
+        link_text_pat = re.compile(r"Referee\s*#?\s*(\d+).*Review.*Attachment", re.IGNORECASE)
+        url_refnum_pat = re.compile(r"/(\d+)_reviewer_attachment_", re.IGNORECASE)
+
+        seen = set()
+        for a in rev_soup.find_all("a", href=True):
+            href = a["href"]
+            text = a.get_text(" ", strip=True)
+            if not href or href in seen:
+                continue
+            if not (link_url_pat.search(href) or "Review Attachment" in text):
+                continue
+            seen.add(href)
+
+            # Resolve referee number: link text first, then URL filename
+            ref_num: Optional[str] = None
+            m = link_text_pat.search(text)
+            if m:
+                ref_num = m.group(1)
+            else:
+                m2 = url_refnum_pat.search(href)
+                if m2:
+                    ref_num = m2.group(1)
+
+            # Match referee
+            ref = None
+            if ref_num is not None:
+                for candidate in referees:
+                    if str(candidate.get("referee_number")) == str(ref_num):
+                        ref = candidate
+                        break
+            if ref is None:
+                # Fallback: if exactly one referee, attach unconditionally
+                active_refs = [
+                    r for r in referees if r.get("status") not in ("declined", "terminated")
+                ]
+                if len(active_refs) == 1:
+                    ref = active_refs[0]
+            if ref is None:
+                continue
+
+            # Download
+            full_url = href if href.startswith("http") else f"{self.BASE_URL}/{href.lstrip('/')}"
+            doc_type = (
+                f"referee_report_{ref_num}_attachment" if ref_num else "referee_report_attachment"
+            )
+            try:
+                local_path = self._download_file_from_url(full_url, ms_id, doc_type)
+            except Exception as e:
+                print(f"         ⚠️ Referee PDF download failed: {str(e)[:80]}")
+                continue
+            if not local_path:
+                continue
+
+            # Make sure the referee has a canonical report dict
+            report = ref.get("report") or {}
+            report.setdefault("source", "siam_reviewer_attachment")
+            report.setdefault("revision", manuscript.get("revision_number", 0) or 0)
+
+            ok = populate_report_from_pdf(report, local_path, attachment_url=full_url)
+            ref["report"] = report
+            ref_reports = ref.setdefault("reports", [])
+            if all(r is not report for r in ref_reports):
+                ref_reports.append(report)
+            if ok:
+                preview = (report.get("comments_to_author") or "")[:80].replace("\n", " ")
+                print(
+                    f"         📎 Referee #{ref_num or '?'} PDF attached ({len(report.get('raw_text') or '')} chars): {preview}"
+                )
 
     def _scrape_status_details_page(
         self, manuscript: dict, soup: BeautifulSoup

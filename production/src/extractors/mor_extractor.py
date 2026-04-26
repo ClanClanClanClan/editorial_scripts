@@ -948,16 +948,72 @@ class MORExtractor(ScholarOneBaseExtractor):
                         f"      🔍 Recovery: {len(all_review_links)} view_review links on page, "
                         f"{len(refs_without_url)} referees without URL"
                     )
+
+                    # ---- Pre-pass: extract URL for every link up-front ----
+                    # We use this both to short-circuit the per-link loop
+                    # and to power the positional-pair fallback below.
+                    link_urls = []
+                    # Match common ScholarOne popup invocations: popWindow,
+                    # popUp, openWindow, window.open — both with single
+                    # and double quotes.
+                    popup_url_pat = re.compile(
+                        r"(?:popWindow|popUp|openWindow|window\.open)\s*\(\s*['\"]([^'\"]+)['\"]",
+                        re.IGNORECASE,
+                    )
+                    for idx, rl in enumerate(all_review_links):
+                        try:
+                            href = rl.get_attribute("href") or ""
+                            onclick = rl.get_attribute("onclick") or ""
+                            # Try onclick, then href, then full outerHTML as last resort
+                            outer = rl.get_attribute("outerHTML") or ""
+                            url_m = popup_url_pat.search(onclick)
+                            if not url_m:
+                                url_m = popup_url_pat.search(href)
+                            if not url_m:
+                                url_m = popup_url_pat.search(outer)
+                            # Also accept href that's just a direct URL (no popup wrapper)
+                            if (
+                                not url_m
+                                and href
+                                and href.startswith(("http", "/"))
+                                and ("review" in href.lower() or "rev_ms" in href.lower())
+                            ):
+                                link_urls.append(href)
+                                continue
+                            if url_m:
+                                link_urls.append(url_m.group(1))
+                            else:
+                                # Diagnostic: surface the bare href/onclick so we
+                                # can broaden the regex if a new pattern appears
+                                print(
+                                    f"      🔍 Recovery link {idx} no URL match — "
+                                    f"href={href[:80]!r} onclick={onclick[:80]!r}"
+                                )
+                                link_urls.append(None)
+                        except Exception as e:
+                            print(f"      🔍 Recovery link {idx} extraction failed: {str(e)[:60]}")
+                            link_urls.append(None)
                     for rl in all_review_links:
                         try:
                             href = rl.get_attribute("href") or ""
-                            onclick = rl.get_attribute("onclick") or href
-                            url_m = re.search(r"popWindow\('([^']+)'", onclick)
+                            onclick = rl.get_attribute("onclick") or ""
+                            outer = rl.get_attribute("outerHTML") or ""
+                            url_m = popup_url_pat.search(onclick)
                             if not url_m:
-                                url_m = re.search(r"popWindow\('([^']+)'", href)
+                                url_m = popup_url_pat.search(href)
                             if not url_m:
+                                url_m = popup_url_pat.search(outer)
+                            if (
+                                not url_m
+                                and href
+                                and href.startswith(("http", "/"))
+                                and ("review" in href.lower() or "rev_ms" in href.lower())
+                            ):
+                                url = href
+                            elif url_m:
+                                url = url_m.group(1)
+                            else:
                                 continue
-                            url = url_m.group(1)
                             already_assigned = any(r.get("report_url") == url for r in referees)
                             if already_assigned:
                                 continue
@@ -1022,8 +1078,41 @@ class MORExtractor(ScholarOneBaseExtractor):
                                     pass
                         except Exception:
                             continue
-                except Exception:
-                    pass
+
+                    # Strategy 3 (positional fallback): when counts match,
+                    # pair the i-th unmatched referee with the i-th remaining
+                    # view_review link in DOM order. ScholarOne's referee
+                    # table renders rows in the same order as the JSON
+                    # extracted by `extract_referees_enhanced`, so this is
+                    # safe when both lists have the same length OR when only
+                    # one referee remains unmatched.
+                    still_missing = [r for r in refs_without_url if not r.get("report_url")]
+                    unused_urls = [
+                        u
+                        for u in link_urls
+                        if u and not any(r.get("report_url") == u for r in referees)
+                    ]
+                    if still_missing and unused_urls:
+                        if len(still_missing) == len(unused_urls):
+                            # Exact 1-1 pairing
+                            for ref, url in zip(still_missing, unused_urls, strict=False):
+                                ref["report_url"] = url
+                                print(
+                                    f"      🔍 Recovered URL for {ref.get('name','?')} (positional fallback)"
+                                )
+                        elif len(still_missing) == 1:
+                            # One referee, multiple links — assign first
+                            still_missing[0]["report_url"] = unused_urls[0]
+                            print(
+                                f"      🔍 Recovered URL for {still_missing[0].get('name','?')} (single-ref fallback)"
+                            )
+                        else:
+                            print(
+                                f"      ⚠️ Recovery skipped — {len(still_missing)} refs vs "
+                                f"{len(unused_urls)} URLs (counts mismatch)"
+                            )
+                except Exception as recov_e:
+                    print(f"      ⚠️ Recovery error: {str(recov_e)[:80]}")
 
             if referees:
                 self.extract_referee_emails_from_table(referees)

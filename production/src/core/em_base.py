@@ -304,35 +304,141 @@ class EMExtractor(CachedExtractorMixin):
         return False
 
     def _select_editor_role(self) -> bool:
+        """Switch the user to the configured editor role.
+
+        Editorial Manager UIs vary by tenant + version: the dropdown can
+        be a `<select id="RoleDropdown">` on the main page, in an iframe,
+        or absent entirely (when the user has only one role). We also
+        accept the case where the user is already on an editor dashboard
+        (no dropdown needed). Returns True iff the role is now editor or
+        a switch is unnecessary.
+        """
         self.switch_to_default()
+
+        # Step 1: try every known frame, look for a role dropdown by id
+        # OR by name. EM tenants use both forms.
+        frames_to_try: list = [None]  # default content
         try:
-            current = self.driver.execute_script(
-                "var dd = document.getElementById('RoleDropdown');" "return dd ? dd.value : null;"
-            )
-            if current is None:
-                print("   ⚠️ No RoleDropdown found")
-                return False
+            for frame in self.driver.find_elements(By.TAG_NAME, "iframe"):
+                frames_to_try.append(frame)
+            for frame in self.driver.find_elements(By.TAG_NAME, "frame"):
+                frames_to_try.append(frame)
+        except Exception:
+            pass
 
-            print(f"   Current role: {current}")
-            if current == self.EDITOR_ROLE:
-                print("   ✅ Already in editor role")
-                return True
+        dropdown_probe = (
+            "var dd = document.getElementById('RoleDropdown') "
+            "|| document.querySelector('select[name=\"RoleDropdown\"]') "
+            "|| document.querySelector('select[id*=\"Role\"]') "
+            "|| document.querySelector('select[name*=\"Role\"]'); "
+            "if (!dd) return null; "
+            "return JSON.stringify({"
+            "  id: dd.id || '', name: dd.name || '', "
+            "  value: dd.value, "
+            "  options: Array.from(dd.options || []).map(function(o){return {value:o.value,text:o.text};})"
+            "});"
+        )
 
+        found_in_frame = None
+        dd_info = None
+        for frame in frames_to_try:
+            try:
+                self.switch_to_default()
+                if frame is not None:
+                    self.driver.switch_to.frame(frame)
+                raw = self.driver.execute_script(dropdown_probe)
+                if raw:
+                    import json as _json
+
+                    dd_info = _json.loads(raw)
+                    found_in_frame = frame
+                    break
+            except Exception:
+                continue
+        # Reset frame context
+        self.switch_to_default()
+
+        if dd_info is None:
+            # No dropdown anywhere — check whether we're already on the
+            # editor menu, in which case there's nothing to switch.
+            print("   ⚠️ No RoleDropdown found — checking if already on editor menu")
+            try:
+                if self.switch_to_content_frame():
+                    src = self.driver.page_source or ""
+                    self.switch_to_default()
+                    if (
+                        "EditorMainMenu" in src
+                        or "EditorsMainMenu" in src
+                        or "aries-folder-item" in src
+                    ):
+                        print("   ✅ Already on editor dashboard — role switch unnecessary")
+                        return True
+            except Exception:
+                self.switch_to_default()
+            return False
+
+        current = dd_info.get("value", "")
+        options = dd_info.get("options", [])
+        opts_summary = ", ".join(
+            f"{o.get('value','')}={o.get('text','')[:30]}" for o in options[:5]
+        )
+        print(f"   Current role: {current!r}; options: {opts_summary}")
+
+        if current == self.EDITOR_ROLE:
+            print("   ✅ Already in editor role")
+            return True
+
+        # Try to match EDITOR_ROLE against option values; if our literal
+        # value isn't present, fall back to fuzzy match by visible text
+        # ("Editor", "Associate Editor", etc.)
+        target_value = None
+        for o in options:
+            if o.get("value", "") == self.EDITOR_ROLE:
+                target_value = self.EDITOR_ROLE
+                break
+        if target_value is None:
+            for o in options:
+                txt_lower = o.get("text", "").lower()
+                if "editor" in txt_lower and "select" not in txt_lower:
+                    target_value = o.get("value", "")
+                    print(
+                        f"   ℹ️ Configured EDITOR_ROLE={self.EDITOR_ROLE!r} not in dropdown; "
+                        f"falling back to {o.get('text','')!r} (value={target_value!r})"
+                    )
+                    break
+        if target_value is None:
+            print("   ⚠️ No editor-like option in RoleDropdown — staying on current role")
+            return False
+
+        # Switch into the frame where we found it (if any) for the postback
+        try:
+            self.switch_to_default()
+            if found_in_frame is not None:
+                self.driver.switch_to.frame(found_in_frame)
             self.driver.execute_script(
                 f"""
-                var dd = document.getElementById('RoleDropdown');
-                dd.value = '{self.EDITOR_ROLE}';
+                var dd = document.getElementById('RoleDropdown')
+                  || document.querySelector('select[name="RoleDropdown"]')
+                  || document.querySelector('select[id*="Role"]')
+                  || document.querySelector('select[name*="Role"]');
+                if (!dd) return;
+                dd.value = '{target_value}';
+                dd.dispatchEvent(new Event('change', {{bubbles: true}}));
                 if (typeof closeSysAdmin === 'function') closeSysAdmin();
-                setTimeout(function() {{ __doPostBack('RoleDropdown',''); }}, 0);
+                if (typeof __doPostBack === 'function') {{
+                    setTimeout(function() {{ __doPostBack(dd.id || dd.name || 'RoleDropdown',''); }}, 0);
+                }}
                 """
             )
-            print(f"   ✅ Switched to role: {self.EDITOR_ROLE}")
+            self.switch_to_default()
+            print(f"   ✅ Switched to role: {target_value}")
             self.smart_wait(10)
             self._save_debug_html("after_role_switch")
             return True
 
         except Exception as e:
-            print(f"   ⚠️ Role switch error: {str(e)[:60]}")
+            self.switch_to_default()
+            print(f"   ⚠️ Role switch error: {str(e)[:80]}")
             return False
 
     # ── Navigation ────────────────────────────────────────────

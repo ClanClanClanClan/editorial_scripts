@@ -1121,21 +1121,11 @@ class MORExtractor(ScholarOneBaseExtractor):
                     manuscript_data["emails_extracted"] = True
                     print(f"      📧 Successfully extracted {email_count} emails")
 
-                reports_extracted = 0
-                for ref in referees:
-                    if ref.get("report_url"):
-                        report = self.extract_referee_report_from_popup(
-                            ref, manuscript_id=manuscript_id
-                        )
-                        if report:
-                            ref["report"] = report
-                            # Append to canonical reports list
-                            ref.setdefault("reports", []).append(dict(report))
-                            if report.get("recommendation") and not ref.get("recommendation"):
-                                ref["recommendation"] = report["recommendation"]
-                            reports_extracted += 1
-                if reports_extracted:
-                    print(f"      📝 Extracted {reports_extracted} referee report(s)")
+                # NOTE: Popup report extraction is DEFERRED to PASS 7b (end
+                # of manuscript extraction). When the popup is blocked and
+                # we have to navigate in place, the manuscript folder page
+                # state is lost — running PASS 2-6 first ensures
+                # title / authors / abstract are captured before navigation.
 
             try:
                 review_details_links = self.driver.find_elements(
@@ -1396,6 +1386,37 @@ class MORExtractor(ScholarOneBaseExtractor):
             self._compute_referee_statistics(manuscript_data)
         except Exception:
             pass
+
+        # PASS 7b: REFEREE REPORT POPUP EXTRACTION (deferred from PASS 1)
+        # Why deferred: when the popup is blocked, our fallback navigates
+        # the only tab in place. That navigation breaks PASS 2-6 (which
+        # need the manuscript folder page state). Running it last means
+        # we lose the page only after every other field is captured.
+        try:
+            referees = manuscript_data.get("referees", [])
+            refs_with_url = [r for r in referees if r.get("report_url")]
+            if refs_with_url:
+                print(f"\n   🔄 PASS 7b: REFEREE REPORT POPUP EXTRACTION ({len(refs_with_url)})")
+                print("   " + "-" * 50)
+                reports_extracted = 0
+                for ref in refs_with_url:
+                    try:
+                        report = self.extract_referee_report_from_popup(
+                            ref, manuscript_id=manuscript_id
+                        )
+                    except Exception as e:
+                        print(f"      ⚠️ Popup extraction error: {str(e)[:80]}")
+                        report = None
+                    if report:
+                        ref["report"] = report
+                        ref.setdefault("reports", []).append(dict(report))
+                        if report.get("recommendation") and not ref.get("recommendation"):
+                            ref["recommendation"] = report["recommendation"]
+                        reports_extracted += 1
+                if reports_extracted:
+                    print(f"      📝 Extracted {reports_extracted} referee report(s)")
+        except Exception as e:
+            print(f"      ⚠️ Pass 7b error: {str(e)[:80]}")
 
         # ORCID enrichment for referees and authors missing ORCIDs
         if ORCIDLookup is not None:
@@ -2896,17 +2917,71 @@ class MORExtractor(ScholarOneBaseExtractor):
             self.cleanup_driver()
 
     def _open_category(self, category: str) -> bool:
-        """Navigate to AE center and click open a category. Returns True on success."""
-        self.navigate_to_ae_center()
-        try:
-            wait_short = WebDriverWait(self.driver, 5)
-            category_link = wait_short.until(EC.element_to_be_clickable((By.LINK_TEXT, category)))
-            self.safe_click(category_link)
-            self.smart_wait(1.5)
-            self._capture_page("category_list", category.replace(" ", "_"))
-            return True
-        except TimeoutException:
-            return False
+        """Navigate to AE center and click open a category. Returns True on success.
+
+        Retries up to 3 times because ScholarOne sometimes lands on a
+        partially-loaded dashboard after a back-navigation. Tries
+        LINK_TEXT, PARTIAL_LINK_TEXT, and XPath text-contains in that
+        order — category labels often have a count appended like
+        "Awaiting Reviewer Reports (2)" that breaks exact LINK_TEXT.
+        """
+        last_error = None
+        for attempt in range(1, 4):
+            try:
+                self.navigate_to_ae_center()
+                self.smart_wait(2)
+
+                # Strategy 1: exact link text
+                try:
+                    el = WebDriverWait(self.driver, 5).until(
+                        EC.element_to_be_clickable((By.LINK_TEXT, category))
+                    )
+                    self.safe_click(el)
+                    self.smart_wait(1.5)
+                    self._capture_page("category_list", category.replace(" ", "_"))
+                    return True
+                except TimeoutException:
+                    pass
+
+                # Strategy 2: partial link text (covers "<name> (count)" suffix)
+                try:
+                    el = WebDriverWait(self.driver, 5).until(
+                        EC.element_to_be_clickable((By.PARTIAL_LINK_TEXT, category))
+                    )
+                    self.safe_click(el)
+                    self.smart_wait(1.5)
+                    self._capture_page("category_list", category.replace(" ", "_"))
+                    return True
+                except TimeoutException:
+                    pass
+
+                # Strategy 3: XPath case-insensitive contains on visible text
+                try:
+                    xpath = (
+                        f"//a[contains(translate(normalize-space(.), "
+                        f"'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), "
+                        f"'{category.lower()}')]"
+                    )
+                    el = WebDriverWait(self.driver, 5).until(
+                        EC.element_to_be_clickable((By.XPATH, xpath))
+                    )
+                    self.safe_click(el)
+                    self.smart_wait(1.5)
+                    self._capture_page("category_list", category.replace(" ", "_"))
+                    return True
+                except TimeoutException:
+                    pass
+
+                last_error = f"all 3 strategies missed on attempt {attempt}"
+                print(f"      ⚠️ Category re-open attempt {attempt}/3 failed ({last_error})")
+
+            except Exception as e:
+                last_error = str(e)[:80]
+                print(f"      ⚠️ Category re-open attempt {attempt}/3 errored: {last_error}")
+
+            self.smart_wait(2 + attempt)
+
+        return False
 
     def _collect_manuscript_ids(self) -> list[str]:
         """Return deduplicated list of MOR manuscript IDs visible on current page.

@@ -1259,6 +1259,20 @@ class ScholarOneBaseExtractor(CachedExtractorMixin):
         if not report_url:
             return None
 
+        # ScholarOne's popWindow() URLs are often relative (e.g.
+        # 'mor_misc/rev_ms_det_pop.html?XYZ'). Selenium's driver.get
+        # rejects relative URLs with "invalid argument", and so does
+        # window.open in some cases. Resolve to absolute against the
+        # current page URL.
+        if report_url and not report_url.startswith(("http://", "https://", "javascript:")):
+            try:
+                from urllib.parse import urljoin
+
+                base = self.driver.current_url
+                report_url = urljoin(base, report_url)
+            except Exception:
+                pass
+
         original_window: Optional[str] = None
         popup: Optional[str] = None
         opened_via_tab = False
@@ -1269,8 +1283,10 @@ class ScholarOneBaseExtractor(CachedExtractorMixin):
 
             # Try popup window first
             try:
+                # JS-escape single quotes in the URL just in case
+                safe_url = report_url.replace("'", "%27")
                 self.driver.execute_script(
-                    f"window.open('{report_url}', 'report_popup', 'width=700,height=600');"
+                    f"window.open('{safe_url}', 'report_popup', 'width=700,height=600');"
                 )
             except Exception as e:
                 print(f"         ⚠️ window.open failed: {str(e)[:60]}")
@@ -1279,16 +1295,33 @@ class ScholarOneBaseExtractor(CachedExtractorMixin):
             all_after = set(self.driver.window_handles)
             new_windows = all_after - all_before
 
-            # Fallback: popup blocked → open as new tab
+            # Fallback 1: popup blocked → open via window.open with _blank
+            # (Selenium's switch_to.new_window("tab") is broken on Chrome 147;
+            # use the JS approach instead.)
             if not new_windows:
-                print("         ⚠️ Popup blocked — opening as new tab")
+                print("         ⚠️ Popup blocked — opening via _blank target")
                 try:
-                    self.driver.switch_to.new_window("tab")
-                    self.driver.get(report_url)
-                    opened_via_tab = True
-                    new_windows = {self.driver.current_window_handle}
+                    self.driver.execute_script(f"window.open('{safe_url}', '_blank');")
+                    time.sleep(2)
+                    all_after2 = set(self.driver.window_handles)
+                    new_windows = all_after2 - all_before
                 except Exception as e:
-                    print(f"         ❌ New-tab fallback failed: {str(e)[:60]}")
+                    print(f"         ⚠️ _blank fallback failed: {str(e)[:80]}")
+
+            # Fallback 2: still no new window → in-place navigation
+            # (preserves the original tab; we navigate back after extraction)
+            if not new_windows:
+                print("         ⚠️ Popup still blocked — navigating in place")
+                try:
+                    saved_url = self.driver.current_url
+                    # report_url was already resolved to absolute at the top
+                    self.driver.get(report_url)
+                    opened_via_tab = True  # treat current tab as "popup"
+                    new_windows = {self.driver.current_window_handle}
+                    # Stash URL on self so we can navigate back at the end
+                    self._inplace_return_url = saved_url
+                except Exception as e:
+                    print(f"         ❌ In-place fallback failed: {str(e)[:80]}")
                     return None
 
             popup = new_windows.pop() if not opened_via_tab else self.driver.current_window_handle
@@ -1397,8 +1430,21 @@ class ScholarOneBaseExtractor(CachedExtractorMixin):
                 except Exception:
                     pass
 
-            self.driver.close()
-            self.driver.switch_to.window(original_window)
+            # Cleanup: close popup OR navigate back if we used in-place fallback
+            if opened_via_tab and getattr(self, "_inplace_return_url", None):
+                # In-place fallback: navigate back, don't close (would close
+                # the only browser window and kill the session)
+                try:
+                    self.driver.get(self._inplace_return_url)
+                except Exception:
+                    pass
+                self._inplace_return_url = None
+            else:
+                try:
+                    self.driver.close()
+                    self.driver.switch_to.window(original_window)
+                except Exception:
+                    pass
 
             cta_len = len(report.get("comments_to_author", ""))
             print(

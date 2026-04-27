@@ -119,37 +119,70 @@ editorial_scripts/
 
 ### Reviewer report content extraction status
 
-After Phase A (canonical `referee.reports[]` schema migration), every
-extractor populates a uniform schema: `recommendation`, `comments_to_author`,
-`raw_text`, `scores`, `word_count`, `available`, `extraction_status`, `source`.
+After Phase A (canonical `referee.reports[]` schema migration) and
+Phase A.live (universal PDF-attachment extraction), every extractor
+populates a uniform schema: `recommendation`, `comments_to_author`,
+`raw_text`, `scores`, `word_count`, `available`, `extraction_status`,
+`source`, `attachments[]`.
 
-Per-journal status:
-- **SICON / SIFIN** ✅ — SIAM `display_all_reviews` page; raw_text always
-  stored; 3 header regex variants for both tenants.
-- **MAFE** ✅ partial — Editorial Manager popup parser works on ~67% of
-  referees (others had reports submitted as PDF attachments).
+**Universal PDF helper** (`production/src/core/pdf_utils.py`):
+- `extract_pdf_text(path)` — pdfplumber → PyPDF2 fallback
+- `populate_report_from_pdf(report, path, attachment_url=...)` —
+  smart-merge into `raw_text` / `comments_to_author` with stub-pointer
+  detection (e.g. "Please see the attached report" gets replaced when
+  the PDF text is materially longer), `word_count`, `extraction_status`,
+  `attachments[]` dedup
+- `derive_recommendation_from_text` — phrase-match fallback when the
+  platform doesn't surface a recommendation field
+
+Per-journal status (live-validated unless noted):
+- **SICON / SIFIN** ✅ — SIAM `display_all_reviews` page; new
+  `_attach_referee_pdfs` scans the reviews HTML for "Referee #N Review
+  Attachment #M" anchors, downloads via `_download_file_from_url`,
+  merges PDF text into the canonical report. Live: M182446 / Tan +
+  Talbi went from 72-char header stubs to 2402 / 4288 chars; M180821 /
+  Hernández went from 66 to 1704 chars.
+- **MAFE** ✅ partial — EM popup parser works on ~67% of referees
+  inline; PDF attachments now flow through `populate_report_from_pdf`
+  in `_extract_reviewer_attachments`. Role-switch hardened to handle
+  iframe / different element id / single-role users.
 - **MF** ✅ — ScholarOne popup parser refactored into pure
-  `_parse_scholarone_popup_html(html, referee)`. Robust 3-col form parsing
-  (cells[-1] is the answer; prompts skipped). Popup-blocked fallback to
-  `switch_to.new_window("tab")`.
-- **MOR** ✅ — Same parser as MF after the refactor. `_recover_missing_report_urls`
-  walks 3 ancestor scopes + preceding-name-link strategy to find the
-  `view_review.gif` icon link sibling to the name.
-- **JOTA** ✅ — Loosened review-detail link discovery (popupReviewerComments,
-  PopupReviewDetails, ReviewerComments.aspx; href + onclick). Minimal canonical
-  report shell when reviews-page summary captures a recommendation.
-- **FS** ✅ — `analyze_referee_report()` was orphaned; now wired into the
-  per-email manuscript builder. New `_link_referee_reports_canonical()` walks
-  `manuscript['referee_reports']` and populates `referee.reports[]` (matched
-  by name with case-insensitive + parts-set fallback). PDF text becomes
-  `raw_text`; preview becomes `comments_to_author`.
-- **NACO** ✅ scaffold — Greenfield detail-page extractor:
-  `_navigate_to_manuscript_detail`, `_extract_referees_from_detail_page`,
-  `_extract_referee_report_inline`, `_extract_referee_report_from_link`.
-  Uses generic heuristics until first live capture pass refines selectors.
-- **MF_WILEY** ✅ scaffold — `extract_submitted_report_for_referee`
-  (attach mode) and `_extract_submitted_report_panel` (headful UC).
-  Forward-looking; no Wiley reviewer has submitted a report yet.
+  `_parse_scholarone_popup_html(html, referee)`. Robust 3-col form
+  parsing (cells[-1] is the answer; prompts skipped). 3-tier
+  popup-blocked fallback: `window.open(target,name)` →
+  `window.open(target,'_blank')` → in-place `driver.get(url)`.
+  Relative URLs resolved to absolute via `urljoin`. PDF
+  `attached_files` run through `populate_report_from_pdf`.
+- **MOR** ✅ — Same parser as MF after the refactor.
+  `_recover_missing_report_urls` walks 3 strategies (ancestor scope,
+  preceding-name link, positional pairing) to find the
+  review-content popup anchor. XPath restricted to `rev_ms_det_pop`
+  to avoid the `rev_hist_pop` (Reviewer History Analysis) decoy.
+  Popup extraction deferred to PASS 7b so in-place navigation
+  doesn't kill PASS 2 (manuscript info / title / authors).
+  `setup_driver` 3-attempt retry for Chrome 147 startup flake with
+  ChromeOptions rebuilt each iteration. Live: MOR-2026-1361 / Keppo
+  + Tam: 4960 + 7116 chars `raw_text`; titles preserved.
+- **JOTA** ✅ — Loosened review-detail link discovery
+  (popupReviewerComments, PopupReviewDetails, ReviewerComments.aspx;
+  href + onclick). Reviews-page now ALWAYS runs after the summary
+  page (was elif → if), populating `review_detail_links` even when
+  `reviewer_summary_url` is also present. Live: JOTA-D-26-00056 /
+  Dolinsky: 0 → 2334 chars after the elif fix.
+- **FS** ✅ — `analyze_referee_report()` wired into the per-email
+  manuscript builder. `_link_referee_reports_canonical()` populates
+  `referee.reports[]` from `manuscript['referee_reports']`. Live: 6
+  manuscripts / 8 reports / source `fs_pdf`.
+- **NACO** ✅ — Greenfield detail-page extractor with PDF-aware
+  branch: when the report URL points to a PDF, downloads via
+  authenticated session cookies and extracts text via
+  `populate_report_from_pdf`. Awaiting active manuscripts to validate
+  end-to-end.
+- **MF_WILEY** ✅ — `extract_submitted_report_for_referee` collects
+  attachment URLs from the reviewer panel and shuttles PDFs back
+  via Chrome JS `fetch + base64 chunking` (256KB chunks under
+  AppleScript result-size cap). Forward-looking; awaits first
+  submitted Wiley report.
 
 ### MF + MF_WILEY (soft merge)
 
@@ -529,4 +562,4 @@ python3 -m pytest tests/test_referee_db.py -v  # Specific module
 
 ---
 
-**Last Updated**: 2026-04-24
+**Last Updated**: 2026-04-27 (Phase A.live: universal PDF-attachment extraction; MOR popup-blocked fallback + deferred PASS 7b; EM role-switch hardened; ScholarOne setup_driver retry)

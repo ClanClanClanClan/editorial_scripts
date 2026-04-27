@@ -938,14 +938,22 @@ class MORExtractor(ScholarOneBaseExtractor):
             refs_without_url = [r for r in referees if not r.get("report_url")]
             if refs_without_url:
                 try:
+                    # Look ONLY for review-content popup links. The
+                    # `view_review.gif` icon also appears next to a
+                    # "Reviewer History Analysis" link (rev_hist_pop.html
+                    # / RevHist) which we don't want — that page just
+                    # shows reviewer stats, not the actual review
+                    # content. Filter by the popup target URL.
                     all_review_links = self.driver.find_elements(
                         By.XPATH,
-                        "//a[.//img[contains(@src,'view_review')]] | "
-                        "//a[contains(@href,'rev_ms_det_pop')] | "
-                        "//a[contains(@onclick,'rev_ms_det_pop')]",
+                        "//a[contains(@href,'rev_ms_det_pop') "
+                        "or contains(@onclick,'rev_ms_det_pop')] | "
+                        "//a[.//img[contains(@src,'view_review')]"
+                        "  and (contains(@href,'rev_ms_det_pop') "
+                        "       or contains(@onclick,'rev_ms_det_pop'))]",
                     )
                     print(
-                        f"      🔍 Recovery: {len(all_review_links)} view_review links on page, "
+                        f"      🔍 Recovery: {len(all_review_links)} review-content links on page, "
                         f"{len(refs_without_url)} referees without URL"
                     )
 

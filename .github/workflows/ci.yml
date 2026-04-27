@@ -39,7 +39,7 @@ jobs:
           mkdir -p artifacts/security
           poetry run bandit -q -r production/src -x tests,dev,archive -f json -o artifacts/security/bandit.json || true
       - name: Upload bandit artifacts (lint job)
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7
         with:
           name: bandit-lint
           path: artifacts/security/bandit.json
@@ -57,7 +57,7 @@ jobs:
               > artifacts/security/pip-audit.json
           fi
       - name: Upload pip-audit artifacts (lint job)
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7
         with:
           name: pip-audit-lint
           path: artifacts/security/pip-audit.json
@@ -142,7 +142,7 @@ jobs:
           mkdir -p artifacts/security
           poetry run bandit -r production/src -x tests,dev,archive -ll -f json -o artifacts/security/bandit.json
       - name: Upload bandit artifacts (security job)
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7
         with:
           name: bandit-security
           path: artifacts/security/bandit.json
@@ -158,7 +158,7 @@ jobs:
               > artifacts/security/pip-audit.json
           fi
       - name: Upload pip-audit artifacts (security job)
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7
         with:
           name: pip-audit-security
           path: artifacts/security/pip-audit.json

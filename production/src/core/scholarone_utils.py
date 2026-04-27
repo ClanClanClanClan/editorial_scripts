@@ -9,7 +9,6 @@ from collections.abc import Callable
 from datetime import datetime
 from functools import wraps
 from pathlib import Path
-from typing import Optional
 
 from selenium.common.exceptions import (
     NoSuchElementException,
@@ -111,7 +110,7 @@ def smart_wait(seconds: float = 1.0):
     time.sleep(max(0.5, wait_time))
 
 
-def parse_date(d_str: str) -> Optional[datetime]:
+def parse_date(d_str: str) -> datetime | None:
     if not d_str:
         return None
     for fmt in ("%d-%b-%Y", "%d %b %Y", "%Y-%m-%d", "%b %d, %Y"):
@@ -122,7 +121,7 @@ def parse_date(d_str: str) -> Optional[datetime]:
     return None
 
 
-def parse_ev_date(ds: str) -> Optional[datetime]:
+def parse_ev_date(ds: str) -> datetime | None:
     if not ds:
         return None
     for fmt in ("%d-%b-%Y", "%Y-%m-%d"):

@@ -10,13 +10,13 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "production" / "src"))
 
-from reporting.action_items import (  # noqa: E402
-    compute_action_items,
-    compute_manuscript_summaries,
-)
 from core.output_schema import (  # noqa: E402
     journal_group,
     journal_group_display,
+)
+from reporting.action_items import (  # noqa: E402
+    compute_action_items,
+    compute_manuscript_summaries,
 )
 from reporting.cross_journal_report import (  # noqa: E402
     JOURNAL_NAMES,
@@ -1308,7 +1308,6 @@ def generate_html(data):
     # "Mathematical Finance" section. Single-journal groups (SICON, etc.)
     # behave exactly as before.
     ms_by_group = data.get("manuscripts_by_group", {})
-    ms_by_journal = data.get("manuscripts_by_journal", {})
     if ms_by_group:
         h.append("<div class='journal-sections'>")
         # Sort groups by code for stable ordering

@@ -8,7 +8,6 @@ import sys
 import time
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
-from typing import Optional
 
 import undetected_chromedriver as uc
 from bs4 import BeautifulSoup
@@ -765,7 +764,7 @@ class EMExtractor(CachedExtractorMixin):
     # ── Manuscript detail extraction ──────────────────────────
 
     @with_retry(max_attempts=2, delay=3.0)
-    def extract_manuscript_detail(self, ms_info: dict) -> Optional[dict]:
+    def extract_manuscript_detail(self, ms_info: dict) -> dict | None:
         ms_id = ms_info["manuscript_id"]
         self._current_manuscript_id = ms_id
         print(f"\n   📄 Extracting: {ms_id}")
@@ -1329,7 +1328,7 @@ class EMExtractor(CachedExtractorMixin):
             return ".zip"
         return ".pdf"
 
-    def _download_file_from_url(self, url: str, manuscript_id: str, doc_type: str) -> Optional[str]:
+    def _download_file_from_url(self, url: str, manuscript_id: str, doc_type: str) -> str | None:
         existing = self._check_existing_download(manuscript_id, doc_type, str(self.download_dir))
         if existing:
             print(f"         📦 [CACHE] Already downloaded: {os.path.basename(existing)}")
@@ -1428,7 +1427,7 @@ class EMExtractor(CachedExtractorMixin):
 
     def _exec_em_js_and_capture_with_frame_fallback(
         self, js_href: str, ms_id: str, debug_prefix: str, folder_url: str = ""
-    ) -> Optional[BeautifulSoup]:
+    ) -> BeautifulSoup | None:
         soup = self._exec_em_js_and_capture(js_href, ms_id, debug_prefix, folder_url)
         if soup:
             return soup
@@ -1707,7 +1706,7 @@ class EMExtractor(CachedExtractorMixin):
 
     def _exec_em_js_and_capture(
         self, js_href: str, ms_id: str, debug_prefix: str, folder_url: str = ""
-    ) -> Optional[BeautifulSoup]:
+    ) -> BeautifulSoup | None:
         if not js_href:
             return None
 

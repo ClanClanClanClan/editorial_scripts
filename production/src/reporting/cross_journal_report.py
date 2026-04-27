@@ -4,7 +4,6 @@ import sys
 import unicodedata
 from datetime import datetime
 from pathlib import Path
-from typing import Optional
 
 OUTPUTS_DIR = Path(__file__).parent.parent.parent / "outputs"
 
@@ -47,12 +46,12 @@ def _list_extraction_files(journal: str) -> list[Path]:
     )
 
 
-def find_latest_output(journal: str) -> Optional[Path]:
+def find_latest_output(journal: str) -> Path | None:
     files = _list_extraction_files(journal)
     return files[0] if files else None
 
 
-def _load_json(path: Path) -> Optional[dict]:
+def _load_json(path: Path) -> dict | None:
     try:
         with open(path) as f:
             return json.load(f)
@@ -60,7 +59,7 @@ def _load_json(path: Path) -> Optional[dict]:
         return None
 
 
-def load_journal_data(journal: str) -> Optional[dict]:
+def load_journal_data(journal: str) -> dict | None:
     files = _list_extraction_files(journal)
     if not files:
         return None
@@ -373,7 +372,7 @@ def _print_feedback_summary(feedback: dict):
     print()
 
 
-def run_report(save_json: bool = False, output_dir: Optional[Path] = None) -> dict:
+def run_report(save_json: bool = False, output_dir: Path | None = None) -> dict:
     all_stats = []
     for journal in JOURNALS:
         data = load_journal_data(journal)

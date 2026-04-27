@@ -11,7 +11,6 @@ import glob
 import os
 from datetime import datetime
 from pathlib import Path
-from typing import Optional
 
 # Import cache components
 from .cache_manager import ExtractorCacheMixin
@@ -108,7 +107,7 @@ class CachedExtractorMixin(ExtractorCacheMixin):
 
     def _check_existing_download(
         self, manuscript_id: str, doc_type: str, download_dir: str
-    ) -> Optional[str]:
+    ) -> str | None:
         pattern = os.path.join(download_dir, f"{manuscript_id}*{doc_type}*")
         matches = glob.glob(pattern)
         if not matches:
@@ -132,7 +131,7 @@ class CachedExtractorMixin(ExtractorCacheMixin):
 
     def get_cached_web_profile(
         self, name: str, institution: str = "", orcid_id: str = ""
-    ) -> Optional[dict]:
+    ) -> dict | None:
         if not hasattr(self, "cache_manager"):
             return None
         if orcid_id:

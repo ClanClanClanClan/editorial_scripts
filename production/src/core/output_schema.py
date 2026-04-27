@@ -8,7 +8,6 @@ Usage: call normalize_wrapper(results_dict, journal_code) before json.dump().
 
 import re
 from datetime import datetime
-from typing import Optional
 
 SCHEMA_VERSION = "1.0.0"
 
@@ -374,7 +373,7 @@ PROMOTED_METADATA_FIELDS = [
 ]
 
 
-def normalize_date(date_str) -> Optional[str]:
+def normalize_date(date_str) -> str | None:
     if not date_str or not isinstance(date_str, str) or not date_str.strip():
         return None
     date_str = date_str.strip()

@@ -15,7 +15,7 @@ import sys
 import time
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 import requests
 import undetected_chromedriver as uc
@@ -164,7 +164,7 @@ class ScholarOneBaseExtractor(CachedExtractorMixin):
         # construction).
         from selenium.common.exceptions import NoSuchWindowException, WebDriverException
 
-        last_err: Optional[Exception] = None
+        last_err: Exception | None = None
         for attempt in range(1, 4):
             try:
                 # UC consumes ChromeOptions on construction — must rebuild
@@ -516,7 +516,7 @@ class ScholarOneBaseExtractor(CachedExtractorMixin):
             return ".docx"
         return ".pdf"
 
-    def _download_file_from_url(self, url: str, manuscript_id: str, doc_type: str) -> Optional[str]:
+    def _download_file_from_url(self, url: str, manuscript_id: str, doc_type: str) -> str | None:
         existing = self._check_existing_download(manuscript_id, doc_type, str(self.download_dir))
         if existing:
             print(f"         📦 [CACHE] Already downloaded: {os.path.basename(existing)}")
@@ -596,7 +596,7 @@ class ScholarOneBaseExtractor(CachedExtractorMixin):
             print(f"            ❌ Download error: {str(e)[:60]}")
             return None
 
-    def _open_popup_and_switch(self, link_element, wait_for_content: bool = False) -> Optional[str]:
+    def _open_popup_and_switch(self, link_element, wait_for_content: bool = False) -> str | None:
         all_before = set(self.driver.window_handles)
         self.driver.execute_script("arguments[0].click();", link_element)
         for _ in range(16):
@@ -643,7 +643,7 @@ class ScholarOneBaseExtractor(CachedExtractorMixin):
 
     def _download_via_popup_window(
         self, link_element, doc_type: str, manuscript_id: str
-    ) -> Optional[str]:
+    ) -> str | None:
         existing = self._check_existing_download(manuscript_id, doc_type, str(self.download_dir))
         if existing:
             print(f"         📦 [CACHE] Already downloaded: {os.path.basename(existing)}")
@@ -820,7 +820,7 @@ class ScholarOneBaseExtractor(CachedExtractorMixin):
 
     def _download_from_popup_listing(
         self, link_element, doc_type: str, manuscript_id: str
-    ) -> Optional[str]:
+    ) -> str | None:
         existing = self._check_existing_download(manuscript_id, doc_type, str(self.download_dir))
         if existing:
             print(f"         📦 [CACHE] Already downloaded: {os.path.basename(existing)}")
@@ -1105,7 +1105,7 @@ class ScholarOneBaseExtractor(CachedExtractorMixin):
     # ------------------------------------------------------------------
 
     @staticmethod
-    def _parse_scholarone_popup_html(html: str, referee: Optional[dict] = None) -> dict:
+    def _parse_scholarone_popup_html(html: str, referee: dict | None = None) -> dict:
         """Pure parser for a ScholarOne referee-report popup page.
 
         Accepts the raw HTML of the popup body; returns a canonical report dict
@@ -1254,7 +1254,7 @@ class ScholarOneBaseExtractor(CachedExtractorMixin):
 
     def extract_referee_report_from_popup(
         self, referee: dict, manuscript_id: str = ""
-    ) -> Optional[dict]:
+    ) -> dict | None:
         report_url = referee.get("report_url", "")
         if not report_url:
             return None
@@ -1273,8 +1273,8 @@ class ScholarOneBaseExtractor(CachedExtractorMixin):
             except Exception:
                 pass
 
-        original_window: Optional[str] = None
-        popup: Optional[str] = None
+        original_window: str | None = None
+        popup: str | None = None
         opened_via_tab = False
 
         try:
@@ -1473,7 +1473,7 @@ class ScholarOneBaseExtractor(CachedExtractorMixin):
                 "error": str(e)[:200],
             }
 
-    def extract_decision_letter_from_popup(self, popup_url: str) -> Optional[str]:
+    def extract_decision_letter_from_popup(self, popup_url: str) -> str | None:
         if not popup_url:
             return None
         try:
@@ -1503,7 +1503,7 @@ class ScholarOneBaseExtractor(CachedExtractorMixin):
                 pass
             return None
 
-    def extract_author_response_from_popup(self, popup_url: str) -> Optional[str]:
+    def extract_author_response_from_popup(self, popup_url: str) -> str | None:
         if not popup_url:
             return None
         try:

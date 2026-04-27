@@ -8,7 +8,6 @@ import sys
 import time
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
-from typing import Optional
 
 import undetected_chromedriver as uc
 from bs4 import BeautifulSoup
@@ -626,7 +625,7 @@ class SIAMExtractor(CachedExtractorMixin):
         return manuscripts
 
     @with_retry(max_attempts=2, delay=3.0)
-    def extract_manuscript_detail(self, ms_info: dict) -> Optional[dict]:
+    def extract_manuscript_detail(self, ms_info: dict) -> dict | None:
         ms_id = ms_info["manuscript_id"]
         self._current_manuscript_id = ms_id
         print(f"\n   \U0001f4c4 Extracting: {ms_id}")
@@ -1810,7 +1809,7 @@ class SIAMExtractor(CachedExtractorMixin):
             seen.add(href)
 
             # Resolve referee number: link text first, then URL filename
-            ref_num: Optional[str] = None
+            ref_num: str | None = None
             m = link_text_pat.search(text)
             if m:
                 ref_num = m.group(1)
@@ -1867,7 +1866,7 @@ class SIAMExtractor(CachedExtractorMixin):
 
     def _scrape_status_details_page(
         self, manuscript: dict, soup: BeautifulSoup
-    ) -> Optional[BeautifulSoup]:
+    ) -> BeautifulSoup | None:
         try:
             href = None
             for a in soup.find_all("a", href=True):
@@ -1898,9 +1897,7 @@ class SIAMExtractor(CachedExtractorMixin):
                 pass
             return None
 
-    def _scrape_email_log_page(
-        self, manuscript: dict, soup: BeautifulSoup
-    ) -> Optional[BeautifulSoup]:
+    def _scrape_email_log_page(self, manuscript: dict, soup: BeautifulSoup) -> BeautifulSoup | None:
         try:
             href = None
             for a in soup.find_all("a", href=True):
@@ -1934,8 +1931,8 @@ class SIAMExtractor(CachedExtractorMixin):
     def _build_audit_trail(
         self,
         manuscript: dict,
-        status_soup: Optional[BeautifulSoup] = None,
-        email_soup: Optional[BeautifulSoup] = None,
+        status_soup: BeautifulSoup | None = None,
+        email_soup: BeautifulSoup | None = None,
     ):
         events = []
         ms_id = manuscript.get("manuscript_id", "")
@@ -1948,7 +1945,7 @@ class SIAMExtractor(CachedExtractorMixin):
             etype: str = "status_change",
             from_email: str = "",
             to_email: str = "",
-        ) -> Optional[dict]:
+        ) -> dict | None:
             if not date_str:
                 return None
             date_part = date_str.split()[0].split("T")[0]
@@ -2899,7 +2896,7 @@ class SIAMExtractor(CachedExtractorMixin):
             return ".docx"
         return ".pdf"
 
-    def _download_file_from_url(self, url: str, manuscript_id: str, doc_type: str) -> Optional[str]:
+    def _download_file_from_url(self, url: str, manuscript_id: str, doc_type: str) -> str | None:
         existing = self._check_existing_download(manuscript_id, doc_type, str(self.download_dir))
         if existing:
             print(f"         \U0001f4e6 [CACHE] Already downloaded: {os.path.basename(existing)}")

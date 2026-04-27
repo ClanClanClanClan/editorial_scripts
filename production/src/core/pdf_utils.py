@@ -25,7 +25,7 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
-from typing import Optional, Union
+from typing import Union
 
 PathLike = Union[str, Path, os.PathLike]
 
@@ -76,7 +76,7 @@ def extract_pdf_text(pdf_path: PathLike) -> str:
         return ""
 
 
-def derive_recommendation_from_text(text: str) -> Optional[str]:
+def derive_recommendation_from_text(text: str) -> str | None:
     """Lightweight phrase-match recommendation extraction.
 
     Returns one of: 'Reject', 'Accept', 'Minor Revision', 'Major Revision'

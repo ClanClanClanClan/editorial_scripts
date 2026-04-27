@@ -1106,6 +1106,48 @@ class ScholarOneBaseExtractor(CachedExtractorMixin):
 
     @staticmethod
     def _parse_scholarone_popup_html(html: str, referee: dict | None = None) -> dict:
+        # Local helper: strip a ScholarOne-style "instruction prompt"
+        # prefix from a captured comments-to-author block. The popup
+        # form often shows boilerplate like
+        #   "Clearly label your Major and Minor Comments to Author in
+        #    the field provided below. Please be sure to retain
+        #    anonymity in your comments."
+        # immediately before the actual review prose. Without stripping,
+        # cta would be 100–200 chars of boilerplate even when raw_text
+        # has the full review.
+        def _strip_form_prompt_prefix(text: str) -> str:
+            if not text:
+                return text
+            t = text.strip()
+            # The boilerplate paragraphs share these phrases; if the
+            # first non-empty paragraph contains any, drop it.
+            prompt_signatures = (
+                "in the field provided",
+                "please be sure to retain",
+                "retain anonymity",
+                "clearly label",
+                "label your major and minor",
+                "be sure to write",
+                "please type your comments",
+            )
+            paragraphs = re.split(r"\n\s*\n", t, maxsplit=1)
+            if len(paragraphs) == 2:
+                first, rest = paragraphs
+                first_lower = first.lower()
+                if any(sig in first_lower for sig in prompt_signatures):
+                    return rest.strip()
+            # Single-paragraph case: split on first newline if the
+            # first line is a prompt sentence ending with a period.
+            lines = t.split("\n", 1)
+            if len(lines) == 2:
+                first_line, rest_lines = lines
+                if (
+                    any(sig in first_line.lower() for sig in prompt_signatures)
+                    and len(rest_lines.strip()) > 50
+                ):
+                    return rest_lines.strip()
+            return t
+
         """Pure parser for a ScholarOne referee-report popup page.
 
         Accepts the raw HTML of the popup body; returns a canonical report dict
@@ -1191,18 +1233,26 @@ class ScholarOneBaseExtractor(CachedExtractorMixin):
                     if len(value) >= 10:
                         report["confidential_comments"] = value[:20000]
 
-        # Pass 2: regex section extraction over full text (loosened patterns).
-        # Catches free-form forms that don't use proper tables.
+        # Pass 2: regex section extraction over full text.
+        # Stop markers are deliberately specific — bare "referee" or
+        # "reviewer" used to be in this list but caused premature
+        # termination for ScholarOne popups whose actual review prose
+        # opens with "Referee Report on …". Use phrases that can only
+        # be section labels (with the editor, with a colon after,
+        # at end of text).
         if not report["comments_to_author"]:
             cta_re = re.compile(
                 r"comments?\s*to\s*(?:the\s*)?author[s]?\s*(?:\(s\))?\s*[:.\n]+(.+?)"
-                r"(?=\n(?:confidential|comments?\s*to\s*(?:the\s*)?editor|recommendation|"
-                r"overall\s*recommendation|score|rating|reviewer|referee|$))",
+                r"(?=\n(?:confidential\s*(?:message|comments?)|"
+                r"comments?\s*to\s*(?:the\s*)?editor|"
+                r"(?:overall\s*)?recommendation\s*[:.]|"
+                r"score\s*[:.]|rating\s*[:.])|\Z)",
                 re.DOTALL | re.IGNORECASE,
             )
             m = cta_re.search(full_text)
             if m:
                 snippet = m.group(1).strip()
+                snippet = _strip_form_prompt_prefix(snippet)
                 if len(snippet) >= 20:
                     report["comments_to_author"] = snippet[:20000]
 
@@ -1225,18 +1275,40 @@ class ScholarOneBaseExtractor(CachedExtractorMixin):
             content_lines = []
             capture = False
             cta_markers = ("comments to author", "review comments", "comments for the author")
-            stop_markers = ("confidential", "recommendation", "overall", "score", "rating")
+            # Strict stop markers — only header-shaped lines.
+            # Bare "recommendation" or "overall" used to fire here too,
+            # but those words appear naturally in review prose. Require
+            # the line to look like a label (colon-suffixed, or the
+            # specific section labels we know).
+            stop_markers = (
+                "confidential message",
+                "confidential comments",
+                "comments to editor",
+                "comments to the editor",
+            )
+
+            def _is_stop_label(line_lower: str) -> bool:
+                if any(m in line_lower for m in stop_markers):
+                    return True
+                # "Recommendation:" or "Overall Recommendation:" exact-ish
+                if line_lower in ("recommendation", "recommendation:", "overall recommendation"):
+                    return True
+                if line_lower.startswith("recommendation:"):
+                    return True
+                return False
+
             for line in lines:
                 lower = line.lower().strip()
-                if any(m in lower for m in cta_markers):
+                if not capture and any(m in lower for m in cta_markers):
                     capture = True
                     continue
                 if capture:
-                    if any(m in lower for m in stop_markers):
+                    if _is_stop_label(lower):
                         break
                     content_lines.append(line)
             if content_lines:
                 joined = "\n".join(content_lines).strip()
+                joined = _strip_form_prompt_prefix(joined)
                 if len(joined) >= 20:
                     report["comments_to_author"] = joined[:20000]
 

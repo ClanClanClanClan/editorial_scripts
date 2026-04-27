@@ -206,3 +206,77 @@ class TestParserDoesNotMistakePromptForResponse:
         # but verify we never silently corrupt structured fields.
         # At minimum, parser should not crash.
         assert "extraction_status" in report
+
+
+# ── Regression: MOR popup with form-instruction prompt before review prose ────
+
+
+# Realistic shape of a ScholarOne in-place popup once we navigate to the
+# review-content URL. The actual review starts with "Referee Report on …"
+# but the form first shows the section label, then a paragraph of
+# instruction boilerplate ("Clearly label your … in the field provided
+# below. Please be sure to retain anonymity in your comments."), then the
+# real prose. Without the strip, cta would be the boilerplate (~135 chars)
+# and the actual review would only live in raw_text.
+MOR_INPLACE_POPUP_HTML = """
+<html>
+<body>
+  <h2>Reviewer 1: Keppo, Jussi</h2>
+  <p>Recommendation: Major Revision</p>
+  <p>Confidential Comments to the Editor</p>
+  <p>I have no confidential comments.</p>
+  <p>Comments to the Author</p>
+  <p>Clearly label your Major and Minor Comments to Author in the field
+provided below. Please be sure to retain anonymity in your comments.</p>
+
+<p>Referee Report on "Decision Making under Costly Sequential
+Information Acquisition: the Paradigm of Reversible and Irreversible Decisions"</p>
+
+<p>Summary and Overall Evaluation</p>
+<p>This paper studies a sequential decision problem with costly information
+acquisition in which a decision maker chooses between a known product and an
+unknown product. After choosing the unknown product, the decision maker may
+later reverse that choice at a cost while learning from a more informative
+signal. The model leads to a nested optimal stopping problem, where the outer
+problem has as its obstacle the value of an inner stopping problem.</p>
+
+<p>Major Comments</p>
+<p>My first major concern is that the paper needs a sharper statement of its
+core contribution. The introduction presents a broad agenda involving costly
+information acquisition, adaptive information sources, sequential decisions,
+reversibility, and a general framework for future multi-stage models.</p>
+</body>
+</html>
+"""
+
+
+class TestMorPopupFormPromptStripped:
+    def test_cta_skips_instruction_prompt(self):
+        """The captured cta must not be the form-instruction boilerplate."""
+        report = ScholarOneBaseExtractor._parse_scholarone_popup_html(MOR_INPLACE_POPUP_HTML)
+        cta = report.get("comments_to_author") or ""
+        # The instruction sentence should NOT be the entire cta
+        assert (
+            "Clearly label your Major and Minor Comments" not in cta[:300]
+        ), f"cta starts with form-instruction prompt: {cta[:200]!r}"
+        # The actual review content must be present
+        assert (
+            "Referee Report on" in cta or "Summary and Overall Evaluation" in cta
+        ), f"cta missing review content: {cta[:300]!r}"
+        assert len(cta) > 200, f"cta too short, expected real review prose: {len(cta)}"
+
+    def test_cta_does_not_stop_at_referee_word(self):
+        """The regex stop-marker list must not include bare 'referee' /
+        'reviewer' — the actual review prose opens with 'Referee Report on…'
+        and we'd lose the entire content otherwise."""
+        report = ScholarOneBaseExtractor._parse_scholarone_popup_html(MOR_INPLACE_POPUP_HTML)
+        cta = report.get("comments_to_author") or ""
+        assert "Major Comments" in cta or "Summary and Overall Evaluation" in cta
+
+    def test_raw_text_still_has_full_content(self):
+        """raw_text always carries the full popup body regardless of cta
+        extraction. Downstream tools (AE prompt, quality scoring) read both."""
+        report = ScholarOneBaseExtractor._parse_scholarone_popup_html(MOR_INPLACE_POPUP_HTML)
+        raw = report.get("raw_text") or ""
+        assert "Decision Making under Costly Sequential" in raw
+        assert "Major Comments" in raw
